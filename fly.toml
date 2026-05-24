@@ -10,11 +10,11 @@ primary_region = "ams"  # Amsterdam — Türkiye'ye en yakın ücretsiz bölge
 # Ortam değişkenleri (gizli olmayanlar buraya, gizliler fly secrets set ile)
 [env]
   NODE_ENV = "production"
-  PORT     = "3000"
+  PORT     = "8080"
 
 # HTTP servisi tanımı
 [http_service]
-  internal_port       = 3000
+  internal_port       = 8080
   force_https         = true
   auto_stop_machines  = true   # Trafik yoksa durdur (ücretsiz plan)
   auto_start_machines = true   # İstek gelince otomatik başlat

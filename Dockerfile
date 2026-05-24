@@ -40,12 +40,12 @@ RUN node -e " \
 COPY --from=builder /app/backend/dist ./dist
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=8080
 
-EXPOSE 3000
+EXPOSE 8080
 
 # Healthcheck — Fly.io bu endpointi kullanır
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-  CMD wget -qO- http://localhost:3000/health || exit 1
+  CMD wget -qO- http://localhost:8080/health || exit 1
 
 CMD ["node", "dist/backend/src/server.js"]
