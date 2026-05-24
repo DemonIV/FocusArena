@@ -1,0 +1,26 @@
+node_modules/
+dist/
+build/
+.expo/
+*.log
+.env
+.env.local
+.env.*.local
+# Store credentials — never commit these
+mobile/google-services.json
+mobile/GoogleService-Info.plist
+mobile/service-account.json
+.DS_Store
+*.orig.*
+web-build/
+android/
+ios/
+.gradle/
+*.keystore
+*.jks
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+*.orig.*
+yarn-error.*

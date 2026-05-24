@@ -1,0 +1,100 @@
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { mmkvStorage } from '../utils/storage';
+import { api } from '../services/api';
+import { authService } from '../services/auth.service';
+import type { User, AuthTokens } from '../types';
+
+interface AuthState {
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isLoading: boolean;
+  isHydrated: boolean;
+
+  // Actions
+  setAuth: (user: User, tokens: AuthTokens) => void;
+  clearAuth: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, username: string) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshAccessToken: () => Promise<string | null>;
+  setHydrated: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isLoading: false,
+      isHydrated: false,
+
+      setHydrated: () => set({ isHydrated: true }),
+
+      setAuth: (user, tokens) => {
+        api.setToken(tokens.accessToken);
+        set({ user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
+      },
+
+      clearAuth: () => {
+        api.clearToken();
+        set({ user: null, accessToken: null, refreshToken: null });
+      },
+
+      login: async (email, password) => {
+        set({ isLoading: true });
+        try {
+          const { user, accessToken, refreshToken } = await authService.login(email, password);
+          get().setAuth(user, { accessToken, refreshToken });
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      register: async (email, password, username) => {
+        set({ isLoading: true });
+        try {
+          const { user, accessToken, refreshToken } = await authService.register(email, password, username);
+          get().setAuth(user, { accessToken, refreshToken });
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      logout: async () => {
+        try { await authService.logout(); } catch { /* ignore */ }
+        get().clearAuth();
+      },
+
+      refreshAccessToken: async () => {
+        const { refreshToken } = get();
+        if (!refreshToken) return null;
+        try {
+          const data = await authService.refresh(refreshToken);
+          api.setToken(data.accessToken);
+          set({ accessToken: data.accessToken, refreshToken: data.refreshToken });
+          return data.accessToken;
+        } catch {
+          get().clearAuth();
+          return null;
+        }
+      },
+    }),
+    {
+      name: 'auth',
+      storage: createJSONStorage(() => mmkvStorage),
+      partialize: (s) => ({ user: s.user, accessToken: s.accessToken, refreshToken: s.refreshToken }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Restore token into api client after hydration
+          if (state.accessToken) api.setToken(state.accessToken);
+          // Register refresh callback
+          api.setOnRefresh(() => state.refreshAccessToken());
+          state.setHydrated();
+        }
+      },
+    },
+  ),
+);

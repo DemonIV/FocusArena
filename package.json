@@ -1,0 +1,16 @@
+{
+  "name": "focusarena",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "mobile",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "mobile": "npm run start --workspace=mobile",
+    "backend:dev": "npm run dev --workspace=backend",
+    "backend:build": "npm run build --workspace=backend",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}
