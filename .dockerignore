@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Gizli dosyalar (secrets Fly.io'da ayarlanır)
+**/.env
+**/.env.*
+
+# Derleme çıktıları (Docker içinde yeniden derlenir)
+backend/dist
+node_modules
+*/node_modules
+
+# Mobile kaynak kodları (deploy edilmez)
+mobile/src
+mobile/assets
+mobile/android
+mobile/ios
+
+# Supabase yerel geliştirme araçları
+supabase/.branches
+supabase/.temp
+
+# Log & temp dosyalar
+*.log
+*.tmp
+.DS_Store

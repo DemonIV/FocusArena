@@ -1,0 +1,36 @@
+# fly.toml — FocusArena Backend
+# Oluşturmak için: fly apps create focusarena-backend
+
+app = "focusarena-backend"
+primary_region = "ams"  # Amsterdam — Türkiye'ye en yakın ücretsiz bölge
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Ortam değişkenleri (gizli olmayanlar buraya, gizliler fly secrets set ile)
+[env]
+  NODE_ENV = "production"
+  PORT     = "3000"
+
+# HTTP servisi tanımı
+[http_service]
+  internal_port       = 3000
+  force_https         = true
+  auto_stop_machines  = true   # Trafik yoksa durdur (ücretsiz plan)
+  auto_start_machines = true   # İstek gelince otomatik başlat
+  min_machines_running = 0     # Sıfıra inebilir (hobbyist kullanım)
+
+  [http_service.concurrency]
+    type       = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+# WebSocket için TCP servisi (Socket.io)
+# Fly.io HTTP servisi WebSocket'i zaten destekler,
+# sadece upgrade header'ları doğru iletilmesi yeterli.
+
+# Makine özellikleri
+[[vm]]
+  memory   = "256mb"
+  cpu_kind = "shared"
+  cpus     = 1
