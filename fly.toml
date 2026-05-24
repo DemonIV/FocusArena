@@ -1,7 +1,7 @@
 # fly.toml — FocusArena Backend
 # Oluşturmak için: fly apps create focusarena-backend
 
-app = "focusarena-backend"
+app = "focusarena"
 primary_region = "ams"  # Amsterdam — Türkiye'ye en yakın ücretsiz bölge
 
 [build]
