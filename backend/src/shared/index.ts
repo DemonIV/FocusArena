@@ -7,7 +7,9 @@ export const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY!,
   {
     realtime: {
-      transport: ws,
+      // ws tipi WebSocketLikeConstructor ile uyumsuz (address: string|URL vs null)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transport: ws as any,
     },
   }
 );
