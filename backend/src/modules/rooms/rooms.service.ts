@@ -110,6 +110,15 @@ export async function getRoomMembers(roomId: string): Promise<RoomMemberWithPres
 
   if (error) throw new Error(error.message);
 
+  // Per-member study minutes for this room (single query)
+  const { data: minutesRows } = await supabase
+    .from('room_member_minutes')
+    .select('user_id, total_minutes')
+    .eq('room_id', roomId);
+
+  const minutesMap = new Map<string, number>();
+  for (const m of minutesRows ?? []) minutesMap.set(m.user_id, m.total_minutes);
+
   const members = await Promise.all(
     (data ?? []).map(async (row) => {
       const u = row.users as unknown as { username: string; avatar_url: string | null };
@@ -120,12 +129,38 @@ export async function getRoomMembers(roomId: string): Promise<RoomMemberWithPres
         avatar_url: u.avatar_url,
         joined_at: row.joined_at as string,
         status,
+        total_minutes: minutesMap.get(row.user_id) ?? 0,
       } satisfies RoomMemberWithPresence;
     }),
   );
 
   return members;
 }
+
+/**
+ * Add `minutes` of study time to every room the user is an active member of.
+ * Called when a focus session ends (fire-and-forget). Atomic via Postgres RPC.
+ */
+export async function addStudyMinutesToRooms(userId: string, minutes: number): Promise<void> {
+  if (minutes <= 0) return;
+  const { error } = await supabase.rpc('add_study_minutes_to_rooms', {
+    p_user_id: userId,
+    p_minutes: minutes,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Number of rooms a user owns (for the per-user create limit) */
+async function ownedRoomCount(userId: string): Promise<number> {
+  const { count } = await supabase
+    .from('rooms')
+    .select('*', { count: 'exact', head: true })
+    .eq('owner_id', userId);
+  return count ?? 0;
+}
+
+/** Max rooms a single user may own */
+export const MAX_OWNED_ROOMS = 2;
 
 // ─── List Public Rooms ────────────────────────────────────────
 
@@ -185,7 +220,16 @@ export async function getMyRooms(userId: string): Promise<RoomSummary[]> {
 
   const counts = await batchMemberCounts(rooms.map((r) => r.id));
 
-  return rooms.map((r) => ({ ...r, member_count: counts.get(r.id) ?? 0 }));
+  return Promise.all(
+    rooms.map(async (r) => {
+      const summary: RoomSummary = { ...r, member_count: counts.get(r.id) ?? 0 };
+      // Attach the invite code for rooms the caller owns (shown in their Profile)
+      if (r.owner_id === userId) {
+        summary.invite_code = (await getInviteCode(r.id)) ?? undefined;
+      }
+      return summary;
+    }),
+  );
 }
 
 // ─── Get Room Detail ──────────────────────────────────────────
@@ -237,9 +281,19 @@ export async function getRoomById(userId: string, roomId: string): Promise<RoomD
 // ─── Create Room ──────────────────────────────────────────────
 
 export async function createRoom(userId: string, body: CreateRoomBody): Promise<RoomDetail> {
+  // Per-user room ownership limit
+  const owned = await ownedRoomCount(userId);
+  if (owned >= MAX_OWNED_ROOMS) {
+    throw Object.assign(
+      new Error(`You can own at most ${MAX_OWNED_ROOMS} rooms. Delete one to create another.`),
+      { code: 'ROOM_LIMIT' },
+    );
+  }
+
+  // All rooms are private (invite-code only). Public room creation is disabled.
   const { data: room, error } = await supabase
     .from('rooms')
-    .insert({ ...body, owner_id: userId })
+    .insert({ ...body, is_private: true, owner_id: userId })
     .select('*')
     .single();
 
@@ -265,9 +319,8 @@ export async function createRoom(userId: string, body: CreateRoomBody): Promise<
     members: [],
   };
 
-  if (body.is_private) {
-    detail.invite_code = await generateInviteCode(room.id);
-  }
+  // Every room is private → always has an invite code
+  detail.invite_code = await generateInviteCode(room.id);
 
   // Fetch full member list after creation
   detail.members = await getRoomMembers(room.id);

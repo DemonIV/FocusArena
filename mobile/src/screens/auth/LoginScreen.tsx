@@ -11,25 +11,28 @@ import {
   Alert,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import type { AuthStackParamList } from '../../types';
 import { useAuth } from '../../hooks';
+import { LanguagePicker } from '../../components';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('Error', 'Please fill in all fields.');
+      Alert.alert(t('common.error'), t('auth.fillAllFields'));
       return;
     }
     try {
       await login(email.trim().toLowerCase(), password);
     } catch (err: any) {
-      Alert.alert('Login Failed', err?.message ?? 'Invalid credentials');
+      Alert.alert(t('auth.loginFailed'), err?.message ?? t('auth.invalidCredentials'));
     }
   };
 
@@ -42,24 +45,24 @@ export function LoginScreen({ navigation }: Props) {
         {/* Logo */}
         <View style={styles.logoArea}>
           <Text style={styles.logoText}>🎯 FocusArena</Text>
-          <Text style={styles.tagline}>Compete. Focus. Achieve.</Text>
+          <Text style={styles.tagline}>{t('auth.tagline')}</Text>
         </View>
 
         {/* Form */}
         <View style={styles.form}>
-          <Text style={styles.fieldLabel}>Email</Text>
+          <Text style={styles.fieldLabel}>{t('auth.email')}</Text>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            placeholder="you@example.com"
+            placeholder={t('auth.emailPlaceholder')}
             placeholderTextColor="#4a4a6a"
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
           />
 
-          <Text style={styles.fieldLabel}>Password</Text>
+          <Text style={styles.fieldLabel}>{t('auth.password')}</Text>
           <TextInput
             style={styles.input}
             value={password}
@@ -78,7 +81,7 @@ export function LoginScreen({ navigation }: Props) {
           >
             {isLoading
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>Sign In</Text>
+              : <Text style={styles.btnText}>{t('auth.signIn')}</Text>
             }
           </TouchableOpacity>
         </View>
@@ -89,10 +92,15 @@ export function LoginScreen({ navigation }: Props) {
           onPress={() => navigation.replace('Register')}
         >
           <Text style={styles.switchText}>
-            No account?{' '}
-            <Text style={styles.switchLink}>Create one →</Text>
+            {t('auth.noAccount')}{' '}
+            <Text style={styles.switchLink}>{t('auth.createOne')}</Text>
           </Text>
         </TouchableOpacity>
+
+        {/* Language picker */}
+        <View style={styles.langRow}>
+          <LanguagePicker />
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -158,6 +166,9 @@ const styles = StyleSheet.create({
   switchRow: {
     alignItems: 'center',
     marginTop: 32,
+  },
+  langRow: {
+    marginTop: 28,
   },
   switchText: {
     color: '#8a8a9a',

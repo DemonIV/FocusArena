@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList } from '../../types';
 import { useAuth } from '../../hooks';
@@ -16,9 +18,21 @@ import { StatCard } from '../../components';
 import { timerService, achievementsService } from '../../services';
 import { formatDuration } from '../../utils/formatTime';
 
+// ─── Palette ──────────────────────────────────────────────────────────────────
+
+const BG     = '#0d0d1a';
+const CARD   = '#131325';
+const CARD2  = 'rgba(255,255,255,0.04)';
+const BORDER = 'rgba(255,255,255,0.08)';
+const ACCENT = '#00d2ff';
+const TEXT   = '#e2e8f0';
+const MUTED  = '#64748b';
+const MUTED2 = '#94a3b8';
+
 type Props = BottomTabScreenProps<MainTabParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const timerActive = useTimerStore((s) => s.isActive);
 
@@ -35,8 +49,13 @@ export function HomeScreen({ navigation }: Props) {
   const stats = statsQ.data;
   const badges = achievQ.data?.earned ?? [];
 
-  const xpToNextLevel = user ? (500 - (user.xp % 500)) : 500;
-  const levelProgress = user ? (user.xp % 500) / 500 : 0;
+  // Live values from stats.allTime (authStore `user` goes stale after earning XP)
+  const at = stats?.allTime;
+  const xp            = at?.xp ?? 0;
+  const level         = at?.level ?? user?.level ?? 1;
+  const streak        = at?.streak ?? 0;
+  const xpToNextLevel = 500 - (xp % 500);
+  const levelProgress = (xp % 500) / 500;
 
   return (
     <ScrollView
@@ -47,56 +66,66 @@ export function HomeScreen({ navigation }: Props) {
         <RefreshControl
           refreshing={statsQ.isFetching || achievQ.isFetching}
           onRefresh={() => { statsQ.refetch(); achievQ.refetch(); }}
-          tintColor="#00d2ff"
+          tintColor={ACCENT}
         />
       }
     >
-      {/* Header */}
+      {/* ── Hero Header ── */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.username}>{user?.username ?? '—'}</Text>
+        <View style={styles.avatarRing}>
+          <Text style={styles.avatarLetter}>
+            {user?.username?.charAt(0).toUpperCase() ?? '?'}
+          </Text>
+        </View>
+        <View style={styles.headerInfo}>
+          <Text style={styles.greeting}>{t('home.welcomeBack')}</Text>
+          <Text style={styles.username} numberOfLines={1}>{user?.username ?? '—'}</Text>
         </View>
         <View style={styles.levelBadge}>
-          <Text style={styles.levelText}>Lv {user?.level ?? 1}</Text>
+          <Text style={styles.levelText}>{t('home.level', { level })}</Text>
         </View>
       </View>
 
-      {/* XP Progress */}
+      {/* ── XP Progress ── */}
       <View style={styles.xpCard}>
         <View style={styles.xpRow}>
-          <Text style={styles.xpLabel}>XP Progress</Text>
-          <Text style={styles.xpVal}>{user?.xp ?? 0} XP</Text>
+          <Text style={styles.xpLabel}>{t('home.xpProgress')}</Text>
+          <Text style={styles.xpVal}>{t('home.xpValue', { xp: xp.toLocaleString() })}</Text>
         </View>
         <View style={styles.xpTrack}>
           <View style={[styles.xpFill, { width: `${levelProgress * 100}%` }]} />
         </View>
-        <Text style={styles.xpSub}>{xpToNextLevel} XP to level {(user?.level ?? 1) + 1}</Text>
+        <View style={styles.xpFooter}>
+          <Text style={styles.xpSub}>{t('home.xpToLevel', { xp: xpToNextLevel, level: level + 1 })}</Text>
+          {streak > 0 && (
+            <Text style={styles.streakChip}>🔥 {streak}</Text>
+          )}
+        </View>
       </View>
 
-      {/* Quick Stats */}
-      <Text style={styles.sectionTitle}>Today's Stats</Text>
+      {/* ── Quick Stats ── */}
+      <Text style={styles.sectionTitle}>{t('home.todaysStats')}</Text>
       <View style={styles.statsRow}>
         <StatCard
-          label="Sessions"
-          value={stats?.totalSessions ?? '—'}
+          label={t('home.sessions')}
+          value={stats?.today.sessionsCount ?? '—'}
           style={styles.statFlex}
         />
         <StatCard
-          label="Focus Time"
-          value={stats ? formatDuration(stats.totalMinutes) : '—'}
+          label={t('home.focusTime')}
+          value={stats ? formatDuration(stats.today.totalMinutes) : '—'}
           style={styles.statFlex}
           accent="#e94560"
         />
         <StatCard
-          label="Streak"
-          value={user ? `${user.streak}🔥` : '—'}
+          label={t('home.streak')}
+          value={stats ? `${streak}🔥` : '—'}
           style={styles.statFlex}
           accent="#f5a623"
         />
       </View>
 
-      {/* Active Timer Banner */}
+      {/* ── Active Timer Banner ── */}
       {timerActive && (
         <TouchableOpacity
           style={styles.activeBanner}
@@ -104,23 +133,24 @@ export function HomeScreen({ navigation }: Props) {
           activeOpacity={0.85}
         >
           <Text style={styles.activeDot}>●</Text>
-          <Text style={styles.activeBannerText}>Session in progress — tap to open</Text>
+          <Text style={styles.activeBannerText}>{t('home.sessionInProgress')}</Text>
           <Text style={styles.activeBannerArrow}>›</Text>
         </TouchableOpacity>
       )}
 
-      {/* Achievements */}
-      <Text style={styles.sectionTitle}>Achievements ({badges.length})</Text>
+      {/* ── Achievements ── */}
+      <Text style={styles.sectionTitle}>{t('home.achievements', { count: badges.length })}</Text>
       {badges.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyText}>Complete your first session to unlock badges!</Text>
+          <Text style={styles.emptyIcon}>🏆</Text>
+          <Text style={styles.emptyText}>{t('home.noBadges')}</Text>
         </View>
       ) : (
         <View style={styles.badgesGrid}>
           {badges.map((b) => (
             <View key={b.id} style={styles.badgeItem}>
               <Text style={styles.badgeIcon}>{b.icon}</Text>
-              <Text style={styles.badgeName}>{b.label}</Text>
+              <Text style={styles.badgeName} numberOfLines={2}>{b.label}</Text>
             </View>
           ))}
         </View>
@@ -130,81 +160,129 @@ export function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#1a1a2e' },
-  content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
+  root: { flex: 1, backgroundColor: BG },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 16 : 24,
+    paddingBottom: 40,
+  },
 
+  // Hero header
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    gap: 14,
   },
-  greeting: { color: '#8a8a9a', fontSize: 14 },
-  username: { color: '#fff', fontSize: 22, fontWeight: '700', marginTop: 2 },
+  avatarRing: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: `${ACCENT}22`,
+    borderWidth: 2,
+    borderColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarLetter: { color: ACCENT, fontSize: 22, fontWeight: '800' },
+  headerInfo: { flex: 1 },
+  greeting: { color: MUTED, fontSize: 13 },
+  username: { color: TEXT, fontSize: 22, fontWeight: '700', marginTop: 2 },
   levelBadge: {
-    backgroundColor: '#e94560',
+    backgroundColor: `${ACCENT}22`,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: `${ACCENT}50`,
   },
-  levelText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  levelText: { color: ACCENT, fontWeight: '700', fontSize: 13 },
 
+  // XP card
   xpCard: {
-    backgroundColor: '#16213e',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 24,
+    backgroundColor: CARD,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: BORDER,
   },
-  xpRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  xpLabel: { color: '#8a8a9a', fontSize: 13 },
-  xpVal: { color: '#00d2ff', fontSize: 13, fontWeight: '600' },
+  xpRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, alignItems: 'center' },
+  xpLabel: {
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  xpVal: { color: ACCENT, fontSize: 15, fontWeight: '800' },
   xpTrack: {
-    height: 6,
-    backgroundColor: '#0f3460',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 4,
     overflow: 'hidden',
   },
   xpFill: {
     height: '100%',
-    backgroundColor: '#00d2ff',
-    borderRadius: 3,
+    backgroundColor: ACCENT,
+    borderRadius: 4,
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
   },
-  xpSub: { color: '#8a8a9a', fontSize: 11, marginTop: 6 },
+  xpFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  xpSub: { color: MUTED2, fontSize: 12 },
+  streakChip: { color: '#f5a623', fontSize: 13, fontWeight: '700' },
 
+  // Section title
   sectionTitle: {
-    color: '#8a8a9a',
-    fontSize: 12,
-    fontWeight: '600',
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '700',
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: 12,
   },
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
+  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   statFlex: { flex: 1 },
 
+  // Active banner
   activeBanner: {
-    backgroundColor: '#0f3460',
-    borderRadius: 12,
+    backgroundColor: `${ACCENT}14`,
+    borderRadius: 14,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: `${ACCENT}40`,
     borderLeftWidth: 3,
-    borderLeftColor: '#00d2ff',
+    borderLeftColor: ACCENT,
   },
-  activeDot: { color: '#00d2ff', fontSize: 12, marginRight: 10 },
-  activeBannerText: { flex: 1, color: '#fff', fontSize: 14 },
-  activeBannerArrow: { color: '#00d2ff', fontSize: 22, marginLeft: 8 },
+  activeDot: { color: ACCENT, fontSize: 12, marginRight: 10 },
+  activeBannerText: { flex: 1, color: TEXT, fontSize: 14, fontWeight: '500' },
+  activeBannerArrow: { color: ACCENT, fontSize: 22, marginLeft: 8 },
 
+  // Empty achievements
   emptyCard: {
-    backgroundColor: '#16213e',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: CARD2,
+    borderRadius: 16,
+    padding: 28,
     alignItems: 'center',
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
   },
-  emptyText: { color: '#8a8a9a', fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  emptyIcon: { fontSize: 36, marginBottom: 10 },
+  emptyText: { color: MUTED, fontSize: 13, textAlign: 'center', lineHeight: 20 },
 
+  // Badges grid
   badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -212,12 +290,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   badgeItem: {
-    backgroundColor: '#16213e',
-    borderRadius: 12,
+    backgroundColor: CARD,
+    borderRadius: 14,
     padding: 14,
     alignItems: 'center',
-    width: 80,
+    width: 86,
+    borderWidth: 1,
+    borderColor: BORDER,
   },
   badgeIcon: { fontSize: 28, marginBottom: 6 },
-  badgeName: { color: '#8a8a9a', fontSize: 10, textAlign: 'center', letterSpacing: 0.5 },
+  badgeName: { color: MUTED2, fontSize: 10, textAlign: 'center', letterSpacing: 0.3, fontWeight: '600' },
 });

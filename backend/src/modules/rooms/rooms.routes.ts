@@ -109,7 +109,9 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       const room = await createRoom(userId, parsed.data);
       return reply.code(201).send({ room });
-    } catch (err) {
+    } catch (err: unknown) {
+      const e = err as { code?: string; message: string };
+      if (e.code === 'ROOM_LIMIT') return reply.code(409).send({ error: 'Conflict', message: e.message });
       request.log.error(err, 'rooms POST failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { MainTabParamList } from '../types';
 import {
   HomeScreen,
@@ -22,24 +23,36 @@ const ICONS: Record<string, string> = {
   Profile: '👤',
 };
 
+const NAV_KEY: Record<string, string> = {
+  Home: 'nav.home',
+  Timer: 'nav.timer',
+  Leaderboard: 'nav.leaderboard',
+  Rooms: 'nav.rooms',
+  Friends: 'nav.friends',
+  Profile: 'nav.profile',
+};
+
 export function MainTabs() {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerStyle: { backgroundColor: '#16213e' },
-        headerTintColor: '#ffffff',
+        headerStyle: { backgroundColor: '#131325' },
+        headerTintColor: '#e2e8f0',
+        headerShadowVisible: false,
         headerTitleStyle: { fontWeight: '700', letterSpacing: 0.5 },
         tabBarStyle: {
-          backgroundColor: '#16213e',
-          borderTopColor: '#0f3460',
+          backgroundColor: '#131325',
+          borderTopColor: 'rgba(255,255,255,0.08)',
           borderTopWidth: 1,
           height: 60,
           paddingBottom: 8,
           paddingTop: 4,
         },
         tabBarActiveTintColor: '#00d2ff',
-        tabBarInactiveTintColor: '#4a4a6a',
-        tabBarLabel: route.name,
+        tabBarInactiveTintColor: '#64748b',
+        tabBarLabel: t(NAV_KEY[route.name] ?? route.name),
         tabBarIcon: ({ focused }) => (
           <Text style={{ fontSize: focused ? 20 : 16, opacity: focused ? 1 : 0.6 }}>
             {ICONS[route.name] ?? '◉'}
@@ -48,11 +61,11 @@ export function MainTabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'FocusArena' }} />
-      <Tab.Screen name="Timer" component={TimerScreen} options={{ title: 'Timer' }} />
-      <Tab.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: 'Leaderboard' }} />
-      <Tab.Screen name="Rooms" component={RoomsScreen} options={{ title: 'Rooms' }} />
-      <Tab.Screen name="Friends" component={FriendsScreen} options={{ title: 'Friends' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
+      <Tab.Screen name="Timer" component={TimerScreen} options={{ title: t('nav.timer') }} />
+      <Tab.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: t('nav.leaderboard') }} />
+      <Tab.Screen name="Rooms" component={RoomsScreen} options={{ title: t('nav.rooms') }} />
+      <Tab.Screen name="Friends" component={FriendsScreen} options={{ title: t('nav.friends') }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('nav.profile') }} />
     </Tab.Navigator>
   );
 }

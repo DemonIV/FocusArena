@@ -1,21 +1,67 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Pressable,
   Alert,
   RefreshControl,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
 import { StatCard } from '../../components';
-import { timerService, achievementsService } from '../../services';
+import { timerService, achievementsService, roomsService } from '../../services';
+import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
+import type { SubjectStat } from '../../types';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const BG      = '#0d0d1a';
+const CARD    = '#131325';
+const CARD2   = 'rgba(255,255,255,0.04)';
+const BORDER  = 'rgba(255,255,255,0.08)';
+const ACCENT  = '#00d2ff';
+const DANGER  = '#ef4444';
+const TEXT    = '#e2e8f0';
+const MUTED   = '#64748b';
+const MUTED2  = '#94a3b8';
+
+const SUBJECT_COLORS = [
+  '#00d2ff', '#ef4444', '#f59e0b', '#10b981',
+  '#8b5cf6', '#ec4899', '#f97316', '#14b8a6',
+  '#6366f1', '#84cc16', '#fb7185', '#a78bfa',
+];
+
+const SUBJECT_ICONS = ['📚', '💻', '🔬', '🎨', '🏃', '🎵', '🗣️', '✏️', '📊', '🏆', '🌍', '🧪'];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function fmtMinutes(m: number): string {
+  if (m === 0) return '—';
+  const min = i18n.t('common.minShort');
+  const hr = i18n.t('common.hourShort');
+  if (m < 60) return `${m}${min}`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return rem > 0 ? `${h}${hr} ${rem}${min}` : `${h}${hr}`;
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export function ProfileScreen() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
+
+  // ── Queries ──────────────────────────────────────────────────────────────────
 
   const statsQ = useQuery({
     queryKey: ['timer-stats'],
@@ -27,195 +73,635 @@ export function ProfileScreen() {
     queryFn: () => achievementsService.mine(),
   });
 
-  const stats = statsQ.data;
-  const earned = achievQ.data?.earned ?? [];
-  const locked = achievQ.data?.locked ?? [];
+  const subjectStatsQ = useQuery({
+    queryKey: ['subject-stats'],
+    queryFn: () => timerService.getSubjectStats(),
+  });
 
-  const levelProgress = user ? (user.xp % 500) / 500 : 0;
-  const xpToNext = user ? (500 - (user.xp % 500)) : 500;
+  const myRoomsQ = useQuery({
+    queryKey: ['my-rooms'],
+    queryFn: () => roomsService.mine(),
+  });
+
+  // Rooms the user owns (these carry the invite code)
+  const ownedRooms = (myRoomsQ.data ?? []).filter((r) => r.ownerId === user?.id);
+
+  const stats    = statsQ.data;
+  const earned   = achievQ.data?.earned  ?? [];
+  const locked   = achievQ.data?.locked  ?? [];
+  const subjects: SubjectStat[] = subjectStatsQ.data?.subjects ?? [];
+
+  // ── Modal state ───────────────────────────────────────────────────────────────
+
+  const [modalVisible,   setModalVisible]   = useState(false);
+  const [editingId,      setEditingId]      = useState<string | null>(null);
+  const [subjectName,    setSubjectName]    = useState('');
+  const [selectedColor,  setSelectedColor]  = useState(SUBJECT_COLORS[0]);
+  const [selectedIcon,   setSelectedIcon]   = useState(SUBJECT_ICONS[0]);
+
+  // ── Mutations ─────────────────────────────────────────────────────────────────
+
+  const invalidateSubjects = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['subject-stats'] });
+    queryClient.invalidateQueries({ queryKey: ['subjects'] }); // keep Timer list in sync
+  }, [queryClient]);
+
+  const createMut = useMutation({
+    mutationFn: (body: { name: string; color: string; icon: string }) =>
+      timerService.createSubject({ ...body, daily_goal_minutes: 60 }),
+    onSuccess: () => { invalidateSubjects(); closeModal(); },
+    onError:   (e: any) => Alert.alert(t('common.error'), e?.message ?? t('profile.subjectAddFailed')),
+  });
+
+  const updateMut = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: { name: string; color: string; icon: string } }) =>
+      timerService.updateSubject(id, body),
+    onSuccess: () => { invalidateSubjects(); closeModal(); },
+    onError:   (e: any) => Alert.alert(t('common.error'), e?.message ?? t('profile.subjectUpdateFailed')),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => timerService.deleteSubject(id),
+    onSuccess:  invalidateSubjects,
+    onError:    (e: any) => Alert.alert(t('common.error'), e?.message ?? t('profile.subjectDeleteFailed')),
+  });
+
+  // ── Handlers ─────────────────────────────────────────────────────────────────
+
+  const openAdd = useCallback(() => {
+    setEditingId(null);
+    setSubjectName('');
+    setSelectedColor(SUBJECT_COLORS[0]);
+    setSelectedIcon(SUBJECT_ICONS[0]);
+    setModalVisible(true);
+  }, []);
+
+  const openEdit = useCallback((s: SubjectStat) => {
+    setEditingId(s.id);
+    setSubjectName(s.name);
+    setSelectedColor(SUBJECT_COLORS.includes(s.color) ? s.color : SUBJECT_COLORS[0]);
+    setSelectedIcon(SUBJECT_ICONS.includes(s.icon) ? s.icon : SUBJECT_ICONS[0]);
+    setModalVisible(true);
+  }, []);
+
+  const closeModal = useCallback(() => setModalVisible(false), []);
+
+  const handleSave = useCallback(() => {
+    const trimmed = subjectName.trim();
+    if (!trimmed) { Alert.alert(t('common.warning'), t('profile.subjectNameEmpty')); return; }
+    const body = { name: trimmed, color: selectedColor, icon: selectedIcon };
+    if (editingId) {
+      updateMut.mutate({ id: editingId, body });
+    } else {
+      createMut.mutate(body);
+    }
+  }, [subjectName, selectedColor, selectedIcon, editingId]);
+
+  const handleDelete = useCallback((s: SubjectStat) => {
+    Alert.alert(
+      t('profile.deleteSubject'),
+      t('profile.deleteSubjectMsg', { name: s.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: () => deleteMut.mutate(s.id) },
+      ],
+    );
+  }, []);
 
   const handleLogout = () => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
+      t('profile.signOut'),
+      t('profile.signOutConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: () => logout() },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('profile.signOut'), style: 'destructive', onPress: () => logout() },
       ],
     );
   };
 
+  // ── Derived ───────────────────────────────────────────────────────────────────
+
+  // XP/level/streak come from stats.allTime (live DB) — the authStore `user`
+  // is only set at login and goes stale after earning XP.
+  const at = stats?.allTime;
+  const xp            = at?.xp ?? 0;
+  const level         = at?.level ?? user?.level ?? 1;
+  const streak        = at?.streak ?? 0;
+  const longestStreak = at?.longestStreak ?? 0;
+  const levelProgress = (xp % 500) / 500;
+  const xpToNext      = 500 - (xp % 500);
+  const avgMinutes    = at && at.totalSessions > 0 ? Math.round(at.totalMinutes / at.totalSessions) : 0;
+  const maxMinutes    = subjects.reduce((m, s) => Math.max(m, s.totalMinutes), 1);
+  const isSaving      = createMut.isPending || updateMut.isPending;
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={statsQ.isFetching || achievQ.isFetching}
-          onRefresh={() => { statsQ.refetch(); achievQ.refetch(); }}
-          tintColor="#00d2ff"
-        />
-      }
-    >
-      {/* Avatar + Name */}
-      <View style={styles.profileCard}>
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarLetter}>
-            {user?.username.charAt(0).toUpperCase() ?? '?'}
-          </Text>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={statsQ.isFetching || achievQ.isFetching || subjectStatsQ.isFetching}
+            onRefresh={() => {
+              statsQ.refetch();
+              achievQ.refetch();
+              subjectStatsQ.refetch();
+            }}
+            tintColor={ACCENT}
+          />
+        }
+      >
+
+        {/* ── Profile Card ── */}
+        <View style={styles.profileCard}>
+          <View style={styles.avatarRing}>
+            <Text style={styles.avatarLetter}>
+              {user?.username.charAt(0).toUpperCase() ?? '?'}
+            </Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.username}>{user?.username ?? '—'}</Text>
+            <Text style={styles.email}>{user?.email ?? ''}</Text>
+          </View>
+          <View style={styles.levelBadge}>
+            <Text style={styles.levelText}>{t('profile.level', { level })}</Text>
+          </View>
         </View>
-        <Text style={styles.username}>{user?.username ?? '—'}</Text>
-        <Text style={styles.email}>{user?.email ?? ''}</Text>
 
-        <View style={styles.levelBadge}>
-          <Text style={styles.levelText}>Level {user?.level ?? 1}</Text>
-        </View>
-      </View>
-
-      {/* XP Bar */}
-      <View style={styles.xpSection}>
-        <View style={styles.xpRow}>
-          <Text style={styles.xpLabel}>{user?.xp ?? 0} XP</Text>
-          <Text style={styles.xpLabel}>{xpToNext} to Lv {(user?.level ?? 1) + 1}</Text>
-        </View>
-        <View style={styles.xpTrack}>
-          <View style={[styles.xpFill, { width: `${levelProgress * 100}%` }]} />
-        </View>
-      </View>
-
-      {/* Stats Grid */}
-      <Text style={styles.sectionTitle}>All-Time Stats</Text>
-      <View style={styles.statsGrid}>
-        <StatCard
-          label="Sessions"
-          value={stats?.totalSessions ?? '—'}
-          style={styles.statCell}
-        />
-        <StatCard
-          label="Focus Time"
-          value={stats ? formatDuration(stats.totalMinutes) : '—'}
-          style={styles.statCell}
-          accent="#e94560"
-        />
-        <StatCard
-          label="Streak"
-          value={user ? `${user.streak}🔥` : '—'}
-          style={styles.statCell}
-          accent="#f5a623"
-        />
-        <StatCard
-          label="Avg / Day"
-          value={stats ? formatDuration(Math.round(stats.averageSessionMinutes)) : '—'}
-          style={styles.statCell}
-          accent="#9c27b0"
-        />
-      </View>
-
-      {/* Achievements */}
-      <Text style={styles.sectionTitle}>
-        Badges {earned.length}/{earned.length + locked.length}
-      </Text>
-
-      {earned.length > 0 && (
-        <View style={styles.badgesRow}>
-          {earned.map((b) => (
-            <View key={b.id} style={styles.badge}>
-              <Text style={styles.badgeIcon}>{b.icon}</Text>
-              <Text style={styles.badgeLabel}>{b.label}</Text>
+        {/* ── XP Bar ── */}
+        <View style={styles.xpCard}>
+          <View style={styles.xpRow}>
+            <View>
+              <Text style={styles.xpAmount}>{xp.toLocaleString()} XP</Text>
+              <Text style={styles.xpSub}>{t('profile.levelN', { level })}</Text>
             </View>
-          ))}
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={styles.xpAmount}>{xpToNext} XP</Text>
+              <Text style={styles.xpSub}>{t('profile.nextLevel')}</Text>
+            </View>
+          </View>
+          <View style={styles.xpTrack}>
+            <View style={[styles.xpFill, { width: `${levelProgress * 100}%` }]} />
+          </View>
+          <View style={styles.streakRow}>
+            <Text style={styles.streakText}>{t('profile.dayStreak', { count: streak })}</Text>
+            <Text style={styles.streakText}>{t('profile.longestStreak', { count: longestStreak })}</Text>
+          </View>
         </View>
-      )}
 
-      {locked.length > 0 && (
-        <>
-          <Text style={styles.lockedTitle}>Locked</Text>
+        {/* ── Stats Grid ── */}
+        <Text style={styles.sectionLabel}>{t('profile.statistics')}</Text>
+        <View style={styles.statsGrid}>
+          <StatCard
+            label={t('profile.totalSessions')}
+            value={at?.totalSessions ?? '—'}
+            style={styles.statCell}
+          />
+          <StatCard
+            label={t('profile.focusTime')}
+            value={at ? formatDuration(at.totalMinutes) : '—'}
+            style={styles.statCell}
+            accent="#e94560"
+          />
+          <StatCard
+            label={t('profile.completed')}
+            value={at?.completedSessions ?? '—'}
+            style={styles.statCell}
+            accent="#10b981"
+          />
+          <StatCard
+            label={t('profile.avgDuration')}
+            value={at ? formatDuration(avgMinutes) : '—'}
+            style={styles.statCell}
+            accent="#8b5cf6"
+          />
+        </View>
+
+        {/* ── Konularım ── */}
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionLabel}>{t('profile.mySubjects')}</Text>
+          <TouchableOpacity style={styles.addButton} onPress={openAdd} activeOpacity={0.75}>
+            <Text style={styles.addButtonText}>{t('profile.addShort')}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {subjectStatsQ.isLoading ? (
+          <ActivityIndicator color={ACCENT} style={{ marginVertical: 24 }} />
+        ) : subjects.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyIcon}>📚</Text>
+            <Text style={styles.emptyTitle}>{t('profile.noSubjects')}</Text>
+            <Text style={styles.emptyHint}>{t('profile.noSubjectsHint')}</Text>
+            <TouchableOpacity style={styles.emptyAddBtn} onPress={openAdd} activeOpacity={0.8}>
+              <Text style={styles.emptyAddBtnText}>{t('profile.addFirstSubject')}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.subjectList}>
+            {subjects.map((s) => (
+              <SubjectCard
+                key={s.id}
+                subject={s}
+                maxMinutes={maxMinutes}
+                onEdit={() => openEdit(s)}
+                onDelete={() => handleDelete(s)}
+                isDeleting={deleteMut.isPending && (deleteMut.variables as string) === s.id}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* ── Achievements ── */}
+        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>
+          {t('profile.badges')} {earned.length > 0 ? `${earned.length}/${earned.length + locked.length}` : ''}
+        </Text>
+
+        {earned.length > 0 && (
           <View style={styles.badgesRow}>
-            {locked.map((b) => (
-              <View key={b.badge_type} style={[styles.badge, styles.badgeLocked]}>
-                <Text style={[styles.badgeIcon, styles.badgeIconLocked]}>🔒</Text>
-                <Text style={[styles.badgeLabel, styles.badgeLabelLocked]}>{b.label}</Text>
-                <Text style={styles.badgeDesc}>{b.description}</Text>
+            {earned.map((b) => (
+              <View key={b.id} style={styles.badge}>
+                <Text style={styles.badgeIcon}>{b.icon}</Text>
+                <Text style={styles.badgeLabel}>{b.label}</Text>
               </View>
             ))}
           </View>
-        </>
-      )}
+        )}
 
-      {/* Sign Out */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
-        <Text style={styles.logoutBtnText}>Sign Out</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {locked.length > 0 && (
+          <>
+            <Text style={styles.lockedLabel}>{t('profile.locked')}</Text>
+            <View style={styles.badgesRow}>
+              {locked.map((b) => (
+                <View key={b.badge_type} style={[styles.badge, styles.badgeLocked]}>
+                  <Text style={[styles.badgeIcon, { opacity: 0.4 }]}>🔒</Text>
+                  <Text style={[styles.badgeLabel, { color: MUTED }]}>{b.label}</Text>
+                  <Text style={styles.badgeDesc}>{b.description}</Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {earned.length === 0 && locked.length === 0 && (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyIcon}>🏆</Text>
+            <Text style={styles.emptyTitle}>{t('profile.noBadges')}</Text>
+            <Text style={styles.emptyHint}>{t('profile.noBadgesHint')}</Text>
+          </View>
+        )}
+
+        {/* ── My Rooms / Invite Codes ── */}
+        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.myRooms')}</Text>
+        {ownedRooms.length > 0 ? (
+          ownedRooms.map((r) => (
+            <View key={r.id} style={styles.roomCodeRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.roomCodeName}>🔒 {r.name}</Text>
+                <Text style={styles.roomCodeMeta}>👥 {r.memberCount}/{r.maxMembers}</Text>
+              </View>
+              <View style={styles.roomCodeBox}>
+                <Text style={styles.roomCodeLabel}>{t('profile.inviteCode')}</Text>
+                <Text style={styles.roomCodeText}>{r.inviteCode ?? '—'}</Text>
+              </View>
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyIcon}>🚪</Text>
+            <Text style={styles.emptyTitle}>{t('profile.noOwnedRooms')}</Text>
+            <Text style={styles.emptyHint}>{t('profile.noOwnedRoomsHint')}</Text>
+          </View>
+        )}
+
+        {/* ── Sign Out ── */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+          <Text style={styles.logoutText}>{t('profile.signOut')}</Text>
+        </TouchableOpacity>
+
+      </ScrollView>
+
+      {/* ── Add / Edit Subject Modal ── */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={closeModal}
+      >
+        <View style={modal.overlay}>
+          <View style={modal.sheet}>
+            <View style={modal.handle} />
+
+            <Text style={modal.title}>
+              {editingId ? t('profile.editSubject') : t('profile.newSubject')}
+            </Text>
+
+            {/* Preview */}
+            <View style={[modal.preview, { borderColor: `${selectedColor}40` }]}>
+              <View style={[modal.previewDot, { backgroundColor: selectedColor }]}>
+                <Text style={modal.previewIcon}>{selectedIcon}</Text>
+              </View>
+              <Text style={modal.previewName} numberOfLines={1}>
+                {subjectName.trim() || t('profile.subjectNameDefault')}
+              </Text>
+            </View>
+
+            {/* Name input */}
+            <Text style={modal.label}>{t('profile.subjectName')}</Text>
+            <TextInput
+              style={modal.input}
+              placeholder={t('profile.subjectNamePlaceholder')}
+              placeholderTextColor={MUTED}
+              value={subjectName}
+              onChangeText={setSubjectName}
+              maxLength={50}
+              returnKeyType="done"
+            />
+
+            {/* Icon picker */}
+            <Text style={modal.label}>{t('profile.icon')}</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={modal.iconRow}
+            >
+              {SUBJECT_ICONS.map((ic) => (
+                <Pressable
+                  key={ic}
+                  style={[
+                    modal.iconBtn,
+                    selectedIcon === ic && { borderColor: selectedColor, backgroundColor: `${selectedColor}22` },
+                  ]}
+                  onPress={() => setSelectedIcon(ic)}
+                >
+                  <Text style={modal.iconText}>{ic}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            {/* Color picker */}
+            <Text style={modal.label}>{t('profile.color')}</Text>
+            <View style={modal.colorGrid}>
+              {SUBJECT_COLORS.map((c) => (
+                <Pressable
+                  key={c}
+                  style={[modal.colorDot, { backgroundColor: c }]}
+                  onPress={() => setSelectedColor(c)}
+                >
+                  {selectedColor === c && <Text style={modal.colorCheck}>✓</Text>}
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Buttons */}
+            <View style={modal.btnRow}>
+              <TouchableOpacity style={modal.cancelBtn} onPress={closeModal} activeOpacity={0.75}>
+                <Text style={modal.cancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  modal.saveBtn,
+                  { backgroundColor: selectedColor },
+                  (!subjectName.trim() || isSaving) && { opacity: 0.45 },
+                ]}
+                onPress={handleSave}
+                disabled={!subjectName.trim() || isSaving}
+                activeOpacity={0.85}
+              >
+                {isSaving
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={modal.saveText}>{t('common.save')}</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#1a1a2e' },
-  content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 48 },
+// ─── SubjectCard ──────────────────────────────────────────────────────────────
 
-  profileCard: {
-    alignItems: 'center',
-    backgroundColor: '#16213e',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 20,
+function SubjectCard({
+  subject,
+  maxMinutes,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: {
+  subject: SubjectStat;
+  maxMinutes: number;
+  onEdit: () => void;
+  onDelete: () => void;
+  isDeleting: boolean;
+}) {
+  const { t } = useTranslation();
+  const pct = maxMinutes > 0 ? Math.min(subject.totalMinutes / maxMinutes, 1) : 0;
+
+  return (
+    <View style={subj.card}>
+      {/* Color accent bar */}
+      <View style={[subj.accent, { backgroundColor: subject.color }]} />
+
+      {/* Icon bubble */}
+      <View style={[subj.iconWrap, { backgroundColor: `${subject.color}22` }]}>
+        <Text style={subj.icon}>{subject.icon}</Text>
+      </View>
+
+      {/* Info */}
+      <View style={subj.info}>
+        <Text style={subj.name} numberOfLines={1}>{subject.name}</Text>
+        <View style={subj.metaRow}>
+          <Text style={[subj.time, { color: subject.color }]}>{fmtMinutes(subject.totalMinutes)}</Text>
+          {subject.sessionsCount > 0 && (
+            <Text style={subj.sessions}> · {t('profile.sessionsUnit', { count: subject.sessionsCount })}</Text>
+          )}
+        </View>
+        {/* Relative progress bar */}
+        <View style={subj.track}>
+          <View
+            style={[
+              subj.fill,
+              { width: `${pct * 100}%`, backgroundColor: subject.color },
+            ]}
+          />
+        </View>
+      </View>
+
+      {/* Actions */}
+      <View style={subj.actions}>
+        <TouchableOpacity
+          onPress={onEdit}
+          style={subj.actionBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 6 }}
+        >
+          <Text style={subj.editIcon}>✏️</Text>
+        </TouchableOpacity>
+        {isDeleting
+          ? <ActivityIndicator size="small" color={DANGER} style={{ marginTop: 4 }} />
+          : (
+            <TouchableOpacity
+              onPress={onDelete}
+              style={subj.actionBtn}
+              hitSlop={{ top: 6, bottom: 10, left: 10, right: 6 }}
+            >
+              <Text style={subj.deleteIcon}>🗑</Text>
+            </TouchableOpacity>
+          )
+        }
+      </View>
+    </View>
+  );
+}
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: BG },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 16 : 24,
+    paddingBottom: 56,
   },
-  avatarCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#0f3460',
+
+  // Profile card
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    gap: 14,
+  },
+  avatarRing: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: `${ACCENT}22`,
+    borderWidth: 2,
+    borderColor: ACCENT,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#00d2ff',
+  },
+  avatarLetter: { color: ACCENT, fontSize: 24, fontWeight: '800' },
+  profileInfo: { flex: 1 },
+  username: { color: TEXT, fontSize: 18, fontWeight: '700' },
+  email: { color: MUTED, fontSize: 12, marginTop: 2 },
+  levelBadge: {
+    backgroundColor: `${ACCENT}22`,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: `${ACCENT}50`,
+  },
+  levelText: { color: ACCENT, fontWeight: '700', fontSize: 13 },
+
+  // XP card
+  xpCard: {
+    backgroundColor: CARD,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  xpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
-  avatarLetter: { color: '#00d2ff', fontSize: 28, fontWeight: '700' },
-  username: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  email: { color: '#8a8a9a', fontSize: 13, marginTop: 4, marginBottom: 12 },
-  levelBadge: {
-    backgroundColor: '#e94560',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-  },
-  levelText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-
-  xpSection: {
-    backgroundColor: '#16213e',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-  },
-  xpRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  xpLabel: { color: '#8a8a9a', fontSize: 12 },
+  xpAmount: { color: TEXT, fontSize: 16, fontWeight: '700' },
+  xpSub: { color: MUTED, fontSize: 11, marginTop: 2 },
   xpTrack: {
     height: 6,
-    backgroundColor: '#0f3460',
+    backgroundColor: 'rgba(255,255,255,0.07)',
     borderRadius: 3,
     overflow: 'hidden',
-  },
-  xpFill: { height: '100%', backgroundColor: '#00d2ff', borderRadius: 3 },
-
-  sectionTitle: {
-    color: '#8a8a9a',
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
     marginBottom: 12,
   },
+  xpFill: {
+    height: '100%',
+    backgroundColor: ACCENT,
+    borderRadius: 3,
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  streakText: { color: MUTED2, fontSize: 12 },
+
+  // Section labels & rows
+  sectionLabel: {
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginBottom: 12,
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  addButton: {
+    backgroundColor: `${ACCENT}18`,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: `${ACCENT}40`,
+  },
+  addButtonText: { color: ACCENT, fontSize: 13, fontWeight: '700' },
+
+  // Stats grid
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginBottom: 24,
+    marginBottom: 28,
   },
-  statCell: { width: '47%' },
+  statCell: { width: '47.5%' },
 
+  // Subjects list
+  subjectList: { marginBottom: 28 },
+
+  // Empty state
+  emptyBox: {
+    backgroundColor: CARD2,
+    borderRadius: 16,
+    padding: 28,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: BORDER,
+    marginBottom: 28,
+  },
+  emptyIcon: { fontSize: 36, marginBottom: 10 },
+  emptyTitle: { color: TEXT, fontSize: 16, fontWeight: '600', marginBottom: 6 },
+  emptyHint: { color: MUTED, fontSize: 13, textAlign: 'center', lineHeight: 19 },
+  emptyAddBtn: {
+    marginTop: 18,
+    backgroundColor: `${ACCENT}18`,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: `${ACCENT}40`,
+  },
+  emptyAddBtnText: { color: ACCENT, fontWeight: '700', fontSize: 14 },
+
+  // Badges
   badgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -223,40 +709,270 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   badge: {
-    backgroundColor: '#16213e',
-    borderRadius: 12,
+    backgroundColor: CARD,
+    borderRadius: 14,
     padding: 14,
     alignItems: 'center',
-    width: 90,
+    width: 86,
+    borderWidth: 1,
+    borderColor: BORDER,
   },
-  badgeLocked: { opacity: 0.45 },
+  badgeLocked: { opacity: 0.4 },
   badgeIcon: { fontSize: 28, marginBottom: 6 },
-  badgeIconLocked: { opacity: 0.5 },
-  badgeLabel: {
-    color: '#ffffff',
+  badgeLabel: { color: TEXT, fontSize: 10, textAlign: 'center', fontWeight: '600' },
+  badgeDesc: { color: MUTED, fontSize: 9, textAlign: 'center', marginTop: 3 },
+  lockedLabel: {
+    color: MUTED,
     fontSize: 10,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  badgeLabelLocked: { color: '#8a8a9a' },
-  badgeDesc: { color: '#4a4a6a', fontSize: 9, textAlign: 'center', marginTop: 2 },
-
-  lockedTitle: {
-    color: '#4a4a6a',
-    fontSize: 11,
-    textTransform: 'uppercase',
+    fontWeight: '700',
     letterSpacing: 2,
+    textTransform: 'uppercase',
     marginBottom: 10,
   },
 
+  // Room invite codes
+  roomCodeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD2,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 14,
+    marginBottom: 10,
+    gap: 12,
+  },
+  roomCodeName: { color: TEXT, fontSize: 15, fontWeight: '700' },
+  roomCodeMeta: { color: MUTED2, fontSize: 12, marginTop: 3 },
+  roomCodeBox: {
+    backgroundColor: `${ACCENT}14`,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  roomCodeLabel: { color: MUTED, fontSize: 9, fontWeight: '700', letterSpacing: 1 },
+  roomCodeText: { color: ACCENT, fontSize: 18, fontWeight: '800', letterSpacing: 3, marginTop: 2 },
+
+  // Logout
   logoutBtn: {
-    marginTop: 16,
-    backgroundColor: '#2a1020',
-    borderRadius: 12,
+    marginTop: 8,
+    backgroundColor: `${DANGER}12`,
+    borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e94560',
+    borderColor: `${DANGER}40`,
   },
-  logoutBtnText: { color: '#e94560', fontSize: 15, fontWeight: '700' },
+  logoutText: { color: DANGER, fontSize: 15, fontWeight: '700' },
+});
+
+// ─── SubjectCard Styles ───────────────────────────────────────────────────────
+
+const subj = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 16,
+    marginBottom: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: BORDER,
+    paddingRight: 14,
+  },
+  accent: {
+    width: 4,
+    alignSelf: 'stretch',
+  },
+  iconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 12,
+  },
+  icon: { fontSize: 22 },
+  info: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingRight: 8,
+  },
+  name: {
+    color: TEXT,
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 3,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 7,
+  },
+  time: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  sessions: {
+    color: MUTED,
+    fontSize: 12,
+  },
+  track: {
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  fill: {
+    height: '100%',
+    borderRadius: 2,
+    opacity: 0.75,
+  },
+  actions: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionBtn: { padding: 4 },
+  editIcon: { fontSize: 17 },
+  deleteIcon: { fontSize: 17 },
+});
+
+// ─── Modal Styles ─────────────────────────────────────────────────────────────
+
+const modal = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#131325',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+    paddingBottom: Platform.OS === 'ios' ? 48 : 32,
+    borderTopWidth: 1,
+    borderColor: BORDER,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    color: TEXT,
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 20,
+  },
+
+  // Preview
+  preview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: CARD2,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+  previewDot: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewIcon: { fontSize: 22 },
+  previewName: { color: TEXT, fontSize: 16, fontWeight: '600', flex: 1 },
+
+  // Fields
+  label: {
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: CARD2,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    color: TEXT,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+    marginBottom: 20,
+  },
+
+  // Icon row
+  iconRow: {
+    gap: 8,
+    marginBottom: 20,
+    paddingBottom: 4,
+  },
+  iconBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: BORDER,
+    backgroundColor: CARD2,
+  },
+  iconText: { fontSize: 22 },
+
+  // Color grid
+  colorGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 24,
+  },
+  colorDot: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorCheck: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+    textShadowColor: 'rgba(0,0,0,0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+
+  // Buttons
+  btnRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+    backgroundColor: CARD2,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  cancelText: { color: MUTED2, fontSize: 15, fontWeight: '600' },
+  saveBtn: {
+    flex: 2,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderRadius: 14,
+  },
+  saveText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

@@ -1,13 +1,11 @@
-import { MMKV } from 'react-native-mmkv';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const storage = new MMKV({ id: 'focusarena' });
-
-/** Zustand-compatible StateStorage backed by MMKV */
+/** Zustand-compatible StateStorage backed by AsyncStorage (Expo Go compatible) */
 export const mmkvStorage = {
-  getItem: (name: string): string | null =>
-    storage.getString(name) ?? null,
-  setItem: (name: string, value: string): void =>
-    storage.set(name, value),
-  removeItem: (name: string): void =>
-    storage.delete(name),
+  getItem: (name: string): Promise<string | null> =>
+    AsyncStorage.getItem(name),
+  setItem: (name: string, value: string): Promise<void> =>
+    AsyncStorage.setItem(name, value),
+  removeItem: (name: string): Promise<void> =>
+    AsyncStorage.removeItem(name),
 };

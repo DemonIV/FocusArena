@@ -5,9 +5,9 @@ import type { Subject, StopTimerResult, TimerStats } from '../types';
 interface TimerStore {
   // Server state
   sessionId: string | null;
-  duration: number;          // intended minutes
-  startTime: number;         // epoch ms of current run segment
-  accumulatedMs: number;     // ms from completed run segments
+  duration: number;
+  startTime: number;
+  accumulatedMs: number;
   isPaused: boolean;
   subjectId?: string;
 
@@ -36,7 +36,10 @@ interface TimerStore {
   reset: () => void;
 }
 
-const INITIAL: Omit<TimerStore, 'start' | 'pause' | 'resume' | 'stop' | 'syncWithServer' | 'tick' | 'loadSubjects' | 'loadStats' | 'reset'> = {
+const INITIAL: Omit<
+  TimerStore,
+  'start' | 'pause' | 'resume' | 'stop' | 'syncWithServer' | 'tick' | 'loadSubjects' | 'loadStats' | 'reset'
+> = {
   sessionId: null,
   duration: 25,
   startTime: 0,
@@ -61,8 +64,6 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     const elapsed = s.accumulatedMs + (Date.now() - s.startTime);
     const remaining = Math.max(0, s.duration * 60_000 - elapsed);
     set({ elapsedMs: elapsed, remainingMs: remaining });
-
-    // Auto-stop when timer expires
     if (remaining === 0) void get().stop();
   },
 
@@ -70,9 +71,6 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const { state } = await timerService.start(duration, subjectId);
-      const elapsed = 0;
-      const remaining = duration * 60_000;
-
       const interval = setInterval(() => get().tick(), 1000);
       set({
         sessionId: state.sessionId,
@@ -81,8 +79,8 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
         accumulatedMs: 0,
         isPaused: false,
         subjectId: state.subjectId,
-        elapsedMs: elapsed,
-        remainingMs: remaining,
+        elapsedMs: 0,
+        remainingMs: duration * 60_000,
         isActive: true,
         _interval: interval,
       });
@@ -92,24 +90,46 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   },
 
   pause: async () => {
+    // 1️⃣ Stop ticker immediately — no more ticks
     const { _interval } = get();
     if (_interval) { clearInterval(_interval); set({ _interval: null }); }
-    set({ isLoading: true });
+
+    // 2️⃣ Optimistic update: mark paused NOW so tick() guard works
+    set({ isLoading: true, isPaused: true });
+
+    let apiFailed = false;
     try {
       const { state } = await timerService.pause();
+      // Sync accumulated time from server (authoritative value)
       set({
         accumulatedMs: state.accumulatedMs,
-        isPaused: true,
-        pausedAt: state.pausedAt,
         elapsedMs: state.accumulatedMs,
-      } as Partial<TimerStore>);
+      });
+    } catch {
+      apiFailed = true;
     } finally {
       set({ isLoading: false });
+    }
+
+    // 3️⃣ If API failed, sync with server to reconcile true state.
+    //    (isLoading is now false so syncWithServer guard passes)
+    //    - Server says paused  → accept paused state, no ticker needed ✓
+    //    - Server says running → restore ticker ✓
+    //    - Server says gone   → reset to INITIAL ✓
+    if (apiFailed) {
+      try {
+        await get().syncWithServer();
+      } catch {
+        // Sync also failed (offline) — full rollback: restore ticker
+        const interval = setInterval(() => get().tick(), 1000);
+        set({ isPaused: false, _interval: interval });
+      }
     }
   },
 
   resume: async () => {
     set({ isLoading: true });
+    let apiFailed = false;
     try {
       const { state } = await timerService.resume();
       const interval = setInterval(() => get().tick(), 1000);
@@ -119,8 +139,18 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
         isPaused: false,
         _interval: interval,
       });
+    } catch {
+      apiFailed = true;
     } finally {
       set({ isLoading: false });
+    }
+    // If API failed, sync with server to get true state
+    if (apiFailed) {
+      try {
+        await get().syncWithServer();
+      } catch {
+        // Offline — keep paused (safest fallback)
+      }
     }
   },
 
@@ -132,27 +162,45 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
       const { result } = await timerService.stop();
       set({ ...INITIAL });
       return result;
-    } catch {
-      set({ ...INITIAL });
-      return null;
+    } catch (err: any) {
+      if (err?.statusCode === 404) {
+        // Server has no session → safe to reset locally (already gone on server)
+        set({ ...INITIAL });
+        return null;
+      }
+      // Network / server error — restore ticker so user can retry
+      const interval = setInterval(() => get().tick(), 1000);
+      set({ _interval: interval });
+      throw err;
     } finally {
       set({ isLoading: false });
     }
   },
 
   syncWithServer: async () => {
-    const { _interval } = get();
+    // 🛑 Guard 1: skip if an operation is already in flight
+    if (get().isLoading) return;
+
+    const currentInterval = get()._interval;
     try {
       const status = await timerService.status();
+
+      // 🛑 Guard 2: if pause/resume/stop started WHILE we were awaiting the
+      //    status response, bail out — don't overwrite their optimistic state.
+      if (get().isLoading) return;
+
       if (!status.active) {
-        if (_interval) clearInterval(_interval);
+        if (currentInterval) clearInterval(currentInterval);
         set({ ...INITIAL });
         return;
       }
 
-      if (!get()._interval && !status.isPaused) {
-        const interval = setInterval(() => get().tick(), 1000);
-        set({ _interval: interval });
+      // Kill stale ticker before setting up a fresh one
+      if (currentInterval) clearInterval(currentInterval);
+
+      let newInterval: ReturnType<typeof setInterval> | null = null;
+      if (!status.isPaused) {
+        newInterval = setInterval(() => get().tick(), 1000);
       }
 
       set({
@@ -165,6 +213,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
         isActive: true,
         accumulatedMs: status.elapsedMs,
         startTime: Date.now(),
+        _interval: newInterval,
       });
     } catch { /* network error — keep local state */ }
   },

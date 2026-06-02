@@ -1,6 +1,7 @@
 import { supabase, redis } from '../../shared';
 import { invalidateCache } from '../leaderboard';
 import { checkAndAward } from '../achievements';
+import { addStudyMinutesToRooms } from '../rooms/rooms.service';
 import type {
   ActiveTimerState,
   TimerStatusResponse,
@@ -106,7 +107,8 @@ export async function startTimer(
 export async function pauseTimer(userId: string): Promise<ActiveTimerState> {
   const state = await readState(userId);
   if (!state) throw Object.assign(new Error('No active session'), { code: 'NO_TIMER' });
-  if (state.isPaused) throw Object.assign(new Error('Session is already paused'), { code: 'ALREADY_PAUSED' });
+  // Idempotent — if already paused, just return current state (handles mobile retries gracefully)
+  if (state.isPaused) return state;
 
   const now = Date.now();
   const updated: ActiveTimerState = {
@@ -123,7 +125,8 @@ export async function pauseTimer(userId: string): Promise<ActiveTimerState> {
 export async function resumeTimer(userId: string): Promise<ActiveTimerState> {
   const state = await readState(userId);
   if (!state) throw Object.assign(new Error('No active session'), { code: 'NO_TIMER' });
-  if (!state.isPaused) throw Object.assign(new Error('Session is not paused'), { code: 'NOT_PAUSED' });
+  // Idempotent — if already running, just return current state
+  if (!state.isPaused) return state;
 
   const updated: ActiveTimerState = {
     ...state,
@@ -144,7 +147,11 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
   const durationMinutes = Math.max(0, Math.floor(elapsedMs / 60_000));
   const wasCompleted = elapsedMs >= state.duration * 60_000 * COMPLETION_THRESHOLD;
 
-  // Finalise the DB session record
+  // 🔑 Clear Redis FIRST — even if the DB update below fails, the user won't be
+  // stuck with "A session is already active" on their next start attempt.
+  await clearState(userId);
+
+  // Finalise the DB session record (best-effort after Redis is cleared)
   const { error } = await supabase
     .from('sessions')
     .update({
@@ -154,13 +161,23 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
     })
     .eq('id', state.sessionId);
 
-  if (error) throw new Error(`Failed to update session: ${error.message}`);
+  if (error) {
+    // Log but don't re-throw — Redis is already cleared, no point blocking the user
+    console.error(`stopTimer: DB update failed (session=${state.sessionId}): ${error.message}`);
+    return { sessionId: state.sessionId, durationMinutes, wasCompleted: false, xpEarned: 0, newXp: 0, newLevel: 1, newStreak: 0 };
+  }
 
-  await clearState(userId);
+  // Attribute studied minutes to every room the user is in (fire-and-forget).
+  // Counts all studied time, not just "completed" sessions.
+  if (durationMinutes > 0) {
+    void addStudyMinutesToRooms(userId, durationMinutes).catch((e) =>
+      console.error(`stopTimer: addStudyMinutesToRooms failed: ${e?.message}`),
+    );
+  }
 
   // XP + streak — only on completion
   if (!wasCompleted || durationMinutes === 0) {
-    return { sessionId: state.sessionId, durationMinutes, wasCompleted, xpGained: 0, newXp: 0, newLevel: 1, newStreak: 0 };
+    return { sessionId: state.sessionId, durationMinutes, wasCompleted, xpEarned: 0, newXp: 0, newLevel: 1, newStreak: 0 };
   }
 
   const result = await awardXpAndStreak(userId, state.sessionId, durationMinutes);
@@ -267,7 +284,7 @@ async function awardXpAndStreak(
     sessionId: _sessionId,
     durationMinutes,
     wasCompleted: true,
-    xpGained,
+    xpEarned: xpGained,
     newXp,
     newLevel,
     newStreak,
@@ -339,7 +356,7 @@ export async function getStats(userId: string): Promise<TimerStats> {
 
     supabase
       .from('sessions')
-      .select('duration_minutes')
+      .select('duration_minutes, was_completed')
       .eq('user_id', userId),
 
     supabase
@@ -391,6 +408,7 @@ export async function getStats(userId: string): Promise<TimerStats> {
   const allTime = {
     totalMinutes: allRows.reduce((s, r) => s + r.duration_minutes, 0),
     totalSessions: allRows.length,
+    completedSessions: allRows.filter((r) => r.was_completed).length,
     level: userRow?.level ?? 1,
     xp: userRow?.xp ?? 0,
     streak: userRow?.streak ?? 0,
@@ -401,6 +419,54 @@ export async function getStats(userId: string): Promise<TimerStats> {
 }
 
 // ─── Subjects ─────────────────────────────────────────────────
+
+export interface SubjectWithStats {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  totalMinutes: number;
+  sessionsCount: number;
+}
+
+/** Returns active subjects enriched with total focus time from sessions */
+export async function getSubjectStats(userId: string): Promise<SubjectWithStats[]> {
+  const [subjectsRes, sessionsRes] = await Promise.all([
+    supabase
+      .from('subjects')
+      .select('id, name, color, icon')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('name', { ascending: true }),
+    supabase
+      .from('sessions')
+      .select('subject_id, duration_minutes')
+      .eq('user_id', userId)
+      .not('subject_id', 'is', null),
+  ]);
+
+  if (subjectsRes.error) throw new Error(subjectsRes.error.message);
+
+  const minutesMap = new Map<string, number>();
+  const countMap   = new Map<string, number>();
+
+  for (const s of sessionsRes.data ?? []) {
+    if (!s.subject_id) continue;
+    minutesMap.set(s.subject_id, (minutesMap.get(s.subject_id) ?? 0) + s.duration_minutes);
+    countMap.set(s.subject_id,   (countMap.get(s.subject_id)   ?? 0) + 1);
+  }
+
+  return (subjectsRes.data ?? [])
+    .map(s => ({
+      id:            s.id,
+      name:          s.name,
+      color:         s.color,
+      icon:          s.icon,
+      totalMinutes:  minutesMap.get(s.id) ?? 0,
+      sessionsCount: countMap.get(s.id)   ?? 0,
+    }))
+    .sort((a, b) => b.totalMinutes - a.totalMinutes);
+}
 
 export async function getSubjects(userId: string) {
   const { data, error } = await supabase
