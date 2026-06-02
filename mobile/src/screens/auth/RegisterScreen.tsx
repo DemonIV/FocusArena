@@ -12,12 +12,15 @@ import {
   ScrollView,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import type { AuthStackParamList } from '../../types';
 import { useAuth } from '../../hooks';
+import { LanguagePicker } from '../../components';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
 export function RegisterScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { register, isLoading } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -26,21 +29,21 @@ export function RegisterScreen({ navigation }: Props) {
 
   const handleRegister = async () => {
     if (!username.trim() || !email.trim() || !password) {
-      Alert.alert('Error', 'Please fill in all fields.');
+      Alert.alert(t('common.error'), t('auth.fillAllFields'));
       return;
     }
     if (password !== confirm) {
-      Alert.alert('Error', 'Passwords do not match.');
+      Alert.alert(t('common.error'), t('auth.passwordsNoMatch'));
       return;
     }
     if (password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters.');
+      Alert.alert(t('common.error'), t('auth.passwordTooShort'));
       return;
     }
     try {
       await register(email.trim().toLowerCase(), password, username.trim());
     } catch (err: any) {
-      Alert.alert('Registration Failed', err?.message ?? 'Something went wrong');
+      Alert.alert(t('auth.registrationFailed'), err?.message ?? t('auth.somethingWrong'));
     }
   };
 
@@ -56,50 +59,50 @@ export function RegisterScreen({ navigation }: Props) {
       >
         <View style={styles.logoArea}>
           <Text style={styles.logoText}>🎯 FocusArena</Text>
-          <Text style={styles.tagline}>Join the arena today</Text>
+          <Text style={styles.tagline}>{t('auth.joinTagline')}</Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.fieldLabel}>Username</Text>
+          <Text style={styles.fieldLabel}>{t('auth.username')}</Text>
           <TextInput
             style={styles.input}
             value={username}
             onChangeText={setUsername}
-            placeholder="focushero"
+            placeholder={t('auth.usernamePlaceholder')}
             placeholderTextColor="#4a4a6a"
             autoCapitalize="none"
             autoComplete="username-new"
           />
 
-          <Text style={styles.fieldLabel}>Email</Text>
+          <Text style={styles.fieldLabel}>{t('auth.email')}</Text>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            placeholder="you@example.com"
+            placeholder={t('auth.emailPlaceholder')}
             placeholderTextColor="#4a4a6a"
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
           />
 
-          <Text style={styles.fieldLabel}>Password</Text>
+          <Text style={styles.fieldLabel}>{t('auth.password')}</Text>
           <TextInput
             style={styles.input}
             value={password}
             onChangeText={setPassword}
-            placeholder="Min. 8 characters"
+            placeholder={t('auth.passwordMinPlaceholder')}
             placeholderTextColor="#4a4a6a"
             secureTextEntry
             autoComplete="password-new"
           />
 
-          <Text style={styles.fieldLabel}>Confirm Password</Text>
+          <Text style={styles.fieldLabel}>{t('auth.confirmPassword')}</Text>
           <TextInput
             style={styles.input}
             value={confirm}
             onChangeText={setConfirm}
-            placeholder="Repeat password"
+            placeholder={t('auth.confirmPlaceholder')}
             placeholderTextColor="#4a4a6a"
             secureTextEntry
             autoComplete="password-new"
@@ -113,7 +116,7 @@ export function RegisterScreen({ navigation }: Props) {
           >
             {isLoading
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>Create Account</Text>
+              : <Text style={styles.btnText}>{t('auth.createAccount')}</Text>
             }
           </TouchableOpacity>
         </View>
@@ -123,10 +126,15 @@ export function RegisterScreen({ navigation }: Props) {
           onPress={() => navigation.replace('Login')}
         >
           <Text style={styles.switchText}>
-            Already have an account?{' '}
-            <Text style={styles.switchLink}>Sign in →</Text>
+            {t('auth.haveAccount')}{' '}
+            <Text style={styles.switchLink}>{t('auth.signInLink')}</Text>
           </Text>
         </TouchableOpacity>
+
+        {/* Language picker */}
+        <View style={styles.langRow}>
+          <LanguagePicker />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -193,6 +201,9 @@ const styles = StyleSheet.create({
   switchRow: {
     alignItems: 'center',
     marginTop: 28,
+  },
+  langRow: {
+    marginTop: 24,
   },
   switchText: {
     color: '#8a8a9a',

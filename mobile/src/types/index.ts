@@ -88,6 +88,16 @@ export interface Subject {
   is_active: boolean;
 }
 
+/** Subject enriched with aggregated focus time from sessions */
+export interface SubjectStat {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  totalMinutes: number;
+  sessionsCount: number;
+}
+
 export interface Session {
   id: string;
   subject_id: string | null;
@@ -104,14 +114,28 @@ export interface DailyStat {
   completedSessions: number;
 }
 
-/** Flat stats — matches /timer/stats response */
+/** Nested stats — matches /timer/stats response (getStats) */
 export interface TimerStats {
-  totalSessions: number;
-  totalMinutes: number;
-  completedSessions: number;
-  averageSessionMinutes: number;
-  currentStreak: number;
-  longestStreak: number;
+  today: {
+    totalMinutes: number;
+    sessionsCount: number;
+    completedSessions: number;
+  };
+  week: {
+    totalMinutes: number;
+    sessionsCount: number;
+    dailyBreakdown: DailyStat[];
+  };
+  allTime: {
+    totalMinutes: number;
+    totalSessions: number;
+    /** Added in migration; may be undefined until backend redeploys */
+    completedSessions?: number;
+    level: number;
+    xp: number;
+    streak: number;
+    longestStreak: number;
+  };
 }
 
 export interface LeaderboardEntry {
@@ -132,11 +156,12 @@ export interface Room {
   id: string;
   name: string;
   ownerId: string;
-  topic?: string;
   isPublic: boolean;
   maxMembers: number;
   memberCount: number;
   createdAt: string;
+  /** Present only for rooms the current user owns */
+  inviteCode?: string;
 }
 
 export interface RoomMember {
@@ -145,6 +170,8 @@ export interface RoomMember {
   avatarUrl: string | null;
   joinedAt: string;
   status: 'studying' | 'break' | 'offline';
+  /** Total minutes studied while in this room */
+  totalMinutes: number;
 }
 
 export interface RoomDetail extends Room {
@@ -162,7 +189,8 @@ export interface FriendEntry {
 }
 
 export interface FriendRequest {
-  id: string;
+  /** The other user's id — used to accept/decline (backend keys on requester id) */
+  userId: string;
   username: string;
   avatarUrl: string | null;
   level: number;
@@ -177,7 +205,6 @@ export interface UserSearchResult {
   username: string;
   avatarUrl: string | null;
   level: number;
-  xp: number;
   relationship: 'none' | 'friends' | 'pending_sent' | 'pending_received' | 'blocked';
 }
 

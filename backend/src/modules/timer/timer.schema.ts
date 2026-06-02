@@ -68,7 +68,7 @@ export interface StopTimerResult {
   sessionId: string;
   durationMinutes: number;
   wasCompleted: boolean;
-  xpGained: number;
+  xpEarned: number;
   newXp: number;
   newLevel: number;
   newStreak: number;
@@ -95,6 +95,7 @@ export interface TimerStats {
   allTime: {
     totalMinutes: number;
     totalSessions: number;
+    completedSessions: number;
     level: number;
     xp: number;
     streak: number;

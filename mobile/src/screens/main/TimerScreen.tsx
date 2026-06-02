@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,57 +9,131 @@ import {
   Modal,
   FlatList,
   ActivityIndicator,
+  Pressable,
+  Platform,
+  TextInput,
+  Keyboard,
+  KeyboardAvoidingView,
 } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { useTimer } from '../../hooks';
 import { TimerCircle } from '../../components';
 import { timerService } from '../../services';
+import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
 
-const PRESET_DURATIONS = [15, 25, 45, 60, 90];
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const DURATIONS = [5, 15, 25, 45, 60, 90, 120];
+
+// Backend accepts 1–180 minutes (see StartTimerSchema)
+const MIN_MIN = 1;
+const MAX_MIN = 180;
+
+const ACCENT   = '#00d2ff';
+const PAUSE_C  = '#f59e0b';
+const DANGER   = '#ef4444';
+const BG       = '#0d0d1a';
+const CARD     = 'rgba(255,255,255,0.05)';
+const CARD_BORDER = 'rgba(255,255,255,0.08)';
+const TEXT     = '#e2e8f0';
+const MUTED    = '#64748b';
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function TimerScreen() {
+  const { t } = useTranslation();
   const timer = useTimer();
+  const qc = useQueryClient();
   const [selectedDuration, setSelectedDuration] = useState(25);
   const [subjectModalVisible, setSubjectModalVisible] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | undefined>();
+  const [customModalVisible, setCustomModalVisible] = useState(false);
+  const [customInput, setCustomInput] = useState('');
+
+  const isCustomDuration = !DURATIONS.includes(selectedDuration);
+
+  const confirmCustomDuration = useCallback(() => {
+    const n = parseInt(customInput, 10);
+    if (isNaN(n) || n < MIN_MIN || n > MAX_MIN) {
+      Alert.alert(t('timer.invalidDuration'), t('timer.invalidDurationMsg', { min: MIN_MIN, max: MAX_MIN }));
+      return;
+    }
+    setSelectedDuration(n);
+    setCustomModalVisible(false);
+    Keyboard.dismiss();
+  }, [customInput]);
 
   const subjectsQ = useQuery({
     queryKey: ['subjects'],
     queryFn: () => timerService.getSubjects(),
   });
-
   const subjects = subjectsQ.data ?? [];
   const selectedSubject = subjects.find((s) => s.id === selectedSubjectId);
+
+  // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleStart = useCallback(async () => {
     try {
       await timer.start(selectedDuration, selectedSubjectId);
     } catch (err: any) {
-      Alert.alert('Error', err?.message ?? 'Could not start timer');
+      if (err?.statusCode === 409) {
+        // Server has an active session — sync to restore it, then user can stop it
+        Alert.alert(
+          t('timer.activeSessionFound'),
+          t('timer.activeSessionMsg'),
+          [{ text: t('common.ok'), onPress: () => void timer.syncWithServer() }],
+        );
+      } else {
+        Alert.alert(t('common.error'), err?.message ?? t('timer.startFailed'));
+      }
     }
   }, [selectedDuration, selectedSubjectId, timer]);
 
-  const handleStop = useCallback(async () => {
+  const handleStop = useCallback(() => {
     Alert.alert(
-      'End Session?',
-      'Your progress will be saved.',
+      t('timer.endSession'),
+      t('timer.endSessionMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'End',
+          text: t('timer.end'),
           style: 'destructive',
           onPress: async () => {
             try {
               const result = await timer.stop();
-              if (result) {
+              // Refresh anything that depends on the finished session
+              qc.invalidateQueries({ queryKey: ['timer-stats'] });
+              qc.invalidateQueries({ queryKey: ['subject-stats'] });
+              qc.invalidateQueries({ queryKey: ['my-rooms'] });
+              qc.invalidateQueries({ queryKey: ['lb-global'] });
+              qc.invalidateQueries({ queryKey: ['lb-me'] });
+              qc.invalidateQueries({ queryKey: ['lb-friends'] });
+              if (result?.wasCompleted && result.xpEarned > 0) {
                 Alert.alert(
-                  '✅ Session Complete',
-                  `+${result.xpEarned} XP earned!\n${formatDuration(result.durationMinutes)} focused`,
+                  t('timer.completed'),
+                  t('timer.completedMsg', { xp: result.xpEarned, duration: formatDuration(result.durationMinutes) }),
+                );
+              } else if (result) {
+                Alert.alert(
+                  t('timer.sessionEnded'),
+                  t('timer.sessionEndedMsg', { duration: formatDuration(result.durationMinutes) }),
                 );
               }
             } catch (err: any) {
-              Alert.alert('Error', err?.message ?? 'Could not end session');
+              Alert.alert(
+                t('timer.stopError'),
+                err?.message ?? t('timer.stopErrorMsg'),
+                [
+                  { text: t('common.ok'), style: 'cancel' },
+                  {
+                    text: t('timer.forceReset'),
+                    style: 'destructive',
+                    onPress: () => timer.syncWithServer(),
+                  },
+                ],
+              );
             }
           },
         },
@@ -67,118 +141,224 @@ export function TimerScreen() {
     );
   }, [timer]);
 
-  const renderIdle = () => (
-    <View style={styles.idleArea}>
-      {/* Duration Picker */}
-      <Text style={styles.sectionLabel}>Duration</Text>
-      <View style={styles.durationRow}>
-        {PRESET_DURATIONS.map((d) => (
-          <TouchableOpacity
-            key={d}
-            style={[styles.durationBtn, d === selectedDuration && styles.durationBtnActive]}
-            onPress={() => setSelectedDuration(d)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.durationBtnText, d === selectedDuration && styles.durationBtnTextActive]}>
-              {d}m
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Subject Picker */}
-      <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Subject (optional)</Text>
-      <TouchableOpacity
-        style={styles.subjectPicker}
-        onPress={() => setSubjectModalVisible(true)}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.subjectPickerText}>
-          {selectedSubject ? `📚 ${selectedSubject.name}` : '+ Add Subject'}
-        </Text>
-        {selectedSubjectId && (
-          <TouchableOpacity
-            onPress={() => setSelectedSubjectId(undefined)}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.clearSubject}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </TouchableOpacity>
-
-      {/* Start Button */}
-      <TouchableOpacity
-        style={[styles.actionBtn, styles.startBtn]}
-        onPress={handleStart}
-        disabled={timer.isLoading}
-        activeOpacity={0.85}
-      >
-        {timer.isLoading
-          ? <ActivityIndicator color="#fff" />
-          : <Text style={styles.actionBtnText}>▶  Start Session</Text>
-        }
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderActive = () => (
-    <View style={styles.activeArea}>
-      {/* Subject label */}
-      {selectedSubject && (
-        <Text style={styles.subjectLabel}>📚 {selectedSubject.name}</Text>
-      )}
-
-      {/* Controls */}
-      <View style={styles.controlsRow}>
-        {timer.isPaused ? (
-          <TouchableOpacity
-            style={[styles.actionBtn, styles.resumeBtn]}
-            onPress={timer.resume}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.actionBtnText}>▶  Resume</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[styles.actionBtn, styles.pauseBtn]}
-            onPress={timer.pause}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.actionBtnText}>⏸  Pause</Text>
-          </TouchableOpacity>
-        )}
-
-        <TouchableOpacity
-          style={[styles.actionBtn, styles.stopBtn]}
-          onPress={handleStop}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.actionBtnText}>■  End</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+  // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <View style={styles.root}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
-        {/* Circle */}
-        <View style={styles.circleArea}>
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>{t('timer.title')}</Text>
+          {timer.isActive && selectedSubject && (
+            <View style={styles.subjectTag}>
+              <View style={[styles.subjectDot, { backgroundColor: selectedSubject.color ?? ACCENT }]} />
+              <Text style={styles.subjectTagText}>{selectedSubject.name}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* ── Timer Circle ── */}
+        <View style={styles.circleWrap}>
           <TimerCircle
             progress={timer.progress}
             remainingMs={timer.remainingMs}
             isActive={timer.isActive}
             isPaused={timer.isPaused}
           />
+
+          {/* Duration badge when idle */}
+          {!timer.isActive && (
+            <View style={styles.durationBadge}>
+              <Text style={styles.durationBadgeText}>{selectedDuration} {t('common.minShort')}</Text>
+            </View>
+          )}
         </View>
 
-        {timer.isActive ? renderActive() : renderIdle()}
+        {/* ── IDLE STATE ── */}
+        {!timer.isActive && (
+          <View style={styles.idleSection}>
+
+            {/* Duration Row */}
+            <Text style={styles.sectionLabel}>{t('timer.duration')}</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.durationRow}
+            >
+              {DURATIONS.map((d) => {
+                const active = d === selectedDuration;
+                return (
+                  <Pressable
+                    key={d}
+                    style={({ pressed }) => [
+                      styles.durationPill,
+                      active && styles.durationPillActive,
+                      pressed && { opacity: 0.75 },
+                    ]}
+                    onPress={() => setSelectedDuration(d)}
+                  >
+                    <Text style={[styles.durationPillText, active && styles.durationPillTextActive]}>
+                      {d < 60 ? `${d}${t('common.minShort')}` : `${d / 60}${t('common.hourShort')}`}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+
+              {/* Selected custom value shows as its own active pill */}
+              {isCustomDuration && (
+                <Pressable
+                  style={[styles.durationPill, styles.durationPillActive]}
+                  onPress={() => { setCustomInput(String(selectedDuration)); setCustomModalVisible(true); }}
+                >
+                  <Text style={[styles.durationPillText, styles.durationPillTextActive]}>
+                    {selectedDuration}{t('common.minShort')}
+                  </Text>
+                </Pressable>
+              )}
+
+              {/* Custom duration trigger */}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.durationPill,
+                  styles.customPill,
+                  pressed && { opacity: 0.75 },
+                ]}
+                onPress={() => { setCustomInput(isCustomDuration ? String(selectedDuration) : ''); setCustomModalVisible(true); }}
+              >
+                <Text style={styles.customPillText}>{t('timer.custom')}</Text>
+              </Pressable>
+            </ScrollView>
+
+            {/* Subject Picker */}
+            <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('timer.subject')}</Text>
+            <Pressable
+              style={({ pressed }) => [styles.subjectCard, pressed && { opacity: 0.75 }]}
+              onPress={() => setSubjectModalVisible(true)}
+            >
+              <View style={styles.subjectCardLeft}>
+                {selectedSubject
+                  ? <View style={[styles.subjectDot, { backgroundColor: selectedSubject.color ?? ACCENT, width: 10, height: 10 }]} />
+                  : <Text style={styles.subjectIcon}>📚</Text>
+                }
+                <Text style={[styles.subjectCardText, selectedSubject && { color: TEXT }]}>
+                  {selectedSubject ? selectedSubject.name : t('timer.selectSubject')}
+                </Text>
+              </View>
+              <View style={styles.subjectCardRight}>
+                {selectedSubjectId
+                  ? (
+                    <TouchableOpacity
+                      onPress={() => setSelectedSubjectId(undefined)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Text style={styles.clearBtn}>✕</Text>
+                    </TouchableOpacity>
+                  )
+                  : <Text style={styles.chevron}>›</Text>
+                }
+              </View>
+            </Pressable>
+
+            {/* Start Button */}
+            <TouchableOpacity
+              style={[styles.startBtn, timer.isLoading && { opacity: 0.6 }]}
+              onPress={handleStart}
+              disabled={timer.isLoading}
+              activeOpacity={0.85}
+            >
+              {timer.isLoading
+                ? <ActivityIndicator color="#000" />
+                : (
+                  <>
+                    <Text style={styles.startBtnIcon}>▶</Text>
+                    <Text style={styles.startBtnText}>{t('timer.startSession')}</Text>
+                  </>
+                )
+              }
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── ACTIVE STATE ── */}
+        {timer.isActive && (
+          <View style={styles.activeSection}>
+            {/* Session info strip */}
+            <View style={styles.sessionInfo}>
+              <InfoChip label={t('timer.duration')} value={`${timer.duration}${t('common.minShort')}`} />
+              <View style={styles.infoDivider} />
+              <InfoChip
+                label={t('timer.elapsed')}
+                value={msToMin(timer.elapsedMs)}
+              />
+              <View style={styles.infoDivider} />
+              <InfoChip
+                label={t('timer.remaining')}
+                value={msToMin(timer.remainingMs)}
+                accent={timer.isPaused ? PAUSE_C : ACCENT}
+              />
+            </View>
+
+            {/* Controls */}
+            <View style={styles.controlsRow}>
+              {timer.isPaused ? (
+                <TouchableOpacity
+                  style={[styles.controlBtn, styles.resumeBtn, timer.isLoading && { opacity: 0.6 }]}
+                  onPress={async () => {
+                    try { await timer.resume(); }
+                    catch (err: any) {
+                      Alert.alert(t('timer.resumeError'), err?.message ?? t('timer.resumeErrorMsg'));
+                    }
+                  }}
+                  disabled={timer.isLoading}
+                  activeOpacity={0.85}
+                >
+                  {timer.isLoading
+                    ? <ActivityIndicator color="#000" />
+                    : <Text style={styles.controlBtnText}>{t('timer.resume')}</Text>
+                  }
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.controlBtn, styles.pauseBtn, timer.isLoading && { opacity: 0.6 }]}
+                  onPress={async () => {
+                    try { await timer.pause(); }
+                    catch (err: any) {
+                      Alert.alert(t('timer.pauseError'), err?.message ?? t('timer.pauseErrorMsg'));
+                    }
+                  }}
+                  disabled={timer.isLoading}
+                  activeOpacity={0.85}
+                >
+                  {timer.isLoading
+                    ? <ActivityIndicator color={PAUSE_C} />
+                    : <Text style={[styles.controlBtnText, { color: PAUSE_C }]}>{t('timer.pause')}</Text>
+                  }
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={[styles.controlBtn, styles.stopBtn]}
+                onPress={handleStop}
+                activeOpacity={0.85}
+              >
+                <Text style={[styles.controlBtnText, { color: DANGER }]}>{t('timer.stop')}</Text>
+              </TouchableOpacity>
+            </View>
+
+            {timer.isPaused && (
+              <Text style={styles.pausedHint}>
+                {t('timer.pausedHint')}
+              </Text>
+            )}
+          </View>
+        )}
       </ScrollView>
 
-      {/* Subject Selection Modal */}
+      {/* ── Subject Modal ── */}
       <Modal
         visible={subjectModalVisible}
         animationType="slide"
@@ -187,152 +367,368 @@ export function TimerScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>Select Subject</Text>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>{t('timer.selectSubjectTitle')}</Text>
 
             {subjectsQ.isLoading
-              ? <ActivityIndicator color="#00d2ff" style={{ marginVertical: 20 }} />
+              ? <ActivityIndicator color={ACCENT} style={{ marginVertical: 32 }} />
               : (
                 <FlatList
                   data={subjects}
                   keyExtractor={(s) => s.id}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={[
-                        styles.subjectItem,
-                        item.id === selectedSubjectId && styles.subjectItemActive,
-                      ]}
-                      onPress={() => {
-                        setSelectedSubjectId(item.id);
-                        setSubjectModalVisible(false);
-                      }}
-                    >
-                      <View style={[styles.subjectDot, { backgroundColor: item.color ?? '#00d2ff' }]} />
-                      <Text style={styles.subjectItemText}>{item.name}</Text>
-                      {item.id === selectedSubjectId && (
-                        <Text style={styles.checkmark}>✓</Text>
-                      )}
-                    </TouchableOpacity>
-                  )}
+                  renderItem={({ item }) => {
+                    const sel = item.id === selectedSubjectId;
+                    return (
+                      <TouchableOpacity
+                        style={[styles.subjectItem, sel && styles.subjectItemSel]}
+                        onPress={() => {
+                          setSelectedSubjectId(item.id);
+                          setSubjectModalVisible(false);
+                        }}
+                        activeOpacity={0.75}
+                      >
+                        <View style={[styles.subjectItemDot, { backgroundColor: item.color ?? ACCENT }]} />
+                        <Text style={[styles.subjectItemText, sel && { color: ACCENT }]}>{item.name}</Text>
+                        {sel && <Text style={styles.checkIcon}>✓</Text>}
+                      </TouchableOpacity>
+                    );
+                  }}
                   ListEmptyComponent={
-                    <Text style={styles.emptyText}>No subjects yet.</Text>
+                    <Text style={styles.emptyText}>{t('timer.noSubjects')}</Text>
                   }
-                  style={{ maxHeight: 320 }}
+                  style={{ maxHeight: 360 }}
                 />
               )
             }
 
             <TouchableOpacity
-              style={styles.modalClose}
+              style={styles.modalCancelBtn}
               onPress={() => setSubjectModalVisible(false)}
             >
-              <Text style={styles.modalCloseText}>Cancel</Text>
+              <Text style={styles.modalCancelText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>
+      </Modal>
+
+      {/* ── Custom Duration Modal ── */}
+      <Modal
+        visible={customModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setCustomModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>{t('timer.customDuration')}</Text>
+            <Text style={styles.customHint}>{t('timer.customHint', { min: MIN_MIN, max: MAX_MIN })}</Text>
+
+            <View style={styles.customInputRow}>
+              <TextInput
+                style={styles.customInput}
+                value={customInput}
+                onChangeText={(val) => setCustomInput(val.replace(/[^0-9]/g, ''))}
+                keyboardType="numeric"
+                placeholder={t('timer.customPlaceholder')}
+                placeholderTextColor={MUTED}
+                selectionColor={ACCENT}
+                cursorColor={ACCENT}
+                keyboardAppearance="dark"
+                maxLength={3}
+                autoFocus
+                onSubmitEditing={confirmCustomDuration}
+                returnKeyType="done"
+              />
+              <Text style={styles.customInputUnit}>{t('timer.minutesUnit')}</Text>
+            </View>
+
+            <TouchableOpacity style={styles.customConfirmBtn} onPress={confirmCustomDuration}>
+              <Text style={styles.customConfirmText}>{t('timer.confirm')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalCancelBtn}
+              onPress={() => setCustomModalVisible(false)}
+            >
+              <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
 }
 
+// ─── Small helpers ────────────────────────────────────────────────────────────
+
+function msToMin(ms: number) {
+  const min = i18n.t('common.minShort');
+  const hr = i18n.t('common.hourShort');
+  const total = Math.ceil(ms / 60000);
+  if (total < 60) return `${total}${min}`;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return m > 0 ? `${h}${hr} ${m}${min}` : `${h}${hr}`;
+}
+
+function InfoChip({ label, value, accent }: { label: string; value: string; accent?: string }) {
+  return (
+    <View style={infoStyles.wrap}>
+      <Text style={infoStyles.label}>{label}</Text>
+      <Text style={[infoStyles.value, accent ? { color: accent } : null]}>{value}</Text>
+    </View>
+  );
+}
+
+const infoStyles = StyleSheet.create({
+  wrap: { alignItems: 'center', flex: 1 },
+  label: { fontSize: 10, fontWeight: '700', letterSpacing: 1.5, color: MUTED, marginBottom: 4 },
+  value: { fontSize: 16, fontWeight: '700', color: TEXT },
+});
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#1a1a2e' },
-  content: {
+  root: { flex: 1, backgroundColor: BG },
+
+  scroll: {
+    paddingBottom: 60,
+  },
+
+  // Header
+  header: {
     paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 48,
-    alignItems: 'center',
-  },
-
-  circleArea: {
-    marginBottom: 48,
-  },
-
-  sectionLabel: {
-    alignSelf: 'flex-start',
-    color: '#8a8a9a',
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-
-  // Idle
-  idleArea: { width: '100%' },
-  durationRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 4,
-  },
-  durationBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: '#16213e',
-    borderRadius: 10,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#0f3460',
-  },
-  durationBtnActive: {
-    backgroundColor: '#0f3460',
-    borderColor: '#00d2ff',
-  },
-  durationBtnText: { color: '#8a8a9a', fontWeight: '600' },
-  durationBtnTextActive: { color: '#00d2ff' },
-
-  subjectPicker: {
+    paddingTop: Platform.OS === 'ios' ? 16 : 24,
+    paddingBottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#16213e',
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: TEXT,
+    letterSpacing: -0.3,
+  },
+  subjectTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 6,
     borderWidth: 1,
-    borderColor: '#0f3460',
+    borderColor: CARD_BORDER,
+  },
+  subjectTagText: { fontSize: 12, color: TEXT, fontWeight: '600' },
+
+  // Circle
+  circleWrap: {
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  durationBadge: {
+    marginTop: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    backgroundColor: CARD,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  durationBadgeText: {
+    color: MUTED,
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+
+  // Section label
+  sectionLabel: {
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginBottom: 10,
+  },
+
+  // ── IDLE ──
+  idleSection: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+  },
+
+  durationRow: {
+    gap: 8,
+    paddingRight: 24,
+  },
+  durationPill: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 30,
+    backgroundColor: CARD,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  durationPillActive: {
+    backgroundColor: `${ACCENT}22`,
+    borderColor: ACCENT,
+  },
+  durationPillText: {
+    color: MUTED,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  durationPillTextActive: {
+    color: ACCENT,
+  },
+  customPill: {
+    borderStyle: 'dashed',
+    borderColor: `${ACCENT}66`,
+  },
+  customPillText: {
+    color: ACCENT,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  subjectCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: CARD,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
     marginBottom: 4,
   },
-  subjectPickerText: { color: '#8a8a9a', fontSize: 15 },
-  clearSubject: { color: '#e94560', fontSize: 16 },
+  subjectCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  subjectCardRight: { padding: 4 },
+  subjectIcon: { fontSize: 16 },
+  subjectDot: { width: 8, height: 8, borderRadius: 4 },
+  subjectCardText: { color: MUTED, fontSize: 15, fontWeight: '500' },
+  clearBtn: { color: DANGER, fontSize: 15, fontWeight: '700', paddingHorizontal: 4 },
+  chevron: { color: MUTED, fontSize: 20, fontWeight: '300' },
 
-  actionBtn: {
+  startBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 28,
+    backgroundColor: ACCENT,
+    borderRadius: 16,
+    paddingVertical: 18,
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  startBtnIcon: { fontSize: 18, color: '#000' },
+  startBtnText: { fontSize: 17, fontWeight: '800', color: '#000', letterSpacing: 0.3 },
+
+  // ── ACTIVE ──
+  activeSection: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    gap: 20,
+  },
+
+  sessionInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  infoDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: CARD_BORDER,
+  },
+
+  controlsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  controlBtn: {
+    flex: 1,
     borderRadius: 14,
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
+    borderWidth: 1,
   },
-  actionBtnText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
-  startBtn: { backgroundColor: '#00d2ff', marginTop: 32 },
+  pauseBtn: {
+    backgroundColor: `${PAUSE_C}12`,
+    borderColor: `${PAUSE_C}40`,
+  },
+  resumeBtn: {
+    backgroundColor: ACCENT,
+    borderColor: ACCENT,
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  stopBtn: {
+    backgroundColor: `${DANGER}12`,
+    borderColor: `${DANGER}40`,
+    flex: 0,
+    paddingHorizontal: 24,
+  },
+  controlBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#000',
+    letterSpacing: 0.3,
+  },
 
-  // Active
-  activeArea: { width: '100%' },
-  subjectLabel: {
-    color: '#00d2ff',
-    fontSize: 14,
+  pausedHint: {
     textAlign: 'center',
-    marginBottom: 24,
+    color: MUTED,
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: -4,
   },
-  controlsRow: { flexDirection: 'row', gap: 12 },
-  pauseBtn: { backgroundColor: '#16213e', borderWidth: 1, borderColor: '#00d2ff' },
-  resumeBtn: { backgroundColor: '#00d2ff' },
-  stopBtn: { backgroundColor: '#e94560' },
 
-  // Modal
+  // ── Modal ──
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
     justifyContent: 'flex-end',
   },
   modalSheet: {
-    backgroundColor: '#16213e',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#131325',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 24,
-    paddingBottom: 40,
+    paddingBottom: Platform.OS === 'ios' ? 44 : 28,
+    borderTopWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   modalTitle: {
-    color: '#fff',
+    color: TEXT,
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 16,
@@ -340,22 +736,55 @@ const styles = StyleSheet.create({
   subjectItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#0f3460',
+    borderBottomColor: CARD_BORDER,
     gap: 12,
   },
-  subjectItemActive: { opacity: 1 },
-  subjectDot: { width: 10, height: 10, borderRadius: 5 },
-  subjectItemText: { flex: 1, color: '#fff', fontSize: 15 },
-  checkmark: { color: '#00d2ff', fontSize: 16 },
-  emptyText: { color: '#8a8a9a', textAlign: 'center', marginVertical: 16 },
-  modalClose: {
-    marginTop: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-    backgroundColor: '#0f3460',
-    borderRadius: 12,
+  subjectItemSel: {
+    backgroundColor: `${ACCENT}0a`,
   },
-  modalCloseText: { color: '#8a8a9a', fontSize: 15 },
+  subjectItemDot: { width: 10, height: 10, borderRadius: 5 },
+  subjectItemText: { flex: 1, color: TEXT, fontSize: 15 },
+  checkIcon: { color: ACCENT, fontSize: 16, fontWeight: '700' },
+  emptyText: { color: MUTED, textAlign: 'center', marginVertical: 24, fontSize: 14 },
+
+  modalCancelBtn: {
+    marginTop: 16,
+    paddingVertical: 15,
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  modalCancelText: { color: MUTED, fontSize: 15, fontWeight: '600' },
+
+  // ── Custom duration modal ──
+  customHint: { color: MUTED, fontSize: 13, marginBottom: 16 },
+  customInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    paddingHorizontal: 16,
+  },
+  customInput: {
+    flex: 1,
+    color: TEXT,
+    fontSize: 28,
+    fontWeight: '800',
+    paddingVertical: 14,
+  },
+  customInputUnit: { color: MUTED, fontSize: 15, fontWeight: '600' },
+  customConfirmBtn: {
+    marginTop: 20,
+    backgroundColor: ACCENT,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  customConfirmText: { color: '#000', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
 });

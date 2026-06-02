@@ -21,28 +21,32 @@ export function StatCard({ label, value, sub, accent = '#00d2ff', style }: Props
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#0f3460',
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    backgroundColor: '#131325',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
     alignItems: 'center',
     minWidth: 90,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   value: {
-    fontSize: 24,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   label: {
-    fontSize: 11,
-    color: '#8a8a9a',
-    marginTop: 4,
+    fontSize: 10,
+    color: '#64748b',
+    marginTop: 6,
     textTransform: 'uppercase',
     letterSpacing: 1,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   sub: {
     fontSize: 10,
-    color: '#8a8a9a',
+    color: '#64748b',
     marginTop: 2,
   },
 });

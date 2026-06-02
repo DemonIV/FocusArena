@@ -4,6 +4,7 @@ import type {
   StopTimerResult,
   TimerStats,
   Subject,
+  SubjectStat,
   Session,
 } from '../types';
 
@@ -48,6 +49,10 @@ export const timerService = {
     const data = await api.get<{ subjects: Subject[] }>('/timer/subjects');
     return data.subjects;
   },
+
+  /** Returns subjects enriched with total focus time */
+  getSubjectStats: () =>
+    api.get<{ subjects: SubjectStat[] }>('/timer/subjects/stats'),
 
   createSubject: (body: { name: string; color: string; icon: string; daily_goal_minutes?: number }) =>
     api.post<{ subject: Subject }>('/timer/subjects', body),

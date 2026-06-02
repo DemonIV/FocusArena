@@ -1,7 +1,11 @@
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
-export const WS_URL = process.env.EXPO_PUBLIC_WS_URL ?? 'ws://localhost:3000';
-export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
-export const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
+// .trim() guards against stray whitespace in .env (a trailing space makes
+// fetch() build a malformed URL like "https://host /path" → every request hangs).
+const env = (v: string | undefined, fallback: string) => (v?.trim() ? v.trim() : fallback);
+
+export const API_URL = env(process.env.EXPO_PUBLIC_API_URL, 'http://localhost:3000');
+export const WS_URL = env(process.env.EXPO_PUBLIC_WS_URL, 'ws://localhost:3000');
+export const SUPABASE_URL = env(process.env.EXPO_PUBLIC_SUPABASE_URL, '');
+export const SUPABASE_ANON_KEY = env(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY, '');
 
 export const TIMER = {
   MIN_DURATION: 5 * 60,

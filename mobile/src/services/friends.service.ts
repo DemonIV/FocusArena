@@ -1,34 +1,42 @@
 import { api } from './api';
 import type { FriendEntry, FriendRequest, UserSearchResult } from '../types';
 
-// ── Raw API shapes ────────────────────────────────────────────────
+// ── Raw API shapes (backend returns snake_case) ───────────────────
 
 interface RawFriend {
-  friendId: string;
+  user_id: string;
   username: string;
-  avatarUrl: string | null;
+  avatar_url: string | null;
   level: number;
-  status: 'studying' | 'break' | 'offline';
-  friendsSince: string;
+  online_status: 'studying' | 'break' | 'offline';
+  friends_since: string;
 }
 
 interface RawRequest {
-  id: string;
+  user_id: string;
   username: string;
-  avatarUrl: string | null;
+  avatar_url: string | null;
   level: number;
-  direction: 'incoming' | 'outgoing';
-  requestedAt: string;
+  requested_at: string;
 }
 
 interface RawSearchUser {
-  id: string;
+  user_id: string;
   username: string;
-  avatarUrl: string | null;
+  avatar_url: string | null;
   level: number;
-  xp: number;
-  relationship: 'none' | 'friends' | 'pending_sent' | 'pending_received' | 'blocked';
+  relationship: 'none' | 'friend' | 'request_sent' | 'request_received' | 'blocked_by_me' | 'blocked_by_them';
 }
+
+/** Map backend relationship enum → mobile UI enum */
+const REL_MAP: Record<RawSearchUser['relationship'], UserSearchResult['relationship']> = {
+  none: 'none',
+  friend: 'friends',
+  request_sent: 'pending_sent',
+  request_received: 'pending_received',
+  blocked_by_me: 'blocked',
+  blocked_by_them: 'blocked',
+};
 
 // ── Service ───────────────────────────────────────────────────────
 
@@ -37,12 +45,12 @@ export const friendsService = {
   list: async (): Promise<FriendEntry[]> => {
     const data = await api.get<{ friends: RawFriend[] }>('/friends');
     return data.friends.map((f) => ({
-      friendId: f.friendId,
+      friendId: f.user_id,
       username: f.username,
-      avatarUrl: f.avatarUrl,
+      avatarUrl: f.avatar_url,
       level: f.level,
-      status: f.status,
-      friendsSince: f.friendsSince,
+      status: f.online_status,
+      friendsSince: f.friends_since,
     }));
   },
 
@@ -52,9 +60,18 @@ export const friendsService = {
       api.get<{ requests: RawRequest[] }>('/friends/requests'),
       api.get<{ requests: RawRequest[] }>('/friends/sent'),
     ]);
+    const map = (r: RawRequest, direction: 'incoming' | 'outgoing'): FriendRequest => ({
+      userId: r.user_id,
+      username: r.username,
+      avatarUrl: r.avatar_url,
+      level: r.level,
+      direction,
+      status: 'pending',
+      requestedAt: r.requested_at,
+    });
     return [
-      ...inc.requests.map((r) => ({ ...r, direction: 'incoming' as const, status: 'pending' as const })),
-      ...out.requests.map((r) => ({ ...r, direction: 'outgoing' as const, status: 'pending' as const })),
+      ...inc.requests.map((r) => map(r, 'incoming')),
+      ...out.requests.map((r) => map(r, 'outgoing')),
     ];
   },
 
@@ -63,20 +80,26 @@ export const friendsService = {
     const data = await api.get<{ users: RawSearchUser[] }>(
       `/friends/search?q=${encodeURIComponent(q)}&limit=${limit}`,
     );
-    return data.users;
+    return data.users.map((u) => ({
+      id: u.user_id,
+      username: u.username,
+      avatarUrl: u.avatar_url,
+      level: u.level,
+      relationship: REL_MAP[u.relationship] ?? 'none',
+    }));
   },
 
   /** Send a friend request to a user */
   sendRequest: (userId: string) =>
     api.post<{ message: string }>('/friends/request', { userId }),
 
-  /** Accept an incoming friend request by friendship row id */
-  acceptRequest: (friendshipId: string) =>
-    api.post<{ message: string }>(`/friends/${friendshipId}/accept`),
+  /** Accept an incoming friend request (keyed on the requester's user id) */
+  acceptRequest: (userId: string) =>
+    api.post<{ message: string }>(`/friends/${userId}/accept`),
 
-  /** Decline an incoming friend request by friendship row id */
-  declineRequest: (friendshipId: string) =>
-    api.post<{ message: string }>(`/friends/${friendshipId}/decline`),
+  /** Decline an incoming friend request (keyed on the requester's user id) */
+  declineRequest: (userId: string) =>
+    api.post<{ message: string }>(`/friends/${userId}/decline`),
 
   /** Remove an existing friend */
   remove: (userId: string) =>

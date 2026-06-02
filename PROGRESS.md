@@ -230,3 +230,32 @@ RootNavigator (Stack, headerShown: false)
 - **Type çakışması çözümü**: `export * from 'focusarena-shared'` kaldırıldı; yalnızca `BadgeType`, `Achievement`, `Friendship`, `MemberStatus` re-export
 - **Rehydration guard**: `AppInner` `isHydrated` false iken navigator render etmez (`null` döner)
 
+
+
+┌───────────────────────────────────────────────────────────────┬─────────────────────────────┐
+  │                             Konu                              │            Durum            │
+  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
+  │ Auth/network kilitlenmesi (URL boşluğu + refresh yarışı)      │ ✅ Çözüldü                  │
+  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
+  │ Friends/Rooms/Leaderboard snake_case uyumsuzlukları           │ ✅ Çözüldü                  │
+  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
+  │ Özel timer süresi                                             │ ✅                          │
+  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
+  │ Odalar private-only + max 2 oda + üye listesi + dakika takibi │ ✅ Deploy + migration canlı │
+  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
+  │ Profile/Home XP=0 bug'ı (nested stats hizalama)               │ ✅                          │
+  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
+  │ Konu silme "Body cannot be empty" (DELETE content-type)       │ ✅                          │
+  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
+  │ i18n altyapısı + 10 dil + Login/Register çevirisi             │ ✅                          │
+  └───────────────────────────────────────────────────────────────┴─────────────────────────────┘
+
+  🔜 Sonraki oturumda kaldığımız yer
+
+  Görev: Tüm ekranları (Timer, Profile, Rooms, Leaderboard, Friends, Home + sekme adları) 10 dile çevirmek —
+  metinleri t() anahtarlarına taşıyıp locales/*.json dosyalarını doldurmak. Parti parti ilerleyeceğiz.
+
+  Ayrıca bekleyen küçük işler: geçici 🔍 Tanı sekmesini kaldırmak, Home ekranı UI modernizasyonu.
+
+  Sonraki oturumda "kaldığımız yerden devam" dediğinde hafızadan bu planı okuyup çeviriye başlayacağım. İyi
+  çalışmalar! 🎯

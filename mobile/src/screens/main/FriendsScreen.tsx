@@ -11,6 +11,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { friendsService } from '../../services';
 import { useSocketStore } from '../../stores';
 import type { FriendEntry, FriendRequest, UserSearchResult } from '../../types';
@@ -32,6 +33,7 @@ const STATUS_ICON: Record<string, string> = {
 type Tab = 'friends' | 'requests' | 'search';
 
 export function FriendsScreen() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const friendStatuses = useSocketStore((s) => s.friendStatuses);
 
@@ -56,9 +58,9 @@ export function FriendsScreen() {
     mutationFn: (userId: string) => friendsService.sendRequest(userId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['friend-requests'] });
-      Alert.alert('Sent!', 'Friend request sent.');
+      Alert.alert(t('friends.requestSentTitle'), t('friends.requestSent'));
     },
-    onError: (err: any) => Alert.alert('Error', err?.message ?? 'Could not send request'),
+    onError: (err: any) => Alert.alert(t('common.error'), err?.message ?? t('friends.sendFailed')),
   });
 
   const acceptMut = useMutation({
@@ -67,19 +69,19 @@ export function FriendsScreen() {
       qc.invalidateQueries({ queryKey: ['friends'] });
       qc.invalidateQueries({ queryKey: ['friend-requests'] });
     },
-    onError: (err: any) => Alert.alert('Error', err?.message),
+    onError: (err: any) => Alert.alert(t('common.error'), err?.message),
   });
 
   const declineMut = useMutation({
     mutationFn: (friendshipId: string) => friendsService.declineRequest(friendshipId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['friend-requests'] }),
-    onError: (err: any) => Alert.alert('Error', err?.message),
+    onError: (err: any) => Alert.alert(t('common.error'), err?.message),
   });
 
   const removeMut = useMutation({
     mutationFn: (userId: string) => friendsService.remove(userId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['friends'] }),
-    onError: (err: any) => Alert.alert('Error', err?.message),
+    onError: (err: any) => Alert.alert(t('common.error'), err?.message),
   });
 
   const handleSearch = async () => {
@@ -89,7 +91,7 @@ export function FriendsScreen() {
       const results = await friendsService.search(searchQuery.trim());
       setSearchResults(results);
     } catch (err: any) {
-      Alert.alert('Error', err?.message ?? 'Search failed');
+      Alert.alert(t('common.error'), err?.message ?? t('friends.searchFailed'));
     } finally {
       setSearching(false);
     }
@@ -105,17 +107,17 @@ export function FriendsScreen() {
         <View style={styles.rowInfo}>
           <Text style={styles.rowName}>{item.username}</Text>
           <Text style={[styles.rowStatus, { color: STATUS_COLOR[status] ?? '#3a3a5a' }]}>
-            {STATUS_ICON[status] ?? '💤'} {status}
+            {STATUS_ICON[status] ?? '💤'} {t(`status.${status}`, { defaultValue: status })}
           </Text>
         </View>
         <TouchableOpacity
           onPress={() =>
             Alert.alert(
-              'Remove Friend',
-              `Remove ${item.username}?`,
+              t('friends.removeFriend'),
+              t('friends.removeFriendMsg', { name: item.username }),
               [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Remove', style: 'destructive', onPress: () => removeMut.mutate(item.friendId) },
+                { text: t('common.cancel'), style: 'cancel' },
+                { text: t('friends.remove'), style: 'destructive', onPress: () => removeMut.mutate(item.friendId) },
               ],
             )
           }
@@ -137,21 +139,21 @@ export function FriendsScreen() {
         <View style={styles.rowInfo}>
           <Text style={styles.rowName}>{item.username}</Text>
           <Text style={styles.rowSub}>
-            {isIncoming ? '⬇ Incoming' : '⬆ Sent'}
+            {isIncoming ? t('friends.incoming') : t('friends.sent')}
           </Text>
         </View>
         {isIncoming && (
           <View style={styles.reqActions}>
             <TouchableOpacity
               style={styles.acceptBtn}
-              onPress={() => acceptMut.mutate(item.id)}
+              onPress={() => acceptMut.mutate(item.userId)}
               activeOpacity={0.8}
             >
               <Text style={styles.acceptBtnText}>✓</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.declineBtn}
-              onPress={() => declineMut.mutate(item.id)}
+              onPress={() => declineMut.mutate(item.userId)}
               activeOpacity={0.8}
             >
               <Text style={styles.declineBtnText}>✕</Text>
@@ -169,7 +171,7 @@ export function FriendsScreen() {
       </View>
       <View style={styles.rowInfo}>
         <Text style={styles.rowName}>{item.username}</Text>
-        <Text style={styles.rowSub}>Lv {item.level} · {item.xp} XP</Text>
+        <Text style={styles.rowSub}>{t('home.level', { level: item.level })}</Text>
       </View>
       {item.relationship === 'none' && (
         <TouchableOpacity
@@ -178,14 +180,14 @@ export function FriendsScreen() {
           disabled={sendMut.isPending}
           activeOpacity={0.8}
         >
-          <Text style={styles.addBtnText}>+ Add</Text>
+          <Text style={styles.addBtnText}>{t('friends.add')}</Text>
         </TouchableOpacity>
       )}
       {item.relationship === 'friends' && (
-        <Text style={styles.friendTag}>Friends</Text>
+        <Text style={styles.friendTag}>{t('friends.friendsTag')}</Text>
       )}
       {(item.relationship === 'pending_sent' || item.relationship === 'pending_received') && (
-        <Text style={styles.pendingTag}>Pending</Text>
+        <Text style={styles.pendingTag}>{t('friends.pending')}</Text>
       )}
     </View>
   );
@@ -194,15 +196,19 @@ export function FriendsScreen() {
     <View style={styles.root}>
       {/* Tabs */}
       <View style={styles.tabRow}>
-        {(['friends', 'requests', 'search'] as Tab[]).map((t) => (
+        {(['friends', 'requests', 'search'] as Tab[]).map((tb) => (
           <TouchableOpacity
-            key={t}
-            style={[styles.tab, tab === t && styles.tabActive]}
-            onPress={() => setTab(t)}
+            key={tb}
+            style={[styles.tab, tab === tb && styles.tabActive]}
+            onPress={() => setTab(tb)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-              {t === 'friends' ? '👥 Friends' : t === 'requests' ? `🔔 Requests${pendingCount > 0 ? ` (${pendingCount})` : ''}` : '🔍 Search'}
+            <Text style={[styles.tabText, tab === tb && styles.tabTextActive]}>
+              {tb === 'friends'
+                ? t('friends.friends')
+                : tb === 'requests'
+                  ? `${t('friends.requests')}${pendingCount > 0 ? ` (${pendingCount})` : ''}`
+                  : t('friends.search')}
             </Text>
           </TouchableOpacity>
         ))}
@@ -217,7 +223,7 @@ export function FriendsScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             !friendsQ.isLoading
-              ? <View style={styles.empty}><Text style={styles.emptyText}>No friends yet. Search for people!</Text></View>
+              ? <View style={styles.empty}><Text style={styles.emptyText}>{t('friends.noFriends')}</Text></View>
               : null
           }
           refreshControl={
@@ -229,13 +235,13 @@ export function FriendsScreen() {
       {tab === 'requests' && (
         <FlatList
           data={requestsQ.data ?? []}
-          keyExtractor={(r) => r.id}
+          keyExtractor={(r) => `${r.direction}-${r.userId}`}
           renderItem={renderRequest}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             !requestsQ.isLoading
-              ? <View style={styles.empty}><Text style={styles.emptyText}>No friend requests.</Text></View>
+              ? <View style={styles.empty}><Text style={styles.emptyText}>{t('friends.noRequests')}</Text></View>
               : null
           }
           refreshControl={
@@ -251,13 +257,13 @@ export function FriendsScreen() {
               style={styles.searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Search by username…"
+              placeholder={t('friends.searchPlaceholder')}
               placeholderTextColor="#4a4a6a"
               onSubmitEditing={handleSearch}
               returnKeyType="search"
             />
             <TouchableOpacity style={styles.searchBtn} onPress={handleSearch} activeOpacity={0.8}>
-              {searching ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.searchBtnText}>Go</Text>}
+              {searching ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.searchBtnText}>{t('friends.go')}</Text>}
             </TouchableOpacity>
           </View>
           <FlatList
@@ -268,7 +274,7 @@ export function FriendsScreen() {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               searchQuery && !searching
-                ? <View style={styles.empty}><Text style={styles.emptyText}>No users found.</Text></View>
+                ? <View style={styles.empty}><Text style={styles.emptyText}>{t('friends.noUsers')}</Text></View>
                 : null
             }
           />
@@ -278,97 +284,112 @@ export function FriendsScreen() {
   );
 }
 
+const BG     = '#0d0d1a';
+const CARD   = '#131325';
+const CARD2  = 'rgba(255,255,255,0.04)';
+const BORDER = 'rgba(255,255,255,0.08)';
+const ACCENT = '#00d2ff';
+const PINK   = '#e94560';
+const TEXT   = '#e2e8f0';
+const MUTED  = '#64748b';
+
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#1a1a2e' },
+  root: { flex: 1, backgroundColor: BG },
 
   tabRow: { flexDirection: 'row', paddingHorizontal: 16, paddingTop: 16, gap: 8 },
   tab: {
     flex: 1,
     paddingVertical: 10,
-    backgroundColor: '#16213e',
-    borderRadius: 8,
+    backgroundColor: CARD2,
+    borderRadius: 10,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: BORDER,
   },
-  tabActive: { backgroundColor: '#0f3460', borderBottomWidth: 2, borderBottomColor: '#e94560' },
-  tabText: { color: '#8a8a9a', fontSize: 12, fontWeight: '600' },
-  tabTextActive: { color: '#e94560' },
+  tabActive: { backgroundColor: `${PINK}1f`, borderColor: PINK },
+  tabText: { color: MUTED, fontSize: 12, fontWeight: '600' },
+  tabTextActive: { color: PINK },
 
   list: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 40 },
   empty: { alignItems: 'center', marginTop: 60 },
-  emptyText: { color: '#8a8a9a', fontSize: 14 },
+  emptyText: { color: MUTED, fontSize: 14 },
 
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#16213e',
-    borderRadius: 12,
+    backgroundColor: CARD,
+    borderRadius: 14,
     padding: 14,
     marginBottom: 10,
     gap: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
   },
   avatarCircle: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#0f3460',
+    backgroundColor: `${ACCENT}18`,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#3a3a5a',
+    borderColor: BORDER,
   },
-  avatarLetter: { color: '#00d2ff', fontSize: 16, fontWeight: '700' },
+  avatarLetter: { color: ACCENT, fontSize: 16, fontWeight: '700' },
   rowInfo: { flex: 1 },
-  rowName: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  rowName: { color: TEXT, fontSize: 15, fontWeight: '600' },
   rowStatus: { fontSize: 12, marginTop: 2 },
-  rowSub: { color: '#8a8a9a', fontSize: 12, marginTop: 2 },
-  removeIcon: { color: '#4a4a6a', fontSize: 16 },
+  rowSub: { color: MUTED, fontSize: 12, marginTop: 2 },
+  removeIcon: { color: MUTED, fontSize: 16 },
 
   reqActions: { flexDirection: 'row', gap: 8 },
   acceptBtn: {
-    backgroundColor: '#00d2ff',
+    backgroundColor: ACCENT,
     width: 34,
     height: 34,
     borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  acceptBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  acceptBtnText: { color: '#000', fontWeight: '800', fontSize: 14 },
   declineBtn: {
-    backgroundColor: '#2a2a4a',
+    backgroundColor: CARD2,
     width: 34,
     height: 34,
     borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BORDER,
   },
-  declineBtnText: { color: '#8a8a9a', fontWeight: '700', fontSize: 14 },
+  declineBtnText: { color: MUTED, fontWeight: '700', fontSize: 14 },
 
   addBtn: {
-    backgroundColor: '#e94560',
-    borderRadius: 8,
+    backgroundColor: PINK,
+    borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  friendTag: { color: '#00d2ff', fontSize: 12, fontWeight: '600' },
+  friendTag: { color: ACCENT, fontSize: 12, fontWeight: '600' },
   pendingTag: { color: '#f5a623', fontSize: 12, fontWeight: '600' },
 
   searchArea: { flex: 1 },
   searchRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16 },
   searchInput: {
     flex: 1,
-    backgroundColor: '#16213e',
-    borderRadius: 10,
+    backgroundColor: CARD,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    color: '#fff',
+    color: TEXT,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#0f3460',
+    borderColor: BORDER,
   },
   searchBtn: {
-    backgroundColor: '#e94560',
-    borderRadius: 10,
+    backgroundColor: PINK,
+    borderRadius: 12,
     paddingHorizontal: 18,
     justifyContent: 'center',
   },

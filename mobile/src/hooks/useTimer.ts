@@ -8,7 +8,13 @@ export function useTimer() {
   const store = useTimerStore();
   const { sendPresence } = useSocketStore();
 
-  // Sync with server when app comes to foreground
+  // Sync on mount — restores any active session from server
+  // (critical after hot-reload, app kill, or token refresh)
+  useEffect(() => {
+    void store.syncWithServer();
+  }, []);
+
+  // Also sync when app comes to foreground
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
       if (next === 'active') void store.syncWithServer();

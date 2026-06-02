@@ -46,6 +46,8 @@ export interface RoomMemberWithPresence {
   avatar_url: string | null;
   joined_at: string;
   status: MemberStatus;
+  /** Total minutes this member has studied while in this room */
+  total_minutes: number;
 }
 
 export interface RoomDetail {
@@ -69,4 +71,6 @@ export interface RoomSummary {
   max_members: number;
   created_at: string;
   member_count: number;
+  /** Present only for rooms the caller owns (so they can share/see the code) */
+  invite_code?: string;
 }

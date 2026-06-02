@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './src/stores';
 import { RootNavigator } from './src/navigation';
+import './src/i18n'; // initialise i18next (device language + saved preference)
 
 const queryClient = new QueryClient({
   defaultOptions: {

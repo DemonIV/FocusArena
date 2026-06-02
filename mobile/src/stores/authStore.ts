@@ -64,13 +64,18 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        try { await authService.logout(); } catch { /* ignore */ }
+        // Fire server-side logout best-effort (uses the still-current token),
+        // but DON'T await it — clear local state immediately so the UI redirects
+        // to the login screen instantly, even when offline or token is expired.
+        void authService.logout().catch(() => { /* ignore */ });
         get().clearAuth();
       },
 
       refreshAccessToken: async () => {
         const { refreshToken } = get();
-        if (!refreshToken) return null;
+        // No refresh token → session is unrecoverable. Clear auth so the
+        // navigator redirects to login instead of leaving the app stuck.
+        if (!refreshToken) { get().clearAuth(); return null; }
         try {
           const data = await authService.refresh(refreshToken);
           api.setToken(data.accessToken);

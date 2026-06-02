@@ -15,6 +15,7 @@ import {
   getTimerStatus,
   getSessions,
   getStats,
+  getSubjectStats,
   getSubjects,
   createSubject,
   updateSubject,
@@ -71,7 +72,6 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
     } catch (err: unknown) {
       const e = err as { code?: string; message: string };
       if (e.code === 'NO_TIMER') return reply.code(404).send({ error: 'Not Found', message: e.message });
-      if (e.code === 'ALREADY_PAUSED') return reply.code(409).send({ error: 'Conflict', message: e.message });
       request.log.error(err, 'timer/pause failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }
@@ -86,7 +86,6 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
     } catch (err: unknown) {
       const e = err as { code?: string; message: string };
       if (e.code === 'NO_TIMER') return reply.code(404).send({ error: 'Not Found', message: e.message });
-      if (e.code === 'NOT_PAUSED') return reply.code(409).send({ error: 'Conflict', message: e.message });
       request.log.error(err, 'timer/resume failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }
@@ -152,7 +151,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
 
   // ── Subjects ──────────────────────────────────────────────
 
-  /** GET /timer/subjects */
+  /** GET /timer/subjects — list of active subjects (no stats) */
   fastify.get('/subjects', async (request, reply) => {
     const { sub: userId } = request.user as JwtPayload;
     try {
@@ -160,6 +159,18 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ subjects });
     } catch (err) {
       request.log.error(err, 'timer/subjects GET failed');
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** GET /timer/subjects/stats — subjects enriched with total focus time */
+  fastify.get('/subjects/stats', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    try {
+      const subjects = await getSubjectStats(userId);
+      return reply.send({ subjects });
+    } catch (err) {
+      request.log.error(err, 'timer/subjects/stats GET failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

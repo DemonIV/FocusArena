@@ -4,9 +4,9 @@ import type { LeaderboardEntry, LeaderboardPeriod } from '../types';
 // ── Raw API shapes ─────────────────────────────────────────────────
 interface RawEntry {
   rank: number;
-  userId: string;
+  user_id: string;        // backend returns snake_case
   username: string;
-  avatarUrl: string | null;
+  avatar_url: string | null;
   score: number;
   isMe?: boolean;
 }
@@ -22,9 +22,9 @@ interface GlobalResponse {
 function mapEntry(e: RawEntry, period: LeaderboardPeriod): LeaderboardEntry {
   return {
     rank: e.rank,
-    userId: e.userId,
+    userId: e.user_id,
     username: e.username,
-    avatarUrl: e.avatarUrl,
+    avatarUrl: e.avatar_url,
     value: e.score,
     unit: period === 'alltime' ? 'XP' : 'min',
     isMe: e.isMe,
