@@ -87,6 +87,14 @@ export function TimerScreen() {
   });
   const todayMinutes = statsQ.data?.today.totalMinutes ?? 0;
 
+  // Ghost race vs. yesterday-you
+  const ghostQ = useQuery({
+    queryKey: ['timer-ghost'],
+    queryFn: () => timerService.getGhost(),
+    refetchInterval: 60_000,
+  });
+  const ghost = ghostQ.data;
+
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleStart = useCallback(async () => {
@@ -120,6 +128,7 @@ export function TimerScreen() {
               const result = await timer.stop();
               // Refresh anything that depends on the finished session
               qc.invalidateQueries({ queryKey: ['timer-stats'] });
+              qc.invalidateQueries({ queryKey: ['timer-ghost'] });
               qc.invalidateQueries({ queryKey: ['subject-stats'] });
               qc.invalidateQueries({ queryKey: ['my-rooms'] });
               qc.invalidateQueries({ queryKey: ['lb-global'] });
@@ -209,6 +218,15 @@ export function TimerScreen() {
           {todayMinutes > 0 && (
             <Text style={styles.bestTodayText}>
               🔥 {t('timer.todayFocus', { duration: formatDuration(todayMinutes) })}
+            </Text>
+          )}
+          {ghost?.hasGhost && (
+            <Text style={[styles.ghostText, ghost.diff >= 0 ? styles.ghostAhead : styles.ghostBehind]}>
+              👻 {ghost.diff > 0
+                ? t('timer.ghostAhead', { duration: formatDuration(ghost.diff) })
+                : ghost.diff < 0
+                  ? t('timer.ghostBehind', { duration: formatDuration(-ghost.diff) })
+                  : t('timer.ghostEven')}
             </Text>
           )}
         </View>
@@ -629,6 +647,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  ghostText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  ghostAhead: { color: '#22c55e' },
+  ghostBehind: { color: '#f59e0b' },
 
   // Section label
   sectionLabel: {

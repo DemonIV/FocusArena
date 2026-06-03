@@ -145,6 +145,13 @@ export interface HeatmapDay {
   totalMinutes: number;
 }
 
+export interface GhostInfo {
+  todayMinutes: number;
+  yesterdayMinutes: number;
+  diff: number;          // positive = ahead of yesterday-you
+  hasGhost: boolean;
+}
+
 export interface HeatmapResponse {
   days: HeatmapDay[];    // ascending by date, gaps filled with 0
   longestStreak: number;

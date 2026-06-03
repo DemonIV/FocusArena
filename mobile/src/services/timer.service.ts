@@ -4,6 +4,7 @@ import type {
   StopTimerResult,
   TimerStats,
   HeatmapResponse,
+  GhostInfo,
   Subject,
   SubjectStat,
   Session,
@@ -47,6 +48,10 @@ export const timerService = {
   /** Daily focus minutes for the activity heat map (default last 30 days) */
   getHeatmap: (days = 30) =>
     api.get<HeatmapResponse>(`/timer/heatmap?days=${days}`),
+
+  /** Ghost race vs. yesterday-you at the same point in the day */
+  getGhost: () =>
+    api.get<GhostInfo>('/timer/ghost'),
 
   // ── Subjects ─────────────────────────────────────────────
   /** Returns subjects array directly */

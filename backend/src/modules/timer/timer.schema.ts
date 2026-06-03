@@ -81,6 +81,17 @@ export interface DailyStat {
   completedSessions: number;
 }
 
+/** "Ghost" race vs. yesterday-you, compared at the same point in the day. */
+export interface GhostResponse {
+  todayMinutes: number;
+  /** Yesterday's cumulative minutes up to the same time-of-day */
+  yesterdayMinutes: number;
+  /** todayMinutes - yesterdayMinutes (positive = ahead of yesterday) */
+  diff: number;
+  /** Whether yesterday had any activity to race against */
+  hasGhost: boolean;
+}
+
 /** One day in the activity heat map (GitHub-contribution style). */
 export interface HeatmapDay {
   date: string;               // YYYY-MM-DD (UTC)

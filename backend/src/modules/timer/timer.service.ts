@@ -10,6 +10,7 @@ import type {
   TimerStats,
   DailyStat,
   HeatmapResponse,
+  GhostResponse,
   CreateSubjectBody,
   UpdateSubjectBody,
   SessionQuery,
@@ -521,6 +522,46 @@ export async function getActivityHeatmap(userId: string, days = 30): Promise<Hea
     days: daysList,
     longestStreak: userRes.data?.longest_streak ?? 0,
     currentStreak: userRes.data?.streak ?? 0,
+  };
+}
+
+/**
+ * Ghost race vs. yesterday: compares today's cumulative focus minutes against
+ * yesterday's cumulative minutes up to the same point in the day (UTC), so the
+ * user competes with their past self in real time.
+ */
+export async function getGhost(userId: string): Promise<GhostResponse> {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  const elapsedMs = now.getTime() - todayStart.getTime();
+  const yesterdayStart = new Date(todayStart.getTime() - 86_400_000);
+  const yesterdayCutoff = new Date(yesterdayStart.getTime() + elapsedMs);
+
+  const [todayRes, yResRes] = await Promise.all([
+    supabase
+      .from('sessions')
+      .select('duration_minutes')
+      .eq('user_id', userId)
+      .gte('started_at', todayStart.toISOString())
+      .lt('started_at', now.toISOString()),
+    supabase
+      .from('sessions')
+      .select('duration_minutes')
+      .eq('user_id', userId)
+      .gte('started_at', yesterdayStart.toISOString())
+      .lt('started_at', yesterdayCutoff.toISOString()),
+  ]);
+
+  const todayMinutes = (todayRes.data ?? []).reduce((s, r) => s + r.duration_minutes, 0);
+  const yesterdayMinutes = (yResRes.data ?? []).reduce((s, r) => s + r.duration_minutes, 0);
+
+  return {
+    todayMinutes,
+    yesterdayMinutes,
+    diff: todayMinutes - yesterdayMinutes,
+    hasGhost: yesterdayMinutes > 0,
   };
 }
 

@@ -16,6 +16,7 @@ import {
   getSessions,
   getStats,
   getActivityHeatmap,
+  getGhost,
   getSubjectStats,
   getSubjects,
   createSubject,
@@ -160,6 +161,18 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(heatmap);
     } catch (err) {
       request.log.error(err, 'timer/heatmap failed');
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** GET /timer/ghost — race vs. yesterday-you at the same point in the day */
+  fastify.get('/ghost', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    try {
+      const ghost = await getGhost(userId);
+      return reply.send(ghost);
+    } catch (err) {
+      request.log.error(err, 'timer/ghost failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
