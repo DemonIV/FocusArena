@@ -198,6 +198,8 @@
     "join": "Katıl",
     "members": "ÜYELER",
     "noMembers": "Üye yok.",
+    "youTag": "(Sen)",
+    "libraryFocus": "Kütüphane odağı: {{duration}}",
     "roomCreated": "🔒 Oda Oluşturuldu",
     "roomCreatedMsg": "Arkadaşlarını davet etmek için bu kodu paylaş:\n\n{{code}}\n\n(Bu kodu Profil sekmesinde de bulabilirsin.)",
     "createFailed": "Oda oluşturulamadı",

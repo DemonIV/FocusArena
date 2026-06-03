@@ -198,6 +198,8 @@
     "join": "Deelnemen",
     "members": "LEDEN",
     "noMembers": "Geen leden.",
+    "youTag": "(Jij)",
+    "libraryFocus": "Bibliotheekfocus: {{duration}}",
     "roomCreated": "🔒 Kamer gemaakt",
     "roomCreatedMsg": "Deel deze code om je vrienden uit te nodigen:\n\n{{code}}\n\n(Je vindt deze code ook in het tabblad Profiel.)",
     "createFailed": "Kan de kamer niet maken",

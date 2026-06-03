@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { roomsService } from '../../services';
 import { useSocketStore, useAuthStore } from '../../stores';
 import i18n from '../../i18n';
-import type { Room } from '../../types';
+import type { Room, RoomMember } from '../../types';
 
 function RoomCard({
   room,
@@ -64,6 +64,7 @@ export function RoomsScreen() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const { joinRoom, leaveRoom } = useSocketStore();
+  const friendStatuses = useSocketStore((s) => s.friendStatuses);
   const userId = useAuthStore((s) => s.user?.id);
 
   const [createVisible, setCreateVisible] = useState(false);
@@ -293,25 +294,49 @@ export function RoomsScreen() {
                   </View>
                 ) : null}
 
+                {/* Collective focus — the "library" feel */}
+                <View style={styles.libraryBox}>
+                  <Text style={styles.libraryIcon}>📚</Text>
+                  <Text style={styles.libraryText}>
+                    {t('rooms.libraryFocus', {
+                      duration: fmtMinutes(detailQ.data.members.reduce((s, m) => s + m.totalMinutes, 0)),
+                    })}
+                  </Text>
+                </View>
+
                 <Text style={styles.membersHeader}>{t('rooms.members')}</Text>
                 <FlatList
-                  data={[...detailQ.data.members].sort((a, b) => b.totalMinutes - a.totalMinutes)}
+                  data={[...detailQ.data.members]
+                    .map((m) => ({ ...m, status: (friendStatuses[m.userId] as RoomMember['status']) ?? m.status }))
+                    .sort((a, b) => b.totalMinutes - a.totalMinutes)}
                   keyExtractor={(m) => m.userId}
                   style={{ maxHeight: 380 }}
-                  renderItem={({ item }) => (
-                    <View style={styles.memberRow}>
-                      <View style={[styles.memberAvatar, { borderColor: MEMBER_STATUS_COLOR[item.status] }]}>
-                        <Text style={styles.memberLetter}>{item.username.charAt(0).toUpperCase()}</Text>
+                  renderItem={({ item, index }) => {
+                    const isMe = item.userId === userId;
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : null;
+                    return (
+                      <View style={[styles.memberRow, isMe && styles.memberRowMe]}>
+                        <View style={styles.rankBox}>
+                          {medal
+                            ? <Text style={styles.rankMedal}>{medal}</Text>
+                            : <Text style={styles.rankNum}>{index + 1}</Text>}
+                        </View>
+                        <View style={[styles.memberAvatar, { borderColor: MEMBER_STATUS_COLOR[item.status] }]}>
+                          <Text style={styles.memberLetter}>{item.username.charAt(0).toUpperCase()}</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.memberName} numberOfLines={1}>
+                            {item.username}
+                            {isMe && <Text style={styles.youTag}>  {t('rooms.youTag')}</Text>}
+                          </Text>
+                          <Text style={[styles.memberStatus, { color: MEMBER_STATUS_COLOR[item.status] }]}>
+                            {MEMBER_STATUS_ICON[item.status]} {t(`status.${item.status}`, { defaultValue: item.status })}
+                          </Text>
+                        </View>
+                        <Text style={styles.memberMinutes}>{fmtMinutes(item.totalMinutes)}</Text>
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.memberName}>{item.username}</Text>
-                        <Text style={[styles.memberStatus, { color: MEMBER_STATUS_COLOR[item.status] }]}>
-                          {MEMBER_STATUS_ICON[item.status]} {t(`status.${item.status}`, { defaultValue: item.status })}
-                        </Text>
-                      </View>
-                      <Text style={styles.memberMinutes}>{fmtMinutes(item.totalMinutes)}</Text>
-                    </View>
-                  )}
+                    );
+                  }}
                   ListEmptyComponent={<Text style={styles.emptyText}>{t('rooms.noMembers')}</Text>}
                 />
               </>
@@ -483,14 +508,38 @@ const styles = StyleSheet.create({
     color: MUTED, fontSize: 11, fontWeight: '700', letterSpacing: 2,
     marginTop: 8, marginBottom: 4,
   },
+  libraryBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: CARD2,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  libraryIcon: { fontSize: 20 },
+  libraryText: { color: TEXT, fontSize: 14, fontWeight: '600', flex: 1 },
   memberRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 10,
     borderBottomWidth: 1,
     borderBottomColor: BORDER,
   },
+  memberRowMe: {
+    backgroundColor: `${ACCENT}12`,
+    borderBottomColor: 'transparent',
+  },
+  rankBox: { width: 24, alignItems: 'center', justifyContent: 'center' },
+  rankMedal: { fontSize: 18 },
+  rankNum: { color: MUTED, fontSize: 14, fontWeight: '800' },
+  youTag: { color: ACCENT, fontSize: 12, fontWeight: '700' },
   memberAvatar: {
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: `${ACCENT}18`,

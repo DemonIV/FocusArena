@@ -198,6 +198,8 @@
     "join": "Unirse",
     "members": "MIEMBROS",
     "noMembers": "Sin miembros.",
+    "youTag": "(Tú)",
+    "libraryFocus": "Enfoque de la biblioteca: {{duration}}",
     "roomCreated": "🔒 Sala creada",
     "roomCreatedMsg": "Comparte este código para invitar a tus amigos:\n\n{{code}}\n\n(También puedes encontrar este código en la pestaña Perfil.)",
     "createFailed": "No se pudo crear la sala",

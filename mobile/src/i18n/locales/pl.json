@@ -198,6 +198,8 @@
     "join": "Dołącz",
     "members": "CZŁONKOWIE",
     "noMembers": "Brak członków.",
+    "youTag": "(Ty)",
+    "libraryFocus": "Skupienie biblioteki: {{duration}}",
     "roomCreated": "🔒 Pokój utworzony",
     "roomCreatedMsg": "Udostępnij ten kod, aby zaprosić znajomych:\n\n{{code}}\n\n(Ten kod znajdziesz też w zakładce Profil.)",
     "createFailed": "Nie udało się utworzyć pokoju",

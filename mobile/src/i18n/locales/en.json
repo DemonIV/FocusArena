@@ -198,6 +198,8 @@
     "join": "Join",
     "members": "MEMBERS",
     "noMembers": "No members.",
+    "youTag": "(You)",
+    "libraryFocus": "Library focus: {{duration}}",
     "roomCreated": "🔒 Room Created",
     "roomCreatedMsg": "Share this code to invite your friends:\n\n{{code}}\n\n(You can also find this code in the Profile tab.)",
     "createFailed": "Could not create room",

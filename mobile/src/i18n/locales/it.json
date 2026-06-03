@@ -198,6 +198,8 @@
     "join": "Unisciti",
     "members": "MEMBRI",
     "noMembers": "Nessun membro.",
+    "youTag": "(Tu)",
+    "libraryFocus": "Concentrazione della biblioteca: {{duration}}",
     "roomCreated": "🔒 Stanza creata",
     "roomCreatedMsg": "Condividi questo codice per invitare i tuoi amici:\n\n{{code}}\n\n(Puoi trovare questo codice anche nella scheda Profilo.)",
     "createFailed": "Impossibile creare la stanza",
