@@ -68,6 +68,13 @@
     "nameRequired": "Lütfen bir konu adı gir.",
     "createFailed": "Konu oluşturulamadı."
   },
+  "boss": {
+    "title": "Bu Haftanın Boss'u",
+    "timeLeft": "{{days}}g {{hours}}sa kaldı",
+    "participants_one": "{{count}} savaşçı",
+    "participants_other": "{{count}} savaşçı",
+    "yourContribution": "Katkın: {{duration}}"
+  },
   "dna": {
     "title": "Çalışma DNA'sı",
     "share": "DNA'yı Paylaş",

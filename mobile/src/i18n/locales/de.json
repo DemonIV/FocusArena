@@ -68,6 +68,13 @@
     "nameRequired": "Bitte gib einen Fachnamen ein.",
     "createFailed": "Fach konnte nicht erstellt werden."
   },
+  "boss": {
+    "title": "Boss dieser Woche",
+    "timeLeft": "noch {{days}}T {{hours}}Std",
+    "participants_one": "{{count}} Kämpfer",
+    "participants_other": "{{count}} Kämpfer",
+    "yourContribution": "Dein Anteil: {{duration}}"
+  },
   "dna": {
     "title": "Lern-DNA",
     "share": "DNA teilen",

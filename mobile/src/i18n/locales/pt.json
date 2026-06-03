@@ -68,6 +68,13 @@
     "nameRequired": "Digite um nome para a matéria.",
     "createFailed": "Não foi possível criar a matéria."
   },
+  "boss": {
+    "title": "Chefe desta semana",
+    "timeLeft": "faltam {{days}}d {{hours}}h",
+    "participants_one": "{{count}} lutador",
+    "participants_other": "{{count}} lutadores",
+    "yourContribution": "Sua parte: {{duration}}"
+  },
   "dna": {
     "title": "DNA de estudo",
     "share": "Compartilhar DNA",

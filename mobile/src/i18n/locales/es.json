@@ -68,6 +68,13 @@
     "nameRequired": "Introduce un nombre de asignatura.",
     "createFailed": "No se pudo crear la asignatura."
   },
+  "boss": {
+    "title": "Jefe de esta semana",
+    "timeLeft": "quedan {{days}}d {{hours}}h",
+    "participants_one": "{{count}} luchador",
+    "participants_other": "{{count}} luchadores",
+    "yourContribution": "Tu aporte: {{duration}}"
+  },
   "dna": {
     "title": "ADN de estudio",
     "share": "Compartir ADN",

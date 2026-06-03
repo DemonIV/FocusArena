@@ -68,6 +68,13 @@
     "nameRequired": "Please enter a subject name.",
     "createFailed": "Could not create subject."
   },
+  "boss": {
+    "title": "This Week's Boss",
+    "timeLeft": "{{days}}d {{hours}}h left",
+    "participants_one": "{{count}} fighter",
+    "participants_other": "{{count}} fighters",
+    "yourContribution": "Your share: {{duration}}"
+  },
   "dna": {
     "title": "Study DNA",
     "share": "Share DNA",

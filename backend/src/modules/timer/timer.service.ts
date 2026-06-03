@@ -12,6 +12,7 @@ import type {
   HeatmapResponse,
   GhostResponse,
   StudyDnaResponse,
+  BossBattleResponse,
   CreateSubjectBody,
   UpdateSubjectBody,
   SessionQuery,
@@ -657,6 +658,73 @@ export async function getStudyDNA(userId: string): Promise<StudyDnaResponse> {
     topSubject,
     superpower,
     longestStreak,
+  };
+}
+
+/**
+ * Boss Battle — a weekly global focus goal everyone works toward together.
+ * The collective total is computed from this week's sessions (cached, short
+ * TTL) and resets automatically each Monday via the week window. No cron or
+ * Redis counter needed.
+ */
+const BOSS_WEEKLY_GOAL = 100_000; // minutes — tunable
+const BOSS_CACHE_KEY = 'boss:weekly';
+const BOSS_CACHE_TTL = 60; // seconds
+
+export async function getBossBattle(userId: string): Promise<BossBattleResponse> {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  // This week's Monday → next Monday (UTC)
+  const dayOfWeek = now.getUTCDay(); // 0 Sun … 6 Sat
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+  const weekStart = new Date(todayStart.getTime() - daysSinceMonday * 86_400_000);
+  const weekEnd = new Date(weekStart.getTime() + 7 * 86_400_000);
+
+  // Collective total + participants (cached briefly — shared across all callers)
+  let totalMinutes: number;
+  let participants: number;
+  const cached = await redis.get(BOSS_CACHE_KEY);
+  if (cached) {
+    const parsed = JSON.parse(cached) as { totalMinutes: number; participants: number };
+    totalMinutes = parsed.totalMinutes;
+    participants = parsed.participants;
+  } else {
+    const { data, error } = await supabase
+      .from('sessions')
+      .select('user_id, duration_minutes')
+      .gte('started_at', weekStart.toISOString())
+      .lt('started_at', weekEnd.toISOString())
+      .limit(50_000);
+    if (error) throw new Error(error.message);
+
+    const users = new Set<string>();
+    totalMinutes = 0;
+    for (const row of data ?? []) {
+      totalMinutes += row.duration_minutes;
+      users.add(row.user_id);
+    }
+    participants = users.size;
+    await redis.set(BOSS_CACHE_KEY, JSON.stringify({ totalMinutes, participants }), 'EX', BOSS_CACHE_TTL);
+  }
+
+  // Caller's own contribution (uncached — cheap, per-user)
+  const { data: mine, error: mineErr } = await supabase
+    .from('sessions')
+    .select('duration_minutes')
+    .eq('user_id', userId)
+    .gte('started_at', weekStart.toISOString())
+    .lt('started_at', weekEnd.toISOString());
+  if (mineErr) throw new Error(mineErr.message);
+  const myContribution = (mine ?? []).reduce((s, r) => s + r.duration_minutes, 0);
+
+  return {
+    totalMinutes,
+    goalMinutes: BOSS_WEEKLY_GOAL,
+    myContribution,
+    participants,
+    weekEndsAt: weekEnd.toISOString(),
   };
 }
 

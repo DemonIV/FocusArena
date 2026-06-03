@@ -68,6 +68,13 @@
     "nameRequired": "Voer een vaknaam in.",
     "createFailed": "Kon vak niet aanmaken."
   },
+  "boss": {
+    "title": "Boss van deze week",
+    "timeLeft": "{{days}}d {{hours}}u resterend",
+    "participants_one": "{{count}} vechter",
+    "participants_other": "{{count}} vechters",
+    "yourContribution": "Jouw aandeel: {{duration}}"
+  },
   "dna": {
     "title": "Studie-DNA",
     "share": "DNA delen",

@@ -18,6 +18,7 @@ import {
   getActivityHeatmap,
   getGhost,
   getStudyDNA,
+  getBossBattle,
   getSubjectStats,
   getSubjects,
   createSubject,
@@ -186,6 +187,18 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(dna);
     } catch (err) {
       request.log.error(err, 'timer/dna failed');
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** GET /timer/boss — weekly global Boss Battle progress */
+  fastify.get('/boss', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    try {
+      const boss = await getBossBattle(userId);
+      return reply.send(boss);
+    } catch (err) {
+      request.log.error(err, 'timer/boss failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

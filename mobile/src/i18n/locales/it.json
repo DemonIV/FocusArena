@@ -68,6 +68,13 @@
     "nameRequired": "Inserisci un nome per la materia.",
     "createFailed": "Impossibile creare la materia."
   },
+  "boss": {
+    "title": "Boss di questa settimana",
+    "timeLeft": "mancano {{days}}g {{hours}}h",
+    "participants_one": "{{count}} combattente",
+    "participants_other": "{{count}} combattenti",
+    "yourContribution": "Il tuo contributo: {{duration}}"
+  },
   "dna": {
     "title": "DNA di studio",
     "share": "Condividi il DNA",

@@ -68,6 +68,13 @@
     "nameRequired": "Podaj nazwę przedmiotu.",
     "createFailed": "Nie udało się utworzyć przedmiotu."
   },
+  "boss": {
+    "title": "Boss tego tygodnia",
+    "timeLeft": "zostało {{days}}d {{hours}}h",
+    "participants_one": "{{count}} wojownik",
+    "participants_other": "{{count}} wojowników",
+    "yourContribution": "Twój wkład: {{duration}}"
+  },
   "dna": {
     "title": "DNA nauki",
     "share": "Udostępnij DNA",

@@ -81,6 +81,20 @@ export interface DailyStat {
   completedSessions: number;
 }
 
+/** "Boss Battle" — a weekly global focus goal everyone works toward together. */
+export interface BossBattleResponse {
+  /** Total focus minutes logged by all users this week */
+  totalMinutes: number;
+  /** Collective goal for the week */
+  goalMinutes: number;
+  /** Caller's own focus minutes this week */
+  myContribution: number;
+  /** Distinct users who contributed this week */
+  participants: number;
+  /** ISO timestamp when the weekly battle resets (next Monday 00:00 UTC) */
+  weekEndsAt: string;
+}
+
 /** "Study DNA" — a personality snapshot derived from session history. */
 export interface StudyDnaResponse {
   hasData: boolean;

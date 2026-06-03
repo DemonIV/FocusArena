@@ -68,6 +68,13 @@
     "nameRequired": "Saisis un nom de matière.",
     "createFailed": "Impossible de créer la matière."
   },
+  "boss": {
+    "title": "Boss de la semaine",
+    "timeLeft": "{{days}}j {{hours}}h restantes",
+    "participants_one": "{{count}} combattant",
+    "participants_other": "{{count}} combattants",
+    "yourContribution": "Ta part : {{duration}}"
+  },
   "dna": {
     "title": "ADN d’étude",
     "share": "Partager l’ADN",

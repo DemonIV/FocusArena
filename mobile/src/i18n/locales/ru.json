@@ -68,6 +68,13 @@
     "nameRequired": "Введите название предмета.",
     "createFailed": "Не удалось создать предмет."
   },
+  "boss": {
+    "title": "Босс этой недели",
+    "timeLeft": "осталось {{days}}д {{hours}}ч",
+    "participants_one": "{{count}} боец",
+    "participants_other": "{{count}} бойцов",
+    "yourContribution": "Твой вклад: {{duration}}"
+  },
   "dna": {
     "title": "ДНК учёбы",
     "share": "Поделиться ДНК",

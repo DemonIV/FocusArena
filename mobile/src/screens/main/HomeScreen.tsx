@@ -64,6 +64,14 @@ export function HomeScreen({ navigation }: Props) {
     queryFn: () => friendsService.list(),
   });
 
+  const bossQ = useQuery({
+    queryKey: ['boss-battle'],
+    queryFn: () => timerService.getBoss(),
+    refetchInterval: 120_000,
+  });
+  const boss = bossQ.data;
+  const bossPct = boss && boss.goalMinutes > 0 ? Math.min(boss.totalMinutes / boss.goalMinutes, 1) : 0;
+
   const stats = statsQ.data;
   const badges = achievQ.data?.earned ?? [];
 
@@ -127,6 +135,29 @@ export function HomeScreen({ navigation }: Props) {
           <Text style={styles.activeBannerText}>{t('home.sessionInProgress')}</Text>
           <Text style={styles.activeBannerArrow}>›</Text>
         </TouchableOpacity>
+      )}
+
+      {/* ── Boss Battle (weekly global event) ── */}
+      {boss && (
+        <View style={styles.bossCard}>
+          <View style={styles.bossHeader}>
+            <Text style={styles.bossTitle}>⚔️ {t('boss.title')}</Text>
+            <Text style={styles.bossTimeLeft}>{timeLeft(boss.weekEndsAt, t)}</Text>
+          </View>
+          <Text style={styles.bossGoal}>
+            {Math.round(boss.totalMinutes).toLocaleString()}
+            <Text style={styles.bossGoalMuted}> / {boss.goalMinutes.toLocaleString()} {t('common.minShort')}</Text>
+          </Text>
+          <View style={styles.bossTrack}>
+            <View style={[styles.bossFill, { width: `${bossPct * 100}%` }]} />
+          </View>
+          <View style={styles.bossFooter}>
+            <Text style={styles.bossMeta}>👥 {t('boss.participants', { count: boss.participants })}</Text>
+            <Text style={styles.bossMeta}>
+              {t('boss.yourContribution', { duration: formatDuration(boss.myContribution) })}
+            </Text>
+          </View>
+        </View>
       )}
 
       {/* ── Daily Goal ── */}
@@ -298,6 +329,13 @@ function WeekChart({
 function statusRank(s: string): number {
   return s === 'studying' ? 0 : s === 'break' ? 1 : 2;
 }
+function timeLeft(iso: string, t: (k: string, o?: any) => string): string {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return t('boss.timeLeft', { days: 0, hours: 0 });
+  const days = Math.floor(ms / 86_400_000);
+  const hours = Math.floor((ms % 86_400_000) / 3_600_000);
+  return t('boss.timeLeft', { days, hours });
+}
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -340,6 +378,38 @@ const styles = StyleSheet.create({
     borderColor: `${ACCENT}50`,
   },
   levelText: { color: ACCENT, fontWeight: '700', fontSize: 13 },
+
+  // Boss Battle card
+  bossCard: {
+    backgroundColor: 'rgba(233,69,96,0.08)',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(233,69,96,0.35)',
+  },
+  bossHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  bossTitle: { color: '#e94560', fontSize: 14, fontWeight: '800', letterSpacing: 0.3 },
+  bossTimeLeft: { color: MUTED2, fontSize: 12, fontWeight: '600' },
+  bossGoal: { color: TEXT, fontSize: 20, fontWeight: '800', marginBottom: 10 },
+  bossGoalMuted: { color: MUTED, fontSize: 14, fontWeight: '600' },
+  bossTrack: {
+    height: 10,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  bossFill: {
+    height: '100%',
+    borderRadius: 5,
+    backgroundColor: '#e94560',
+    shadowColor: '#e94560',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 6,
+  },
+  bossFooter: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
+  bossMeta: { color: MUTED2, fontSize: 12, fontWeight: '600' },
 
   // Daily goal card
   goalCard: {

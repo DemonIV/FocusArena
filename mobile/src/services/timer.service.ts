@@ -6,6 +6,7 @@ import type {
   HeatmapResponse,
   GhostInfo,
   DnaInfo,
+  BossInfo,
   Subject,
   SubjectStat,
   Session,
@@ -57,6 +58,10 @@ export const timerService = {
   /** Shareable "Study DNA" personality snapshot */
   getDNA: () =>
     api.get<DnaInfo>('/timer/dna'),
+
+  /** Weekly global Boss Battle progress */
+  getBoss: () =>
+    api.get<BossInfo>('/timer/boss'),
 
   // ── Subjects ─────────────────────────────────────────────
   /** Returns subjects array directly */

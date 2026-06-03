@@ -152,6 +152,14 @@ export interface GhostInfo {
   hasGhost: boolean;
 }
 
+export interface BossInfo {
+  totalMinutes: number;
+  goalMinutes: number;
+  myContribution: number;
+  participants: number;
+  weekEndsAt: string;    // ISO
+}
+
 export interface DnaInfo {
   hasData: boolean;
   totalSessions: number;
