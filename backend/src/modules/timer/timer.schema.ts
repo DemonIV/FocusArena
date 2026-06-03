@@ -96,6 +96,7 @@ export interface HeatmapResponse {
 export interface TimerStats {
   today: {
     totalMinutes: number;
+    goalMinutes: number;
     sessionsCount: number;
     completedSessions: number;
   };

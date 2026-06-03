@@ -118,6 +118,7 @@ export interface DailyStat {
 export interface TimerStats {
   today: {
     totalMinutes: number;
+    goalMinutes: number;
     sessionsCount: number;
     completedSessions: number;
   };

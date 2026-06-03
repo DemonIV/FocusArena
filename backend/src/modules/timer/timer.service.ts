@@ -386,7 +386,7 @@ export async function getStats(userId: string): Promise<TimerStats> {
   const weekStart = new Date(todayStart.getTime() - daysSinceMonday * 86_400_000);
   const weekEnd = new Date(weekStart.getTime() + 7 * 86_400_000);
 
-  const [todayRes, weekRes, allTimeRes, userRes] = await Promise.all([
+  const [todayRes, weekRes, allTimeRes, userRes, goalRes] = await Promise.all([
     supabase
       .from('sessions')
       .select('duration_minutes, was_completed')
@@ -411,12 +411,23 @@ export async function getStats(userId: string): Promise<TimerStats> {
       .select('xp, level, streak, longest_streak')
       .eq('id', userId)
       .single(),
+
+    supabase
+      .from('subjects')
+      .select('daily_goal_minutes')
+      .eq('user_id', userId)
+      .eq('is_active', true),
   ]);
+
+  // Daily goal = sum of active subjects' goals (fallback to 120 min if none set)
+  const goalSum = (goalRes.data ?? []).reduce((s, r) => s + (r.daily_goal_minutes ?? 0), 0);
+  const goalMinutes = goalSum > 0 ? goalSum : 120;
 
   // Today
   const todaySessions = todayRes.data ?? [];
   const today = {
     totalMinutes: todaySessions.reduce((s, r) => s + r.duration_minutes, 0),
+    goalMinutes,
     sessionsCount: todaySessions.length,
     completedSessions: todaySessions.filter((r) => r.was_completed).length,
   };
