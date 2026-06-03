@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { leaderboardService } from '../../services';
 import { useSocketStore } from '../../stores';
-import type { LeaderboardPeriod, LeaderboardEntry } from '../../types';
+import type { LeaderboardPeriod, LeaderboardEntry, MyRankInfo } from '../../types';
 
 const PERIODS: { key: LeaderboardPeriod; labelKey: string }[] = [
   { key: 'daily', labelKey: 'leaderboard.today' },
@@ -23,6 +23,10 @@ const PERIODS: { key: LeaderboardPeriod; labelKey: string }[] = [
 ];
 
 const MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+function unitLabel(unit: string, t: (k: string) => string): string {
+  return unit === 'min' ? t('common.minShort') : unit;
+}
 
 function RankRow({ entry }: { entry: LeaderboardEntry }) {
   const { t } = useTranslation();
@@ -54,11 +58,64 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
           {entry.isMe ? t('leaderboard.you') : ''}
         </Text>
         <Text style={styles.score}>
-          {entry.value.toLocaleString()} {entry.unit}
+          {entry.value.toLocaleString()} {unitLabel(entry.unit, t)}
         </Text>
       </View>
 
       {entry.isMe && <View style={styles.meDot} />}
+    </View>
+  );
+}
+
+/** Caller's own rank card + local context window (shown atop the list) */
+function MyRankHeader({ info }: { info: MyRankInfo }) {
+  const { t } = useTranslation();
+  const unit = unitLabel(info.unit, t);
+  const rank = info.rank as number; // non-null whenever info exists
+  const showWindow = rank > 10 && info.neighbors.length > 0;
+
+  return (
+    <View style={styles.myRankBlock}>
+      <View style={styles.myRankCard}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.myRankLabel}>{t('leaderboard.yourGlobalRank')}</Text>
+          {rank === 1 ? (
+            <Text style={styles.myRankHint}>{t('leaderboard.atTop')}</Text>
+          ) : info.pointsToNextRank != null && info.nextRank != null ? (
+            <Text style={styles.myRankHint}>
+              {t('leaderboard.reachNext', {
+                rank: info.nextRank,
+                points: info.pointsToNextRank.toLocaleString(),
+                unit,
+              })}
+            </Text>
+          ) : info.ahead != null && info.ahead > 0 ? (
+            <Text style={styles.myRankHint}>
+              {t('leaderboard.peopleAhead', { count: info.ahead })}
+            </Text>
+          ) : null}
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text style={styles.myRankVal}>{MEDAL[rank] ?? `#${rank}`}</Text>
+          <Text style={styles.myRankScore}>
+            {info.score.toLocaleString()} {unit}
+          </Text>
+        </View>
+      </View>
+
+      {showWindow && (
+        <View style={styles.windowWrap}>
+          <Text style={styles.sectionLabel}>{t('leaderboard.yourPosition')}</Text>
+          {info.neighbors.map((n) => (
+            <RankRow key={n.userId} entry={n} />
+          ))}
+          {info.ahead != null && info.ahead > 0 && (
+            <Text style={styles.windowCaption}>
+              {t('leaderboard.peopleAhead', { count: info.ahead })}
+            </Text>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -81,8 +138,8 @@ export function LeaderboardScreen() {
   });
 
   const meQ = useQuery({
-    queryKey: ['lb-me'],
-    queryFn: () => leaderboardService.getMe(),
+    queryKey: ['lb-me', period],
+    queryFn: () => leaderboardService.getMe(period),
   });
 
   // Merge live socket updates (weekly only) with server data
@@ -111,19 +168,6 @@ export function LeaderboardScreen() {
         ))}
       </View>
 
-      {/* My rank card */}
-      {meQ.data && (
-        <View style={styles.myRankCard}>
-          <Text style={styles.myRankLabel}>{t('leaderboard.yourGlobalRank')}</Text>
-          <Text style={styles.myRankVal}>
-            {MEDAL[meQ.data.rank] ?? `#${meQ.data.rank}`}
-          </Text>
-          <Text style={styles.myRankScore}>
-            {meQ.data.value.toLocaleString()} {meQ.data.unit}
-          </Text>
-        </View>
-      )}
-
       {isLoading ? (
         <ActivityIndicator color="#00d2ff" style={{ marginTop: 40 }} />
       ) : (
@@ -134,7 +178,10 @@ export function LeaderboardScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            <Text style={styles.sectionLabel}>{t('leaderboard.globalTop10')}</Text>
+            <>
+              {meQ.data && <MyRankHeader info={meQ.data} />}
+              <Text style={styles.sectionLabel}>{t('leaderboard.globalTop10')}</Text>
+            </>
           }
           ListFooterComponent={
             friendsQ.data && friendsQ.data.length > 0 ? (
@@ -191,23 +238,39 @@ const styles = StyleSheet.create({
   tabText: { color: MUTED, fontSize: 13, fontWeight: '600' },
   tabTextActive: { color: ACCENT },
 
+  myRankBlock: { marginBottom: 16 },
   myRankCard: {
     backgroundColor: CARD,
     borderRadius: 16,
-    marginHorizontal: 16,
-    marginTop: 16,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
     borderWidth: 1,
     borderColor: BORDER,
     borderLeftWidth: 3,
     borderLeftColor: PINK,
   },
-  myRankLabel: { color: MUTED, fontSize: 12 },
+  myRankLabel: {
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  myRankHint: { color: MUTED2, fontSize: 13, fontWeight: '600', marginTop: 4, lineHeight: 18 },
   myRankVal: { fontSize: 24, color: TEXT, fontWeight: '800' },
-  myRankScore: { color: ACCENT, fontSize: 13, fontWeight: '700' },
+  myRankScore: { color: ACCENT, fontSize: 13, fontWeight: '700', marginTop: 2 },
+
+  windowWrap: { marginTop: 16 },
+  windowCaption: {
+    color: MUTED2,
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 4,
+  },
 
   sectionLabel: {
     color: MUTED,

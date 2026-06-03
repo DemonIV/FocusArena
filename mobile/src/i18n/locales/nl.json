@@ -76,6 +76,9 @@
     "pause": "⏸  Pauzeren",
     "stop": "■  Stoppen",
     "pausedHint": "Timer gepauzeerd — druk op ▶ wanneer je klaar bent om te hervatten",
+    "peopleFocusing_one": "Op dit moment focust {{count}} persoon samen met jou",
+    "peopleFocusing_other": "Op dit moment focussen {{count}} mensen samen met jou",
+    "todayFocus": "Je record van vandaag: {{duration}}",
     "selectSubjectTitle": "Vak kiezen",
     "noSubjects": "Nog geen vakken.",
     "customDuration": "Aangepaste duur",
@@ -184,7 +187,11 @@
     "yourGlobalRank": "Je wereldwijde positie",
     "globalTop10": "Wereldwijde top 10",
     "friends": "Vrienden",
-    "you": " (jij)"
+    "you": " (jij)",
+    "yourPosition": "JOUW POSITIE",
+    "peopleAhead": "{{count}} mensen voor je",
+    "reachNext": "Studeer {{points}} {{unit}} meer om #{{rank}} te bereiken",
+    "atTop": "🏆 Je staat bovenaan!"
   },
   "friends": {
     "friends": "👥 Vrienden",
@@ -213,5 +220,14 @@
     "break": "pauze",
     "offline": "offline",
     "online": "online"
+  },
+  "receipt": {
+    "share": "📤 Delen",
+    "shareTitle": "Deel je focusbon",
+    "focused": "gefocust",
+    "dayN": "Dag {{count}}",
+    "globalRank": "Wereldwijde positie: #{{rank}}",
+    "shareUnavailable": "Delen is niet beschikbaar op dit apparaat",
+    "shareFailed": "Kon niet delen"
   }
 }

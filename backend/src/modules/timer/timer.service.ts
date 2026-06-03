@@ -2,6 +2,7 @@ import { supabase, redis } from '../../shared';
 import { invalidateCache } from '../leaderboard';
 import { checkAndAward } from '../achievements';
 import { addStudyMinutesToRooms } from '../rooms/rooms.service';
+import { getSocketServer } from '../../websocket';
 import type {
   ActiveTimerState,
   TimerStatusResponse,
@@ -22,6 +23,49 @@ const XP_PER_LEVEL = 500;
 const COMPLETION_THRESHOLD = 0.9;
 
 const timerKey = (userId: string) => `timer:${userId}`;
+
+// ─── Global "active focus" count ──────────────────────────────
+// Number of users with a live session right now. The source of truth is the
+// set of `timer:*` keys; we recount on each change (cheap at this scale) and
+// broadcast over WebSocket so clients can show "N people focusing with you".
+
+const FOCUS_COUNT_KEY = 'global:focus_count';
+
+/** Last persisted active-focus count (0 if unknown). */
+export async function getActiveFocusCount(): Promise<number> {
+  const raw = await redis.get(FOCUS_COUNT_KEY);
+  const n = raw ? parseInt(raw, 10) : 0;
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+/** Recount live timers from `timer:*` keys, persist, and return the total. */
+export async function recomputeActiveFocusCount(): Promise<number> {
+  let count = 0;
+  let cursor = '0';
+  do {
+    const [next, keys] = await redis.scan(cursor, 'MATCH', 'timer:*', 'COUNT', 200);
+    cursor = next;
+    count += keys.length;
+  } while (cursor !== '0');
+  await redis.set(FOCUS_COUNT_KEY, String(count));
+  return count;
+}
+
+/** Emit the current count to every connected client (no-op if socket not ready). */
+export function broadcastActiveFocusCount(count: number): void {
+  try {
+    getSocketServer().emit('global:activeCount', { count });
+  } catch {
+    // Socket server not initialised yet — periodic tick will catch up
+  }
+}
+
+/** Recompute + broadcast; fire-and-forget on the request path. */
+function refreshActiveFocusCount(): void {
+  void recomputeActiveFocusCount()
+    .then(broadcastActiveFocusCount)
+    .catch((e) => console.error(`activeFocusCount refresh failed: ${e?.message}`));
+}
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -101,6 +145,7 @@ export async function startTimer(
   };
 
   await writeState(userId, state);
+  refreshActiveFocusCount(); // one more user is now focusing
   return state;
 }
 
@@ -150,6 +195,7 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
   // 🔑 Clear Redis FIRST — even if the DB update below fails, the user won't be
   // stuck with "A session is already active" on their next start attempt.
   await clearState(userId);
+  refreshActiveFocusCount(); // this user stopped focusing
 
   // Finalise the DB session record (best-effort after Redis is cleared)
   const { error } = await supabase

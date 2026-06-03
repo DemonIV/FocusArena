@@ -76,6 +76,9 @@
     "pause": "⏸  Пауза",
     "stop": "■  Завершить",
     "pausedHint": "Таймер на паузе — нажмите ▶, когда будете готовы продолжить",
+    "peopleFocusing_one": "Прямо сейчас {{count}} человек фокусируется вместе с тобой",
+    "peopleFocusing_other": "Прямо сейчас {{count}} человек фокусируются вместе с тобой",
+    "todayFocus": "Твой рекорд сегодня: {{duration}}",
     "selectSubjectTitle": "Выбрать предмет",
     "noSubjects": "Пока нет предметов.",
     "customDuration": "Своя длительность",
@@ -184,7 +187,11 @@
     "yourGlobalRank": "Ваш мировой ранг",
     "globalTop10": "Мировой топ-10",
     "friends": "Друзья",
-    "you": " (вы)"
+    "you": " (вы)",
+    "yourPosition": "ВАША ПОЗИЦИЯ",
+    "peopleAhead": "{{count}} человек впереди вас",
+    "reachNext": "Позанимайтесь ещё {{points}} {{unit}}, чтобы достичь #{{rank}}",
+    "atTop": "🏆 Вы на вершине!"
   },
   "friends": {
     "friends": "👥 Друзья",
@@ -213,5 +220,14 @@
     "break": "перерыв",
     "offline": "не в сети",
     "online": "в сети"
+  },
+  "receipt": {
+    "share": "📤 Поделиться",
+    "shareTitle": "Поделитесь чеком фокуса",
+    "focused": "в фокусе",
+    "dayN": "День {{count}}",
+    "globalRank": "Мировой ранг: #{{rank}}",
+    "shareUnavailable": "Общий доступ недоступен на этом устройстве",
+    "shareFailed": "Не удалось поделиться"
   }
 }

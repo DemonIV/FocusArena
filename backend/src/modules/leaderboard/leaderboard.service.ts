@@ -268,12 +268,61 @@ export async function getMyRank(
 ): Promise<MyRankResponse> {
   const list = await fetchGlobalList(period);
 
-  const entry = list.find((e) => e.user_id === userId);
+  const idx = list.findIndex((e) => e.user_id === userId);
+
+  // Not ranked this period
+  if (idx === -1) {
+    return {
+      period,
+      rank: null,
+      score: 0,
+      totalUsers: list.length,
+      username: null,
+      avatar_url: null,
+      neighbors: [],
+      ahead: null,
+      nextRank: null,
+      pointsToNextRank: null,
+    };
+  }
+
+  const me = list[idx];
+
+  // Local window: 2 above + self + 2 below
+  const neighbors = list
+    .slice(Math.max(0, idx - 2), idx + 3)
+    .map((e) => ({
+      rank: e.rank,
+      user_id: e.user_id,
+      username: e.username,
+      avatar_url: e.avatar_url,
+      score: e.score,
+      isMe: e.user_id === userId,
+    }));
+
+  // Nearest strictly-higher-scored user = the next rung to climb.
+  // Matching their score reaches their (competition) rank.
+  let nextRank: number | null = null;
+  let pointsToNextRank: number | null = null;
+  for (let i = idx - 1; i >= 0; i--) {
+    if (list[i].score > me.score) {
+      nextRank = list[i].rank;
+      pointsToNextRank = list[i].score - me.score;
+      break;
+    }
+  }
+
   return {
     period,
-    rank: entry?.rank ?? null,
-    score: entry?.score ?? 0,
+    rank: me.rank,
+    score: me.score,
     totalUsers: list.length,
+    username: me.username,
+    avatar_url: me.avatar_url,
+    neighbors,
+    ahead: me.rank - 1,
+    nextRank,
+    pointsToNextRank,
   };
 }
 

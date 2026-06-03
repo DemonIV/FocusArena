@@ -152,6 +152,22 @@ export interface LeaderboardEntry {
 
 export type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly' | 'alltime';
 
+/** The caller's own rank + local context window (from /leaderboard/me) */
+export interface MyRankInfo {
+  rank: number | null;
+  score: number;
+  unit: string;
+  totalUsers: number;
+  /** 2 above + self + 2 below, in rank order */
+  neighbors: LeaderboardEntry[];
+  /** Distinct users ahead (rank - 1); null if unranked */
+  ahead: number | null;
+  /** Rank of the next rung up; null if #1 / unranked */
+  nextRank: number | null;
+  /** Score gap to reach nextRank; null if #1 / unranked */
+  pointsToNextRank: number | null;
+}
+
 export interface Room {
   id: string;
   name: string;

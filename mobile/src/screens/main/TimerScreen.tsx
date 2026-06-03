@@ -18,7 +18,8 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useTimer } from '../../hooks';
-import { TimerCircle } from '../../components';
+import { useSocketStore } from '../../stores';
+import { TimerCircle, StudyReceiptModal } from '../../components';
 import { timerService } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
@@ -51,6 +52,12 @@ export function TimerScreen() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | undefined>();
   const [customModalVisible, setCustomModalVisible] = useState(false);
   const [customInput, setCustomInput] = useState('');
+  const [receipt, setReceipt] = useState<{
+    subjectName?: string;
+    durationMinutes: number;
+    xpEarned: number;
+    streak: number;
+  } | null>(null);
 
   const isCustomDuration = !DURATIONS.includes(selectedDuration);
 
@@ -71,6 +78,14 @@ export function TimerScreen() {
   });
   const subjects = subjectsQ.data ?? [];
   const selectedSubject = subjects.find((s) => s.id === selectedSubjectId);
+
+  // Live global focus count (WebSocket) + today's best for motivation
+  const activeCount = useSocketStore((s) => s.activeCount);
+  const statsQ = useQuery({
+    queryKey: ['timer-stats'],
+    queryFn: () => timerService.getStats(),
+  });
+  const todayMinutes = statsQ.data?.today.totalMinutes ?? 0;
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -110,11 +125,14 @@ export function TimerScreen() {
               qc.invalidateQueries({ queryKey: ['lb-global'] });
               qc.invalidateQueries({ queryKey: ['lb-me'] });
               qc.invalidateQueries({ queryKey: ['lb-friends'] });
-              if (result?.wasCompleted && result.xpEarned > 0) {
-                Alert.alert(
-                  t('timer.completed'),
-                  t('timer.completedMsg', { xp: result.xpEarned, duration: formatDuration(result.durationMinutes) }),
-                );
+              if (result && result.xpEarned > 0) {
+                // Celebrate with a shareable Study Receipt
+                setReceipt({
+                  subjectName: selectedSubject?.name,
+                  durationMinutes: result.durationMinutes,
+                  xpEarned: result.xpEarned,
+                  streak: result.newStreak,
+                });
               } else if (result) {
                 Alert.alert(
                   t('timer.sessionEnded'),
@@ -139,7 +157,7 @@ export function TimerScreen() {
         },
       ],
     );
-  }, [timer]);
+  }, [timer, selectedSubject]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -175,6 +193,23 @@ export function TimerScreen() {
             <View style={styles.durationBadge}>
               <Text style={styles.durationBadgeText}>{selectedDuration} {t('common.minShort')}</Text>
             </View>
+          )}
+        </View>
+
+        {/* ── Live motivation layer ── */}
+        <View style={styles.motivationWrap}>
+          {activeCount > 0 && (
+            <View style={styles.liveCountRow}>
+              <View style={styles.liveDot} />
+              <Text style={styles.liveCountText}>
+                {t('timer.peopleFocusing', { count: activeCount })}
+              </Text>
+            </View>
+          )}
+          {todayMinutes > 0 && (
+            <Text style={styles.bestTodayText}>
+              🔥 {t('timer.todayFocus', { duration: formatDuration(todayMinutes) })}
+            </Text>
           )}
         </View>
 
@@ -458,6 +493,18 @@ export function TimerScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* ── Study Receipt (shareable) ── */}
+      {receipt && (
+        <StudyReceiptModal
+          visible={!!receipt}
+          onClose={() => setReceipt(null)}
+          subjectName={receipt.subjectName}
+          durationMinutes={receipt.durationMinutes}
+          xpEarned={receipt.xpEarned}
+          streak={receipt.streak}
+        />
+      )}
     </View>
   );
 }
@@ -546,6 +593,41 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+
+  // Live motivation layer
+  motivationWrap: {
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+    gap: 8,
+  },
+  liveCountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(0,210,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,210,255,0.25)',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#22c55e',
+  },
+  liveCountText: {
+    color: ACCENT,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  bestTodayText: {
+    color: MUTED,
+    fontSize: 13,
+    fontWeight: '600',
   },
 
   // Section label

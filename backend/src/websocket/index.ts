@@ -9,6 +9,7 @@ import type {
 import { supabase } from '../shared';
 import type { JwtPayload } from '../modules/auth/auth.schema';
 import { registerHandlers } from './handlers';
+import { getActiveFocusCount } from '../modules/timer/timer.service';
 
 export type AppServer = Server<
   ClientToServerEvents,
@@ -88,6 +89,11 @@ export function setupHandlers(jwtVerify: JwtVerifyFn): void {
 
     // Join personal room so other modules can push directly to this user
     void socket.join(`user:${userId}`);
+
+    // Send the current "people focusing" count so the UI shows it immediately
+    void getActiveFocusCount()
+      .then((count) => socket.emit('global:activeCount', { count }))
+      .catch(() => { /* count unavailable — periodic tick will deliver it */ });
 
     // Register all event handlers
     registerHandlers(server, socket);

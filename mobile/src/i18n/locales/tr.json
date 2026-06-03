@@ -76,6 +76,9 @@
     "pause": "⏸  Duraklat",
     "stop": "■  Bitir",
     "pausedHint": "Zamanlayıcı duraklatıldı — devam etmeye hazır olduğunda ▶ bas",
+    "peopleFocusing_one": "Şu anda {{count}} kişi seninle birlikte odaklanıyor",
+    "peopleFocusing_other": "Şu anda {{count}} kişi seninle birlikte odaklanıyor",
+    "todayFocus": "Bugünkü rekorun: {{duration}}",
     "selectSubjectTitle": "Konu Seç",
     "noSubjects": "Henüz konu yok.",
     "customDuration": "Özel Süre",
@@ -184,7 +187,11 @@
     "yourGlobalRank": "Küresel Sıran",
     "globalTop10": "Küresel İlk 10",
     "friends": "Arkadaşlar",
-    "you": " (sen)"
+    "you": " (sen)",
+    "yourPosition": "SENİN KONUMUN",
+    "peopleAhead": "Önünde {{count}} kişi var",
+    "reachNext": "#{{rank}} için {{points}} {{unit}} daha çalış",
+    "atTop": "🏆 Zirvedesin!"
   },
   "friends": {
     "friends": "👥 Arkadaşlar",
@@ -213,5 +220,14 @@
     "break": "molada",
     "offline": "çevrimdışı",
     "online": "çevrimiçi"
+  },
+  "receipt": {
+    "share": "📤 Paylaş",
+    "shareTitle": "Odak makbuzunu paylaş",
+    "focused": "odaklanıldı",
+    "dayN": "{{count}}. gün",
+    "globalRank": "Küresel Sıra: #{{rank}}",
+    "shareUnavailable": "Bu cihazda paylaşım kullanılamıyor",
+    "shareFailed": "Paylaşılamadı"
   }
 }

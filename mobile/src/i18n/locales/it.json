@@ -76,6 +76,9 @@
     "pause": "⏸  Pausa",
     "stop": "■  Termina",
     "pausedHint": "Timer in pausa — premi ▶ quando sei pronto a riprendere",
+    "peopleFocusing_one": "In questo momento {{count}} persona si sta concentrando con te",
+    "peopleFocusing_other": "In questo momento {{count}} persone si stanno concentrando con te",
+    "todayFocus": "Il tuo record di oggi: {{duration}}",
     "selectSubjectTitle": "Scegli materia",
     "noSubjects": "Ancora nessuna materia.",
     "customDuration": "Durata personalizzata",
@@ -184,7 +187,11 @@
     "yourGlobalRank": "La tua posizione globale",
     "globalTop10": "Top 10 globale",
     "friends": "Amici",
-    "you": " (tu)"
+    "you": " (tu)",
+    "yourPosition": "LA TUA POSIZIONE",
+    "peopleAhead": "{{count}} persone davanti a te",
+    "reachNext": "Studia {{points}} {{unit}} in più per raggiungere #{{rank}}",
+    "atTop": "🏆 Sei in cima!"
   },
   "friends": {
     "friends": "👥 Amici",
@@ -213,5 +220,14 @@
     "break": "pausa",
     "offline": "offline",
     "online": "online"
+  },
+  "receipt": {
+    "share": "📤 Condividi",
+    "shareTitle": "Condividi la tua ricevuta di concentrazione",
+    "focused": "concentrato",
+    "dayN": "Giorno {{count}}",
+    "globalRank": "Posizione globale: #{{rank}}",
+    "shareUnavailable": "La condivisione non è disponibile su questo dispositivo",
+    "shareFailed": "Impossibile condividere"
   }
 }

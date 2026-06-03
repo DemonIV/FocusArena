@@ -27,6 +27,7 @@ interface SocketStore {
   isConnected: boolean;
   top10: LeaderboardEntry[];
   friendStatuses: Record<string, string>;   // userId → status
+  activeCount: number;                       // global users focusing right now
 
   connect: (token: string) => void;
   disconnect: () => void;
@@ -39,12 +40,17 @@ export const useSocketStore = create<SocketStore>((set) => ({
   isConnected: false,
   top10: [],
   friendStatuses: {},
+  activeCount: 0,
 
   connect: (token) => {
     const socket = initSocket(token);
 
     socket.on('connect', () => set({ isConnected: true }));
-    socket.on('disconnect', () => set({ isConnected: false }));
+    socket.on('disconnect', () => set({ isConnected: false, activeCount: 0 }));
+
+    socket.on('global:activeCount', ({ count }) => {
+      set({ activeCount: count });
+    });
 
     socket.on('timer:started', ({ sessionId, startedAt }) => {
       // Sync sessionId if started via WS from another device
@@ -74,7 +80,7 @@ export const useSocketStore = create<SocketStore>((set) => ({
 
   disconnect: () => {
     disconnectSocket();
-    set({ isConnected: false, top10: [], friendStatuses: {} });
+    set({ isConnected: false, top10: [], friendStatuses: {}, activeCount: 0 });
   },
 
   sendPresence: (status) => {

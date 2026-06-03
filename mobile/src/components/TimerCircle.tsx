@@ -8,6 +8,9 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withRepeat,
+  withSequence,
+  cancelAnimation,
   Easing,
 } from 'react-native-reanimated';
 import { msToDisplay } from '../utils/formatTime';
@@ -36,6 +39,9 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused }: Props
   const rightRot = useSharedValue(180);
   const leftRot  = useSharedValue(0);
 
+  // Breathing pulse — only while actively focusing (not paused / idle)
+  const pulse = useSharedValue(0);
+
   useEffect(() => {
     const dur = 600;
     const ease = Easing.out(Easing.cubic);
@@ -43,6 +49,23 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused }: Props
     leftRot.value  = withTiming(targetLeft,  { duration: dur, easing: ease });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p]);
+
+  useEffect(() => {
+    if (isActive && !isPaused) {
+      pulse.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1,
+        false,
+      );
+    } else {
+      cancelAnimation(pulse);
+      pulse.value = withTiming(0, { duration: 300 });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive, isPaused]);
 
   const fillColor = !isActive ? '#4a4a6a' : isPaused ? '#f59e0b' : '#00d2ff';
   const glowColor = !isActive ? 'transparent' : isPaused ? '#f59e0b' : '#00d2ff';
@@ -54,12 +77,16 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused }: Props
   const leftAnimStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${leftRot.value}deg` }],
   }));
+  const glowAnimStyle = useAnimatedStyle(() => ({
+    opacity: 0.35 + pulse.value * 0.5,
+    transform: [{ scale: 1 + pulse.value * 0.04 }],
+  }));
 
   return (
     <View style={styles.outerWrapper}>
-      {/* Glow ring behind the circle */}
+      {/* Glow ring behind the circle — breathes while focusing */}
       {isActive && (
-        <View style={[styles.glowRing, {
+        <Animated.View style={[styles.glowRing, glowAnimStyle, {
           shadowColor: glowColor,
           borderColor: `${glowColor}22`,
         }]} />

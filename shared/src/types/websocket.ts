@@ -17,6 +17,8 @@ export interface ServerToClientEvents {
   'friend:status': (payload: { userId: string; status: string }) => void;
   'achievement:new': (payload: { badge: Achievement }) => void;
   'error:session': (payload: { message: string }) => void;
+  /** Global count of users with an active focus session right now */
+  'global:activeCount': (payload: { count: number }) => void;
 }
 
 export interface InterServerEvents {}

@@ -76,6 +76,9 @@
     "pause": "⏸  Wstrzymaj",
     "stop": "■  Zakończ",
     "pausedHint": "Stoper wstrzymany — naciśnij ▶, gdy będziesz gotów wznowić",
+    "peopleFocusing_one": "Teraz {{count}} osoba skupia się razem z Tobą",
+    "peopleFocusing_other": "Teraz {{count}} osób skupia się razem z Tobą",
+    "todayFocus": "Twój dzisiejszy rekord: {{duration}}",
     "selectSubjectTitle": "Wybierz przedmiot",
     "noSubjects": "Brak przedmiotów.",
     "customDuration": "Własny czas trwania",
@@ -184,7 +187,11 @@
     "yourGlobalRank": "Twoja pozycja globalna",
     "globalTop10": "Globalna top 10",
     "friends": "Znajomi",
-    "you": " (ty)"
+    "you": " (ty)",
+    "yourPosition": "TWOJA POZYCJA",
+    "peopleAhead": "{{count}} osób przed tobą",
+    "reachNext": "Ucz się jeszcze {{points}} {{unit}}, aby osiągnąć #{{rank}}",
+    "atTop": "🏆 Jesteś na szczycie!"
   },
   "friends": {
     "friends": "👥 Znajomi",
@@ -213,5 +220,14 @@
     "break": "przerwa",
     "offline": "offline",
     "online": "online"
+  },
+  "receipt": {
+    "share": "📤 Udostępnij",
+    "shareTitle": "Udostępnij swój paragon skupienia",
+    "focused": "skupienia",
+    "dayN": "Dzień {{count}}",
+    "globalRank": "Pozycja globalna: #{{rank}}",
+    "shareUnavailable": "Udostępnianie jest niedostępne na tym urządzeniu",
+    "shareFailed": "Nie udało się udostępnić"
   }
 }

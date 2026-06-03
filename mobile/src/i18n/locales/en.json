@@ -76,6 +76,9 @@
     "pause": "⏸  Pause",
     "stop": "■  Stop",
     "pausedHint": "Timer paused — press ▶ when you're ready to resume",
+    "peopleFocusing_one": "{{count}} person is focusing with you right now",
+    "peopleFocusing_other": "{{count}} people are focusing with you right now",
+    "todayFocus": "Your best today: {{duration}}",
     "selectSubjectTitle": "Select Subject",
     "noSubjects": "No subjects yet.",
     "customDuration": "Custom Duration",
@@ -184,7 +187,11 @@
     "yourGlobalRank": "Your Global Rank",
     "globalTop10": "Global Top 10",
     "friends": "Friends",
-    "you": " (you)"
+    "you": " (you)",
+    "yourPosition": "YOUR POSITION",
+    "peopleAhead": "{{count}} people ahead of you",
+    "reachNext": "Study {{points}} more {{unit}} to reach #{{rank}}",
+    "atTop": "🏆 You're at the top!"
   },
   "friends": {
     "friends": "👥 Friends",
@@ -213,5 +220,14 @@
     "break": "break",
     "offline": "offline",
     "online": "online"
+  },
+  "receipt": {
+    "share": "📤 Share",
+    "shareTitle": "Share your focus receipt",
+    "focused": "focused",
+    "dayN": "Day {{count}}",
+    "globalRank": "Global Rank: #{{rank}}",
+    "shareUnavailable": "Sharing isn't available on this device",
+    "shareFailed": "Couldn't share"
   }
 }
