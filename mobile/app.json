@@ -37,6 +37,12 @@
           "color": "#00d2ff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2a6f2656-4c91-4ff0-ae69-4da3a93567ed"
+      }
+    },
+    "owner": "software66"
   }
 }
