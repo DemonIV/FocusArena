@@ -68,6 +68,24 @@
     "nameRequired": "Digite um nome para a matéria.",
     "createFailed": "Não foi possível criar a matéria."
   },
+  "dna": {
+    "title": "DNA de estudo",
+    "share": "Compartilhar DNA",
+    "peakHours": "Horários de pico",
+    "avgSession": "Sessão média",
+    "superpower": "Superpoder",
+    "noData": "Conclua algumas sessões para revelar seu DNA de estudo.",
+    "chronoNightOwl": "Coruja noturna",
+    "chronoEarlyBird": "Madrugador",
+    "chronoDaytime": "Diurno",
+    "styleDeep": "Especialista em foco profundo",
+    "styleSprinter": "Estudante sprint",
+    "styleSteady": "Estudante constante",
+    "powerStreak": "Sequências longas",
+    "powerVolume": "Alto volume",
+    "powerFinisher": "Finalizador",
+    "powerConsistency": "Consistência"
+  },
   "home": {
     "welcomeBack": "Bem-vindo de volta,",
     "level": "Nv {{level}}",

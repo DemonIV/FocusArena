@@ -16,7 +16,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
-import { StatCard, StreakHeatmap } from '../../components';
+import { StatCard, StreakHeatmap, StudyDnaCard } from '../../components';
 import { timerService, achievementsService, roomsService } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
@@ -266,6 +266,10 @@ export function ProfileScreen() {
             longestStreak={heatmapQ.data.longestStreak}
           />
         )}
+
+        {/* ── Study DNA ── */}
+        <Text style={styles.sectionLabel}>{t('dna.title')}</Text>
+        <StudyDnaCard />
 
         {/* ── Stats Grid ── */}
         <Text style={styles.sectionLabel}>{t('profile.statistics')}</Text>

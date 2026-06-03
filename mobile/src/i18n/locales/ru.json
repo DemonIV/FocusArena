@@ -68,6 +68,24 @@
     "nameRequired": "Введите название предмета.",
     "createFailed": "Не удалось создать предмет."
   },
+  "dna": {
+    "title": "ДНК учёбы",
+    "share": "Поделиться ДНК",
+    "peakHours": "Пиковые часы",
+    "avgSession": "Ср. сессия",
+    "superpower": "Суперсила",
+    "noData": "Заверши несколько сессий, чтобы раскрыть свою ДНК учёбы.",
+    "chronoNightOwl": "Сова",
+    "chronoEarlyBird": "Жаворонок",
+    "chronoDaytime": "Дневной режим",
+    "styleDeep": "Мастер глубокого фокуса",
+    "styleSprinter": "Спринтер",
+    "styleSteady": "Стабильный ученик",
+    "powerStreak": "Длинные серии",
+    "powerVolume": "Большой объём",
+    "powerFinisher": "Финишёр",
+    "powerConsistency": "Постоянство"
+  },
   "home": {
     "welcomeBack": "С возвращением,",
     "level": "Ур. {{level}}",

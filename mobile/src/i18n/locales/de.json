@@ -68,6 +68,24 @@
     "nameRequired": "Bitte gib einen Fachnamen ein.",
     "createFailed": "Fach konnte nicht erstellt werden."
   },
+  "dna": {
+    "title": "Lern-DNA",
+    "share": "DNA teilen",
+    "peakHours": "Spitzenzeiten",
+    "avgSession": "Ø Sitzung",
+    "superpower": "Superkraft",
+    "noData": "Absolviere ein paar Sitzungen, um deine Lern-DNA zu sehen.",
+    "chronoNightOwl": "Nachteule",
+    "chronoEarlyBird": "Frühaufsteher",
+    "chronoDaytime": "Tagmensch",
+    "styleDeep": "Deep-Focus-Spezialist",
+    "styleSprinter": "Sprint-Lerner",
+    "styleSteady": "Beständiger Lerner",
+    "powerStreak": "Lange Serien",
+    "powerVolume": "Hohes Volumen",
+    "powerFinisher": "Vollender",
+    "powerConsistency": "Beständigkeit"
+  },
   "home": {
     "welcomeBack": "Willkommen zurück,",
     "level": "Lv {{level}}",

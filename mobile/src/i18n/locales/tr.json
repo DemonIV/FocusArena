@@ -68,6 +68,24 @@
     "nameRequired": "Lütfen bir konu adı gir.",
     "createFailed": "Konu oluşturulamadı."
   },
+  "dna": {
+    "title": "Çalışma DNA'sı",
+    "share": "DNA'yı Paylaş",
+    "peakHours": "Zirve saatler",
+    "avgSession": "Ort. seans",
+    "superpower": "Süper güç",
+    "noData": "Çalışma DNA'nı görmek için birkaç seans tamamla.",
+    "chronoNightOwl": "Gece Kuşu",
+    "chronoEarlyBird": "Erkenci Kuş",
+    "chronoDaytime": "Gündüz Odaklı",
+    "styleDeep": "Derin Odak Uzmanı",
+    "styleSprinter": "Sprint Odaklı",
+    "styleSteady": "İstikrarlı Öğrenci",
+    "powerStreak": "Uzun Seriler",
+    "powerVolume": "Yüksek Hacim",
+    "powerFinisher": "Bitirici",
+    "powerConsistency": "İstikrar Ustası"
+  },
   "home": {
     "welcomeBack": "Tekrar hoş geldin,",
     "level": "Sv {{level}}",

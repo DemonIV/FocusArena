@@ -68,6 +68,24 @@
     "nameRequired": "Introduce un nombre de asignatura.",
     "createFailed": "No se pudo crear la asignatura."
   },
+  "dna": {
+    "title": "ADN de estudio",
+    "share": "Compartir ADN",
+    "peakHours": "Horas pico",
+    "avgSession": "Sesión media",
+    "superpower": "Superpoder",
+    "noData": "Completa algunas sesiones para revelar tu ADN de estudio.",
+    "chronoNightOwl": "Búho nocturno",
+    "chronoEarlyBird": "Madrugador",
+    "chronoDaytime": "Diurno",
+    "styleDeep": "Especialista en concentración profunda",
+    "styleSprinter": "Estudiante sprint",
+    "styleSteady": "Estudiante constante",
+    "powerStreak": "Rachas largas",
+    "powerVolume": "Alto volumen",
+    "powerFinisher": "Finalizador",
+    "powerConsistency": "Constancia"
+  },
   "home": {
     "welcomeBack": "Bienvenido de nuevo,",
     "level": "Nv {{level}}",

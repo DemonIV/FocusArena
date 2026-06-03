@@ -68,6 +68,24 @@
     "nameRequired": "Voer een vaknaam in.",
     "createFailed": "Kon vak niet aanmaken."
   },
+  "dna": {
+    "title": "Studie-DNA",
+    "share": "DNA delen",
+    "peakHours": "Piekuren",
+    "avgSession": "Gem. sessie",
+    "superpower": "Superkracht",
+    "noData": "Voltooi een paar sessies om je studie-DNA te onthullen.",
+    "chronoNightOwl": "Nachtuil",
+    "chronoEarlyBird": "Vroege vogel",
+    "chronoDaytime": "Dagmens",
+    "styleDeep": "Deep-focus-specialist",
+    "styleSprinter": "Sprintleerder",
+    "styleSteady": "Gestage leerder",
+    "powerStreak": "Lange reeksen",
+    "powerVolume": "Hoog volume",
+    "powerFinisher": "Afmaker",
+    "powerConsistency": "Consistentie"
+  },
   "home": {
     "welcomeBack": "Welkom terug,",
     "level": "Lv {{level}}",

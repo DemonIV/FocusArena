@@ -68,6 +68,24 @@
     "nameRequired": "Saisis un nom de matière.",
     "createFailed": "Impossible de créer la matière."
   },
+  "dna": {
+    "title": "ADN d’étude",
+    "share": "Partager l’ADN",
+    "peakHours": "Heures de pointe",
+    "avgSession": "Session moy.",
+    "superpower": "Superpouvoir",
+    "noData": "Termine quelques sessions pour révéler ton ADN d’étude.",
+    "chronoNightOwl": "Oiseau de nuit",
+    "chronoEarlyBird": "Lève-tôt",
+    "chronoDaytime": "Diurne",
+    "styleDeep": "Spécialiste de la concentration",
+    "styleSprinter": "Sprinteur",
+    "styleSteady": "Apprenant régulier",
+    "powerStreak": "Longues séries",
+    "powerVolume": "Gros volume",
+    "powerFinisher": "Finisseur",
+    "powerConsistency": "Régularité"
+  },
   "home": {
     "welcomeBack": "Bon retour,",
     "level": "Niv {{level}}",

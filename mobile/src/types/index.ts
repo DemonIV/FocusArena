@@ -152,6 +152,19 @@ export interface GhostInfo {
   hasGhost: boolean;
 }
 
+export interface DnaInfo {
+  hasData: boolean;
+  totalSessions: number;
+  totalMinutes: number;
+  avgSessionMinutes: number;
+  peakHour: number;      // 0–23 (UTC)
+  chronotype: 'night_owl' | 'early_bird' | 'daytime';
+  focusStyle: 'deep' | 'sprinter' | 'steady';
+  topSubject: string | null;
+  superpower: 'streak' | 'volume' | 'finisher' | 'consistency';
+  longestStreak: number;
+}
+
 export interface HeatmapResponse {
   days: HeatmapDay[];    // ascending by date, gaps filled with 0
   longestStreak: number;

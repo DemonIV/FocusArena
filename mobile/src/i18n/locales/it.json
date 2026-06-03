@@ -68,6 +68,24 @@
     "nameRequired": "Inserisci un nome per la materia.",
     "createFailed": "Impossibile creare la materia."
   },
+  "dna": {
+    "title": "DNA di studio",
+    "share": "Condividi il DNA",
+    "peakHours": "Ore di punta",
+    "avgSession": "Sessione media",
+    "superpower": "Superpotere",
+    "noData": "Completa alcune sessioni per rivelare il tuo DNA di studio.",
+    "chronoNightOwl": "Nottambulo",
+    "chronoEarlyBird": "Mattiniero",
+    "chronoDaytime": "Diurno",
+    "styleDeep": "Specialista del focus profondo",
+    "styleSprinter": "Studente sprint",
+    "styleSteady": "Studente costante",
+    "powerStreak": "Serie lunghe",
+    "powerVolume": "Alto volume",
+    "powerFinisher": "Finalizzatore",
+    "powerConsistency": "Costanza"
+  },
   "home": {
     "welcomeBack": "Bentornato,",
     "level": "Lv {{level}}",

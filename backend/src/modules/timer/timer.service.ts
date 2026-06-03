@@ -11,6 +11,7 @@ import type {
   DailyStat,
   HeatmapResponse,
   GhostResponse,
+  StudyDnaResponse,
   CreateSubjectBody,
   UpdateSubjectBody,
   SessionQuery,
@@ -562,6 +563,100 @@ export async function getGhost(userId: string): Promise<GhostResponse> {
     yesterdayMinutes,
     diff: todayMinutes - yesterdayMinutes,
     hasGhost: yesterdayMinutes > 0,
+  };
+}
+
+/**
+ * Study DNA — a shareable personality snapshot from the user's session
+ * history: chronotype (when they study), focus style (how long), dominant
+ * subject, and a "superpower" derived from streak/volume/completion.
+ */
+export async function getStudyDNA(userId: string): Promise<StudyDnaResponse> {
+  const [sessionsRes, userRes] = await Promise.all([
+    supabase
+      .from('sessions')
+      .select('started_at, duration_minutes, was_completed, subjects(name)')
+      .eq('user_id', userId)
+      .limit(5000),
+    supabase
+      .from('users')
+      .select('longest_streak')
+      .eq('id', userId)
+      .single(),
+  ]);
+
+  const sessions = sessionsRes.data ?? [];
+  const longestStreak = userRes.data?.longest_streak ?? 0;
+
+  if (sessions.length === 0) {
+    return {
+      hasData: false,
+      totalSessions: 0,
+      totalMinutes: 0,
+      avgSessionMinutes: 0,
+      peakHour: 0,
+      chronotype: 'daytime',
+      focusStyle: 'steady',
+      topSubject: null,
+      superpower: 'consistency',
+      longestStreak,
+    };
+  }
+
+  const hourMinutes = new Array<number>(24).fill(0);
+  const subjectMinutes = new Map<string, number>();
+  let totalMinutes = 0;
+  let completed = 0;
+
+  for (const s of sessions) {
+    const mins = s.duration_minutes ?? 0;
+    totalMinutes += mins;
+    if (s.was_completed) completed += 1;
+    hourMinutes[new Date(s.started_at).getUTCHours()] += mins;
+    const subj = (s.subjects as unknown as { name: string } | null)?.name;
+    if (subj) subjectMinutes.set(subj, (subjectMinutes.get(subj) ?? 0) + mins);
+  }
+
+  const totalSessions = sessions.length;
+  const avgSessionMinutes = Math.round(totalMinutes / totalSessions);
+
+  let peakHour = 0;
+  for (let h = 1; h < 24; h++) if (hourMinutes[h] > hourMinutes[peakHour]) peakHour = h;
+
+  const chronotype: StudyDnaResponse['chronotype'] =
+    peakHour >= 22 || peakHour <= 4 ? 'night_owl' :
+    peakHour >= 5 && peakHour <= 10 ? 'early_bird' :
+    'daytime';
+
+  const focusStyle: StudyDnaResponse['focusStyle'] =
+    avgSessionMinutes >= 60 ? 'deep' :
+    avgSessionMinutes <= 25 ? 'sprinter' :
+    'steady';
+
+  let topSubject: string | null = null;
+  let topMins = 0;
+  for (const [name, mins] of subjectMinutes) {
+    if (mins > topMins) { topMins = mins; topSubject = name; }
+  }
+
+  const completedRatio = completed / totalSessions;
+  const superpower: StudyDnaResponse['superpower'] =
+    longestStreak >= 7 ? 'streak' :
+    totalSessions >= 50 ? 'volume' :
+    completedRatio >= 0.8 ? 'finisher' :
+    'consistency';
+
+  return {
+    hasData: true,
+    totalSessions,
+    totalMinutes,
+    avgSessionMinutes,
+    peakHour,
+    chronotype,
+    focusStyle,
+    topSubject,
+    superpower,
+    longestStreak,
   };
 }
 

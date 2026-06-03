@@ -81,6 +81,21 @@ export interface DailyStat {
   completedSessions: number;
 }
 
+/** "Study DNA" — a personality snapshot derived from session history. */
+export interface StudyDnaResponse {
+  hasData: boolean;
+  totalSessions: number;
+  totalMinutes: number;
+  avgSessionMinutes: number;
+  /** Peak focus hour 0–23 (UTC) */
+  peakHour: number;
+  chronotype: 'night_owl' | 'early_bird' | 'daytime';
+  focusStyle: 'deep' | 'sprinter' | 'steady';
+  topSubject: string | null;
+  superpower: 'streak' | 'volume' | 'finisher' | 'consistency';
+  longestStreak: number;
+}
+
 /** "Ghost" race vs. yesterday-you, compared at the same point in the day. */
 export interface GhostResponse {
   todayMinutes: number;

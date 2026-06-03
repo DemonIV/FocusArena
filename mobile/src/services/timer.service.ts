@@ -5,6 +5,7 @@ import type {
   TimerStats,
   HeatmapResponse,
   GhostInfo,
+  DnaInfo,
   Subject,
   SubjectStat,
   Session,
@@ -52,6 +53,10 @@ export const timerService = {
   /** Ghost race vs. yesterday-you at the same point in the day */
   getGhost: () =>
     api.get<GhostInfo>('/timer/ghost'),
+
+  /** Shareable "Study DNA" personality snapshot */
+  getDNA: () =>
+    api.get<DnaInfo>('/timer/dna'),
 
   // ── Subjects ─────────────────────────────────────────────
   /** Returns subjects array directly */

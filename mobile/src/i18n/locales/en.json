@@ -68,6 +68,24 @@
     "nameRequired": "Please enter a subject name.",
     "createFailed": "Could not create subject."
   },
+  "dna": {
+    "title": "Study DNA",
+    "share": "Share DNA",
+    "peakHours": "Peak hours",
+    "avgSession": "Avg session",
+    "superpower": "Superpower",
+    "noData": "Complete a few sessions to reveal your Study DNA.",
+    "chronoNightOwl": "Night Owl",
+    "chronoEarlyBird": "Early Bird",
+    "chronoDaytime": "Daytime Focuser",
+    "styleDeep": "Deep Focus Specialist",
+    "styleSprinter": "Sprint Focuser",
+    "styleSteady": "Steady Learner",
+    "powerStreak": "Long Streaks",
+    "powerVolume": "High Volume",
+    "powerFinisher": "Finisher",
+    "powerConsistency": "Consistency Builder"
+  },
   "home": {
     "welcomeBack": "Welcome back,",
     "level": "Lv {{level}}",

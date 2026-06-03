@@ -17,6 +17,7 @@ import {
   getStats,
   getActivityHeatmap,
   getGhost,
+  getStudyDNA,
   getSubjectStats,
   getSubjects,
   createSubject,
@@ -173,6 +174,18 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(ghost);
     } catch (err) {
       request.log.error(err, 'timer/ghost failed');
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** GET /timer/dna — shareable "Study DNA" personality snapshot */
+  fastify.get('/dna', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    try {
+      const dna = await getStudyDNA(userId);
+      return reply.send(dna);
+    } catch (err) {
+      request.log.error(err, 'timer/dna failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
