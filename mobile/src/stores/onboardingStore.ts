@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
+import { track } from '../services/analytics';
 
 interface OnboardingState {
   completed: boolean;
@@ -15,7 +16,7 @@ export const useOnboardingStore = create<OnboardingState>()(
     (set) => ({
       completed: false,
       isHydrated: false,
-      complete: () => set({ completed: true }),
+      complete: () => { track('onboarding_completed'); set({ completed: true }); },
       reset: () => set({ completed: false }),
       setHydrated: () => set({ isHydrated: true }),
     }),

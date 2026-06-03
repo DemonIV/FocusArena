@@ -18,6 +18,7 @@ import {
   validateRefreshToken,
   deleteRefreshToken,
 } from './auth.service';
+import { track } from '../../shared/observability';
 
 // Augment @fastify/jwt so request.user is typed throughout the app
 declare module '@fastify/jwt' {
@@ -88,6 +89,8 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
       const user = await getUserById(authUser.id);
       const { accessToken, refreshToken } = signTokenPair(user.id, user.email);
       await storeRefreshToken(user.id, refreshToken);
+
+      track(user.id, 'user_registered', { username: user.username });
 
       return reply.code(201).send({ accessToken, refreshToken, user });
     } catch (err: unknown) {

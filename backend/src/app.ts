@@ -9,12 +9,21 @@ import { roomsModule } from './modules/rooms';
 import { friendsModule } from './modules/friends';
 import { achievementsModule } from './modules/achievements';
 import { notificationsModule } from './modules/notifications';
+import { captureException } from './shared/observability';
 
 export async function buildApp() {
   const app = Fastify({
     logger: {
       level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
     },
+  });
+
+  // Report unhandled/5xx errors to Sentry without altering Fastify's response.
+  app.addHook('onError', async (request, reply, error) => {
+    const status = reply.statusCode || (error as { statusCode?: number }).statusCode || 500;
+    if (status >= 500) {
+      captureException(error, { method: request.method, url: request.url });
+    }
   });
 
   await app.register(cors, { origin: true });

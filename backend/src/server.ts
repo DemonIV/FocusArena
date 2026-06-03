@@ -1,4 +1,9 @@
 import 'dotenv/config';
+import { initObservability, shutdownObservability } from './shared/observability';
+
+// Initialise Sentry/PostHog before anything else so early errors are captured.
+initObservability();
+
 import { buildApp } from './app';
 import { createSocketServer, setupHandlers } from './websocket';
 import { startJobs, stopJobs } from './jobs';
@@ -19,6 +24,7 @@ const start = async () => {
     app.log.info(`Received ${signal}, shutting down…`);
     await stopJobs();
     await app.close();
+    await shutdownObservability();
     process.exit(0);
   };
 

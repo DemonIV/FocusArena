@@ -1,10 +1,11 @@
-import React from 'react';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import React, { useRef } from 'react';
+import { NavigationContainer, DarkTheme, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList, AuthStackParamList } from '../types';
 import { useAuthStore, useOnboardingStore } from '../stores';
 import { LoginScreen, RegisterScreen, OnboardingScreen } from '../screens';
 import { MainTabs } from './MainTabs';
+import { track } from '../services/analytics';
 
 const Root = createNativeStackNavigator<RootStackParamList>();
 const Auth = createNativeStackNavigator<AuthStackParamList>();
@@ -38,8 +39,24 @@ export function RootNavigator() {
 
   const onboardingDone = useOnboardingStore((s) => s.completed);
 
+  const navRef = useNavigationContainerRef();
+  const routeNameRef = useRef<string | undefined>(undefined);
+
   return (
-    <NavigationContainer theme={AppTheme}>
+    <NavigationContainer
+      theme={AppTheme}
+      ref={navRef}
+      onReady={() => {
+        routeNameRef.current = navRef.getCurrentRoute()?.name;
+      }}
+      onStateChange={() => {
+        const current = navRef.getCurrentRoute()?.name;
+        if (current && current !== routeNameRef.current) {
+          track('screen_viewed', { screen: current });
+        }
+        routeNameRef.current = current;
+      }}
+    >
       <Root.Navigator screenOptions={{ headerShown: false }}>
         {!isAuthenticated ? (
           <Root.Screen name="Auth" component={AuthStack} />

@@ -12,6 +12,7 @@ import * as Sharing from 'expo-sharing';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { timerService } from '../services';
+import { track } from '../services/analytics';
 import { formatDuration } from '../utils/formatTime';
 import type { DnaInfo } from '../types';
 
@@ -62,6 +63,7 @@ export function StudyDnaCard() {
       }
       const uri = await captureRef(cardRef, { format: 'png', quality: 1 });
       await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: t('dna.share') });
+      track('dna_shared');
     } catch (e: any) {
       Alert.alert(t('common.error'), e?.message ?? t('receipt.shareFailed'));
     } finally {

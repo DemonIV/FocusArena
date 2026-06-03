@@ -3,6 +3,7 @@ import { invalidateCache, invalidateCountries } from '../leaderboard';
 import { checkAndAward } from '../achievements';
 import { addStudyMinutesToRooms } from '../rooms/rooms.service';
 import { getSocketServer } from '../../websocket';
+import { track } from '../../shared/observability';
 import type {
   ActiveTimerState,
   TimerStatusResponse,
@@ -330,6 +331,13 @@ async function awardXpAndStreak(
     streak: newStreak,
     level: newLevel,
     totalMinutes: Math.floor(newXp / XP_PER_MINUTE),
+  });
+
+  track(userId, 'session_completed', {
+    durationMinutes,
+    xpEarned: xpGained,
+    streak: newStreak,
+    level: newLevel,
   });
 
   return {

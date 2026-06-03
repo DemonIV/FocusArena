@@ -4,7 +4,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore, useOnboardingStore } from './src/stores';
 import { RootNavigator } from './src/navigation';
+import { initAnalytics, Sentry } from './src/services/analytics';
 import './src/i18n'; // initialise i18next (device language + saved preference)
+
+// Initialise Sentry + PostHog once, before the app renders (no-op without keys).
+initAnalytics();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,7 +43,7 @@ function AppInner() {
   );
 }
 
-export default function App() {
+function App() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
@@ -48,3 +52,6 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+// Sentry.wrap adds crash/error boundary + performance context (no-op without DSN).
+export default Sentry.wrap(App);

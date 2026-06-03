@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
 import { api } from '../services/api';
 import { authService } from '../services/auth.service';
+import { identifyUser, resetUser } from '../services/analytics';
 import type { User, AuthTokens } from '../types';
 
 interface AuthState {
@@ -35,11 +36,13 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (user, tokens) => {
         api.setToken(tokens.accessToken);
+        identifyUser(user.id, { username: user.username });
         set({ user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
       },
 
       clearAuth: () => {
         api.clearToken();
+        resetUser();
         set({ user: null, accessToken: null, refreshToken: null });
       },
 
@@ -95,6 +98,8 @@ export const useAuthStore = create<AuthState>()(
         if (state) {
           // Restore token into api client after hydration
           if (state.accessToken) api.setToken(state.accessToken);
+          // Re-identify the restored user for analytics/crash reports
+          if (state.user) identifyUser(state.user.id, { username: state.user.username });
           // Register refresh callback
           api.setOnRefresh(() => state.refreshAccessToken());
           state.setHydrated();

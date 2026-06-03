@@ -13,6 +13,7 @@ import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { leaderboardService } from '../services';
+import { track } from '../services/analytics';
 
 interface Props {
   visible: boolean;
@@ -75,6 +76,7 @@ export function StudyReceiptModal({
         mimeType: 'image/png',
         dialogTitle: t('receipt.shareTitle'),
       });
+      track('receipt_shared');
     } catch (e: any) {
       Alert.alert(t('common.error'), e?.message ?? t('receipt.shareFailed'));
     } finally {
