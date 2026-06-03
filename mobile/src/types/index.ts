@@ -151,6 +151,20 @@ export interface HeatmapResponse {
   currentStreak: number;
 }
 
+export interface CountryEntry {
+  rank: number;
+  country: string;       // ISO 3166-1 alpha-2 (uppercase)
+  totalMinutes: number;
+  userCount: number;
+}
+
+export interface CountriesInfo {
+  entries: CountryEntry[];
+  myCountry: string | null;
+  myCountryRank: number | null;
+  myContribution: number;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   userId: string;

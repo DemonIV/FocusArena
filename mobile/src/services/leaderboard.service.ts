@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { LeaderboardEntry, LeaderboardPeriod, MyRankInfo } from '../types';
+import type { LeaderboardEntry, LeaderboardPeriod, MyRankInfo, CountriesInfo, CountryEntry } from '../types';
 
 // ── Raw API shapes ─────────────────────────────────────────────────
 interface RawEntry {
@@ -93,4 +93,24 @@ export const leaderboardService = {
       pointsToNextRank: data.pointsToNextRank,
     };
   },
+
+  /** Weekly Country Wars — totals per country + caller's contribution */
+  getCountries: async (): Promise<CountriesInfo> => {
+    const data = await api.get<{
+      entries: CountryEntry[];
+      myCountry: string | null;
+      myCountryRank: number | null;
+      myContribution: number;
+    }>('/leaderboard/countries');
+    return {
+      entries: data.entries ?? [],
+      myCountry: data.myCountry,
+      myCountryRank: data.myCountryRank,
+      myContribution: data.myContribution ?? 0,
+    };
+  },
+
+  /** Persist the caller's country (ISO 3166-1 alpha-2) — best-effort */
+  setCountry: (country: string): Promise<{ ok: boolean }> =>
+    api.put<{ ok: boolean }>('/leaderboard/country', { country }),
 };

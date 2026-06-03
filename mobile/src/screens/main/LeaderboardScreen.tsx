@@ -13,7 +13,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { leaderboardService } from '../../services';
 import { useSocketStore } from '../../stores';
-import type { LeaderboardPeriod, LeaderboardEntry, MyRankInfo } from '../../types';
+import { formatDuration } from '../../utils/formatTime';
+import i18n from '../../i18n';
+import type { LeaderboardPeriod, LeaderboardEntry, MyRankInfo, CountryEntry } from '../../types';
 
 const PERIODS: { key: LeaderboardPeriod; labelKey: string }[] = [
   { key: 'daily', labelKey: 'leaderboard.today' },
@@ -26,6 +28,23 @@ const MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 function unitLabel(unit: string, t: (k: string) => string): string {
   return unit === 'min' ? t('common.minShort') : unit;
+}
+
+/** ISO 3166-1 alpha-2 → flag emoji (regional indicator symbols). */
+function flagEmoji(iso: string): string {
+  const cc = iso.toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc)) return '🏳️';
+  return String.fromCodePoint(...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+}
+
+/** Localized country name, falling back to the ISO code on unsupported engines. */
+function countryName(iso: string): string {
+  try {
+    const dn = new Intl.DisplayNames([i18n.language], { type: 'region' });
+    return dn.of(iso.toUpperCase()) ?? iso.toUpperCase();
+  } catch {
+    return iso.toUpperCase();
+  }
 }
 
 function RankRow({ entry }: { entry: LeaderboardEntry }) {
@@ -120,10 +139,35 @@ function MyRankHeader({ info }: { info: MyRankInfo }) {
   );
 }
 
+function CountryRow({ entry, isMine }: { entry: CountryEntry; isMine: boolean }) {
+  const medal = MEDAL[entry.rank];
+  return (
+    <View style={[styles.row, isMine && styles.rowMe]}>
+      <View style={styles.rankCol}>
+        {medal ? <Text style={styles.medal}>{medal}</Text> : <Text style={styles.rankNum}>{entry.rank}</Text>}
+      </View>
+      <Text style={styles.flag}>{flagEmoji(entry.country)}</Text>
+      <View style={styles.userInfo}>
+        <Text style={styles.username} numberOfLines={1}>{countryName(entry.country)}</Text>
+        <Text style={styles.score}>{formatDuration(entry.totalMinutes)}</Text>
+      </View>
+      {isMine && <View style={styles.meDot} />}
+    </View>
+  );
+}
+
 export function LeaderboardScreen() {
   const { t } = useTranslation();
+  const [mode, setMode] = useState<'players' | 'countries'>('players');
   const [period, setPeriod] = useState<LeaderboardPeriod>('weekly');
   const top10Live = useSocketStore((s) => s.top10);
+
+  const countriesQ = useQuery({
+    queryKey: ['lb-countries'],
+    queryFn: () => leaderboardService.getCountries(),
+    staleTime: 60_000,
+    enabled: mode === 'countries',
+  });
 
   const globalQ = useQuery({
     queryKey: ['lb-global', period],
@@ -152,55 +196,128 @@ export function LeaderboardScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Period tabs */}
-      <View style={styles.tabRow}>
-        {PERIODS.map((p) => (
-          <TouchableOpacity
-            key={p.key}
-            style={[styles.tab, period === p.key && styles.tabActive]}
-            onPress={() => setPeriod(p.key)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, period === p.key && styles.tabTextActive]}>
-              {t(p.labelKey)}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      {/* Mode toggle: Players ↔ Countries */}
+      <View style={styles.modeRow}>
+        <TouchableOpacity
+          style={[styles.modeTab, mode === 'players' && styles.modeTabActive]}
+          onPress={() => setMode('players')}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.modeText, mode === 'players' && styles.modeTextActive]}>
+            🏆 {t('leaderboard.players')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeTab, mode === 'countries' && styles.modeTabActive]}
+          onPress={() => setMode('countries')}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.modeText, mode === 'countries' && styles.modeTextActive]}>
+            🌍 {t('leaderboard.countries')}
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {isLoading ? (
-        <ActivityIndicator color="#00d2ff" style={{ marginTop: 40 }} />
-      ) : (
-        <FlatList
-          data={globalData}
-          keyExtractor={(item) => item.userId}
-          renderItem={({ item }) => <RankRow entry={item} />}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <>
-              {meQ.data && <MyRankHeader info={meQ.data} />}
-              <Text style={styles.sectionLabel}>{t('leaderboard.globalTop10')}</Text>
-            </>
-          }
-          ListFooterComponent={
-            friendsQ.data && friendsQ.data.length > 0 ? (
-              <>
-                <Text style={[styles.sectionLabel, { marginTop: 24 }]}>{t('leaderboard.friends')}</Text>
-                {friendsQ.data.map((entry) => (
-                  <RankRow key={entry.userId} entry={entry} />
-                ))}
-              </>
-            ) : null
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={globalQ.isFetching}
-              onRefresh={() => { globalQ.refetch(); friendsQ.refetch(); }}
-              tintColor="#00d2ff"
+      {mode === 'players' ? (
+        <>
+          {/* Period tabs */}
+          <View style={styles.tabRow}>
+            {PERIODS.map((p) => (
+              <TouchableOpacity
+                key={p.key}
+                style={[styles.tab, period === p.key && styles.tabActive]}
+                onPress={() => setPeriod(p.key)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.tabText, period === p.key && styles.tabTextActive]}>
+                  {t(p.labelKey)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {isLoading ? (
+            <ActivityIndicator color="#00d2ff" style={{ marginTop: 40 }} />
+          ) : (
+            <FlatList
+              data={globalData}
+              keyExtractor={(item) => item.userId}
+              renderItem={({ item }) => <RankRow entry={item} />}
+              contentContainerStyle={styles.list}
+              showsVerticalScrollIndicator={false}
+              ListHeaderComponent={
+                <>
+                  {meQ.data && <MyRankHeader info={meQ.data} />}
+                  <Text style={styles.sectionLabel}>{t('leaderboard.globalTop10')}</Text>
+                </>
+              }
+              ListFooterComponent={
+                friendsQ.data && friendsQ.data.length > 0 ? (
+                  <>
+                    <Text style={[styles.sectionLabel, { marginTop: 24 }]}>{t('leaderboard.friends')}</Text>
+                    {friendsQ.data.map((entry) => (
+                      <RankRow key={entry.userId} entry={entry} />
+                    ))}
+                  </>
+                ) : null
+              }
+              refreshControl={
+                <RefreshControl
+                  refreshing={globalQ.isFetching}
+                  onRefresh={() => { globalQ.refetch(); friendsQ.refetch(); }}
+                  tintColor="#00d2ff"
+                />
+              }
             />
-          }
-        />
+          )}
+        </>
+      ) : (
+        countriesQ.isLoading ? (
+          <ActivityIndicator color="#00d2ff" style={{ marginTop: 40 }} />
+        ) : (
+          <FlatList
+            data={countriesQ.data?.entries ?? []}
+            keyExtractor={(c) => c.country}
+            renderItem={({ item }) => (
+              <CountryRow entry={item} isMine={item.country === countriesQ.data?.myCountry} />
+            )}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={
+              <>
+                {countriesQ.data?.myCountry && (
+                  <View style={styles.myCountryCard}>
+                    <Text style={styles.myCountryFlag}>{flagEmoji(countriesQ.data.myCountry)}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.myRankLabel}>{t('leaderboard.yourCountry')}</Text>
+                      <Text style={styles.myRankHint}>
+                        {t('leaderboard.countryContribution', {
+                          duration: formatDuration(countriesQ.data.myContribution),
+                        })}
+                      </Text>
+                    </View>
+                    {countriesQ.data.myCountryRank != null && (
+                      <Text style={styles.myRankVal}>
+                        {MEDAL[countriesQ.data.myCountryRank] ?? `#${countriesQ.data.myCountryRank}`}
+                      </Text>
+                    )}
+                  </View>
+                )}
+                <Text style={styles.sectionLabel}>{t('leaderboard.countryWars')}</Text>
+              </>
+            }
+            ListEmptyComponent={
+              <Text style={styles.emptyCountries}>{t('leaderboard.noCountryData')}</Text>
+            }
+            refreshControl={
+              <RefreshControl
+                refreshing={countriesQ.isFetching}
+                onRefresh={() => countriesQ.refetch()}
+                tintColor="#00d2ff"
+              />
+            }
+          />
+        )
       )}
     </View>
   );
@@ -219,10 +336,29 @@ const MUTED2 = '#94a3b8';
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: BG },
 
-  tabRow: {
+  modeRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingTop: 16,
+    gap: 8,
+  },
+  modeTab: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: CARD,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  modeTabActive: { backgroundColor: `${ACCENT}22`, borderColor: ACCENT },
+  modeText: { color: MUTED, fontSize: 14, fontWeight: '700' },
+  modeTextActive: { color: ACCENT },
+
+  tabRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 12,
     gap: 8,
   },
   tab: {
@@ -323,4 +459,22 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: PINK,
   },
+
+  // Country Wars
+  flag: { fontSize: 28, width: 40, textAlign: 'center' },
+  myCountryCard: {
+    backgroundColor: CARD,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderLeftWidth: 3,
+    borderLeftColor: ACCENT,
+  },
+  myCountryFlag: { fontSize: 34 },
+  emptyCountries: { color: MUTED, fontSize: 14, textAlign: 'center', marginTop: 40, paddingHorizontal: 32 },
 });

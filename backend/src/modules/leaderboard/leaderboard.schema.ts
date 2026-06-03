@@ -17,8 +17,13 @@ export const PeriodQuerySchema = z.object({
   period: z.enum(PERIODS).default('weekly'),
 });
 
+export const SetCountrySchema = z.object({
+  country: z.string().regex(/^[A-Za-z]{2}$/, 'Country must be a 2-letter ISO code'),
+});
+
 export type GlobalQuery = z.infer<typeof GlobalQuerySchema>;
 export type PeriodQuery = z.infer<typeof PeriodQuerySchema>;
+export type SetCountryBody = z.infer<typeof SetCountrySchema>;
 
 // ─── Response Types ───────────────────────────────────────────
 
@@ -55,6 +60,27 @@ export interface MyRankNeighbor {
   avatar_url: string | null;
   score: number;
   isMe: boolean;
+}
+
+// ─── Country Wars ─────────────────────────────────────────────
+
+export interface CountryEntry {
+  rank: number;
+  country: string;       // ISO 3166-1 alpha-2 (uppercase)
+  totalMinutes: number;
+  userCount: number;
+}
+
+export interface CountriesResponse {
+  /** Weekly totals per country, sorted desc */
+  entries: CountryEntry[];
+  /** Caller's own country, if set */
+  myCountry: string | null;
+  /** Rank of the caller's country (null if unset / no activity) */
+  myCountryRank: number | null;
+  /** Caller's own focus minutes this week */
+  myContribution: number;
+  cachedAt: string;
 }
 
 export interface MyRankResponse {

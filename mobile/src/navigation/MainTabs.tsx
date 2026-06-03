@@ -3,7 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { MainTabParamList } from '../types';
-import { registerForPushNotifications } from '../services';
+import * as Localization from 'expo-localization';
+import { registerForPushNotifications, leaderboardService } from '../services';
 import {
   HomeScreen,
   TimerScreen,
@@ -39,6 +40,12 @@ export function MainTabs() {
   // Register this device for push notifications once the user is in the app.
   useEffect(() => {
     void registerForPushNotifications();
+
+    // Auto-report the device's country for Country Wars (best-effort).
+    const region = Localization.getLocales()[0]?.regionCode;
+    if (region && /^[A-Za-z]{2}$/.test(region)) {
+      leaderboardService.setCountry(region).catch(() => { /* ignore */ });
+    }
   }, []);
 
   return (

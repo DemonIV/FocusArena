@@ -5,6 +5,8 @@ import type {
   GlobalLeaderboardResponse,
   FriendsLeaderboardResponse,
   MyRankResponse,
+  CountryEntry,
+  CountriesResponse,
 } from './leaderboard.schema';
 
 // ─── Cache TTLs (seconds) ─────────────────────────────────────
@@ -24,6 +26,7 @@ const MAX_RANKED = 1000;
 const cacheKey = {
   global: (period: Period) => `lb:global:${period}`,
   friends: (userId: string, period: Period) => `lb:friends:${userId}:${period}`,
+  countries: () => `lb:countries:weekly`,
 };
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -340,4 +343,90 @@ export async function getTop10ForSocket(period: Period): Promise<LeaderboardEntr
  */
 export async function invalidateCache(period: Period): Promise<void> {
   await redis.del(cacheKey.global(period));
+}
+
+// ─── Country Wars ─────────────────────────────────────────────
+
+/** Store the caller's country (ISO 3166-1 alpha-2, uppercased). */
+export async function setUserCountry(userId: string, country: string): Promise<void> {
+  const { error } = await supabase
+    .from('users')
+    .update({ country: country.toUpperCase() })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+}
+
+/** Weekly focus minutes aggregated per country (cached). */
+async function fetchCountryList(): Promise<CountryEntry[]> {
+  const cached = await redis.get(cacheKey.countries());
+  if (cached) return JSON.parse(cached) as CountryEntry[];
+
+  const range = periodRange('weekly')!;
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('user_id, duration_minutes, users!inner(country)')
+    .gte('started_at', range.start.toISOString())
+    .lt('started_at', range.end.toISOString())
+    .limit(50_000);
+
+  if (error) throw new Error(error.message);
+
+  const map = new Map<string, { minutes: number; users: Set<string> }>();
+  for (const row of data ?? []) {
+    const u = row.users as unknown as { country: string | null };
+    const c = u.country;
+    if (!c) continue;
+    const entry = map.get(c) ?? { minutes: 0, users: new Set<string>() };
+    entry.minutes += row.duration_minutes;
+    entry.users.add(row.user_id);
+    map.set(c, entry);
+  }
+
+  const sorted = [...map.entries()]
+    .map(([country, v]) => ({ country, totalMinutes: v.minutes, userCount: v.users.size }))
+    .sort((a, b) => b.totalMinutes - a.totalMinutes);
+
+  // Competition ranking on totalMinutes
+  let rank = 1;
+  const list: CountryEntry[] = sorted.map((e, i) => {
+    if (i > 0 && e.totalMinutes < sorted[i - 1].totalMinutes) rank = i + 1;
+    return { rank, ...e };
+  });
+
+  await redis.set(cacheKey.countries(), JSON.stringify(list), 'EX', CACHE_TTL.weekly);
+  return list;
+}
+
+/** Caller's own focus minutes this week (uncapped, direct query). */
+async function weeklyMinutesForUser(userId: string): Promise<number> {
+  const range = periodRange('weekly')!;
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('duration_minutes')
+    .eq('user_id', userId)
+    .gte('started_at', range.start.toISOString())
+    .lt('started_at', range.end.toISOString());
+  if (error) throw new Error(error.message);
+  return (data ?? []).reduce((s, r) => s + r.duration_minutes, 0);
+}
+
+export async function getCountryWars(userId: string): Promise<CountriesResponse> {
+  const [list, userRes, myContribution] = await Promise.all([
+    fetchCountryList(),
+    supabase.from('users').select('country').eq('id', userId).single(),
+    weeklyMinutesForUser(userId),
+  ]);
+
+  const myCountry = (userRes.data?.country as string | null) ?? null;
+  const myCountryRank = myCountry
+    ? list.find((e) => e.country === myCountry)?.rank ?? null
+    : null;
+
+  return {
+    entries: list,
+    myCountry,
+    myCountryRank,
+    myContribution,
+    cachedAt: new Date().toISOString(),
+  };
 }
