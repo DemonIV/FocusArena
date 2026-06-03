@@ -345,6 +345,10 @@ export async function invalidateCache(period: Period): Promise<void> {
   await redis.del(cacheKey.global(period));
 }
 
+export async function invalidateCountries(): Promise<void> {
+  await redis.del(cacheKey.countries());
+}
+
 // ─── Country Wars ─────────────────────────────────────────────
 
 /** Store the caller's country (ISO 3166-1 alpha-2, uppercased). */

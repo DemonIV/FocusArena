@@ -1,5 +1,5 @@
 import { supabase, redis } from '../../shared';
-import { invalidateCache } from '../leaderboard';
+import { invalidateCache, invalidateCountries } from '../leaderboard';
 import { checkAndAward } from '../achievements';
 import { addStudyMinutesToRooms } from '../rooms/rooms.service';
 import { getSocketServer } from '../../websocket';
@@ -232,12 +232,14 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
 
   const result = await awardXpAndStreak(userId, state.sessionId, durationMinutes);
 
-  // Bust leaderboard caches for all time-windowed periods (fire-and-forget)
+  // Bust leaderboard and aggregate caches (fire-and-forget)
   void Promise.allSettled([
     invalidateCache('daily'),
     invalidateCache('weekly'),
     invalidateCache('monthly'),
     invalidateCache('alltime'),
+    invalidateCountries(),              // Country Wars weekly aggregate
+    redis.del(BOSS_CACHE_KEY),         // Boss Battle weekly total
   ]);
 
   return result;

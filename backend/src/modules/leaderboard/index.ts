@@ -5,4 +5,4 @@ export const leaderboardModule: FastifyPluginAsync = async (fastify) => {
   await fastify.register(leaderboardRoutes);
 };
 
-export { getTop10ForSocket, invalidateCache } from './leaderboard.service';
+export { getTop10ForSocket, invalidateCache, invalidateCountries } from './leaderboard.service';
