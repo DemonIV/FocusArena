@@ -9,6 +9,7 @@ import type {
   StopTimerResult,
   TimerStats,
   DailyStat,
+  HeatmapResponse,
   CreateSubjectBody,
   UpdateSubjectBody,
   SessionQuery,
@@ -462,6 +463,54 @@ export async function getStats(userId: string): Promise<TimerStats> {
   };
 
   return { today, week, allTime };
+}
+
+/**
+ * Daily focus minutes for the last `days` days (default 30), for a
+ * GitHub-contribution-style heat map. Gaps are filled with 0 so the grid is
+ * always contiguous. Also returns the current/longest streak for the legend.
+ */
+export async function getActivityHeatmap(userId: string, days = 30): Promise<HeatmapResponse> {
+  const span = Math.min(Math.max(Math.trunc(days), 1), 366);
+
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setUTCHours(0, 0, 0, 0);
+  const rangeStart = new Date(todayStart.getTime() - (span - 1) * 86_400_000);
+  const tomorrowStart = new Date(todayStart.getTime() + 86_400_000);
+
+  const [sessionsRes, userRes] = await Promise.all([
+    supabase
+      .from('sessions')
+      .select('started_at, duration_minutes')
+      .eq('user_id', userId)
+      .gte('started_at', rangeStart.toISOString())
+      .lt('started_at', tomorrowStart.toISOString()),
+    supabase
+      .from('users')
+      .select('streak, longest_streak')
+      .eq('id', userId)
+      .single(),
+  ]);
+
+  // Seed every day in range with 0, then accumulate
+  const byDate = new Map<string, number>();
+  for (let d = 0; d < span; d++) {
+    const key = new Date(rangeStart.getTime() + d * 86_400_000).toISOString().slice(0, 10);
+    byDate.set(key, 0);
+  }
+  for (const row of sessionsRes.data ?? []) {
+    const key = new Date(row.started_at).toISOString().slice(0, 10);
+    if (byDate.has(key)) byDate.set(key, (byDate.get(key) ?? 0) + row.duration_minutes);
+  }
+
+  const daysList = [...byDate.entries()].map(([date, totalMinutes]) => ({ date, totalMinutes }));
+
+  return {
+    days: daysList,
+    longestStreak: userRes.data?.longest_streak ?? 0,
+    currentStreak: userRes.data?.streak ?? 0,
+  };
 }
 
 // ─── Subjects ─────────────────────────────────────────────────

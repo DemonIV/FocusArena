@@ -16,7 +16,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
-import { StatCard } from '../../components';
+import { StatCard, StreakHeatmap } from '../../components';
 import { timerService, achievementsService, roomsService } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
@@ -76,6 +76,11 @@ export function ProfileScreen() {
   const subjectStatsQ = useQuery({
     queryKey: ['subject-stats'],
     queryFn: () => timerService.getSubjectStats(),
+  });
+
+  const heatmapQ = useQuery({
+    queryKey: ['timer-heatmap'],
+    queryFn: () => timerService.getHeatmap(30),
   });
 
   const myRoomsQ = useQuery({
@@ -209,6 +214,7 @@ export function ProfileScreen() {
               statsQ.refetch();
               achievQ.refetch();
               subjectStatsQ.refetch();
+              heatmapQ.refetch();
             }}
             tintColor={ACCENT}
           />
@@ -251,6 +257,15 @@ export function ProfileScreen() {
             <Text style={styles.streakText}>{t('profile.longestStreak', { count: longestStreak })}</Text>
           </View>
         </View>
+
+        {/* ── Streak Heat Map ── */}
+        {heatmapQ.data && heatmapQ.data.days.length > 0 && (
+          <StreakHeatmap
+            days={heatmapQ.data.days}
+            currentStreak={heatmapQ.data.currentStreak}
+            longestStreak={heatmapQ.data.longestStreak}
+          />
+        )}
 
         {/* ── Stats Grid ── */}
         <Text style={styles.sectionLabel}>{t('profile.statistics')}</Text>

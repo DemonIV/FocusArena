@@ -81,6 +81,18 @@ export interface DailyStat {
   completedSessions: number;
 }
 
+/** One day in the activity heat map (GitHub-contribution style). */
+export interface HeatmapDay {
+  date: string;               // YYYY-MM-DD (UTC)
+  totalMinutes: number;
+}
+
+export interface HeatmapResponse {
+  days: HeatmapDay[];         // ascending by date, gaps filled with 0
+  longestStreak: number;
+  currentStreak: number;
+}
+
 export interface TimerStats {
   today: {
     totalMinutes: number;

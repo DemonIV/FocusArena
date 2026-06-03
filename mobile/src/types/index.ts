@@ -138,6 +138,17 @@ export interface TimerStats {
   };
 }
 
+export interface HeatmapDay {
+  date: string;          // YYYY-MM-DD (UTC)
+  totalMinutes: number;
+}
+
+export interface HeatmapResponse {
+  days: HeatmapDay[];    // ascending by date, gaps filled with 0
+  longestStreak: number;
+  currentStreak: number;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   userId: string;

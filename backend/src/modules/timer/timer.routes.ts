@@ -15,6 +15,7 @@ import {
   getTimerStatus,
   getSessions,
   getStats,
+  getActivityHeatmap,
   getSubjectStats,
   getSubjects,
   createSubject,
@@ -145,6 +146,20 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(stats);
     } catch (err) {
       request.log.error(err, 'timer/stats failed');
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** GET /timer/heatmap?days=30 — daily focus minutes for the activity calendar */
+  fastify.get('/heatmap', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    const { days } = request.query as { days?: string };
+    const parsedDays = days ? parseInt(days, 10) : 30;
+    try {
+      const heatmap = await getActivityHeatmap(userId, Number.isFinite(parsedDays) ? parsedDays : 30);
+      return reply.send(heatmap);
+    } catch (err) {
+      request.log.error(err, 'timer/heatmap failed');
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

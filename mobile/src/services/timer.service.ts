@@ -3,6 +3,7 @@ import type {
   TimerStatusResponse,
   StopTimerResult,
   TimerStats,
+  HeatmapResponse,
   Subject,
   SubjectStat,
   Session,
@@ -42,6 +43,10 @@ export const timerService = {
   /** Flat stats for profile/home screens */
   getStats: () =>
     api.get<TimerStats>('/timer/stats'),
+
+  /** Daily focus minutes for the activity heat map (default last 30 days) */
+  getHeatmap: (days = 30) =>
+    api.get<HeatmapResponse>(`/timer/heatmap?days=${days}`),
 
   // ── Subjects ─────────────────────────────────────────────
   /** Returns subjects array directly */
