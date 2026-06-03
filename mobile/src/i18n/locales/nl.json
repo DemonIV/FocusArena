@@ -49,6 +49,25 @@
     "friends": "Vrienden",
     "profile": "Profiel"
   },
+  "onboarding": {
+    "skip": "Overslaan",
+    "step1Title": "Wat studeer je?",
+    "step1Subtitle": "Maak je eerste vak aan om je focustijd bij te houden.",
+    "subjectExample": "bijv. Wiskunde",
+    "subjectPlaceholder": "Naam van het vak",
+    "icon": "Pictogram",
+    "color": "Kleur",
+    "step2Title": "Stel je dagdoel in",
+    "step2Subtitle": "Hoe lang wil je je elke dag concentreren?",
+    "perDay": "per dag",
+    "step3Title": "Vind je vrienden",
+    "step3Subtitle": "Studeer samen en blijf gemotiveerd.",
+    "back": "Terug",
+    "continue": "Doorgaan",
+    "finish": "Beginnen",
+    "nameRequired": "Voer een vaknaam in.",
+    "createFailed": "Kon vak niet aanmaken."
+  },
   "home": {
     "welcomeBack": "Welkom terug,",
     "level": "Lv {{level}}",

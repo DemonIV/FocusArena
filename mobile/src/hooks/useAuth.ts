@@ -1,5 +1,6 @@
 import { useAuthStore } from '../stores/authStore';
 import { useSocketStore } from '../stores/socketStore';
+import { useOnboardingStore } from '../stores/onboardingStore';
 import { unregisterPushNotifications } from '../services';
 
 export function useAuth() {
@@ -21,6 +22,9 @@ export function useAuth() {
   const handleLogout = async () => {
     await unregisterPushNotifications();
     disconnect();
+    // Re-evaluate onboarding for whoever logs in next on this device
+    // (existing users auto-skip via the subjects check).
+    useOnboardingStore.getState().reset();
     await logout();
   };
 

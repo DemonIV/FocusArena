@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuthStore } from './src/stores';
+import { useAuthStore, useOnboardingStore } from './src/stores';
 import { RootNavigator } from './src/navigation';
 import './src/i18n'; // initialise i18next (device language + saved preference)
 
@@ -18,13 +18,15 @@ const queryClient = new QueryClient({
 
 function AppInner() {
   const isHydrated = useAuthStore((s) => s.isHydrated);
+  const onbHydrated = useOnboardingStore((s) => s.isHydrated);
 
   useEffect(() => {
     // Trigger MMKV → Zustand hydration
     void useAuthStore.persist.rehydrate();
+    void useOnboardingStore.persist.rehydrate();
   }, []);
 
-  if (!isHydrated) {
+  if (!isHydrated || !onbHydrated) {
     // Wait for persisted state to load before rendering navigator
     return null;
   }

@@ -49,6 +49,25 @@
     "friends": "Znajomi",
     "profile": "Profil"
   },
+  "onboarding": {
+    "skip": "Pomiń",
+    "step1Title": "Czego się uczysz?",
+    "step1Subtitle": "Utwórz swój pierwszy przedmiot, aby śledzić czas skupienia.",
+    "subjectExample": "np. Matematyka",
+    "subjectPlaceholder": "Nazwa przedmiotu",
+    "icon": "Ikona",
+    "color": "Kolor",
+    "step2Title": "Ustaw swój cel dzienny",
+    "step2Subtitle": "Jak długo chcesz się codziennie skupiać?",
+    "perDay": "dziennie",
+    "step3Title": "Znajdź znajomych",
+    "step3Subtitle": "Uczcie się razem i bądźcie zmotywowani.",
+    "back": "Wstecz",
+    "continue": "Dalej",
+    "finish": "Zaczynaj",
+    "nameRequired": "Podaj nazwę przedmiotu.",
+    "createFailed": "Nie udało się utworzyć przedmiotu."
+  },
   "home": {
     "welcomeBack": "Witaj ponownie,",
     "level": "Poz {{level}}",

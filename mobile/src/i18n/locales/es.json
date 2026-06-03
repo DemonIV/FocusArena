@@ -49,6 +49,25 @@
     "friends": "Amigos",
     "profile": "Perfil"
   },
+  "onboarding": {
+    "skip": "Omitir",
+    "step1Title": "¿Qué estudias?",
+    "step1Subtitle": "Crea tu primera asignatura para empezar a registrar tu tiempo de concentración.",
+    "subjectExample": "p. ej. Matemáticas",
+    "subjectPlaceholder": "Nombre de la asignatura",
+    "icon": "Icono",
+    "color": "Color",
+    "step2Title": "Define tu meta diaria",
+    "step2Subtitle": "¿Cuánto quieres concentrarte cada día?",
+    "perDay": "por día",
+    "step3Title": "Encuentra a tus amigos",
+    "step3Subtitle": "Estudien juntos y manténganse motivados.",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "finish": "Empezar",
+    "nameRequired": "Introduce un nombre de asignatura.",
+    "createFailed": "No se pudo crear la asignatura."
+  },
   "home": {
     "welcomeBack": "Bienvenido de nuevo,",
     "level": "Nv {{level}}",

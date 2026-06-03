@@ -2,8 +2,8 @@ import React from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList, AuthStackParamList } from '../types';
-import { useAuthStore } from '../stores';
-import { LoginScreen, RegisterScreen } from '../screens';
+import { useAuthStore, useOnboardingStore } from '../stores';
+import { LoginScreen, RegisterScreen, OnboardingScreen } from '../screens';
 import { MainTabs } from './MainTabs';
 
 const Root = createNativeStackNavigator<RootStackParamList>();
@@ -36,13 +36,17 @@ export function RootNavigator() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const isAuthenticated = !!user && !!accessToken;
 
+  const onboardingDone = useOnboardingStore((s) => s.completed);
+
   return (
     <NavigationContainer theme={AppTheme}>
       <Root.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <Root.Screen name="Main" component={MainTabs} />
-        ) : (
+        {!isAuthenticated ? (
           <Root.Screen name="Auth" component={AuthStack} />
+        ) : !onboardingDone ? (
+          <Root.Screen name="Onboarding" component={OnboardingScreen} />
+        ) : (
+          <Root.Screen name="Main" component={MainTabs} />
         )}
       </Root.Navigator>
     </NavigationContainer>

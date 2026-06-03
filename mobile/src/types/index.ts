@@ -5,6 +5,7 @@ export type { BadgeType, Achievement, Friendship, MemberStatus } from 'focusaren
 
 export type RootStackParamList = {
   Auth: undefined;
+  Onboarding: undefined;
   Main: undefined;
 };
 

@@ -49,6 +49,25 @@
     "friends": "Amis",
     "profile": "Profil"
   },
+  "onboarding": {
+    "skip": "Passer",
+    "step1Title": "Qu’étudies-tu ?",
+    "step1Subtitle": "Crée ta première matière pour suivre ton temps de concentration.",
+    "subjectExample": "ex. Mathématiques",
+    "subjectPlaceholder": "Nom de la matière",
+    "icon": "Icône",
+    "color": "Couleur",
+    "step2Title": "Définis ton objectif quotidien",
+    "step2Subtitle": "Combien de temps veux-tu te concentrer chaque jour ?",
+    "perDay": "par jour",
+    "step3Title": "Trouve tes amis",
+    "step3Subtitle": "Étudiez ensemble et restez motivés.",
+    "back": "Retour",
+    "continue": "Continuer",
+    "finish": "Commencer",
+    "nameRequired": "Saisis un nom de matière.",
+    "createFailed": "Impossible de créer la matière."
+  },
   "home": {
     "welcomeBack": "Bon retour,",
     "level": "Niv {{level}}",

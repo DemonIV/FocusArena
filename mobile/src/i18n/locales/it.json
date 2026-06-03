@@ -49,6 +49,25 @@
     "friends": "Amici",
     "profile": "Profilo"
   },
+  "onboarding": {
+    "skip": "Salta",
+    "step1Title": "Cosa studi?",
+    "step1Subtitle": "Crea la tua prima materia per iniziare a tracciare il tempo di concentrazione.",
+    "subjectExample": "es. Matematica",
+    "subjectPlaceholder": "Nome della materia",
+    "icon": "Icona",
+    "color": "Colore",
+    "step2Title": "Imposta il tuo obiettivo giornaliero",
+    "step2Subtitle": "Quanto vuoi concentrarti ogni giorno?",
+    "perDay": "al giorno",
+    "step3Title": "Trova i tuoi amici",
+    "step3Subtitle": "Studiate insieme e restate motivati.",
+    "back": "Indietro",
+    "continue": "Continua",
+    "finish": "Inizia",
+    "nameRequired": "Inserisci un nome per la materia.",
+    "createFailed": "Impossibile creare la materia."
+  },
   "home": {
     "welcomeBack": "Bentornato,",
     "level": "Lv {{level}}",

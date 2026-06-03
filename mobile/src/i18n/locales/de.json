@@ -49,6 +49,25 @@
     "friends": "Freunde",
     "profile": "Profil"
   },
+  "onboarding": {
+    "skip": "Überspringen",
+    "step1Title": "Was lernst du?",
+    "step1Subtitle": "Erstelle dein erstes Fach, um deine Lernzeit zu verfolgen.",
+    "subjectExample": "z. B. Mathematik",
+    "subjectPlaceholder": "Fachname",
+    "icon": "Symbol",
+    "color": "Farbe",
+    "step2Title": "Setze dein Tagesziel",
+    "step2Subtitle": "Wie lange möchtest du täglich lernen?",
+    "perDay": "pro Tag",
+    "step3Title": "Finde deine Freunde",
+    "step3Subtitle": "Lernt zusammen und bleibt motiviert.",
+    "back": "Zurück",
+    "continue": "Weiter",
+    "finish": "Los geht’s",
+    "nameRequired": "Bitte gib einen Fachnamen ein.",
+    "createFailed": "Fach konnte nicht erstellt werden."
+  },
   "home": {
     "welcomeBack": "Willkommen zurück,",
     "level": "Lv {{level}}",

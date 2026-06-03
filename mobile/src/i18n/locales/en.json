@@ -49,6 +49,25 @@
     "friends": "Friends",
     "profile": "Profile"
   },
+  "onboarding": {
+    "skip": "Skip",
+    "step1Title": "What do you study?",
+    "step1Subtitle": "Create your first subject to start tracking focus time.",
+    "subjectExample": "e.g. Mathematics",
+    "subjectPlaceholder": "Subject name",
+    "icon": "Icon",
+    "color": "Color",
+    "step2Title": "Set your daily goal",
+    "step2Subtitle": "How long do you want to focus each day?",
+    "perDay": "per day",
+    "step3Title": "Find your friends",
+    "step3Subtitle": "Study together and stay motivated.",
+    "back": "Back",
+    "continue": "Continue",
+    "finish": "Get started",
+    "nameRequired": "Please enter a subject name.",
+    "createFailed": "Could not create subject."
+  },
   "home": {
     "welcomeBack": "Welcome back,",
     "level": "Lv {{level}}",

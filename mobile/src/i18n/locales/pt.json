@@ -49,6 +49,25 @@
     "friends": "Amigos",
     "profile": "Perfil"
   },
+  "onboarding": {
+    "skip": "Pular",
+    "step1Title": "O que você estuda?",
+    "step1Subtitle": "Crie sua primeira matéria para começar a registrar seu tempo de foco.",
+    "subjectExample": "ex. Matemática",
+    "subjectPlaceholder": "Nome da matéria",
+    "icon": "Ícone",
+    "color": "Cor",
+    "step2Title": "Defina sua meta diária",
+    "step2Subtitle": "Quanto tempo você quer focar por dia?",
+    "perDay": "por dia",
+    "step3Title": "Encontre seus amigos",
+    "step3Subtitle": "Estudem juntos e mantenham a motivação.",
+    "back": "Voltar",
+    "continue": "Continuar",
+    "finish": "Começar",
+    "nameRequired": "Digite um nome para a matéria.",
+    "createFailed": "Não foi possível criar a matéria."
+  },
   "home": {
     "welcomeBack": "Bem-vindo de volta,",
     "level": "Nv {{level}}",

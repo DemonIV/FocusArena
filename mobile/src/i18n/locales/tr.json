@@ -49,6 +49,25 @@
     "friends": "Arkadaşlar",
     "profile": "Profil"
   },
+  "onboarding": {
+    "skip": "Atla",
+    "step1Title": "Ne çalışıyorsun?",
+    "step1Subtitle": "Odak süreni takip etmeye başlamak için ilk konunu oluştur.",
+    "subjectExample": "örn. Matematik",
+    "subjectPlaceholder": "Konu adı",
+    "icon": "Simge",
+    "color": "Renk",
+    "step2Title": "Günlük hedefini belirle",
+    "step2Subtitle": "Her gün ne kadar odaklanmak istiyorsun?",
+    "perDay": "günde",
+    "step3Title": "Arkadaşlarını bul",
+    "step3Subtitle": "Birlikte çalış, motivasyonunu yüksek tut.",
+    "back": "Geri",
+    "continue": "Devam",
+    "finish": "Başla",
+    "nameRequired": "Lütfen bir konu adı gir.",
+    "createFailed": "Konu oluşturulamadı."
+  },
   "home": {
     "welcomeBack": "Tekrar hoş geldin,",
     "level": "Sv {{level}}",
