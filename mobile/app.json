@@ -29,7 +29,14 @@
     },
     "plugins": [
       "expo-task-manager",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#00d2ff"
+        }
+      ]
     ]
   }
 }

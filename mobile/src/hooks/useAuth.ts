@@ -1,5 +1,6 @@
 import { useAuthStore } from '../stores/authStore';
 import { useSocketStore } from '../stores/socketStore';
+import { unregisterPushNotifications } from '../services';
 
 export function useAuth() {
   const { user, isLoading, login, register, logout, accessToken } = useAuthStore();
@@ -18,6 +19,7 @@ export function useAuth() {
   };
 
   const handleLogout = async () => {
+    await unregisterPushNotifications();
     disconnect();
     await logout();
   };

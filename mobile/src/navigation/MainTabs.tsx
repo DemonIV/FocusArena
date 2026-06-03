@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { MainTabParamList } from '../types';
+import { registerForPushNotifications } from '../services';
 import {
   HomeScreen,
   TimerScreen,
@@ -34,6 +35,11 @@ const NAV_KEY: Record<string, string> = {
 
 export function MainTabs() {
   const { t } = useTranslation();
+
+  // Register this device for push notifications once the user is in the app.
+  useEffect(() => {
+    void registerForPushNotifications();
+  }, []);
 
   return (
     <Tab.Navigator

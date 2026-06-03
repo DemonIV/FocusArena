@@ -2,6 +2,7 @@ import Bull from 'bull';
 import Redis from 'ioredis';
 import { processLeaderboardTick } from './leaderboard-tick';
 import { processStreakReset } from './streak-reset';
+import { processStreakReminder } from './streak-reminder';
 import { processSessionCleanup } from './session-cleanup';
 
 // ─── Redis connection ─────────────────────────────────────────
@@ -30,9 +31,10 @@ const sharedJobOpts: Bull.JobOptions = {
 
 // ─── Queue Definitions ────────────────────────────────────────
 
-export const leaderboardQueue = new Bull('leaderboard-tick', { createClient, defaultJobOptions: sharedJobOpts });
-export const streakQueue      = new Bull('streak-reset',     { createClient, defaultJobOptions: sharedJobOpts });
-export const cleanupQueue     = new Bull('session-cleanup',  { createClient, defaultJobOptions: sharedJobOpts });
+export const leaderboardQueue    = new Bull('leaderboard-tick',  { createClient, defaultJobOptions: sharedJobOpts });
+export const streakQueue         = new Bull('streak-reset',      { createClient, defaultJobOptions: sharedJobOpts });
+export const streakReminderQueue = new Bull('streak-reminder',   { createClient, defaultJobOptions: sharedJobOpts });
+export const cleanupQueue        = new Bull('session-cleanup',   { createClient, defaultJobOptions: sharedJobOpts });
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -63,10 +65,12 @@ function registerProcessors(): void {
 
   streakQueue.process('streak-reset', processStreakReset);
 
+  streakReminderQueue.process('streak-reminder', processStreakReminder);
+
   cleanupQueue.process('session-cleanup', processSessionCleanup);
 
   // Global error logging for all queues
-  [leaderboardQueue, streakQueue, cleanupQueue].forEach((q) => {
+  [leaderboardQueue, streakQueue, streakReminderQueue, cleanupQueue].forEach((q) => {
     q.on('failed', (job, err) => {
       console.error(`[bull] Job ${q.name}#${job.id} failed:`, err.message);
     });
@@ -98,6 +102,15 @@ export async function startJobs(): Promise<void> {
     { attempts: 3, backoff: { type: 'exponential', delay: 10_000 } },
   );
 
+  // Streak reminder — every night at 20:00 UTC (~4h before the reset),
+  // nudging users whose streak is alive but unworked today.
+  await scheduleRepeat(
+    streakReminderQueue,
+    'streak-reminder',
+    { cron: '0 20 * * *', tz: 'UTC' },
+    { attempts: 2, backoff: { type: 'fixed', delay: 30_000 } },
+  );
+
   // Session cleanup — every 10 minutes
   await scheduleRepeat(
     cleanupQueue,
@@ -116,6 +129,7 @@ export async function stopJobs(): Promise<void> {
   await Promise.all([
     leaderboardQueue.close(),
     streakQueue.close(),
+    streakReminderQueue.close(),
     cleanupQueue.close(),
   ]);
 }
