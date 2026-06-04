@@ -24,7 +24,11 @@ export function initObservability(): void {
   if (POSTHOG_KEY) {
     posthog = new PostHog(POSTHOG_KEY, {
       host: POSTHOG_HOST,
-      flushAt: 20,
+      // The backend runs on Fly with auto_stop_machines + min_machines_running=0,
+      // so the process is suspended as soon as it goes idle — often before a
+      // batched flush (or the kill-grace shutdown flush) can complete. Send each
+      // event in its own request so it leaves the process during the live window.
+      flushAt: 1,
       flushInterval: 10_000,
     });
   }
