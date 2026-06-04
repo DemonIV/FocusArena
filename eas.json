@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 20.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SENTRY_DSN": "https://e18b4a942c67d2e05b35d2de931d6d93@o4511507854327808.ingest.de.sentry.io/4511507857670224",
+        "EXPO_PUBLIC_POSTHOG_KEY": "phc_sDvgQjbMj5FignbamDGEAyPvsVgrbdU4pjLQd7iG92cB",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://us.i.posthog.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SENTRY_DSN": "https://e18b4a942c67d2e05b35d2de931d6d93@o4511507854327808.ingest.de.sentry.io/4511507857670224",
+        "EXPO_PUBLIC_POSTHOG_KEY": "phc_sDvgQjbMj5FignbamDGEAyPvsVgrbdU4pjLQd7iG92cB",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://us.i.posthog.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

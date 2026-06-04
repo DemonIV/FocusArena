@@ -97,7 +97,7 @@ Ambient ses seçeneği (opsiyonel):
 → Expo AV ile local ses dosyaları
 → Premium özellik olabilir
 
-Oda içi mini leaderboard:
+Oda içi mini leaderboard:   
 1. Alex    2h 15m
 2. Sen     1h 45m  ◄
 3. Maria   1h 10m
@@ -187,3 +187,53 @@ Bu ay:
 8. Ghost Mode                        (daily motivation)
 9. Oda ambient ses                   (premium feature)
 10. Boss Battle sistemi              (weekly event)
+
+
+
+1. Sentry: 2 proje aç → Node (backend) + React Native (mobile), DSN'leri al.                                                                                                                                            
+    2. PostHog: 1 proje aç (cloud us/eu), Project API Key + host al.                                                                                                                                                       
+    3. Anahtarları bana ver → backend için fly secrets set …, mobile .env + EAS env'i ben dolduruyorum. bu adımları nasıl yapacağım                                                                                        
+    
+● Tamamı tarayıcıdan, ücretsiz planlarla yapılıyor. Adım adım:
+
+  1) Sentry — 2 proje
+
+  1. sentry.io → Get Started / Sign up (GitHub veya Google ile hızlı; ücretsiz "Developer" planı yeterli).
+  2. İlk açılışta bir organization ister → bir isim ver (örn. focusarena).
+  3. Backend projesi:
+    - Create Project (veya Projects → Create Project).
+    - Platform listesinden Node.js seç.
+    - Proje adı: focusarena-backend → Create Project.
+    - Açılan "Configure" ekranında DSN görünür (https://...@o....ingest.sentry.io/...). Bunu kopyala. → DSN #1
+  4. Mobil projesi:
+    - Tekrar Create Project → platform React Native → ad focusarena-mobile → Create.
+    - Yine DSN'i kopyala. → DSN #2
+
+  ▎ DSN'i sonradan bulmak istersen: Settings → Projects → [proje] → Client Keys (DSN).
+
+  2) PostHog — 1 proje
+
+  1. posthog.com → Get started for free / Sign up.
+  2. Bölge sorar: US mu EU mu? Birini seç ve aklında tut:
+    - US seçersen host = https://us.i.posthog.com
+    - EU seçersen host = https://eu.i.posthog.com
+  3. Kayıt sonrası otomatik bir proje oluşur. Project API Key'i al:
+    - Settings (sol altta) → Project → Project API Key (veya açılış ekranındaki kurulum snippet'inde görünür).
+    - phc_ ile başlar. → PostHog Key
+
+  3) Bana getireceğin 4 değer
+
+  Sentry backend DSN  : https://...ingest.sentry.io/...
+  Sentry mobile DSN   : https://...ingest.sentry.io/...
+  PostHog Project Key : phc_...
+  PostHog host        : https://us.i.posthog.com   (veya eu)
+
+  Bunları yapıştır, gerisini ben hallederim:
+  - Backend → fly secrets set SENTRY_DSN=… POSTHOG_KEY=… POSTHOG_HOST=… (Fly otomatik yeniden başlatır)
+  - Mobil → mobile/.env + EAS env
+
+  ---
+  İki küçük not:
+  - Sentry'de DSN gizli değildir (zaten istemciye gömülüyor), rahatça paylaşabilirsin. PostHog Project API Key de istemci-tarafı anahtardır, paylaşması güvenli — asıl gizli olan "Personal API Key"i değil, onu
+  istemiyorum.
+  - Acele etmene gerek yok; anahtarlar olmadan da uygulama sorunsuz çalışıyor. Hazır olunca yapıştırman yeterli.
