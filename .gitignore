@@ -10,6 +10,8 @@ build/
 mobile/google-services.json
 mobile/GoogleService-Info.plist
 mobile/service-account.json
+# Local Claude Code settings — may contain secrets in permission rules
+.claude/settings.local.json
 .DS_Store
 *.orig.*
 web-build/
