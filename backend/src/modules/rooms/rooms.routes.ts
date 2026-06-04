@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
+import { captureException } from '../../shared/observability';
 import {
   CreateRoomSchema,
   UpdateRoomSchema,
@@ -46,6 +47,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(await listPublicRooms(parsed.data));
     } catch (err) {
       request.log.error(err, 'rooms list failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -58,6 +60,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ rooms: await getMyRooms(userId) });
     } catch (err) {
       request.log.error(err, 'rooms/mine failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -81,6 +84,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'ROOM_FULL') return reply.code(409).send({ error: 'Conflict', message: e.message });
       if (e.code === 'ALREADY_MEMBER') return reply.code(409).send({ error: 'Conflict', message: e.message });
       request.log.error(err, 'rooms/join-by-code failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -95,6 +99,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'rooms/:id GET failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -113,6 +118,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'ROOM_LIMIT') return reply.code(409).send({ error: 'Conflict', message: e.message });
       request.log.error(err, 'rooms POST failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -135,6 +141,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'FORBIDDEN') return reply.code(403).send({ error: 'Forbidden', message: e.message });
       if (e.code === 'VALIDATION') return reply.code(400).send({ error: 'Bad Request', message: e.message });
       request.log.error(err, 'rooms PATCH failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -151,6 +158,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
       if (e.code === 'FORBIDDEN') return reply.code(403).send({ error: 'Forbidden', message: e.message });
       request.log.error(err, 'rooms DELETE failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -174,6 +182,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'ROOM_FULL') return reply.code(409).send({ error: 'Conflict', message: e.message });
       if (e.code === 'ALREADY_MEMBER') return reply.code(409).send({ error: 'Conflict', message: e.message });
       request.log.error(err, 'rooms/join failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -190,6 +199,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'rooms/leave failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -207,6 +217,7 @@ export const roomsRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'FORBIDDEN') return reply.code(403).send({ error: 'Forbidden', message: e.message });
       if (e.code === 'VALIDATION') return reply.code(400).send({ error: 'Bad Request', message: e.message });
       request.log.error(err, 'rooms/invite failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

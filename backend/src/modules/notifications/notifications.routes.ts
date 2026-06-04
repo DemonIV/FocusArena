@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
+import { captureException } from '../../shared/observability';
 import { RegisterPushSchema } from './notifications.schema';
 import { savePushToken, clearPushToken } from './notifications.service';
 
@@ -21,6 +22,7 @@ export const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ ok: true });
     } catch (err) {
       request.log.error(err, 'notifications/register failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -33,6 +35,7 @@ export const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ ok: true });
     } catch (err) {
       request.log.error(err, 'notifications/unregister failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

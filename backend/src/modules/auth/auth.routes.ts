@@ -5,6 +5,7 @@ import type {
   preHandlerHookHandler,
 } from 'fastify';
 import type { JwtPayload } from './auth.schema';
+import { captureException } from '../../shared/observability';
 import {
   RegisterBodySchema,
   LoginBodySchema,
@@ -99,6 +100,7 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.code(409).send({ error: 'Conflict', message: 'Email or username already in use' });
       }
       request.log.error(err, 'register failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -128,6 +130,7 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.code(401).send({ error: 'Unauthorized', message: 'Invalid email or password' });
       }
       request.log.error(err, 'login failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

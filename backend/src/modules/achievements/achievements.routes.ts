@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
+import { captureException } from '../../shared/observability';
 import { getAchievementsWithProgress, getUserAchievements } from './achievements.service';
 
 export const achievementsRoutes: FastifyPluginAsync = async (fastify) => {
@@ -15,6 +16,7 @@ export const achievementsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(result);
     } catch (err) {
       request.log.error(err, 'achievements GET / failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -28,6 +30,7 @@ export const achievementsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ earned });
     } catch (err) {
       request.log.error(err, 'achievements GET /:userId failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

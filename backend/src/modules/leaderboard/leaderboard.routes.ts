@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
+import { captureException } from '../../shared/observability';
 import { GlobalQuerySchema, PeriodQuerySchema, SetCountrySchema } from './leaderboard.schema';
 import {
   getGlobalLeaderboard,
@@ -27,6 +28,7 @@ export const leaderboardRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(result);
     } catch (err) {
       request.log.error(err, 'leaderboard/global failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -46,6 +48,7 @@ export const leaderboardRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(result);
     } catch (err) {
       request.log.error(err, 'leaderboard/friends failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -65,6 +68,7 @@ export const leaderboardRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(result);
     } catch (err) {
       request.log.error(err, 'leaderboard/me failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -78,6 +82,7 @@ export const leaderboardRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(result);
     } catch (err) {
       request.log.error(err, 'leaderboard/countries failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -97,6 +102,7 @@ export const leaderboardRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ ok: true });
     } catch (err) {
       request.log.error(err, 'leaderboard/country failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync, FastifyReply } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
+import { captureException } from '../../shared/observability';
 import { SendRequestSchema, SearchQuerySchema } from './friends.schema';
 import {
   sendRequest,
@@ -37,6 +38,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ friends: await listFriends(userId) });
     } catch (err) {
       request.log.error(err, 'friends list failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -48,6 +50,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ requests: await listIncomingRequests(userId) });
     } catch (err) {
       request.log.error(err, 'friends/requests failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -59,6 +62,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ requests: await listSentRequests(userId) });
     } catch (err) {
       request.log.error(err, 'friends/sent failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -70,6 +74,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ blocked: await listBlocked(userId) });
     } catch (err) {
       request.log.error(err, 'friends/blocked failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -86,6 +91,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ users: results });
     } catch (err) {
       request.log.error(err, 'friends/search failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -104,6 +110,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       const handled = handleErr(err, reply);
       if (handled !== null) return handled;
       request.log.error(err, 'friends/request POST failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -119,6 +126,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       const handled = handleErr(err, reply);
       if (handled !== null) return handled;
       request.log.error(err, 'friends accept failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -134,6 +142,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       const handled = handleErr(err, reply);
       if (handled !== null) return handled;
       request.log.error(err, 'friends decline failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -149,6 +158,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       const handled = handleErr(err, reply);
       if (handled !== null) return handled;
       request.log.error(err, 'friends block failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -165,6 +175,7 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       const handled = handleErr(err, reply);
       if (handled !== null) return handled;
       request.log.error(err, 'friends DELETE failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });

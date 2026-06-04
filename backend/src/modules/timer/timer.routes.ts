@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
+import { captureException } from '../../shared/observability';
 import {
   StartTimerSchema,
   CreateSubjectSchema,
@@ -63,6 +64,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'TIMER_ACTIVE') return reply.code(409).send({ error: 'Conflict', message: e.message });
       if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'timer/start failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -77,6 +79,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NO_TIMER') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'timer/pause failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -91,6 +94,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NO_TIMER') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'timer/resume failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -105,6 +109,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NO_TIMER') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'timer/stop failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -117,6 +122,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(status);
     } catch (err) {
       request.log.error(err, 'timer/status failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -137,6 +143,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(result);
     } catch (err) {
       request.log.error(err, 'timer/sessions failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -149,6 +156,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(stats);
     } catch (err) {
       request.log.error(err, 'timer/stats failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -163,6 +171,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(heatmap);
     } catch (err) {
       request.log.error(err, 'timer/heatmap failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -175,6 +184,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(ghost);
     } catch (err) {
       request.log.error(err, 'timer/ghost failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -187,6 +197,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(dna);
     } catch (err) {
       request.log.error(err, 'timer/dna failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -199,6 +210,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(boss);
     } catch (err) {
       request.log.error(err, 'timer/boss failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -213,6 +225,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ subjects });
     } catch (err) {
       request.log.error(err, 'timer/subjects GET failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -225,6 +238,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send({ subjects });
     } catch (err) {
       request.log.error(err, 'timer/subjects/stats GET failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -243,6 +257,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.code(201).send({ subject });
     } catch (err) {
       request.log.error(err, 'timer/subjects POST failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -264,6 +279,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'timer/subjects PATCH failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
@@ -280,6 +296,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'timer/subjects DELETE failed');
+      captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
   });
