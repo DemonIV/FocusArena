@@ -4,6 +4,8 @@ import { mmkvStorage } from '../utils/storage';
 import { api } from '../services/api';
 import { authService } from '../services/auth.service';
 import { identifyUser, resetUser } from '../services/analytics';
+import { loginBilling, logoutBilling } from '../services/billing';
+import { useBillingStore } from './billingStore';
 import type { User, AuthTokens } from '../types';
 
 interface AuthState {
@@ -37,12 +39,16 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (user, tokens) => {
         api.setToken(tokens.accessToken);
         identifyUser(user.id, { username: user.username });
+        // Tie RevenueCat to our user id, then sync Pro status (both no-op without keys).
+        void loginBilling(user.id).then(() => useBillingStore.getState().refresh());
         set({ user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
       },
 
       clearAuth: () => {
         api.clearToken();
         resetUser();
+        void logoutBilling();
+        useBillingStore.getState().setPro(false);
         set({ user: null, accessToken: null, refreshToken: null });
       },
 

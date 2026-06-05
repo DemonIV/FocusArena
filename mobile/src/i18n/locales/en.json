@@ -297,5 +297,26 @@
     "globalRank": "Global Rank: #{{rank}}",
     "shareUnavailable": "Sharing isn't available on this device",
     "shareFailed": "Couldn't share"
+  },
+  "pro": {
+    "tagline": "More focus, fewer limits.",
+    "benefitSubjects": "Add unlimited subjects",
+    "benefitFreeze": "Streak freeze — a missed day won't break your streak",
+    "unavailable": "Subscriptions are unavailable right now. Please try again later.",
+    "yearly": "Yearly",
+    "monthly": "Monthly",
+    "subscribe": "Go Pro",
+    "restore": "Restore purchases",
+    "legal": "Subscription auto-renews at the end of each period. Cancel anytime in your store settings.",
+    "successTitle": "Welcome to Pro! 👑",
+    "successMsg": "All Pro features are now unlocked.",
+    "purchaseFailed": "Purchase could not be completed.",
+    "restoredTitle": "Restored",
+    "restoredMsg": "Your Pro membership has been restored.",
+    "nothingTitle": "Nothing to restore",
+    "nothingMsg": "No active subscription was found to restore.",
+    "activeMember": "You're a Pro member",
+    "upgradeTitle": "FocusArena Pro",
+    "upgradeSub": "Unlimited subjects + streak freeze"
   }
 }

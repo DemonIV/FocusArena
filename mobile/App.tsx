@@ -5,10 +5,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore, useOnboardingStore } from './src/stores';
 import { RootNavigator } from './src/navigation';
 import { initAnalytics, Sentry } from './src/services/analytics';
+import { initBilling } from './src/services/billing';
 import './src/i18n'; // initialise i18next (device language + saved preference)
 
 // Initialise Sentry + PostHog once, before the app renders (no-op without keys).
 initAnalytics();
+// Configure RevenueCat once (no-op without keys / in Expo Go).
+initBilling();
 
 const queryClient = new QueryClient({
   defaultOptions: {

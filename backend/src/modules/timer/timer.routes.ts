@@ -255,7 +255,11 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       const subject = await createSubject(userId, parsed.data);
       return reply.code(201).send({ subject });
-    } catch (err) {
+    } catch (err: unknown) {
+      const e = err as { code?: string; message: string };
+      if (e.code === 'LIMIT_REACHED') {
+        return reply.code(402).send({ error: 'Payment Required', code: 'LIMIT_REACHED', message: e.message });
+      }
       request.log.error(err, 'timer/subjects POST failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });

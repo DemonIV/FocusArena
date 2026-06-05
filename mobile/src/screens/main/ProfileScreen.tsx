@@ -17,6 +17,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
 import { StatCard, StreakHeatmap, StudyDnaCard } from '../../components';
+import { PaywallModal } from '../../components/PaywallModal';
+import { useBillingStore } from '../../stores';
 import { timerService, achievementsService, roomsService } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
@@ -99,6 +101,9 @@ export function ProfileScreen() {
   // ── Modal state ───────────────────────────────────────────────────────────────
 
   const [modalVisible,   setModalVisible]   = useState(false);
+  const [paywallVisible, setPaywallVisible] = useState(false);
+  const [paywallSource,  setPaywallSource]  = useState('profile');
+  const isPro = useBillingStore((s) => s.isPro);
   const [editingId,      setEditingId]      = useState<string | null>(null);
   const [subjectName,    setSubjectName]    = useState('');
   const [selectedColor,  setSelectedColor]  = useState(SUBJECT_COLORS[0]);
@@ -115,7 +120,11 @@ export function ProfileScreen() {
     mutationFn: (body: { name: string; color: string; icon: string }) =>
       timerService.createSubject({ ...body, daily_goal_minutes: 60 }),
     onSuccess: () => { invalidateSubjects(); closeModal(); },
-    onError:   (e: any) => Alert.alert(t('common.error'), e?.message ?? t('profile.subjectAddFailed')),
+    onError:   (e: any) => {
+      // 402 = free-plan subject cap reached → offer Pro instead of an error.
+      if (e?.statusCode === 402) { closeModal(); setPaywallSource('subject_limit'); setPaywallVisible(true); return; }
+      Alert.alert(t('common.error'), e?.message ?? t('profile.subjectAddFailed'));
+    },
   });
 
   const updateMut = useMutation({
@@ -257,6 +266,25 @@ export function ProfileScreen() {
             <Text style={styles.streakText}>{t('profile.longestStreak', { count: longestStreak })}</Text>
           </View>
         </View>
+
+        {/* ── Pro ── */}
+        {isPro ? (
+          <View style={styles.proActive}>
+            <Text style={styles.proActiveText}>👑 {t('pro.activeMember')}</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.proCard}
+            onPress={() => { setPaywallSource('profile'); setPaywallVisible(true); }}
+            activeOpacity={0.85}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={styles.proTitle}>👑 {t('pro.upgradeTitle')}</Text>
+              <Text style={styles.proSub}>{t('pro.upgradeSub')}</Text>
+            </View>
+            <Text style={styles.proChevron}>›</Text>
+          </TouchableOpacity>
+        )}
 
         {/* ── Streak Heat Map ── */}
         {heatmapQ.data && heatmapQ.data.days.length > 0 && (
@@ -498,6 +526,12 @@ export function ProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      <PaywallModal
+        visible={paywallVisible}
+        onClose={() => setPaywallVisible(false)}
+        source={paywallSource}
+      />
     </>
   );
 }
@@ -659,6 +693,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   streakText: { color: MUTED2, fontSize: 12 },
+
+  // Pro upsell
+  proCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(245,158,11,0.10)',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.45)',
+  },
+  proTitle: { color: '#f59e0b', fontSize: 16, fontWeight: '800' },
+  proSub: { color: MUTED2, fontSize: 12, marginTop: 3 },
+  proChevron: { color: '#f59e0b', fontSize: 28, fontWeight: '300', marginLeft: 8 },
+  proActive: {
+    backgroundColor: 'rgba(245,158,11,0.10)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.45)',
+    alignItems: 'center',
+  },
+  proActiveText: { color: '#f59e0b', fontSize: 15, fontWeight: '800' },
 
   // Section labels & rows
   sectionLabel: {

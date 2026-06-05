@@ -2,6 +2,7 @@ import { supabase, redis } from '../../shared';
 import { invalidateCache, invalidateCountries } from '../leaderboard';
 import { checkAndAward } from '../achievements';
 import { addStudyMinutesToRooms } from '../rooms/rooms.service';
+import { billingEnabled, isUserPro, FREE_SUBJECT_LIMIT } from '../billing';
 import { getSocketServer } from '../../websocket';
 import { track } from '../../shared/observability';
 import type {
@@ -801,6 +802,23 @@ export async function getSubjects(userId: string) {
 }
 
 export async function createSubject(userId: string, body: CreateSubjectBody) {
+  // Free tier is capped to FREE_SUBJECT_LIMIT active subjects; Pro is unlimited.
+  // Skipped entirely when billing is off so dev/Expo Go is unaffected.
+  if (billingEnabled && !(await isUserPro(userId))) {
+    const { count } = await supabase
+      .from('subjects')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_active', true);
+
+    if ((count ?? 0) >= FREE_SUBJECT_LIMIT) {
+      throw Object.assign(
+        new Error(`Free plan is limited to ${FREE_SUBJECT_LIMIT} subjects`),
+        { code: 'LIMIT_REACHED' },
+      );
+    }
+  }
+
   const { data, error } = await supabase
     .from('subjects')
     .insert({ ...body, user_id: userId })

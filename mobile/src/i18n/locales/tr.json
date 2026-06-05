@@ -297,5 +297,26 @@
     "globalRank": "Küresel Sıra: #{{rank}}",
     "shareUnavailable": "Bu cihazda paylaşım kullanılamıyor",
     "shareFailed": "Paylaşılamadı"
+  },
+  "pro": {
+    "tagline": "Daha fazla odak, daha az sınır.",
+    "benefitSubjects": "Sınırsız konu ekle",
+    "benefitFreeze": "Streak dondurma — kaçırdığın gün serini korur",
+    "unavailable": "Abonelik şu an kullanılamıyor. Lütfen daha sonra tekrar dene.",
+    "yearly": "Yıllık",
+    "monthly": "Aylık",
+    "subscribe": "Pro'ya Geç",
+    "restore": "Satın alımları geri yükle",
+    "legal": "Abonelik dönem sonunda otomatik yenilenir. İstediğin zaman mağaza ayarlarından iptal edebilirsin.",
+    "successTitle": "Hoş geldin Pro! 👑",
+    "successMsg": "Artık tüm Pro özellikleri açık.",
+    "purchaseFailed": "Satın alma tamamlanamadı.",
+    "restoredTitle": "Geri yüklendi",
+    "restoredMsg": "Pro üyeliğin geri yüklendi.",
+    "nothingTitle": "Bulunamadı",
+    "nothingMsg": "Geri yüklenecek aktif bir abonelik bulunamadı.",
+    "activeMember": "Pro üyesin",
+    "upgradeTitle": "FocusArena Pro",
+    "upgradeSub": "Sınırsız konu + streak dondurma"
   }
 }
