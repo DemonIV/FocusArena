@@ -37,8 +37,7 @@
           "color": "#00d2ff"
         }
       ],
-      "@sentry/react-native",
-      "react-native-purchases"
+      "@sentry/react-native"
     ],
     "extra": {
       "eas": {
