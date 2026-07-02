@@ -35,6 +35,21 @@ interface Props {
 
 export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId }: Props) {
   const frame = getFrameVisual(frameId);
+
+  // Pro frames: slow orbiting highlight on the outer ring.
+  const orbit = useSharedValue(0);
+  useEffect(() => {
+    if (frame?.animated) {
+      orbit.value = withRepeat(withTiming(360, { duration: 6000, easing: Easing.linear }), -1, false);
+    } else {
+      cancelAnimation(orbit);
+      orbit.value = 0;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frame?.animated]);
+  const orbitStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${orbit.value}deg` }],
+  }));
   const p = Math.min(1, Math.max(0, progress));
 
   const targetRight = p <= 0.5 ? 180 - p * 2 * 180 : 0;
@@ -100,6 +115,13 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId
           }]} />
           {frame.outer2 && (
             <View style={[styles.frameRing2, { borderColor: `${frame.outer2}55` }]} />
+          )}
+          {/* Pro frames: orbiting comet highlight */}
+          {frame.animated && (
+            <Animated.View style={[styles.orbitRing, orbitStyle, {
+              borderTopColor: frame.outer,
+              borderRightColor: `${frame.outer2 ?? frame.outer}88`,
+            }]} />
           )}
         </>
       )}
@@ -173,6 +195,14 @@ const styles = StyleSheet.create({
     height: SIZE + 44,
     borderRadius: (SIZE + 44) / 2,
     borderWidth: 1.5,
+  },
+  orbitRing: {
+    position: 'absolute',
+    width: SIZE + 32,
+    height: SIZE + 32,
+    borderRadius: (SIZE + 32) / 2,
+    borderWidth: 3,
+    borderColor: 'transparent',
   },
   glowRing: {
     position: 'absolute',

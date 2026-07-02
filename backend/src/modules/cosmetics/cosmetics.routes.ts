@@ -9,6 +9,7 @@ function statusFor(code: CosmeticsError['code']): number {
   switch (code) {
     case 'unknown_frame': return 404;
     case 'not_owned': return 403;
+    case 'pro_required': return 403;
     case 'already_owned': return 409;
     case 'insufficient_coins': return 402;
   }

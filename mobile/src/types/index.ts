@@ -308,6 +308,8 @@ export interface FrameEntry {
   id: string;
   price: number;
   owned: boolean;
+  /** Pro-exclusive frame — owned mirrors Pro status */
+  pro?: boolean;
 }
 
 export interface FramesResponse {

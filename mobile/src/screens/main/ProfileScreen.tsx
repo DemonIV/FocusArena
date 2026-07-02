@@ -551,6 +551,7 @@ function FrameShopSection() {
   const queryClient = useQueryClient();
   const [coinShopVisible, setCoinShopVisible] = useState(false);
   const [coinShopSource, setCoinShopSource] = useState('shop_chip');
+  const [framePaywallVisible, setFramePaywallVisible] = useState(false);
 
   const framesQ = useQuery({
     queryKey: ['frames'],
@@ -609,6 +610,11 @@ function FrameShopSection() {
       selectMut.mutate(frame.id);
       return;
     }
+    if (frame.pro) {
+      // Pro-exclusive — sell the subscription, not the frame.
+      setFramePaywallVisible(true);
+      return;
+    }
     if (coins < frame.price) {
       showNotEnough();
       return;
@@ -663,12 +669,17 @@ function FrameShopSection() {
         </Pressable>
 
         {FRAMES.map((v) => {
-          const entry = ownedMap.get(v.id) ?? { id: v.id, price: v.price, owned: false };
+          const entry = ownedMap.get(v.id) ?? { id: v.id, price: v.price, owned: false, pro: v.pro };
           const isSel = selected === v.id;
           return (
             <Pressable
               key={v.id}
-              style={[shop.card, isSel && shop.cardSelected, !entry.owned && shop.cardLocked]}
+              style={[
+                shop.card,
+                isSel && shop.cardSelected,
+                !entry.owned && shop.cardLocked,
+                v.pro && shop.cardPro,
+              ]}
               onPress={() => handlePress(entry)}
             >
               <View style={shop.previewWrap}>
@@ -680,6 +691,8 @@ function FrameShopSection() {
                 <Text style={[shop.state, { color: ACCENT }]}>✓ {t('shop.selected')}</Text>
               ) : entry.owned ? (
                 <Text style={shop.state}>{t('shop.select')}</Text>
+              ) : entry.pro ? (
+                <Text style={shop.proTag}>👑 Pro</Text>
               ) : (
                 <Text style={[shop.price, coins < entry.price && { color: MUTED }]}>
                   🪙 {entry.price.toLocaleString()}
@@ -696,6 +709,12 @@ function FrameShopSection() {
         visible={coinShopVisible}
         onClose={() => setCoinShopVisible(false)}
         source={coinShopSource}
+      />
+
+      <PaywallModal
+        visible={framePaywallVisible}
+        onClose={() => { setFramePaywallVisible(false); invalidate(); }}
+        source="pro_frame"
       />
     </View>
   );
@@ -1114,6 +1133,7 @@ const shop = StyleSheet.create({
   },
   cardSelected: { borderColor: ACCENT, backgroundColor: `${ACCENT}0d` },
   cardLocked: { opacity: 0.75 },
+  cardPro: { borderColor: 'rgba(245,158,11,0.45)', backgroundColor: 'rgba(245,158,11,0.06)', opacity: 1 },
   previewWrap: {
     width: 52,
     height: 52,
@@ -1142,6 +1162,7 @@ const shop = StyleSheet.create({
   name: { color: TEXT, fontSize: 12, fontWeight: '700', marginBottom: 4 },
   state: { color: MUTED2, fontSize: 11, fontWeight: '600' },
   price: { color: '#ffd700', fontSize: 11, fontWeight: '800' },
+  proTag: { color: '#f59e0b', fontSize: 11, fontWeight: '800' },
   hint: { color: MUTED, fontSize: 11, marginTop: 10 },
 });
 

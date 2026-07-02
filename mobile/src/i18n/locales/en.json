@@ -342,7 +342,9 @@
       "neon": "Neon",
       "aurora": "Aurora",
       "inferno": "Inferno",
-      "legend": "Legend"
+      "legend": "Legend",
+      "prism": "Prism",
+      "royal": "Royal"
     }
   },
   "coinShop": {

@@ -11,9 +11,16 @@ export interface FrameVisual {
   glow: string;       // breathing glow color
   outer: string;      // decorative outer ring (always visible)
   outer2?: string;    // second outer ring for premium dual-ring frames
+  /** Pro-exclusive — unlocked by the subscription, not coins */
+  pro?: boolean;
+  /** Animated orbit effect on the timer (Pro frames) */
+  animated?: boolean;
 }
 
 export const FRAMES: readonly FrameVisual[] = [
+  // Pro-exclusive animated frames — shown first as the shop's hero items.
+  { id: 'prism',    price: 0,     ring: '#00d2ff', glow: '#ff2ec4', outer: '#00d2ff', outer2: '#ff2ec4', pro: true, animated: true },
+  { id: 'royal',    price: 0,     ring: '#ffd700', glow: '#8b5cf6', outer: '#ffd700', outer2: '#8b5cf6', pro: true, animated: true },
   { id: 'bronze',   price: 100,   ring: '#cd7f32', glow: '#cd7f32', outer: '#cd7f32' },
   { id: 'silver',   price: 1000,  ring: '#c8d0dc', glow: '#c8d0dc', outer: '#c8d0dc' },
   { id: 'gold',     price: 2000,  ring: '#ffd700', glow: '#ffd700', outer: '#ffd700' },

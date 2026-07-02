@@ -6,9 +6,14 @@
 export interface FrameDef {
   id: string;
   price: number; // coins
+  /** Pro-exclusive: not purchasable with coins, equippable while Pro is active. */
+  pro?: boolean;
 }
 
 export const FRAME_CATALOG: readonly FrameDef[] = [
+  // Pro-exclusive animated frames — the visible status symbol of the subscription.
+  { id: 'prism',    price: 0, pro: true },
+  { id: 'royal',    price: 0, pro: true },
   { id: 'bronze',   price: 100 },
   { id: 'silver',   price: 1000 },
   { id: 'gold',     price: 2000 },
@@ -32,6 +37,8 @@ export interface FrameListEntry {
   id: string;
   price: number;
   owned: boolean;
+  /** Pro-exclusive frame — owned mirrors the caller's Pro status. */
+  pro?: boolean;
 }
 
 export interface FramesResponse {

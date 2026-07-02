@@ -1,4 +1,5 @@
 import { supabase } from '../../shared';
+import { isUserPro } from '../billing';
 import { FRAME_CATALOG, getFrameDef } from './cosmetics.schema';
 import type { FramesResponse } from './cosmetics.schema';
 
@@ -8,7 +9,7 @@ import type { FramesResponse } from './cosmetics.schema';
  */
 export class CosmeticsError extends Error {
   constructor(
-    public code: 'unknown_frame' | 'not_owned' | 'already_owned' | 'insufficient_coins',
+    public code: 'unknown_frame' | 'not_owned' | 'already_owned' | 'insufficient_coins' | 'pro_required',
   ) {
     super(code);
     this.name = 'CosmeticsError';
@@ -17,9 +18,10 @@ export class CosmeticsError extends Error {
 
 /** Full shop view for the caller: coin balance + every frame with ownership. */
 export async function getFramesForUser(userId: string): Promise<FramesResponse> {
-  const [{ data: user, error: userErr }, { data: owned, error: ownedErr }] = await Promise.all([
+  const [{ data: user, error: userErr }, { data: owned, error: ownedErr }, pro] = await Promise.all([
     supabase.from('users').select('coins, selected_frame').eq('id', userId).single(),
     supabase.from('user_frames').select('frame_id').eq('user_id', userId),
+    isUserPro(userId),
   ]);
 
   if (userErr || !user) throw new Error('User not found');
@@ -33,7 +35,9 @@ export async function getFramesForUser(userId: string): Promise<FramesResponse> 
     frames: FRAME_CATALOG.map((f) => ({
       id: f.id,
       price: f.price,
-      owned: ownedSet.has(f.id),
+      // Pro frames aren't bought — they're unlocked while Pro is active.
+      owned: f.pro ? pro : ownedSet.has(f.id),
+      pro: f.pro ?? false,
     })),
   };
 }
@@ -45,6 +49,7 @@ export async function getFramesForUser(userId: string): Promise<FramesResponse> 
 export async function buyFrame(userId: string, frameId: string): Promise<{ coins: number }> {
   const def = getFrameDef(frameId);
   if (!def) throw new CosmeticsError('unknown_frame');
+  if (def.pro) throw new CosmeticsError('pro_required'); // not for sale — Pro perk
 
   const { data, error } = await supabase.rpc('buy_frame', {
     p_user_id: userId,
@@ -66,17 +71,23 @@ export async function buyFrame(userId: string, frameId: string): Promise<{ coins
  */
 export async function selectFrame(userId: string, frameId: string | null): Promise<void> {
   if (frameId !== null) {
-    if (!getFrameDef(frameId)) throw new CosmeticsError('unknown_frame');
+    const def = getFrameDef(frameId);
+    if (!def) throw new CosmeticsError('unknown_frame');
 
-    const { data: row, error } = await supabase
-      .from('user_frames')
-      .select('frame_id')
-      .eq('user_id', userId)
-      .eq('frame_id', frameId)
-      .maybeSingle();
+    if (def.pro) {
+      // Pro frames are unlocked by the subscription, not by ownership rows.
+      if (!(await isUserPro(userId))) throw new CosmeticsError('pro_required');
+    } else {
+      const { data: row, error } = await supabase
+        .from('user_frames')
+        .select('frame_id')
+        .eq('user_id', userId)
+        .eq('frame_id', frameId)
+        .maybeSingle();
 
-    if (error) throw new Error(error.message);
-    if (!row) throw new CosmeticsError('not_owned');
+      if (error) throw new Error(error.message);
+      if (!row) throw new CosmeticsError('not_owned');
+    }
   }
 
   const { error: updErr } = await supabase
