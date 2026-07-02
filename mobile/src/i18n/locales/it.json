@@ -344,5 +344,17 @@
       "inferno": "Inferno",
       "legend": "Leggenda"
     }
+  },
+  "coinShop": {
+    "title": "Pacchetto monete",
+    "sub": "Compra cornici e cosmetici con le monete — i tuoi XP restano intatti",
+    "coins": "Monete",
+    "bestValue": "MIGLIOR VALORE",
+    "successTitle": "Acquistato! 🎉",
+    "successMsg": "{{coins}} monete saranno aggiunte al tuo account in pochi secondi.",
+    "failed": "Acquisto non riuscito",
+    "unavailable": "Impossibile caricare i pacchetti. Riprova più tardi.",
+    "comingSoon": "I pacchetti di monete arrivano presto!",
+    "footer": "Puoi guadagnare monete anche concentrandoti — ogni sessione dà monete pari agli XP"
   }
 }

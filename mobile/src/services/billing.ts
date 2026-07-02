@@ -131,6 +131,63 @@ export async function purchaseProPackage(pkg: ProPackage): Promise<boolean> {
   }
 }
 
+// ─── Coin packs (consumables) ─────────────────────────────────
+
+/** A purchasable coin pack from the RC "coins" offering. */
+export interface CoinPackage {
+  identifier: string;
+  priceString: string;
+  /** Coins granted — parsed from the product id (e.g. "coins_5500" → 5500). */
+  coins: number;
+  /** Opaque RC package handed straight back to purchase(). */
+  raw: unknown;
+}
+
+/** "coins_5500" → 5500; 0 when the id doesn't follow the convention. */
+function coinsFromProductId(id: string): number {
+  const m = /(\d+)\s*$/.exec(id);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+/** Coin packs from the RC offering named "coins" (empty when billing is off). */
+export async function getCoinPackages(): Promise<CoinPackage[]> {
+  const P = load() as any;
+  if (!P) return [];
+  try {
+    const offerings = await P.getOfferings();
+    const pkgs = offerings?.all?.coins?.availablePackages ?? [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return pkgs
+      .map((pkg: any) => ({
+        identifier: pkg.identifier,
+        priceString: pkg.product?.priceString ?? '',
+        coins: coinsFromProductId(pkg.product?.identifier ?? pkg.identifier ?? ''),
+        raw: pkg,
+      }))
+      .filter((p: CoinPackage) => p.coins > 0)
+      .sort((a: CoinPackage, b: CoinPackage) => a.coins - b.coins);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Purchase a coin pack. Returns true on success; a user-cancelled purchase
+ * resolves to false. Coins are credited by the backend webhook (may take a
+ * few seconds), so refetch the balance after this resolves.
+ */
+export async function purchaseCoinPackage(pkg: CoinPackage): Promise<boolean> {
+  const P = load() as any;
+  if (!P) return false;
+  try {
+    await P.purchasePackage(pkg.raw);
+    return true;
+  } catch (e: unknown) {
+    if ((e as { userCancelled?: boolean })?.userCancelled) return false;
+    throw e;
+  }
+}
+
 /** Restore previous purchases. Returns true if "pro" is now active. */
 export async function restoreProPurchases(): Promise<boolean> {
   const P = load() as any;

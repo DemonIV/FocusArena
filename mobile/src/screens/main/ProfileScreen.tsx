@@ -18,6 +18,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
 import { StatCard, StreakHeatmap, StudyDnaCard } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
+import { CoinShopModal } from '../../components/CoinShopModal';
+import { billingEnabled } from '../../services/billing';
 import { useBillingStore } from '../../stores';
 import { timerService, achievementsService, roomsService, cosmeticsService } from '../../services';
 import { FRAMES } from '../../constants';
@@ -547,6 +549,8 @@ export function ProfileScreen() {
 function FrameShopSection() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [coinShopVisible, setCoinShopVisible] = useState(false);
+  const [coinShopSource, setCoinShopSource] = useState('shop_chip');
 
   const framesQ = useQuery({
     queryKey: ['frames'],
@@ -561,6 +565,21 @@ function FrameShopSection() {
     queryClient.invalidateQueries({ queryKey: ['frames'] });
   }, [queryClient]);
 
+  // "Not enough coins" → offer the coin IAP when billing is live, plain alert otherwise.
+  const showNotEnough = useCallback(() => {
+    if (billingEnabled) {
+      Alert.alert(t('shop.notEnoughTitle'), t('shop.notEnoughMsg'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: `🪙 ${t('coinShop.title')}`,
+          onPress: () => { setCoinShopSource('not_enough_coins'); setCoinShopVisible(true); },
+        },
+      ]);
+    } else {
+      Alert.alert(t('shop.notEnoughTitle'), t('shop.notEnoughMsg'));
+    }
+  }, [t]);
+
   // Buy + auto-equip in one flow — nobody buys a frame not to wear it.
   const buyMut = useMutation({
     mutationFn: async (frameId: string) => {
@@ -569,10 +588,7 @@ function FrameShopSection() {
     },
     onSuccess: invalidate,
     onError: (e: any) => {
-      if (e?.statusCode === 402) {
-        Alert.alert(t('shop.notEnoughTitle'), t('shop.notEnoughMsg'));
-        return;
-      }
+      if (e?.statusCode === 402) { showNotEnough(); return; }
       if (e?.statusCode === 409) { invalidate(); return; } // already owned — just refresh
       Alert.alert(t('common.error'), e?.message ?? t('shop.buyFailed'));
     },
@@ -594,7 +610,7 @@ function FrameShopSection() {
       return;
     }
     if (coins < frame.price) {
-      Alert.alert(t('shop.notEnoughTitle'), t('shop.notEnoughMsg'));
+      showNotEnough();
       return;
     }
     const name = t(`shop.frames.${frame.id}`);
@@ -606,15 +622,25 @@ function FrameShopSection() {
         { text: t('shop.buy'), onPress: () => buyMut.mutate(frame.id) },
       ],
     );
-  }, [isBusy, selected, coins, t]);
+  }, [isBusy, selected, coins, t, showNotEnough]);
 
   return (
     <View style={shop.container}>
       <View style={shop.headerRow}>
         <Text style={styles.sectionLabel}>{t('shop.title')}</Text>
-        <View style={shop.coinChip}>
-          <Text style={shop.coinText}>🪙 {coins.toLocaleString()}</Text>
-        </View>
+        <TouchableOpacity
+          style={shop.coinChip}
+          onPress={() => {
+            if (!billingEnabled) return;
+            setCoinShopSource('shop_chip');
+            setCoinShopVisible(true);
+          }}
+          activeOpacity={billingEnabled ? 0.75 : 1}
+        >
+          <Text style={shop.coinText}>
+            🪙 {coins.toLocaleString()}{billingEnabled ? '  +' : ''}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -665,6 +691,12 @@ function FrameShopSection() {
       </ScrollView>
 
       <Text style={shop.hint}>{t('shop.earnHint')}</Text>
+
+      <CoinShopModal
+        visible={coinShopVisible}
+        onClose={() => setCoinShopVisible(false)}
+        source={coinShopSource}
+      />
     </View>
   );
 }

@@ -1,4 +1,5 @@
 import { supabase } from '../../shared';
+import { track } from '../../shared/observability';
 
 // ─── Tunables ─────────────────────────────────────────────────
 
@@ -91,11 +92,34 @@ export async function applyEntitlement(
   }
 }
 
+// ─── Coin packs (consumables) ─────────────────────────────────
+
+/**
+ * RevenueCat product id → coins granted. Keep in sync with the products
+ * configured in the RC dashboard (offering: "coins"). Consumables arrive
+ * as NON_RENEWING_PURCHASE webhook events.
+ */
+export const COIN_PACKS: Record<string, number> = {
+  coins_1000: 1000,
+  coins_5500: 5500,
+  coins_12000: 12000,
+};
+
+/** Atomically credit purchased coins (add_coins() DB function). */
+async function grantCoins(userId: string, amount: number): Promise<void> {
+  const { error } = await supabase.rpc('add_coins', {
+    p_user_id: userId,
+    p_amount: amount,
+  });
+  if (error) throw new Error(`grantCoins failed: ${error.message}`);
+}
+
 // ─── Webhook event handling ───────────────────────────────────
 
 interface RevenueCatEvent {
   type?: string;
   app_user_id?: string;
+  product_id?: string;
   expiration_at_ms?: number | null;
 }
 
@@ -118,6 +142,17 @@ export async function processWebhookEvent(event: RevenueCatEvent): Promise<void>
   // Ignore anonymous ids — we always call Purchases.logIn(user.id) on the client,
   // so a real event carries our UUID.
   if (!userId || userId.startsWith('$RCAnonymousID')) return;
+
+  // Coin packs are consumables, NOT a Pro entitlement — handle them first so a
+  // NON_RENEWING_PURCHASE of a coin product never flips is_pro.
+  const coinAmount = COIN_PACKS[event.product_id ?? ''];
+  if (coinAmount) {
+    if (event.type === 'NON_RENEWING_PURCHASE') {
+      await grantCoins(userId, coinAmount);
+      track(userId, 'coins_purchased', { productId: event.product_id, coins: coinAmount });
+    }
+    return;
+  }
 
   if (ACTIVE_EVENTS.has(event.type ?? '')) {
     await applyEntitlement(userId, true, event.expiration_at_ms ?? null);

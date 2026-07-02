@@ -344,5 +344,17 @@
       "inferno": "Inferno",
       "legend": "Legenda"
     }
+  },
+  "coinShop": {
+    "title": "Pakiet monet",
+    "sub": "Kupuj ramki i kosmetyki za monety — twoje XP pozostaje nietknięte",
+    "coins": "Monety",
+    "bestValue": "NAJLEPSZA OFERTA",
+    "successTitle": "Kupiono! 🎉",
+    "successMsg": "{{coins}} monet zostanie dodanych do twojego konta w ciągu kilku sekund.",
+    "failed": "Zakup nieudany",
+    "unavailable": "Nie udało się załadować pakietów. Spróbuj później.",
+    "comingSoon": "Pakiety monet już wkrótce!",
+    "footer": "Monety możesz też zdobywać skupiając się — każda sesja daje monety równe XP"
   }
 }

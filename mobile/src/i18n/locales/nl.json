@@ -344,5 +344,17 @@
       "inferno": "Inferno",
       "legend": "Legende"
     }
+  },
+  "coinShop": {
+    "title": "Muntenpakket",
+    "sub": "Koop frames en cosmetica met munten — je XP blijft onaangetast",
+    "coins": "Munten",
+    "bestValue": "BESTE DEAL",
+    "successTitle": "Gekocht! 🎉",
+    "successMsg": "{{coins}} munten worden binnen enkele seconden aan je account toegevoegd.",
+    "failed": "Aankoop mislukt",
+    "unavailable": "Pakketten konden niet worden geladen. Probeer het later opnieuw.",
+    "comingSoon": "Muntenpakketten komen eraan!",
+    "footer": "Je kunt ook munten verdienen door te focussen — elke sessie geeft munten gelijk aan XP"
   }
 }

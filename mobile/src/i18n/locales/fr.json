@@ -344,5 +344,17 @@
       "inferno": "Inferno",
       "legend": "Légende"
     }
+  },
+  "coinShop": {
+    "title": "Pack de pièces",
+    "sub": "Achète des cadres et des cosmétiques avec des pièces — ton XP reste intact",
+    "coins": "Pièces",
+    "bestValue": "MEILLEURE OFFRE",
+    "successTitle": "Acheté ! 🎉",
+    "successMsg": "{{coins}} pièces seront ajoutées à ton compte dans quelques secondes.",
+    "failed": "Achat échoué",
+    "unavailable": "Impossible de charger les packs. Réessaie plus tard.",
+    "comingSoon": "Les packs de pièces arrivent bientôt !",
+    "footer": "Tu peux aussi gagner des pièces en te concentrant — chaque session rapporte autant de pièces que d’XP"
   }
 }

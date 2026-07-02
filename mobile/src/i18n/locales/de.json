@@ -344,5 +344,17 @@
       "inferno": "Inferno",
       "legend": "Legende"
     }
+  },
+  "coinShop": {
+    "title": "Münzpaket",
+    "sub": "Kaufe Rahmen und Kosmetik mit Münzen — deine XP bleiben unberührt",
+    "coins": "Münzen",
+    "bestValue": "BESTER WERT",
+    "successTitle": "Gekauft! 🎉",
+    "successMsg": "{{coins}} Münzen werden deinem Konto in wenigen Sekunden gutgeschrieben.",
+    "failed": "Kauf fehlgeschlagen",
+    "unavailable": "Pakete konnten gerade nicht geladen werden. Versuche es später erneut.",
+    "comingSoon": "Münzpakete kommen bald!",
+    "footer": "Münzen kannst du auch durch Fokussieren verdienen — jede Sitzung bringt Münzen in Höhe der XP"
   }
 }

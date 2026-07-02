@@ -344,5 +344,17 @@
       "inferno": "Inferno",
       "legend": "Lenda"
     }
+  },
+  "coinShop": {
+    "title": "Pacote de moedas",
+    "sub": "Compre molduras e cosméticos com moedas — seu XP fica intacto",
+    "coins": "Moedas",
+    "bestValue": "MELHOR VALOR",
+    "successTitle": "Comprado! 🎉",
+    "successMsg": "{{coins}} moedas serão adicionadas à sua conta em segundos.",
+    "failed": "Falha na compra",
+    "unavailable": "Não foi possível carregar os pacotes. Tente novamente mais tarde.",
+    "comingSoon": "Pacotes de moedas em breve!",
+    "footer": "Você também pode ganhar moedas focando — cada sessão dá moedas iguais ao XP"
   }
 }

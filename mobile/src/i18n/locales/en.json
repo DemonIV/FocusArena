@@ -344,5 +344,17 @@
       "inferno": "Inferno",
       "legend": "Legend"
     }
+  },
+  "coinShop": {
+    "title": "Coin Pack",
+    "sub": "Buy frames and cosmetics with coins — your XP stays untouched",
+    "coins": "Coins",
+    "bestValue": "BEST VALUE",
+    "successTitle": "Purchased! 🎉",
+    "successMsg": "{{coins}} coins will be added to your account within seconds.",
+    "failed": "Purchase failed",
+    "unavailable": "Packs could not be loaded right now. Try again later.",
+    "comingSoon": "Coin packs are coming soon!",
+    "footer": "You can also earn coins by focusing — every session gives coins equal to XP"
   }
 }

@@ -344,5 +344,17 @@
       "inferno": "Infierno",
       "legend": "Leyenda"
     }
+  },
+  "coinShop": {
+    "title": "Pack de monedas",
+    "sub": "Compra marcos y cosméticos con monedas — tu XP no se toca",
+    "coins": "Monedas",
+    "bestValue": "MEJOR VALOR",
+    "successTitle": "¡Comprado! 🎉",
+    "successMsg": "{{coins}} monedas se añadirán a tu cuenta en unos segundos.",
+    "failed": "Compra fallida",
+    "unavailable": "No se pudieron cargar los packs. Inténtalo más tarde.",
+    "comingSoon": "¡Los packs de monedas llegan pronto!",
+    "footer": "También puedes ganar monedas concentrándote — cada sesión da monedas iguales a tu XP"
   }
 }

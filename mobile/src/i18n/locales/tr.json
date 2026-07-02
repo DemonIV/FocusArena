@@ -344,5 +344,17 @@
       "inferno": "Alev",
       "legend": "Efsane"
     }
+  },
+  "coinShop": {
+    "title": "Coin Paketi",
+    "sub": "Coin ile çerçeve ve kozmetik alabilirsin — XP'ne dokunulmaz",
+    "coins": "Coin",
+    "bestValue": "EN AVANTAJLI",
+    "successTitle": "Satın alındı! 🎉",
+    "successMsg": "{{coins}} coin birkaç saniye içinde hesabına eklenecek.",
+    "failed": "Satın alma başarısız",
+    "unavailable": "Paketler şu an yüklenemedi. Daha sonra tekrar dene.",
+    "comingSoon": "Coin paketleri çok yakında!",
+    "footer": "Odaklanarak da coin kazanabilirsin — her seans XP kadar coin verir"
   }
 }
