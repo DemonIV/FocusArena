@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { useTimer } from '../../hooks';
 import { useSocketStore } from '../../stores';
 import { TimerCircle, StudyReceiptModal } from '../../components';
-import { timerService } from '../../services';
+import { timerService, cosmeticsService } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
 
@@ -76,6 +76,14 @@ export function TimerScreen() {
     queryKey: ['subjects'],
     queryFn: () => timerService.getSubjects(),
   });
+
+  // Equipped cosmetic frame — shared cache with the Profile shop.
+  const framesQ = useQuery({
+    queryKey: ['frames'],
+    queryFn: () => cosmeticsService.getFrames(),
+    staleTime: 60_000,
+  });
+  const selectedFrame = framesQ.data?.selectedFrame ?? null;
   const subjects = subjectsQ.data ?? [];
   const selectedSubject = subjects.find((s) => s.id === selectedSubjectId);
 
@@ -195,6 +203,7 @@ export function TimerScreen() {
             remainingMs={timer.remainingMs}
             isActive={timer.isActive}
             isPaused={timer.isPaused}
+            frameId={selectedFrame}
           />
 
           {/* Duration badge when idle */}

@@ -6,4 +6,5 @@ export { leaderboardService } from './leaderboard.service';
 export { roomsService } from './rooms.service';
 export { friendsService } from './friends.service';
 export { achievementsService } from './achievements.service';
+export { cosmeticsService } from './cosmetics.service';
 export { registerForPushNotifications, unregisterPushNotifications } from './notifications';

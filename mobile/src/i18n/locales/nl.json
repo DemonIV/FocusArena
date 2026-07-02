@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "FRAME-WINKEL",
+    "default": "Standaard",
+    "select": "Kies",
+    "selected": "Geselecteerd",
+    "buy": "Kopen",
+    "buyTitle": "Frame kopen",
+    "buyMsg": "Het frame {{name}} kopen voor {{price}} munten?",
+    "notEnoughTitle": "Niet genoeg munten",
+    "notEnoughMsg": "Verdien munten door te focussen — elke sessie geeft munten gelijk aan XP!",
+    "buyFailed": "Aankoop mislukt",
+    "earnHint": "🪙 Elke voltooide sessie levert munten op gelijk aan XP",
+    "frames": {
+      "bronze": "Brons",
+      "silver": "Zilver",
+      "gold": "Goud",
+      "emerald": "Smaragd",
+      "ruby": "Robijn",
+      "sapphire": "Saffier",
+      "amethyst": "Amethist",
+      "neon": "Neon",
+      "aurora": "Aurora",
+      "inferno": "Inferno",
+      "legend": "Legende"
+    }
   }
 }

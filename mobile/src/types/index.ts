@@ -297,6 +297,19 @@ export interface LockedAchievement {
   description: string;
 }
 
+/** Cosmetics shop — one catalog frame with ownership state */
+export interface FrameEntry {
+  id: string;
+  price: number;
+  owned: boolean;
+}
+
+export interface FramesResponse {
+  coins: number;
+  selectedFrame: string | null;
+  frames: FrameEntry[];
+}
+
 export interface StoredTimerState {
   sessionId: string;
   startTime: number;

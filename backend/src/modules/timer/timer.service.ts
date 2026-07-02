@@ -216,7 +216,7 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
   if (error) {
     // Log but don't re-throw — Redis is already cleared, no point blocking the user
     console.error(`stopTimer: DB update failed (session=${state.sessionId}): ${error.message}`);
-    return { sessionId: state.sessionId, durationMinutes, wasCompleted: false, xpEarned: 0, newXp: 0, newLevel: 1, newStreak: 0 };
+    return { sessionId: state.sessionId, durationMinutes, wasCompleted: false, xpEarned: 0, coinsEarned: 0, newXp: 0, newCoins: 0, newLevel: 1, newStreak: 0 };
   }
 
   // Attribute studied minutes to every room the user is in (fire-and-forget).
@@ -229,7 +229,7 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
 
   // XP + streak — only on completion
   if (!wasCompleted || durationMinutes === 0) {
-    return { sessionId: state.sessionId, durationMinutes, wasCompleted, xpEarned: 0, newXp: 0, newLevel: 1, newStreak: 0 };
+    return { sessionId: state.sessionId, durationMinutes, wasCompleted, xpEarned: 0, coinsEarned: 0, newXp: 0, newCoins: 0, newLevel: 1, newStreak: 0 };
   }
 
   const result = await awardXpAndStreak(userId, state.sessionId, durationMinutes);
@@ -276,7 +276,7 @@ async function awardXpAndStreak(
 
   const { data: user, error: userErr } = await supabase
     .from('users')
-    .select('xp, level, streak, longest_streak')
+    .select('xp, level, streak, longest_streak, coins')
     .eq('id', userId)
     .single();
 
@@ -284,6 +284,8 @@ async function awardXpAndStreak(
 
   const newXp = user.xp + xpGained;
   const newLevel = computeLevel(newXp);
+  // Coins are the spendable cosmetics currency — earned 1:1 with XP.
+  const newCoins = (user.coins ?? 0) + xpGained;
 
   // ── Streak logic ──────────────────────────────────────────
   const todayUtcStart = new Date();
@@ -321,6 +323,7 @@ async function awardXpAndStreak(
     .update({
       xp: newXp,
       level: newLevel,
+      coins: newCoins,
       streak: newStreak,
       longest_streak: newLongestStreak,
     })
@@ -346,7 +349,9 @@ async function awardXpAndStreak(
     durationMinutes,
     wasCompleted: true,
     xpEarned: xpGained,
+    coinsEarned: xpGained,
     newXp,
+    newCoins,
     newLevel,
     newStreak,
   };

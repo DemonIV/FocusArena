@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "SKLEP Z RAMKAMI",
+    "default": "Domyślna",
+    "select": "Wybierz",
+    "selected": "Wybrana",
+    "buy": "Kup",
+    "buyTitle": "Kup ramkę",
+    "buyMsg": "Kupić ramkę {{name}} za {{price}} monet?",
+    "notEnoughTitle": "Za mało monet",
+    "notEnoughMsg": "Zdobywaj monety skupiając się — każda sesja daje monety równe XP!",
+    "buyFailed": "Zakup nieudany",
+    "earnHint": "🪙 Każda ukończona sesja daje monety równe XP",
+    "frames": {
+      "bronze": "Brąz",
+      "silver": "Srebro",
+      "gold": "Złoto",
+      "emerald": "Szmaragd",
+      "ruby": "Rubin",
+      "sapphire": "Szafir",
+      "amethyst": "Ametyst",
+      "neon": "Neon",
+      "aurora": "Zorza",
+      "inferno": "Inferno",
+      "legend": "Legenda"
+    }
   }
 }

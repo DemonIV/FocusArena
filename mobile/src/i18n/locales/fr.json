@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "BOUTIQUE DE CADRES",
+    "default": "Par défaut",
+    "select": "Choisir",
+    "selected": "Sélectionné",
+    "buy": "Acheter",
+    "buyTitle": "Acheter le cadre",
+    "buyMsg": "Acheter le cadre {{name}} pour {{price}} pièces ?",
+    "notEnoughTitle": "Pas assez de pièces",
+    "notEnoughMsg": "Gagne des pièces en te concentrant — chaque session rapporte autant de pièces que d’XP !",
+    "buyFailed": "Achat échoué",
+    "earnHint": "🪙 Chaque session terminée rapporte autant de pièces que d’XP",
+    "frames": {
+      "bronze": "Bronze",
+      "silver": "Argent",
+      "gold": "Or",
+      "emerald": "Émeraude",
+      "ruby": "Rubis",
+      "sapphire": "Saphir",
+      "amethyst": "Améthyste",
+      "neon": "Néon",
+      "aurora": "Aurore",
+      "inferno": "Inferno",
+      "legend": "Légende"
+    }
   }
 }

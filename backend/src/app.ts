@@ -10,6 +10,7 @@ import { friendsModule } from './modules/friends';
 import { achievementsModule } from './modules/achievements';
 import { notificationsModule } from './modules/notifications';
 import { billingModule } from './modules/billing';
+import { cosmeticsModule } from './modules/cosmetics';
 import { captureException } from './shared/observability';
 
 export async function buildApp() {
@@ -39,6 +40,7 @@ export async function buildApp() {
   await app.register(achievementsModule, { prefix: '/achievements' });
   await app.register(notificationsModule, { prefix: '/notifications' });
   await app.register(billingModule, { prefix: '/billing' });
+  await app.register(cosmeticsModule, { prefix: '/cosmetics' });
 
   app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 

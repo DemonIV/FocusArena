@@ -19,10 +19,11 @@ import { useAuth } from '../../hooks';
 import { StatCard, StreakHeatmap, StudyDnaCard } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { useBillingStore } from '../../stores';
-import { timerService, achievementsService, roomsService } from '../../services';
+import { timerService, achievementsService, roomsService, cosmeticsService } from '../../services';
+import { FRAMES } from '../../constants';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
-import type { SubjectStat } from '../../types';
+import type { SubjectStat, FrameEntry } from '../../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -286,6 +287,9 @@ export function ProfileScreen() {
           </TouchableOpacity>
         )}
 
+        {/* ── Frame Shop ── */}
+        <FrameShopSection />
+
         {/* ── Streak Heat Map ── */}
         {heatmapQ.data && heatmapQ.data.days.length > 0 && (
           <StreakHeatmap
@@ -533,6 +537,135 @@ export function ProfileScreen() {
         source={paywallSource}
       />
     </>
+  );
+}
+
+// ─── FrameShopSection ─────────────────────────────────────────────────────────
+// Coin balance + horizontal frame shop. Frames are bought with coins
+// (earned 1:1 with XP) and equip onto the focus timer ring.
+
+function FrameShopSection() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const framesQ = useQuery({
+    queryKey: ['frames'],
+    queryFn: () => cosmeticsService.getFrames(),
+  });
+
+  const coins = framesQ.data?.coins ?? 0;
+  const selected = framesQ.data?.selectedFrame ?? null;
+  const ownedMap = new Map((framesQ.data?.frames ?? []).map((f) => [f.id, f]));
+
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['frames'] });
+  }, [queryClient]);
+
+  // Buy + auto-equip in one flow — nobody buys a frame not to wear it.
+  const buyMut = useMutation({
+    mutationFn: async (frameId: string) => {
+      await cosmeticsService.buyFrame(frameId);
+      await cosmeticsService.selectFrame(frameId);
+    },
+    onSuccess: invalidate,
+    onError: (e: any) => {
+      if (e?.statusCode === 402) {
+        Alert.alert(t('shop.notEnoughTitle'), t('shop.notEnoughMsg'));
+        return;
+      }
+      if (e?.statusCode === 409) { invalidate(); return; } // already owned — just refresh
+      Alert.alert(t('common.error'), e?.message ?? t('shop.buyFailed'));
+    },
+  });
+
+  const selectMut = useMutation({
+    mutationFn: (frameId: string | null) => cosmeticsService.selectFrame(frameId),
+    onSuccess: invalidate,
+    onError: (e: any) => Alert.alert(t('common.error'), e?.message ?? t('shop.buyFailed')),
+  });
+
+  const isBusy = buyMut.isPending || selectMut.isPending;
+
+  const handlePress = useCallback((frame: FrameEntry) => {
+    if (isBusy) return;
+    if (selected === frame.id) return; // already equipped
+    if (frame.owned) {
+      selectMut.mutate(frame.id);
+      return;
+    }
+    if (coins < frame.price) {
+      Alert.alert(t('shop.notEnoughTitle'), t('shop.notEnoughMsg'));
+      return;
+    }
+    const name = t(`shop.frames.${frame.id}`);
+    Alert.alert(
+      t('shop.buyTitle'),
+      t('shop.buyMsg', { name, price: frame.price.toLocaleString() }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('shop.buy'), onPress: () => buyMut.mutate(frame.id) },
+      ],
+    );
+  }, [isBusy, selected, coins, t]);
+
+  return (
+    <View style={shop.container}>
+      <View style={shop.headerRow}>
+        <Text style={styles.sectionLabel}>{t('shop.title')}</Text>
+        <View style={shop.coinChip}>
+          <Text style={shop.coinText}>🪙 {coins.toLocaleString()}</Text>
+        </View>
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={shop.row}
+      >
+        {/* Default (no frame) */}
+        <Pressable
+          style={[shop.card, selected === null && shop.cardSelected]}
+          onPress={() => { if (!isBusy && selected !== null) selectMut.mutate(null); }}
+        >
+          <View style={shop.previewWrap}>
+            <View style={[shop.preview, { borderColor: ACCENT }]} />
+          </View>
+          <Text style={shop.name} numberOfLines={1}>{t('shop.default')}</Text>
+          <Text style={[shop.state, selected === null && { color: ACCENT }]}>
+            {selected === null ? `✓ ${t('shop.selected')}` : t('shop.select')}
+          </Text>
+        </Pressable>
+
+        {FRAMES.map((v) => {
+          const entry = ownedMap.get(v.id) ?? { id: v.id, price: v.price, owned: false };
+          const isSel = selected === v.id;
+          return (
+            <Pressable
+              key={v.id}
+              style={[shop.card, isSel && shop.cardSelected, !entry.owned && shop.cardLocked]}
+              onPress={() => handlePress(entry)}
+            >
+              <View style={shop.previewWrap}>
+                {v.outer2 && <View style={[shop.previewOuter, { borderColor: `${v.outer2}88` }]} />}
+                <View style={[shop.preview, { borderColor: v.ring, shadowColor: v.glow }]} />
+              </View>
+              <Text style={shop.name} numberOfLines={1}>{t(`shop.frames.${v.id}`)}</Text>
+              {isSel ? (
+                <Text style={[shop.state, { color: ACCENT }]}>✓ {t('shop.selected')}</Text>
+              ) : entry.owned ? (
+                <Text style={shop.state}>{t('shop.select')}</Text>
+              ) : (
+                <Text style={[shop.price, coins < entry.price && { color: MUTED }]}>
+                  🪙 {entry.price.toLocaleString()}
+                </Text>
+              )}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <Text style={shop.hint}>{t('shop.earnHint')}</Text>
+    </View>
   );
 }
 
@@ -915,6 +1048,69 @@ const subj = StyleSheet.create({
   actionBtn: { padding: 4 },
   editIcon: { fontSize: 17 },
   deleteIcon: { fontSize: 17 },
+});
+
+// ─── Frame Shop Styles ────────────────────────────────────────────────────────
+
+const shop = StyleSheet.create({
+  container: { marginBottom: 24 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  coinChip: {
+    backgroundColor: 'rgba(255,215,0,0.10)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.35)',
+    marginBottom: 12,
+  },
+  coinText: { color: '#ffd700', fontSize: 13, fontWeight: '800' },
+  row: { gap: 10, paddingVertical: 4 },
+  card: {
+    width: 96,
+    backgroundColor: CARD,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: BORDER,
+  },
+  cardSelected: { borderColor: ACCENT, backgroundColor: `${ACCENT}0d` },
+  cardLocked: { opacity: 0.75 },
+  previewWrap: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  previewOuter: {
+    position: 'absolute',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1.5,
+  },
+  preview: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 3.5,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  name: { color: TEXT, fontSize: 12, fontWeight: '700', marginBottom: 4 },
+  state: { color: MUTED2, fontSize: 11, fontWeight: '600' },
+  price: { color: '#ffd700', fontSize: 11, fontWeight: '800' },
+  hint: { color: MUTED, fontSize: 11, marginTop: 10 },
 });
 
 // ─── Modal Styles ─────────────────────────────────────────────────────────────

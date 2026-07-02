@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "NEGOZIO DI CORNICI",
+    "default": "Predefinita",
+    "select": "Scegli",
+    "selected": "Selezionata",
+    "buy": "Compra",
+    "buyTitle": "Compra cornice",
+    "buyMsg": "Comprare la cornice {{name}} per {{price}} monete?",
+    "notEnoughTitle": "Monete insufficienti",
+    "notEnoughMsg": "Guadagna monete concentrandoti — ogni sessione dà monete pari agli XP!",
+    "buyFailed": "Acquisto non riuscito",
+    "earnHint": "🪙 Ogni sessione completata ti dà monete pari agli XP",
+    "frames": {
+      "bronze": "Bronzo",
+      "silver": "Argento",
+      "gold": "Oro",
+      "emerald": "Smeraldo",
+      "ruby": "Rubino",
+      "sapphire": "Zaffiro",
+      "amethyst": "Ametista",
+      "neon": "Neon",
+      "aurora": "Aurora",
+      "inferno": "Inferno",
+      "legend": "Leggenda"
+    }
   }
 }

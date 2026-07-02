@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "FRAME SHOP",
+    "default": "Default",
+    "select": "Select",
+    "selected": "Selected",
+    "buy": "Buy",
+    "buyTitle": "Buy frame",
+    "buyMsg": "Buy the {{name}} frame for {{price}} coins?",
+    "notEnoughTitle": "Not enough coins",
+    "notEnoughMsg": "Earn coins by focusing — every session gives coins equal to XP!",
+    "buyFailed": "Purchase failed",
+    "earnHint": "🪙 Every completed session earns you coins equal to XP",
+    "frames": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "emerald": "Emerald",
+      "ruby": "Ruby",
+      "sapphire": "Sapphire",
+      "amethyst": "Amethyst",
+      "neon": "Neon",
+      "aurora": "Aurora",
+      "inferno": "Inferno",
+      "legend": "Legend"
+    }
   }
 }

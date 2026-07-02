@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "МАГАЗИН РАМОК",
+    "default": "Обычная",
+    "select": "Выбрать",
+    "selected": "Выбрана",
+    "buy": "Купить",
+    "buyTitle": "Купить рамку",
+    "buyMsg": "Купить рамку «{{name}}» за {{price}} монет?",
+    "notEnoughTitle": "Недостаточно монет",
+    "notEnoughMsg": "Зарабатывай монеты, фокусируясь — каждая сессия даёт монеты, равные XP!",
+    "buyFailed": "Покупка не удалась",
+    "earnHint": "🪙 Каждая завершённая сессия приносит монеты, равные XP",
+    "frames": {
+      "bronze": "Бронза",
+      "silver": "Серебро",
+      "gold": "Золото",
+      "emerald": "Изумруд",
+      "ruby": "Рубин",
+      "sapphire": "Сапфир",
+      "amethyst": "Аметист",
+      "neon": "Неон",
+      "aurora": "Аврора",
+      "inferno": "Инферно",
+      "legend": "Легенда"
+    }
   }
 }

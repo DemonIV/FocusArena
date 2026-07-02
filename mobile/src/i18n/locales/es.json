@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "TIENDA DE MARCOS",
+    "default": "Predeterminado",
+    "select": "Elegir",
+    "selected": "Seleccionado",
+    "buy": "Comprar",
+    "buyTitle": "Comprar marco",
+    "buyMsg": "¿Comprar el marco {{name}} por {{price}} monedas?",
+    "notEnoughTitle": "Monedas insuficientes",
+    "notEnoughMsg": "¡Gana monedas concentrándote — cada sesión da monedas iguales a tu XP!",
+    "buyFailed": "Compra fallida",
+    "earnHint": "🪙 Cada sesión completada te da monedas iguales a tu XP",
+    "frames": {
+      "bronze": "Bronce",
+      "silver": "Plata",
+      "gold": "Oro",
+      "emerald": "Esmeralda",
+      "ruby": "Rubí",
+      "sapphire": "Zafiro",
+      "amethyst": "Amatista",
+      "neon": "Neón",
+      "aurora": "Aurora",
+      "inferno": "Infierno",
+      "legend": "Leyenda"
+    }
   }
 }

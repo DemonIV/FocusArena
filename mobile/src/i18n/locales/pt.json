@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "LOJA DE MOLDURAS",
+    "default": "Padrão",
+    "select": "Escolher",
+    "selected": "Selecionada",
+    "buy": "Comprar",
+    "buyTitle": "Comprar moldura",
+    "buyMsg": "Comprar a moldura {{name}} por {{price}} moedas?",
+    "notEnoughTitle": "Moedas insuficientes",
+    "notEnoughMsg": "Ganhe moedas focando — cada sessão dá moedas iguais ao XP!",
+    "buyFailed": "Falha na compra",
+    "earnHint": "🪙 Cada sessão concluída rende moedas iguais ao XP",
+    "frames": {
+      "bronze": "Bronze",
+      "silver": "Prata",
+      "gold": "Ouro",
+      "emerald": "Esmeralda",
+      "ruby": "Rubi",
+      "sapphire": "Safira",
+      "amethyst": "Ametista",
+      "neon": "Néon",
+      "aurora": "Aurora",
+      "inferno": "Inferno",
+      "legend": "Lenda"
+    }
   }
 }

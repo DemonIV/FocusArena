@@ -318,5 +318,31 @@
     "activeMember": "Pro üyesin",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Sınırsız konu + streak dondurma"
+  },
+  "shop": {
+    "title": "ÇERÇEVE MAĞAZASI",
+    "default": "Varsayılan",
+    "select": "Seç",
+    "selected": "Seçili",
+    "buy": "Satın Al",
+    "buyTitle": "Çerçeve satın al",
+    "buyMsg": "{{name}} çerçevesini {{price}} coin karşılığında satın almak istiyor musun?",
+    "notEnoughTitle": "Yeterli coin yok",
+    "notEnoughMsg": "Odaklanarak coin kazan — her seans XP kadar coin kazandırır!",
+    "buyFailed": "Satın alma başarısız",
+    "earnHint": "🪙 Her tamamlanan seansta XP kadar coin kazanırsın",
+    "frames": {
+      "bronze": "Bronz",
+      "silver": "Gümüş",
+      "gold": "Altın",
+      "emerald": "Zümrüt",
+      "ruby": "Yakut",
+      "sapphire": "Safir",
+      "amethyst": "Ametist",
+      "neon": "Neon",
+      "aurora": "Aurora",
+      "inferno": "Alev",
+      "legend": "Efsane"
+    }
   }
 }

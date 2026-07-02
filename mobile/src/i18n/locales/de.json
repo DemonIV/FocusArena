@@ -318,5 +318,31 @@
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
     "upgradeSub": "Unlimited subjects + streak freeze"
+  },
+  "shop": {
+    "title": "RAHMEN-SHOP",
+    "default": "Standard",
+    "select": "Wählen",
+    "selected": "Ausgewählt",
+    "buy": "Kaufen",
+    "buyTitle": "Rahmen kaufen",
+    "buyMsg": "Den Rahmen {{name}} für {{price}} Münzen kaufen?",
+    "notEnoughTitle": "Nicht genug Münzen",
+    "notEnoughMsg": "Verdiene Münzen durch Fokussieren — jede Sitzung bringt Münzen in Höhe der XP!",
+    "buyFailed": "Kauf fehlgeschlagen",
+    "earnHint": "🪙 Jede abgeschlossene Sitzung bringt dir Münzen in Höhe der XP",
+    "frames": {
+      "bronze": "Bronze",
+      "silver": "Silber",
+      "gold": "Gold",
+      "emerald": "Smaragd",
+      "ruby": "Rubin",
+      "sapphire": "Saphir",
+      "amethyst": "Amethyst",
+      "neon": "Neon",
+      "aurora": "Aurora",
+      "inferno": "Inferno",
+      "legend": "Legende"
+    }
   }
 }

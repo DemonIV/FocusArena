@@ -20,3 +20,6 @@ export const XP = {
 } as const;
 
 export const BACKGROUND_TIMER_TASK = 'FOCUS_ARENA_TIMER_TASK';
+
+export { FRAMES, getFrameVisual } from './frames';
+export type { FrameVisual } from './frames';

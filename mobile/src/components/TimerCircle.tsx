@@ -14,6 +14,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { msToDisplay } from '../utils/formatTime';
+import { getFrameVisual } from '../constants/frames';
 
 const SIZE = 220;
 const STROKE = 14;
@@ -28,9 +29,12 @@ interface Props {
   remainingMs: number;
   isActive: boolean;
   isPaused: boolean;
+  /** Equipped cosmetic frame id (shop) — undefined/null = default look */
+  frameId?: string | null;
 }
 
-export function TimerCircle({ progress, remainingMs, isActive, isPaused }: Props) {
+export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId }: Props) {
+  const frame = getFrameVisual(frameId);
   const p = Math.min(1, Math.max(0, progress));
 
   const targetRight = p <= 0.5 ? 180 - p * 2 * 180 : 0;
@@ -67,8 +71,11 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused }: Props
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, isPaused]);
 
-  const fillColor = !isActive ? '#4a4a6a' : isPaused ? '#f59e0b' : '#00d2ff';
-  const glowColor = !isActive ? 'transparent' : isPaused ? '#f59e0b' : '#00d2ff';
+  // Frame overrides the focusing colors; paused stays amber for clarity.
+  const focusRing = frame?.ring ?? '#00d2ff';
+  const focusGlow = frame?.glow ?? '#00d2ff';
+  const fillColor = !isActive ? '#4a4a6a' : isPaused ? '#f59e0b' : focusRing;
+  const glowColor = !isActive ? 'transparent' : isPaused ? '#f59e0b' : focusGlow;
   const statusLabel = !isActive ? 'READY' : isPaused ? 'PAUSED' : 'FOCUSING';
 
   const rightAnimStyle = useAnimatedStyle(() => ({
@@ -84,6 +91,19 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused }: Props
 
   return (
     <View style={styles.outerWrapper}>
+      {/* Cosmetic frame — decorative outer ring(s), visible even when idle */}
+      {frame && (
+        <>
+          <View style={[styles.frameRing, {
+            borderColor: `${frame.outer}66`,
+            shadowColor: frame.outer,
+          }]} />
+          {frame.outer2 && (
+            <View style={[styles.frameRing2, { borderColor: `${frame.outer2}55` }]} />
+          )}
+        </>
+      )}
+
       {/* Glow ring behind the circle — breathes while focusing */}
       {isActive && (
         <Animated.View style={[styles.glowRing, glowAnimStyle, {
@@ -133,8 +153,26 @@ const styles = StyleSheet.create({
   outerWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: SIZE + 40,
-    height: SIZE + 40,
+    width: SIZE + 48,
+    height: SIZE + 48,
+  },
+  frameRing: {
+    position: 'absolute',
+    width: SIZE + 32,
+    height: SIZE + 32,
+    borderRadius: (SIZE + 32) / 2,
+    borderWidth: 3,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  frameRing2: {
+    position: 'absolute',
+    width: SIZE + 44,
+    height: SIZE + 44,
+    borderRadius: (SIZE + 44) / 2,
+    borderWidth: 1.5,
   },
   glowRing: {
     position: 'absolute',

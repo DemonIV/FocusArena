@@ -69,7 +69,10 @@ export interface StopTimerResult {
   durationMinutes: number;
   wasCompleted: boolean;
   xpEarned: number;
+  /** Coins earned this session (1:1 with XP) — cosmetics currency */
+  coinsEarned: number;
   newXp: number;
+  newCoins: number;
   newLevel: number;
   newStreak: number;
 }
