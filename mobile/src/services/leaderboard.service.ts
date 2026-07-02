@@ -7,6 +7,7 @@ interface RawEntry {
   user_id: string;        // backend returns snake_case
   username: string;
   avatar_url: string | null;
+  frame?: string | null;
   score: number;
   isMe?: boolean;
 }
@@ -25,6 +26,7 @@ function mapEntry(e: RawEntry, period: LeaderboardPeriod): LeaderboardEntry {
     userId: e.user_id,
     username: e.username,
     avatarUrl: e.avatar_url,
+    frame: e.frame ?? null,
     value: e.score,
     unit: period === 'alltime' ? 'XP' : 'min',
     isMe: e.isMe,
@@ -63,6 +65,7 @@ export const leaderboardService = {
         user_id: string;
         username: string;
         avatar_url: string | null;
+        frame?: string | null;
         score: number;
         isMe: boolean;
       }[];
@@ -84,6 +87,7 @@ export const leaderboardService = {
         userId: n.user_id,
         username: n.username,
         avatarUrl: n.avatar_url,
+        frame: n.frame ?? null,
         value: n.score,
         unit,
         isMe: n.isMe,

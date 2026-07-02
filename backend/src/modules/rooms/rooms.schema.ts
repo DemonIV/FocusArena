@@ -44,6 +44,8 @@ export interface RoomMemberWithPresence {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  /** Equipped cosmetic frame id (shop) — social display */
+  frame: string | null;
   joined_at: string;
   status: MemberStatus;
   /** Total minutes this member has studied while in this room */

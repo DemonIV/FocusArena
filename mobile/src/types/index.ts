@@ -198,6 +198,8 @@ export interface LeaderboardEntry {
   userId: string;
   username: string;
   avatarUrl: string | null;
+  /** Equipped cosmetic frame id — social display */
+  frame?: string | null;
   /** Numeric score for the given period */
   value: number;
   /** 'min' | 'XP' etc. */
@@ -239,6 +241,8 @@ export interface RoomMember {
   userId: string;
   username: string;
   avatarUrl: string | null;
+  /** Equipped cosmetic frame id — social display */
+  frame?: string | null;
   joinedAt: string;
   status: 'studying' | 'break' | 'offline';
   /** Total minutes studied while in this room */
@@ -254,6 +258,8 @@ export interface FriendEntry {
   friendId: string;
   username: string;
   avatarUrl: string | null;
+  /** Equipped cosmetic frame id — social display */
+  frame?: string | null;
   level: number;
   status: 'studying' | 'break' | 'offline';
   friendsSince: string;

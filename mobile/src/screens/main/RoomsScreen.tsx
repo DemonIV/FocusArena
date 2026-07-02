@@ -14,6 +14,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { roomsService } from '../../services';
+import { FramedAvatar } from '../../components';
 import { useSocketStore, useAuthStore } from '../../stores';
 import i18n from '../../i18n';
 import type { Room, RoomMember } from '../../types';
@@ -321,9 +322,13 @@ export function RoomsScreen() {
                             ? <Text style={styles.rankMedal}>{medal}</Text>
                             : <Text style={styles.rankNum}>{index + 1}</Text>}
                         </View>
-                        <View style={[styles.memberAvatar, { borderColor: MEMBER_STATUS_COLOR[item.status] }]}>
-                          <Text style={styles.memberLetter}>{item.username.charAt(0).toUpperCase()}</Text>
-                        </View>
+                        {item.frame ? (
+                          <FramedAvatar username={item.username} avatarUrl={item.avatarUrl} frameId={item.frame} size={36} />
+                        ) : (
+                          <View style={[styles.memberAvatar, { borderColor: MEMBER_STATUS_COLOR[item.status] }]}>
+                            <Text style={styles.memberLetter}>{item.username.charAt(0).toUpperCase()}</Text>
+                          </View>
+                        )}
                         <View style={{ flex: 1 }}>
                           <Text style={styles.memberName} numberOfLines={1}>
                             {item.username}

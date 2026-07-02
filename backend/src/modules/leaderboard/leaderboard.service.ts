@@ -83,7 +83,7 @@ async function buildGlobalList(period: Period): Promise<LeaderboardEntry[]> {
   if (period === 'alltime') {
     const { data, error } = await supabase
       .from('users')
-      .select('id, username, avatar_url, xp')
+      .select('id, username, avatar_url, selected_frame, xp')
       .order('xp', { ascending: false })
       .limit(MAX_RANKED);
 
@@ -93,6 +93,7 @@ async function buildGlobalList(period: Period): Promise<LeaderboardEntry[]> {
       user_id: u.id as string,
       username: u.username as string,
       avatar_url: u.avatar_url as string | null,
+      frame: u.selected_frame as string | null,
       score: u.xp as number,
     }));
     return assignRanks(raw);
@@ -103,7 +104,7 @@ async function buildGlobalList(period: Period): Promise<LeaderboardEntry[]> {
   // sessions joined with users — PostgREST resource embedding
   const { data, error } = await supabase
     .from('sessions')
-    .select('user_id, duration_minutes, users!inner(username, avatar_url)')
+    .select('user_id, duration_minutes, users!inner(username, avatar_url, selected_frame)')
     .gte('started_at', range.start.toISOString())
     .lt('started_at', range.end.toISOString())
     .limit(50_000); // safety cap; aggregate in JS
@@ -113,11 +114,11 @@ async function buildGlobalList(period: Period): Promise<LeaderboardEntry[]> {
   // Aggregate duration_minutes per user
   const map = new Map<
     string,
-    { username: string; avatar_url: string | null; score: number }
+    { username: string; avatar_url: string | null; frame: string | null; score: number }
   >();
 
   for (const row of data ?? []) {
-    const u = row.users as unknown as { username: string; avatar_url: string | null };
+    const u = row.users as unknown as { username: string; avatar_url: string | null; selected_frame: string | null };
     const existing = map.get(row.user_id);
     if (existing) {
       existing.score += row.duration_minutes;
@@ -125,6 +126,7 @@ async function buildGlobalList(period: Period): Promise<LeaderboardEntry[]> {
       map.set(row.user_id, {
         username: u.username,
         avatar_url: u.avatar_url,
+        frame: u.selected_frame,
         score: row.duration_minutes,
       });
     }
@@ -193,7 +195,7 @@ export async function getFriendsLeaderboard(
   if (period === 'alltime') {
     const { data, error } = await supabase
       .from('users')
-      .select('id, username, avatar_url, xp')
+      .select('id, username, avatar_url, selected_frame, xp')
       .in('id', participantIds);
 
     if (error) throw new Error(error.message);
@@ -203,6 +205,7 @@ export async function getFriendsLeaderboard(
         user_id: u.id as string,
         username: u.username as string,
         avatar_url: u.avatar_url as string | null,
+        frame: u.selected_frame as string | null,
         score: u.xp as number,
       }))
       .sort((a, b) => b.score - a.score);
@@ -213,7 +216,7 @@ export async function getFriendsLeaderboard(
 
     const { data, error } = await supabase
       .from('sessions')
-      .select('user_id, duration_minutes, users!inner(username, avatar_url)')
+      .select('user_id, duration_minutes, users!inner(username, avatar_url, selected_frame)')
       .in('user_id', participantIds)
       .gte('started_at', range.start.toISOString())
       .lt('started_at', range.end.toISOString());
@@ -222,16 +225,16 @@ export async function getFriendsLeaderboard(
 
     const map = new Map<
       string,
-      { username: string; avatar_url: string | null; score: number }
+      { username: string; avatar_url: string | null; frame: string | null; score: number }
     >();
 
     for (const row of data ?? []) {
-      const u = row.users as unknown as { username: string; avatar_url: string | null };
+      const u = row.users as unknown as { username: string; avatar_url: string | null; selected_frame: string | null };
       const existing = map.get(row.user_id);
       if (existing) {
         existing.score += row.duration_minutes;
       } else {
-        map.set(row.user_id, { username: u.username, avatar_url: u.avatar_url, score: row.duration_minutes });
+        map.set(row.user_id, { username: u.username, avatar_url: u.avatar_url, frame: u.selected_frame, score: row.duration_minutes });
       }
     }
 
@@ -241,10 +244,10 @@ export async function getFriendsLeaderboard(
         // fetch username/avatar lazily
         const { data: u } = await supabase
           .from('users')
-          .select('username, avatar_url')
+          .select('username, avatar_url, selected_frame')
           .eq('id', id)
           .single();
-        if (u) map.set(id, { username: u.username, avatar_url: u.avatar_url, score: 0 });
+        if (u) map.set(id, { username: u.username, avatar_url: u.avatar_url, frame: u.selected_frame, score: 0 });
       }
     }
 
@@ -299,6 +302,7 @@ export async function getMyRank(
       user_id: e.user_id,
       username: e.username,
       avatar_url: e.avatar_url,
+      frame: e.frame ?? null,
       score: e.score,
       isMe: e.user_id === userId,
     }));

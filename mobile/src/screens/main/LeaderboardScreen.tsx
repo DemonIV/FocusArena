@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Image,
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { leaderboardService } from '../../services';
+import { FramedAvatar } from '../../components';
 import { useSocketStore } from '../../stores';
 import { formatDuration } from '../../utils/formatTime';
 import i18n from '../../i18n';
@@ -60,16 +60,12 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
         }
       </View>
 
-      {entry.avatarUrl
-        ? <Image source={{ uri: entry.avatarUrl }} style={styles.avatar} />
-        : (
-          <View style={[styles.avatar, styles.avatarFallback]}>
-            <Text style={styles.avatarLetter}>
-              {entry.username.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )
-      }
+      <FramedAvatar
+        username={entry.username}
+        avatarUrl={entry.avatarUrl}
+        frameId={entry.frame}
+        size={40}
+      />
 
       <View style={styles.userInfo}>
         <Text style={[styles.username, entry.isMe && styles.usernameMe]}>

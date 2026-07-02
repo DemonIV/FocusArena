@@ -75,10 +75,10 @@ async function deleteRow(userA: string, userB: string): Promise<void> {
 async function getUser(userId: string) {
   const { data } = await supabase
     .from('users')
-    .select('id, username, avatar_url, level')
+    .select('id, username, avatar_url, level, selected_frame')
     .eq('id', userId)
     .single();
-  return data as { id: string; username: string; avatar_url: string | null; level: number } | null;
+  return data as { id: string; username: string; avatar_url: string | null; level: number; selected_frame: string | null } | null;
 }
 
 // ─── Send Friend Request ──────────────────────────────────────
@@ -222,6 +222,7 @@ export async function listFriends(callerId: string): Promise<FriendEntry[]> {
         user_id: user.id,
         username: user.username,
         avatar_url: user.avatar_url,
+        frame: user.selected_frame,
         level: user.level,
         friends_since: row.created_at,
         online_status,

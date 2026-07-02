@@ -13,6 +13,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { friendsService } from '../../services';
+import { FramedAvatar } from '../../components';
 import { useSocketStore } from '../../stores';
 import type { FriendEntry, FriendRequest, UserSearchResult } from '../../types';
 
@@ -101,9 +102,14 @@ export function FriendsScreen() {
     const status = friendStatuses[item.friendId] ?? item.status ?? 'offline';
     return (
       <View style={styles.row}>
-        <View style={[styles.avatarCircle, { borderColor: STATUS_COLOR[status] ?? '#3a3a5a' }]}>
-          <Text style={styles.avatarLetter}>{item.username.charAt(0).toUpperCase()}</Text>
-        </View>
+        {item.frame ? (
+          // Frame trumps the status border — status stays visible in the text line
+          <FramedAvatar username={item.username} avatarUrl={item.avatarUrl} frameId={item.frame} size={40} />
+        ) : (
+          <View style={[styles.avatarCircle, { borderColor: STATUS_COLOR[status] ?? '#3a3a5a' }]}>
+            <Text style={styles.avatarLetter}>{item.username.charAt(0).toUpperCase()}</Text>
+          </View>
+        )}
         <View style={styles.rowInfo}>
           <Text style={styles.rowName}>{item.username}</Text>
           <Text style={[styles.rowStatus, { color: STATUS_COLOR[status] ?? '#3a3a5a' }]}>

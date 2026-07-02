@@ -35,6 +35,8 @@ export interface FriendEntry {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  /** Equipped cosmetic frame id (shop) — social display */
+  frame: string | null;
   level: number;
   friends_since: string;
   online_status: OnlineStatus;
