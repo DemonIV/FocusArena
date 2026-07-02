@@ -21,6 +21,9 @@ const UNLOCK: Record<BadgeType, (ctx: AchievementContext) => boolean> = {
   level_10:         (ctx) => (ctx.level ?? 0) >= 10,
   room_host:        (ctx) => ctx.isRoomHost === true,
   social_butterfly: (ctx) => (ctx.friendCount ?? 0) >= 5,
+  pro_member:       (ctx) => ctx.isPro === true,
+  pro_marathon:     (ctx) => ctx.isPro === true && (ctx.sessionMinutes ?? 0) >= 120,
+  pro_streak_14:    (ctx) => ctx.isPro === true && (ctx.streak ?? 0) >= 14,
 };
 
 // ─── Core Engine ──────────────────────────────────────────────

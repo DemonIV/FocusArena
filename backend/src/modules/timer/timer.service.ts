@@ -2,7 +2,7 @@ import { supabase, redis } from '../../shared';
 import { invalidateCache, invalidateCountries } from '../leaderboard';
 import { checkAndAward } from '../achievements';
 import { addStudyMinutesToRooms } from '../rooms/rooms.service';
-import { billingEnabled, isUserPro, FREE_SUBJECT_LIMIT } from '../billing';
+import { billingEnabled, isUserPro, getProStatus, FREE_SUBJECT_LIMIT } from '../billing';
 import { getSocketServer } from '../../websocket';
 import { track } from '../../shared/observability';
 import type {
@@ -329,13 +329,18 @@ async function awardXpAndStreak(
     })
     .eq('id', userId);
 
-  // Check & award achievements (fire-and-forget)
-  void checkAndAward(userId, {
-    isFirstSession: user.xp === 0,   // had zero XP before this session
-    streak: newStreak,
-    level: newLevel,
-    totalMinutes: Math.floor(newXp / XP_PER_MINUTE),
-  });
+  // Check & award achievements (fire-and-forget). Pro badges use the real
+  // entitlement (getProStatus), not the billing-disabled dev bypass.
+  void getProStatus(userId).then(({ isPro }) =>
+    checkAndAward(userId, {
+      isFirstSession: user.xp === 0,   // had zero XP before this session
+      streak: newStreak,
+      level: newLevel,
+      totalMinutes: Math.floor(newXp / XP_PER_MINUTE),
+      isPro,
+      sessionMinutes: durationMinutes,
+    }),
+  );
 
   track(userId, 'session_completed', {
     durationMinutes,

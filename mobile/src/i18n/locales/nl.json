@@ -161,7 +161,8 @@
     "resumeError": "Fout bij hervatten",
     "resumeErrorMsg": "Kan niet hervatten",
     "pauseError": "Fout bij pauzeren",
-    "pauseErrorMsg": "Kan niet pauzeren"
+    "pauseErrorMsg": "Kan niet pauzeren",
+    "zenMode": "Zen-modus"
   },
   "profile": {
     "level": "Lv {{level}}",
@@ -302,6 +303,9 @@
     "tagline": "More focus, fewer limits.",
     "benefitSubjects": "Add unlimited subjects",
     "benefitFreeze": "Streak freeze — a missed day won't break your streak",
+    "benefitZen": "Zen-modus — meeslepend focusscherm zonder afleiding",
+    "benefitFrames": "Geanimeerde Pro-timerframes (Prism & Royal)",
+    "benefitBadges": "Exclusieve Pro-badges",
     "unavailable": "Subscriptions are unavailable right now. Please try again later.",
     "yearly": "Yearly",
     "monthly": "Monthly",

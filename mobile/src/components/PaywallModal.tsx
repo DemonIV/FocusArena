@@ -96,6 +96,9 @@ export function PaywallModal({ visible, onClose, source = 'unknown' }: Props) {
   const benefits = [
     { icon: '📚', text: t('pro.benefitSubjects') },
     { icon: '🛡️', text: t('pro.benefitFreeze') },
+    { icon: '🧘', text: t('pro.benefitZen') },
+    { icon: '✨', text: t('pro.benefitFrames') },
+    { icon: '🎖️', text: t('pro.benefitBadges') },
   ];
 
   return (

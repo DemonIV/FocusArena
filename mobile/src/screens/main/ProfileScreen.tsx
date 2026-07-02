@@ -374,12 +374,16 @@ export function ProfileScreen() {
 
         {earned.length > 0 && (
           <View style={styles.badgesRow}>
-            {earned.map((b) => (
-              <View key={b.id} style={styles.badge}>
-                <Text style={styles.badgeIcon}>{b.icon}</Text>
-                <Text style={styles.badgeLabel}>{b.label}</Text>
-              </View>
-            ))}
+            {earned.map((b) => {
+              const pro = b.badge_type.startsWith('pro_');
+              return (
+                <View key={b.id} style={[styles.badge, pro && styles.badgePro]}>
+                  {pro && <Text style={styles.badgeProTag}>PRO</Text>}
+                  <Text style={styles.badgeIcon}>{b.icon}</Text>
+                  <Text style={styles.badgeLabel}>{b.label}</Text>
+                </View>
+              );
+            })}
           </View>
         )}
 
@@ -387,13 +391,24 @@ export function ProfileScreen() {
           <>
             <Text style={styles.lockedLabel}>{t('profile.locked')}</Text>
             <View style={styles.badgesRow}>
-              {locked.map((b) => (
-                <View key={b.badge_type} style={[styles.badge, styles.badgeLocked]}>
-                  <Text style={[styles.badgeIcon, { opacity: 0.4 }]}>🔒</Text>
-                  <Text style={[styles.badgeLabel, { color: MUTED }]}>{b.label}</Text>
-                  <Text style={styles.badgeDesc}>{b.description}</Text>
-                </View>
-              ))}
+              {locked.map((b) => {
+                const pro = b.badge_type.startsWith('pro_');
+                return (
+                  <Pressable
+                    key={b.badge_type}
+                    style={[styles.badge, pro ? styles.badgeLockedPro : styles.badgeLocked, pro && styles.badgePro]}
+                    // Locked Pro badge → sell the subscription
+                    onPress={pro && !isPro
+                      ? () => { setPaywallSource('pro_badge'); setPaywallVisible(true); }
+                      : undefined}
+                  >
+                    {pro && <Text style={styles.badgeProTag}>PRO</Text>}
+                    <Text style={[styles.badgeIcon, { opacity: 0.4 }]}>{pro ? '👑' : '🔒'}</Text>
+                    <Text style={[styles.badgeLabel, { color: MUTED }]}>{b.label}</Text>
+                    <Text style={styles.badgeDesc}>{b.description}</Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </>
         )}
@@ -996,6 +1011,20 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
   badgeLocked: { opacity: 0.4 },
+  badgeLockedPro: { opacity: 0.65 },
+  badgePro: {
+    borderColor: 'rgba(245,158,11,0.45)',
+    backgroundColor: 'rgba(245,158,11,0.06)',
+  },
+  badgeProTag: {
+    position: 'absolute',
+    top: 5,
+    right: 7,
+    color: '#f59e0b',
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
   badgeIcon: { fontSize: 28, marginBottom: 6 },
   badgeLabel: { color: TEXT, fontSize: 10, textAlign: 'center', fontWeight: '600' },
   badgeDesc: { color: MUTED, fontSize: 9, textAlign: 'center', marginTop: 3 },

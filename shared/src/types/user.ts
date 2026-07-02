@@ -38,4 +38,7 @@ export type BadgeType =
   | 'level_5'
   | 'level_10'
   | 'room_host'
-  | 'social_butterfly';
+  | 'social_butterfly'
+  | 'pro_member'
+  | 'pro_marathon'
+  | 'pro_streak_14';

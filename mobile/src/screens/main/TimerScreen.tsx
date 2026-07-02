@@ -18,8 +18,10 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useTimer } from '../../hooks';
-import { useSocketStore } from '../../stores';
-import { TimerCircle, StudyReceiptModal } from '../../components';
+import { useSocketStore, useBillingStore } from '../../stores';
+import { TimerCircle, StudyReceiptModal, ZenModeModal } from '../../components';
+import { PaywallModal } from '../../components/PaywallModal';
+import { billingEnabled } from '../../services/billing';
 import { timerService, cosmeticsService } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
@@ -58,6 +60,12 @@ export function TimerScreen() {
     xpEarned: number;
     streak: number;
   } | null>(null);
+
+  // Zen Mode — Pro-exclusive immersive focus screen
+  const isPro = useBillingStore((s) => s.isPro);
+  const zenLocked = billingEnabled && !isPro;
+  const [zenVisible, setZenVisible] = useState(false);
+  const [zenPaywallVisible, setZenPaywallVisible] = useState(false);
 
   const isCustomDuration = !DURATIONS.includes(selectedDuration);
 
@@ -122,6 +130,25 @@ export function TimerScreen() {
     }
   }, [selectedDuration, selectedSubjectId, timer]);
 
+  const handlePause = useCallback(async () => {
+    try { await timer.pause(); }
+    catch (err: any) {
+      Alert.alert(t('timer.pauseError'), err?.message ?? t('timer.pauseErrorMsg'));
+    }
+  }, [timer]);
+
+  const handleResume = useCallback(async () => {
+    try { await timer.resume(); }
+    catch (err: any) {
+      Alert.alert(t('timer.resumeError'), err?.message ?? t('timer.resumeErrorMsg'));
+    }
+  }, [timer]);
+
+  const handleZenPress = useCallback(() => {
+    if (zenLocked) { setZenPaywallVisible(true); return; }
+    setZenVisible(true);
+  }, [zenLocked]);
+
   const handleStop = useCallback(() => {
     Alert.alert(
       t('timer.endSession'),
@@ -134,6 +161,7 @@ export function TimerScreen() {
           onPress: async () => {
             try {
               const result = await timer.stop();
+              setZenVisible(false);
               // Refresh anything that depends on the finished session
               qc.invalidateQueries({ queryKey: ['timer-stats'] });
               qc.invalidateQueries({ queryKey: ['timer-ghost'] });
@@ -348,6 +376,16 @@ export function TimerScreen() {
         {/* ── ACTIVE STATE ── */}
         {timer.isActive && (
           <View style={styles.activeSection}>
+            {/* Zen Mode — Pro-exclusive immersive focus screen */}
+            <TouchableOpacity style={styles.zenBtn} onPress={handleZenPress} activeOpacity={0.8}>
+              <Text style={styles.zenBtnText}>🧘 {t('timer.zenMode')}</Text>
+              {zenLocked && (
+                <View style={styles.zenProTag}>
+                  <Text style={styles.zenProTagText}>👑 PRO</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
             {/* Session info strip */}
             <View style={styles.sessionInfo}>
               <InfoChip label={t('timer.duration')} value={`${timer.duration}${t('common.minShort')}`} />
@@ -369,12 +407,7 @@ export function TimerScreen() {
               {timer.isPaused ? (
                 <TouchableOpacity
                   style={[styles.controlBtn, styles.resumeBtn, timer.isLoading && { opacity: 0.6 }]}
-                  onPress={async () => {
-                    try { await timer.resume(); }
-                    catch (err: any) {
-                      Alert.alert(t('timer.resumeError'), err?.message ?? t('timer.resumeErrorMsg'));
-                    }
-                  }}
+                  onPress={handleResume}
                   disabled={timer.isLoading}
                   activeOpacity={0.85}
                 >
@@ -386,12 +419,7 @@ export function TimerScreen() {
               ) : (
                 <TouchableOpacity
                   style={[styles.controlBtn, styles.pauseBtn, timer.isLoading && { opacity: 0.6 }]}
-                  onPress={async () => {
-                    try { await timer.pause(); }
-                    catch (err: any) {
-                      Alert.alert(t('timer.pauseError'), err?.message ?? t('timer.pauseErrorMsg'));
-                    }
-                  }}
+                  onPress={handlePause}
                   disabled={timer.isLoading}
                   activeOpacity={0.85}
                 >
@@ -532,6 +560,27 @@ export function TimerScreen() {
           streak={receipt.streak}
         />
       )}
+
+      {/* ── Zen Mode (Pro) ── */}
+      <ZenModeModal
+        visible={zenVisible && timer.isActive}
+        onClose={() => setZenVisible(false)}
+        remainingMs={timer.remainingMs}
+        progress={timer.progress}
+        isPaused={timer.isPaused}
+        isLoading={timer.isLoading}
+        subjectName={selectedSubject?.name}
+        frameId={selectedFrame}
+        onPause={handlePause}
+        onResume={handleResume}
+        onStop={handleStop}
+      />
+
+      <PaywallModal
+        visible={zenPaywallVisible}
+        onClose={() => setZenPaywallVisible(false)}
+        source="zen_mode"
+      />
     </View>
   );
 }
@@ -755,6 +804,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 8,
     gap: 20,
+  },
+
+  zenBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(139,92,246,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.35)',
+  },
+  zenBtnText: {
+    color: '#a78bfa',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  zenProTag: {
+    backgroundColor: 'rgba(245,158,11,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.4)',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  zenProTagText: {
+    color: '#f59e0b',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 
   sessionInfo: {

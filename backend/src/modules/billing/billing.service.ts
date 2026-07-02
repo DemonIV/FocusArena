@@ -1,5 +1,6 @@
 import { supabase } from '../../shared';
 import { track } from '../../shared/observability';
+import { checkAndAward } from '../achievements';
 
 // ─── Tunables ─────────────────────────────────────────────────
 
@@ -87,6 +88,8 @@ export async function applyEntitlement(
         streak_freezes: STREAK_FREEZE_MAX,
       })
       .eq('id', userId);
+    // Pro badge (fire-and-forget; renewals dedupe against already-earned)
+    void checkAndAward(userId, { isPro: true });
   } else {
     await supabase.from('users').update({ is_pro: false }).eq('id', userId);
   }

@@ -161,7 +161,8 @@
     "resumeError": "Error al reanudar",
     "resumeErrorMsg": "No se pudo reanudar",
     "pauseError": "Error al pausar",
-    "pauseErrorMsg": "No se pudo pausar"
+    "pauseErrorMsg": "No se pudo pausar",
+    "zenMode": "Modo Zen"
   },
   "profile": {
     "level": "Nv {{level}}",
@@ -302,6 +303,9 @@
     "tagline": "More focus, fewer limits.",
     "benefitSubjects": "Add unlimited subjects",
     "benefitFreeze": "Streak freeze — a missed day won't break your streak",
+    "benefitZen": "Modo Zen — pantalla de enfoque inmersiva y sin distracciones",
+    "benefitFrames": "Marcos de temporizador Pro animados (Prism y Royal)",
+    "benefitBadges": "Insignias exclusivas de Pro",
     "unavailable": "Subscriptions are unavailable right now. Please try again later.",
     "yearly": "Yearly",
     "monthly": "Monthly",

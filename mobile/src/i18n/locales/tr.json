@@ -161,7 +161,8 @@
     "resumeError": "Devam Hatası",
     "resumeErrorMsg": "Devam ettirilemedi",
     "pauseError": "Duraklama Hatası",
-    "pauseErrorMsg": "Duraklama başarısız"
+    "pauseErrorMsg": "Duraklama başarısız",
+    "zenMode": "Zen Modu"
   },
   "profile": {
     "level": "Sv {{level}}",
@@ -302,6 +303,9 @@
     "tagline": "Daha fazla odak, daha az sınır.",
     "benefitSubjects": "Sınırsız konu ekle",
     "benefitFreeze": "Streak dondurma — kaçırdığın gün serini korur",
+    "benefitZen": "Zen Modu — dikkat dağıtmayan, sürükleyici odak ekranı",
+    "benefitFrames": "Animasyonlu Pro zamanlayıcı çerçeveleri (Prism ve Royal)",
+    "benefitBadges": "Pro'ya özel rozetler",
     "unavailable": "Abonelik şu an kullanılamıyor. Lütfen daha sonra tekrar dene.",
     "yearly": "Yıllık",
     "monthly": "Aylık",

@@ -11,6 +11,10 @@ export const BADGE_TYPES = [
   'level_10',
   'room_host',
   'social_butterfly',
+  // Pro-exclusive — only earnable with an active Pro subscription
+  'pro_member',
+  'pro_marathon',
+  'pro_streak_14',
 ] as const;
 
 export type BadgeType = (typeof BADGE_TYPES)[number];
@@ -34,6 +38,10 @@ export interface AchievementContext {
   isRoomHost?: boolean;
   /** Number of accepted friends the user now has */
   friendCount?: number;
+  /** User has an active Pro subscription (real entitlement, not the dev bypass) */
+  isPro?: boolean;
+  /** Length of the session just completed, in minutes */
+  sessionMinutes?: number;
 }
 
 // ─── Response Shapes ─────────────────────────────────────────
@@ -104,5 +112,20 @@ export const BADGE_META: Record<BadgeType, BadgeMeta> = {
     label: 'Social Butterfly',
     description: 'Connect with 5 or more friends.',
     icon: '🦋',
+  },
+  pro_member: {
+    label: 'Pro Member',
+    description: 'Join FocusArena Pro.',
+    icon: '👑',
+  },
+  pro_marathon: {
+    label: 'Marathon Pro',
+    description: 'Complete a 2-hour session as a Pro member.',
+    icon: '🚀',
+  },
+  pro_streak_14: {
+    label: 'Unbreakable',
+    description: 'Reach a 14-day streak as a Pro member.',
+    icon: '⚜️',
   },
 };

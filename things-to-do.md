@@ -204,3 +204,16 @@ Anahtarlar: Fly secrets (backend) + `backend/.env` + `mobile/.env` + `eas.json` 
 Bu sırada bulunup düzeltilen 2 gerçek hata:
 - **Sentry boşluğu** (commit 11132a4): route'lar hatayı catch edip elle 500 dönüyordu → Fastify `onError` tetiklenmiyordu → her 500 catch'ine `captureException` eklendi.
 - **PostHog kaybı** (commit a537b7e): Fly auto-stop makineyi idle olunca durdurduğundan batch'lenen event'ler flush edilmeden kayboluyordu → `flushAt: 1` ile her event anında gönderiliyor.
+
+## ✅ Pro'ya özel Zen Modu + rozetler (2026-07-02)
+
+"Abonelik için özel timer ekranı ve rozetler" — tamamlandı:
+
+- **Zen Modu**: aktif seansta 🧘 butonu → tam ekran, dikkat dağıtmayan odak ekranı (animasyonlu aurora efektleri, dev saat, minimal kontroller; takılı çerçevenin renklerine uyar). Pro değilse paywall açılır (source: `zen_mode`).
+- **Pro rozetleri** (3 adet, yalnızca aktif Pro aboneliğiyle kazanılır):
+  - `pro_member` 👑 — Pro'ya katıl (RevenueCat webhook aktivasyonunda verilir)
+  - `pro_marathon` 🚀 — Pro'yken 2 saatlik seans tamamla
+  - `pro_streak_14` ⚜️ — Pro'yken 14 günlük seriye ulaş
+- Profil'de Pro rozetleri altın çerçeveli + PRO etiketli; kilitliyse tıklayınca paywall (source: `pro_badge`).
+- Paywall'a 3 yeni fayda satırı eklendi (Zen, animasyonlu çerçeveler, rozetler) — 10 dilde.
+- Migration `008_pro_badges.sql` (badge_type CHECK genişletmesi) canlı DB'ye uygulandı ✓
