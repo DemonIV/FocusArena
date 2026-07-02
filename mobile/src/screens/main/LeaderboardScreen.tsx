@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { leaderboardService } from '../../services';
 import { FramedAvatar } from '../../components';
+import { getPetEmoji } from '../../constants';
 import { useSocketStore } from '../../stores';
 import { formatDuration } from '../../utils/formatTime';
 import i18n from '../../i18n';
@@ -70,6 +71,7 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
       <View style={styles.userInfo}>
         <Text style={[styles.username, entry.isMe && styles.usernameMe]}>
           {entry.username}
+          {getPetEmoji(entry.pet) ? ` ${getPetEmoji(entry.pet)}` : ''}
           {entry.isMe ? t('leaderboard.you') : ''}
         </Text>
         <Text style={styles.score}>

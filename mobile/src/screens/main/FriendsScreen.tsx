@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { friendsService } from '../../services';
 import { FramedAvatar } from '../../components';
+import { getPetEmoji } from '../../constants';
 import { useSocketStore } from '../../stores';
 import type { FriendEntry, FriendRequest, UserSearchResult } from '../../types';
 
@@ -111,7 +112,10 @@ export function FriendsScreen() {
           </View>
         )}
         <View style={styles.rowInfo}>
-          <Text style={styles.rowName}>{item.username}</Text>
+          <Text style={styles.rowName}>
+            {item.username}
+            {getPetEmoji(item.pet) ? ` ${getPetEmoji(item.pet)}` : ''}
+          </Text>
           <Text style={[styles.rowStatus, { color: STATUS_COLOR[status] ?? '#3a3a5a' }]}>
             {STATUS_ICON[status] ?? '💤'} {t(`status.${status}`, { defaultValue: status })}
           </Text>

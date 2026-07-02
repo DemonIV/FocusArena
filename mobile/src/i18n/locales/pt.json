@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}d"
   },
+  "pets": {
+    "shopTitle": "LOJA DE PETS",
+    "shopHint": "🐾 Seu pet mora na tela inicial e aparece ao lado do seu nome no ranking",
+    "none": "Nenhum",
+    "buyMsg": "Adotar {{name}} por {{price}} moedas?",
+    "adopt": "Adote um companheiro",
+    "adoptHint": "Adquira um pet animado e fofo com suas moedas",
+    "stageEgg": "Ovo",
+    "stageBaby": "Filhote",
+    "stageAdult": "Adulto",
+    "hatchIn": "{{duration}} de foco até chocar",
+    "growIn": "{{duration}} de foco até crescer",
+    "together": "Vocês focaram {{duration}} juntos",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Tartaruga",
+      "panda": "Panda",
+      "fox": "Raposa",
+      "owl": "Coruja",
+      "dragon": "Dragão",
+      "unicorn": "Unicórnio"
+    }
+  },
   "coinShop": {
     "title": "Pacote de moedas",
     "sub": "Compre molduras e cosméticos com moedas — seu XP fica intacto",

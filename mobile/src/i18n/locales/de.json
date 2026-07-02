@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}T"
   },
+  "pets": {
+    "shopTitle": "HAUSTIER-SHOP",
+    "shopHint": "🐾 Dein Haustier lebt auf dem Startbildschirm und erscheint neben deinem Namen in der Rangliste",
+    "none": "Keins",
+    "buyMsg": "{{name}} für {{price}} Münzen adoptieren?",
+    "adopt": "Adoptiere einen Begleiter",
+    "adoptHint": "Hol dir ein süßes animiertes Haustier mit deinen Münzen",
+    "stageEgg": "Ei",
+    "stageBaby": "Baby",
+    "stageAdult": "Erwachsen",
+    "hatchIn": "Noch {{duration}} Fokus bis zum Schlüpfen",
+    "growIn": "Noch {{duration}} Fokus, bis es ausgewachsen ist",
+    "together": "Ihr habt zusammen {{duration}} fokussiert",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Schildkröte",
+      "panda": "Panda",
+      "fox": "Fuchs",
+      "owl": "Eule",
+      "dragon": "Drache",
+      "unicorn": "Einhorn"
+    }
+  },
   "coinShop": {
     "title": "Münzpaket",
     "sub": "Kaufe Rahmen und Kosmetik mit Münzen — deine XP bleiben unberührt",

@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}d"
   },
+  "pets": {
+    "shopTitle": "TIENDA DE MASCOTAS",
+    "shopHint": "🐾 Tu mascota vive en la pantalla de inicio y aparece junto a tu nombre en la clasificación",
+    "none": "Ninguna",
+    "buyMsg": "¿Adoptar a {{name}} por {{price}} monedas?",
+    "adopt": "Adopta un compañero",
+    "adoptHint": "Consigue una adorable mascota animada con tus monedas",
+    "stageEgg": "Huevo",
+    "stageBaby": "Bebé",
+    "stageAdult": "Adulto",
+    "hatchIn": "{{duration}} de enfoque para que eclosione",
+    "growIn": "{{duration}} de enfoque para que crezca del todo",
+    "together": "Habéis enfocado {{duration}} juntos",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Tortuga",
+      "panda": "Panda",
+      "fox": "Zorro",
+      "owl": "Búho",
+      "dragon": "Dragón",
+      "unicorn": "Unicornio"
+    }
+  },
   "coinShop": {
     "title": "Pack de monedas",
     "sub": "Compra marcos y cosméticos con monedas — tu XP no se toca",

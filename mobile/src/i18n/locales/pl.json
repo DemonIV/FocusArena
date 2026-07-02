@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}dn"
   },
+  "pets": {
+    "shopTitle": "SKLEP ZE ZWIERZAKAMI",
+    "shopHint": "🐾 Twój zwierzak mieszka na ekranie głównym i pojawia się obok twojej nazwy w rankingu",
+    "none": "Brak",
+    "buyMsg": "Adoptować {{name}} za {{price}} monet?",
+    "adopt": "Adoptuj towarzysza",
+    "adoptHint": "Kup uroczego animowanego zwierzaka za monety",
+    "stageEgg": "Jajko",
+    "stageBaby": "Maluch",
+    "stageAdult": "Dorosły",
+    "hatchIn": "{{duration}} skupienia do wyklucia",
+    "growIn": "{{duration}} skupienia do dorośnięcia",
+    "together": "Skupialiście się razem przez {{duration}}",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Żółw",
+      "panda": "Panda",
+      "fox": "Lis",
+      "owl": "Sowa",
+      "dragon": "Smok",
+      "unicorn": "Jednorożec"
+    }
+  },
   "coinShop": {
     "title": "Pakiet monet",
     "sub": "Kupuj ramki i kosmetyki za monety — twoje XP pozostaje nietknięte",

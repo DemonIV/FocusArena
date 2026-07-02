@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}j"
   },
+  "pets": {
+    "shopTitle": "BOUTIQUE D'ANIMAUX",
+    "shopHint": "🐾 Ton animal vit sur l'écran d'accueil et apparaît à côté de ton nom dans le classement",
+    "none": "Aucun",
+    "buyMsg": "Adopter {{name}} pour {{price}} pièces ?",
+    "adopt": "Adopte un compagnon",
+    "adoptHint": "Offre-toi un adorable animal animé avec tes pièces",
+    "stageEgg": "Œuf",
+    "stageBaby": "Bébé",
+    "stageAdult": "Adulte",
+    "hatchIn": "{{duration}} de concentration avant l'éclosion",
+    "growIn": "{{duration}} de concentration avant qu'il grandisse",
+    "together": "Vous avez été concentrés {{duration}} ensemble",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Tortue",
+      "panda": "Panda",
+      "fox": "Renard",
+      "owl": "Hibou",
+      "dragon": "Dragon",
+      "unicorn": "Licorne"
+    }
+  },
   "coinShop": {
     "title": "Pack de pièces",
     "sub": "Achète des cadres et des cosmétiques avec des pièces — ton XP reste intact",

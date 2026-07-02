@@ -2,12 +2,21 @@ import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
 import { captureException, track } from '../../shared/observability';
-import { CosmeticsError, buyFrame, getFramesForUser, selectFrame } from './cosmetics.service';
+import {
+  CosmeticsError,
+  buyFrame,
+  getFramesForUser,
+  selectFrame,
+  buyPet,
+  getPetsForUser,
+  selectPet,
+} from './cosmetics.service';
 
 /** Map business errors to HTTP codes; anything else is a 500. */
 function statusFor(code: CosmeticsError['code']): number {
   switch (code) {
     case 'unknown_frame': return 404;
+    case 'unknown_pet': return 404;
     case 'not_owned': return 403;
     case 'pro_required': return 403;
     case 'already_owned': return 409;
@@ -64,6 +73,56 @@ export const cosmeticsRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.code(statusFor(err.code)).send({ error: err.code });
       }
       request.log.error(err, 'cosmetics POST /frames/select failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // ── GET /cosmetics/pets ───────────────────────────────────
+  // Pet shop view: coin balance, equipped pet, catalog with ownership + stage.
+  fastify.get('/pets', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    try {
+      const result = await getPetsForUser(userId);
+      return reply.send(result);
+    } catch (err) {
+      request.log.error(err, 'cosmetics GET /pets failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // ── POST /cosmetics/pets/:petId/buy ───────────────────────
+  fastify.post('/pets/:petId/buy', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    const { petId } = request.params as { petId: string };
+    try {
+      const result = await buyPet(userId, petId);
+      track(userId, 'pet_purchased', { petId, coinsLeft: result.coins });
+      return reply.send(result);
+    } catch (err) {
+      if (err instanceof CosmeticsError) {
+        return reply.code(statusFor(err.code)).send({ error: err.code });
+      }
+      request.log.error(err, 'cosmetics POST /pets/:petId/buy failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // ── POST /cosmetics/pets/select ───────────────────────────
+  // Body: { petId: string | null } — null unequips.
+  fastify.post('/pets/select', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    const { petId } = (request.body ?? {}) as { petId?: string | null };
+    try {
+      await selectPet(userId, petId ?? null);
+      return reply.send({ ok: true });
+    } catch (err) {
+      if (err instanceof CosmeticsError) {
+        return reply.code(statusFor(err.code)).send({ error: err.code });
+      }
+      request.log.error(err, 'cosmetics POST /pets/select failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }

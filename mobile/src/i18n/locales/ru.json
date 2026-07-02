@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}д"
   },
+  "pets": {
+    "shopTitle": "МАГАЗИН ПИТОМЦЕВ",
+    "shopHint": "🐾 Питомец живёт на главном экране и появляется рядом с вашим именем в рейтинге",
+    "none": "Нет",
+    "buyMsg": "Приютить {{name}} за {{price}} монет?",
+    "adopt": "Заведите компаньона",
+    "adoptHint": "Купите милого анимированного питомца за монеты",
+    "stageEgg": "Яйцо",
+    "stageBaby": "Малыш",
+    "stageAdult": "Взрослый",
+    "hatchIn": "{{duration}} фокуса до вылупления",
+    "growIn": "{{duration}} фокуса до взросления",
+    "together": "Вы сфокусировались вместе {{duration}}",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Черепаха",
+      "panda": "Панда",
+      "fox": "Лиса",
+      "owl": "Сова",
+      "dragon": "Дракон",
+      "unicorn": "Единорог"
+    }
+  },
   "coinShop": {
     "title": "Набор монет",
     "sub": "Покупай рамки и косметику за монеты — твой XP не тратится",

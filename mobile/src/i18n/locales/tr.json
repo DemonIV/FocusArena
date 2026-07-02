@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}g"
   },
+  "pets": {
+    "shopTitle": "EVCİL HAYVAN MAĞAZASI",
+    "shopHint": "🐾 Evcil hayvanın Ana Sayfa'da yaşar, liderlik tablosunda adının yanında görünür",
+    "none": "Yok",
+    "buyMsg": "{{name}} dostunu {{price}} coin karşılığında sahiplenmek ister misin?",
+    "adopt": "Bir yol arkadaşı edin",
+    "adoptHint": "Coin'lerinle sevimli, animasyonlu bir dost al",
+    "stageEgg": "Yumurta",
+    "stageBaby": "Yavru",
+    "stageAdult": "Yetişkin",
+    "hatchIn": "Yumurtadan çıkmasına {{duration}} odak kaldı",
+    "growIn": "Büyümesine {{duration}} odak kaldı",
+    "together": "Birlikte {{duration}} odaklandınız",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Kaplumbağa",
+      "panda": "Panda",
+      "fox": "Tilki",
+      "owl": "Baykuş",
+      "dragon": "Ejderha",
+      "unicorn": "Tek Boynuz"
+    }
+  },
   "coinShop": {
     "title": "Coin Paketi",
     "sub": "Coin ile çerçeve ve kozmetik alabilirsin — XP'ne dokunulmaz",

@@ -15,6 +15,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { roomsService } from '../../services';
 import { FramedAvatar } from '../../components';
+import { getPetEmoji } from '../../constants';
 import { useSocketStore, useAuthStore } from '../../stores';
 import i18n from '../../i18n';
 import type { Room, RoomMember } from '../../types';
@@ -332,6 +333,7 @@ export function RoomsScreen() {
                         <View style={{ flex: 1 }}>
                           <Text style={styles.memberName} numberOfLines={1}>
                             {item.username}
+                            {getPetEmoji(item.pet) ? ` ${getPetEmoji(item.pet)}` : ''}
                             {isMe && <Text style={styles.youTag}>  {t('rooms.youTag')}</Text>}
                           </Text>
                           <Text style={[styles.memberStatus, { color: MEMBER_STATUS_COLOR[item.status] }]}>

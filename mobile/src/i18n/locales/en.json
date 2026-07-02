@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}d"
   },
+  "pets": {
+    "shopTitle": "PET SHOP",
+    "shopHint": "🐾 Your pet lives on your Home screen and shows next to your name on the leaderboard",
+    "none": "None",
+    "buyMsg": "Adopt {{name}} for {{price}} coins?",
+    "adopt": "Adopt a companion",
+    "adoptHint": "Get a cute animated pet with your coins",
+    "stageEgg": "Egg",
+    "stageBaby": "Baby",
+    "stageAdult": "Adult",
+    "hatchIn": "{{duration}} of focus until it hatches",
+    "growIn": "{{duration}} of focus until it's fully grown",
+    "together": "You've focused {{duration}} together",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Turtle",
+      "panda": "Panda",
+      "fox": "Fox",
+      "owl": "Owl",
+      "dragon": "Dragon",
+      "unicorn": "Unicorn"
+    }
+  },
   "coinShop": {
     "title": "Coin Pack",
     "sub": "Buy frames and cosmetics with coins — your XP stays untouched",

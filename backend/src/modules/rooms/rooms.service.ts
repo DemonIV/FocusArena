@@ -103,7 +103,7 @@ async function batchMemberCounts(roomIds: string[]): Promise<Map<string, number>
 export async function getRoomMembers(roomId: string): Promise<RoomMemberWithPresence[]> {
   const { data, error } = await supabase
     .from('room_members')
-    .select('user_id, joined_at, users!inner(username, avatar_url, selected_frame)')
+    .select('user_id, joined_at, users!inner(username, avatar_url, selected_frame, selected_pet)')
     .eq('room_id', roomId)
     .eq('is_active', true)
     .order('joined_at', { ascending: true });
@@ -121,13 +121,14 @@ export async function getRoomMembers(roomId: string): Promise<RoomMemberWithPres
 
   const members = await Promise.all(
     (data ?? []).map(async (row) => {
-      const u = row.users as unknown as { username: string; avatar_url: string | null; selected_frame: string | null };
+      const u = row.users as unknown as { username: string; avatar_url: string | null; selected_frame: string | null; selected_pet: string | null };
       const status = await getPresence(roomId, row.user_id);
       return {
         user_id: row.user_id as string,
         username: u.username,
         avatar_url: u.avatar_url,
         frame: u.selected_frame,
+        pet: u.selected_pet,
         joined_at: row.joined_at as string,
         status,
         total_minutes: minutesMap.get(row.user_id) ?? 0,

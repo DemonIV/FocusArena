@@ -23,7 +23,7 @@ import type {
 // ─── Constants ────────────────────────────────────────────────
 
 const TIMER_TTL = 60 * 60 * 4; // 4 hours max session in Redis
-const XP_PER_MINUTE = 10;
+export const XP_PER_MINUTE = 10;
 const XP_PER_LEVEL = 500;
 /** Session is "completed" if >= 90 % of intended duration was logged */
 const COMPLETION_THRESHOLD = 0.9;

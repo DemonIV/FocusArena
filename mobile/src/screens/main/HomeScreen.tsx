@@ -14,8 +14,8 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList, FriendEntry } from '../../types';
 import { useAuth } from '../../hooks';
 import { useTimerStore, useSocketStore } from '../../stores';
-import { StatCard } from '../../components';
-import { timerService, achievementsService, friendsService } from '../../services';
+import { StatCard, PetCompanion, PetAdoptTeaser } from '../../components';
+import { timerService, achievementsService, friendsService, cosmeticsService } from '../../services';
 import { formatDuration } from '../../utils/formatTime';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
@@ -69,6 +69,17 @@ export function HomeScreen({ navigation }: Props) {
     queryFn: () => timerService.getBoss(),
     refetchInterval: 120_000,
   });
+
+  // Companion pet — shared cache with the Profile pet shop
+  const petsQ = useQuery({
+    queryKey: ['pets'],
+    queryFn: () => cosmeticsService.getPets(),
+    staleTime: 60_000,
+  });
+  const selectedPetId = petsQ.data?.selectedPet ?? null;
+  const selectedPet = selectedPetId
+    ? petsQ.data?.pets.find((p) => p.id === selectedPetId)
+    : undefined;
   const boss = bossQ.data;
   const bossPct = boss && boss.goalMinutes > 0 ? Math.min(boss.totalMinutes / boss.goalMinutes, 1) : 0;
 
@@ -103,7 +114,7 @@ export function HomeScreen({ navigation }: Props) {
       refreshControl={
         <RefreshControl
           refreshing={statsQ.isFetching || achievQ.isFetching || friendsQ.isFetching}
-          onRefresh={() => { statsQ.refetch(); achievQ.refetch(); friendsQ.refetch(); }}
+          onRefresh={() => { statsQ.refetch(); achievQ.refetch(); friendsQ.refetch(); petsQ.refetch(); }}
           tintColor={ACCENT}
         />
       }
@@ -123,6 +134,17 @@ export function HomeScreen({ navigation }: Props) {
           <Text style={styles.levelText}>{t('home.level', { level })}</Text>
         </View>
       </View>
+
+      {/* ── Companion Pet ── */}
+      {selectedPet ? (
+        <PetCompanion
+          petId={selectedPet.id}
+          stage={selectedPet.stage ?? 'egg'}
+          minutesTogether={selectedPet.minutesTogether ?? 0}
+        />
+      ) : petsQ.data ? (
+        <PetAdoptTeaser onPress={() => navigation.navigate('Profile')} />
+      ) : null}
 
       {/* ── Active Timer Banner ── */}
       {timerActive && (

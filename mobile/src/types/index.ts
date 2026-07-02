@@ -200,6 +200,8 @@ export interface LeaderboardEntry {
   avatarUrl: string | null;
   /** Equipped cosmetic frame id — social display */
   frame?: string | null;
+  /** Equipped pet id — social display */
+  pet?: string | null;
   /** Numeric score for the given period */
   value: number;
   /** 'min' | 'XP' etc. */
@@ -243,6 +245,8 @@ export interface RoomMember {
   avatarUrl: string | null;
   /** Equipped cosmetic frame id — social display */
   frame?: string | null;
+  /** Equipped pet id — social display */
+  pet?: string | null;
   joinedAt: string;
   status: 'studying' | 'break' | 'offline';
   /** Total minutes studied while in this room */
@@ -260,6 +264,8 @@ export interface FriendEntry {
   avatarUrl: string | null;
   /** Equipped cosmetic frame id — social display */
   frame?: string | null;
+  /** Equipped pet id — social display */
+  pet?: string | null;
   level: number;
   status: 'studying' | 'break' | 'offline';
   friendsSince: string;
@@ -318,6 +324,27 @@ export interface FramesResponse {
   coins: number;
   selectedFrame: string | null;
   frames: FrameEntry[];
+}
+
+/** Pet evolution stage — server-computed from focus minutes while owned */
+export type PetStage = 'egg' | 'baby' | 'adult';
+
+/** Pet shop — one catalog pet with ownership + evolution state */
+export interface PetEntry {
+  id: string;
+  price: number;
+  owned: boolean;
+  /** Pro-exclusive pet — owned mirrors Pro status */
+  pro?: boolean;
+  /** Focus minutes earned while owning this pet (owned pets only) */
+  minutesTogether?: number;
+  stage?: PetStage;
+}
+
+export interface PetsResponse {
+  coins: number;
+  selectedPet: string | null;
+  pets: PetEntry[];
 }
 
 export interface StoredTimerState {

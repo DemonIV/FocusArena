@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}g"
   },
+  "pets": {
+    "shopTitle": "NEGOZIO ANIMALI",
+    "shopHint": "🐾 Il tuo animale vive nella schermata Home e appare accanto al tuo nome in classifica",
+    "none": "Nessuno",
+    "buyMsg": "Adottare {{name}} per {{price}} monete?",
+    "adopt": "Adotta un compagno",
+    "adoptHint": "Prendi un adorabile animale animato con le tue monete",
+    "stageEgg": "Uovo",
+    "stageBaby": "Cucciolo",
+    "stageAdult": "Adulto",
+    "hatchIn": "{{duration}} di focus prima della schiusa",
+    "growIn": "{{duration}} di focus prima che cresca",
+    "together": "Vi siete concentrati {{duration}} insieme",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Tartaruga",
+      "panda": "Panda",
+      "fox": "Volpe",
+      "owl": "Gufo",
+      "dragon": "Drago",
+      "unicorn": "Unicorno"
+    }
+  },
   "coinShop": {
     "title": "Pacchetto monete",
     "sub": "Compra cornici e cosmetici con le monete — i tuoi XP restano intatti",

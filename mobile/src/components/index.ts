@@ -7,3 +7,4 @@ export { StudyReceiptModal } from './StudyReceiptModal';
 export { StreakHeatmap } from './StreakHeatmap';
 export { StudyDnaCard } from './StudyDnaCard';
 export { ZenModeModal } from './ZenModeModal';
+export { PetCompanion, PetAdoptTeaser } from './PetCompanion';

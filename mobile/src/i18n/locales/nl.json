@@ -353,6 +353,29 @@
     },
     "daysLeftShort": "{{count}}d"
   },
+  "pets": {
+    "shopTitle": "HUISDIERENWINKEL",
+    "shopHint": "🐾 Je huisdier woont op je startscherm en staat naast je naam op het klassement",
+    "none": "Geen",
+    "buyMsg": "{{name}} adopteren voor {{price}} munten?",
+    "adopt": "Adopteer een maatje",
+    "adoptHint": "Koop een schattig geanimeerd huisdier met je munten",
+    "stageEgg": "Ei",
+    "stageBaby": "Baby",
+    "stageAdult": "Volwassen",
+    "hatchIn": "Nog {{duration}} focus tot het uitkomt",
+    "growIn": "Nog {{duration}} focus tot het volgroeid is",
+    "together": "Jullie hebben samen {{duration}} gefocust",
+    "attribution": "Animations: Google Noto Animated Emoji (CC BY 4.0)",
+    "names": {
+      "turtle": "Schildpad",
+      "panda": "Panda",
+      "fox": "Vos",
+      "owl": "Uil",
+      "dragon": "Draak",
+      "unicorn": "Eenhoorn"
+    }
+  },
   "coinShop": {
     "title": "Muntenpakket",
     "sub": "Koop frames en cosmetica met munten — je XP blijft onaangetast",
