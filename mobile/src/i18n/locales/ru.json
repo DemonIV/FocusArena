@@ -344,8 +344,10 @@
       "inferno": "Инферно",
       "legend": "Легенда",
       "prism": "Призма",
-      "royal": "Королевская"
-    }
+      "royal": "Королевская",
+      "summer": "Лето"
+    },
+    "daysLeftShort": "{{count}}д"
   },
   "coinShop": {
     "title": "Набор монет",

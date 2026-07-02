@@ -344,8 +344,10 @@
       "inferno": "Inferno",
       "legend": "Legenda",
       "prism": "Pryzmat",
-      "royal": "Królewski"
-    }
+      "royal": "Królewski",
+      "summer": "Lato"
+    },
+    "daysLeftShort": "{{count}}dn"
   },
   "coinShop": {
     "title": "Pakiet monet",

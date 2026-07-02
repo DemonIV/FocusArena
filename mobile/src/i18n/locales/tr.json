@@ -344,8 +344,10 @@
       "inferno": "Alev",
       "legend": "Efsane",
       "prism": "Prizma",
-      "royal": "Kraliyet"
-    }
+      "royal": "Kraliyet",
+      "summer": "Yaz"
+    },
+    "daysLeftShort": "{{count}}g"
   },
   "coinShop": {
     "title": "Coin Paketi",

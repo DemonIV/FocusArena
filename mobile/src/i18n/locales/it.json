@@ -344,8 +344,10 @@
       "inferno": "Inferno",
       "legend": "Leggenda",
       "prism": "Prisma",
-      "royal": "Reale"
-    }
+      "royal": "Reale",
+      "summer": "Estate"
+    },
+    "daysLeftShort": "{{count}}g"
   },
   "coinShop": {
     "title": "Pacchetto monete",

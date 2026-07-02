@@ -344,8 +344,10 @@
       "inferno": "Inferno",
       "legend": "Legende",
       "prism": "Prisma",
-      "royal": "Königlich"
-    }
+      "royal": "Königlich",
+      "summer": "Sommer"
+    },
+    "daysLeftShort": "{{count}}T"
   },
   "coinShop": {
     "title": "Münzpaket",

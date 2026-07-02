@@ -344,8 +344,10 @@
       "inferno": "Inferno",
       "legend": "Legende",
       "prism": "Prisma",
-      "royal": "Koninklijk"
-    }
+      "royal": "Koninklijk",
+      "summer": "Zomer"
+    },
+    "daysLeftShort": "{{count}}d"
   },
   "coinShop": {
     "title": "Muntenpakket",

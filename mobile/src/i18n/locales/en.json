@@ -344,8 +344,10 @@
       "inferno": "Inferno",
       "legend": "Legend",
       "prism": "Prism",
-      "royal": "Royal"
-    }
+      "royal": "Royal",
+      "summer": "Summer"
+    },
+    "daysLeftShort": "{{count}}d"
   },
   "coinShop": {
     "title": "Coin Pack",

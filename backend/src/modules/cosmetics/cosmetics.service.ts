@@ -1,6 +1,6 @@
 import { supabase } from '../../shared';
 import { isUserPro } from '../billing';
-import { FRAME_CATALOG, getFrameDef } from './cosmetics.schema';
+import { FRAME_CATALOG, getFrameDef, isFrameAvailable } from './cosmetics.schema';
 import type { FramesResponse } from './cosmetics.schema';
 
 /**
@@ -9,7 +9,7 @@ import type { FramesResponse } from './cosmetics.schema';
  */
 export class CosmeticsError extends Error {
   constructor(
-    public code: 'unknown_frame' | 'not_owned' | 'already_owned' | 'insufficient_coins' | 'pro_required',
+    public code: 'unknown_frame' | 'not_owned' | 'already_owned' | 'insufficient_coins' | 'pro_required' | 'expired',
   ) {
     super(code);
     this.name = 'CosmeticsError';
@@ -32,13 +32,18 @@ export async function getFramesForUser(userId: string): Promise<FramesResponse> 
   return {
     coins: user.coins as number,
     selectedFrame: (user.selected_frame as string | null) ?? null,
-    frames: FRAME_CATALOG.map((f) => ({
-      id: f.id,
-      price: f.price,
-      // Pro frames aren't bought — they're unlocked while Pro is active.
-      owned: f.pro ? pro : ownedSet.has(f.id),
-      pro: f.pro ?? false,
-    })),
+    frames: FRAME_CATALOG
+      // Seasonal frames drop out of the shop after their cutoff — but stay
+      // visible (and equippable) for users who already own them.
+      .filter((f) => isFrameAvailable(f) || ownedSet.has(f.id))
+      .map((f) => ({
+        id: f.id,
+        price: f.price,
+        // Pro frames aren't bought — they're unlocked while Pro is active.
+        owned: f.pro ? pro : ownedSet.has(f.id),
+        pro: f.pro ?? false,
+        availableUntil: f.availableUntil ?? null,
+      })),
   };
 }
 
@@ -50,6 +55,7 @@ export async function buyFrame(userId: string, frameId: string): Promise<{ coins
   const def = getFrameDef(frameId);
   if (!def) throw new CosmeticsError('unknown_frame');
   if (def.pro) throw new CosmeticsError('pro_required'); // not for sale — Pro perk
+  if (!isFrameAvailable(def)) throw new CosmeticsError('expired'); // seasonal window closed
 
   const { data, error } = await supabase.rpc('buy_frame', {
     p_user_id: userId,

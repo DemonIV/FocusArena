@@ -22,7 +22,7 @@ import { CoinShopModal } from '../../components/CoinShopModal';
 import { billingEnabled } from '../../services/billing';
 import { useBillingStore } from '../../stores';
 import { timerService, achievementsService, roomsService, cosmeticsService } from '../../services';
-import { FRAMES } from '../../constants';
+import { FRAMES, getFrameVisual } from '../../constants';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
 import type { SubjectStat, FrameEntry } from '../../types';
@@ -560,7 +560,13 @@ function FrameShopSection() {
 
   const coins = framesQ.data?.coins ?? 0;
   const selected = framesQ.data?.selectedFrame ?? null;
-  const ownedMap = new Map((framesQ.data?.frames ?? []).map((f) => [f.id, f]));
+
+  // Server list drives what's on sale (seasonal frames drop out after their
+  // cutoff); before it loads, fall back to the static catalog.
+  const serverFrames = framesQ.data?.frames;
+  const shopList: FrameEntry[] = serverFrames && serverFrames.length > 0
+    ? serverFrames
+    : FRAMES.map((v) => ({ id: v.id, price: v.price, owned: false, pro: v.pro }));
 
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['frames'] });
@@ -668,25 +674,35 @@ function FrameShopSection() {
           </Text>
         </Pressable>
 
-        {FRAMES.map((v) => {
-          const entry = ownedMap.get(v.id) ?? { id: v.id, price: v.price, owned: false, pro: v.pro };
-          const isSel = selected === v.id;
+        {shopList.map((entry) => {
+          const v = getFrameVisual(entry.id);
+          if (!v) return null; // unknown id from a newer backend — skip gracefully
+          const isSel = selected === entry.id;
+          // Seasonal countdown (days left until the frame leaves the shop)
+          const daysLeft = entry.availableUntil
+            ? Math.max(0, Math.ceil((new Date(entry.availableUntil).getTime() - Date.now()) / 86_400_000))
+            : null;
           return (
             <Pressable
-              key={v.id}
+              key={entry.id}
               style={[
                 shop.card,
                 isSel && shop.cardSelected,
                 !entry.owned && shop.cardLocked,
-                v.pro && shop.cardPro,
+                entry.pro && shop.cardPro,
               ]}
               onPress={() => handlePress(entry)}
             >
+              {daysLeft !== null && !entry.owned && (
+                <View style={shop.seasonBadge}>
+                  <Text style={shop.seasonBadgeText}>⏳ {t('shop.daysLeftShort', { count: daysLeft })}</Text>
+                </View>
+              )}
               <View style={shop.previewWrap}>
                 {v.outer2 && <View style={[shop.previewOuter, { borderColor: `${v.outer2}88` }]} />}
                 <View style={[shop.preview, { borderColor: v.ring, shadowColor: v.glow }]} />
               </View>
-              <Text style={shop.name} numberOfLines={1}>{t(`shop.frames.${v.id}`)}</Text>
+              <Text style={shop.name} numberOfLines={1}>{t(`shop.frames.${entry.id}`)}</Text>
               {isSel ? (
                 <Text style={[shop.state, { color: ACCENT }]}>✓ {t('shop.selected')}</Text>
               ) : entry.owned ? (
@@ -1163,6 +1179,17 @@ const shop = StyleSheet.create({
   state: { color: MUTED2, fontSize: 11, fontWeight: '600' },
   price: { color: '#ffd700', fontSize: 11, fontWeight: '800' },
   proTag: { color: '#f59e0b', fontSize: 11, fontWeight: '800' },
+  seasonBadge: {
+    position: 'absolute',
+    top: -8,
+    right: 6,
+    backgroundColor: '#ff6b1a',
+    borderRadius: 9,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    zIndex: 1,
+  },
+  seasonBadgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
   hint: { color: MUTED, fontSize: 11, marginTop: 10 },
 });
 

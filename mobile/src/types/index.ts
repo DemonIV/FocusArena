@@ -310,6 +310,8 @@ export interface FrameEntry {
   owned: boolean;
   /** Pro-exclusive frame — owned mirrors Pro status */
   pro?: boolean;
+  /** Seasonal cutoff (ISO) — present only on limited-time frames */
+  availableUntil?: string | null;
 }
 
 export interface FramesResponse {

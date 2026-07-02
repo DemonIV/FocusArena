@@ -12,6 +12,7 @@ function statusFor(code: CosmeticsError['code']): number {
     case 'pro_required': return 403;
     case 'already_owned': return 409;
     case 'insufficient_coins': return 402;
+    case 'expired': return 410;
   }
 }
 

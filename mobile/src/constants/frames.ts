@@ -21,6 +21,8 @@ export const FRAMES: readonly FrameVisual[] = [
   // Pro-exclusive animated frames — shown first as the shop's hero items.
   { id: 'prism',    price: 0,     ring: '#00d2ff', glow: '#ff2ec4', outer: '#00d2ff', outer2: '#ff2ec4', pro: true, animated: true },
   { id: 'royal',    price: 0,     ring: '#ffd700', glow: '#8b5cf6', outer: '#ffd700', outer2: '#8b5cf6', pro: true, animated: true },
+  // Seasonal — availability is decided server-side (availableUntil in the API).
+  { id: 'summer',   price: 2500,  ring: '#ffb703', glow: '#ff6b1a', outer: '#ffb703', outer2: '#00d2ff' },
   { id: 'bronze',   price: 100,   ring: '#cd7f32', glow: '#cd7f32', outer: '#cd7f32' },
   { id: 'silver',   price: 1000,  ring: '#c8d0dc', glow: '#c8d0dc', outer: '#c8d0dc' },
   { id: 'gold',     price: 2000,  ring: '#ffd700', glow: '#ffd700', outer: '#ffd700' },

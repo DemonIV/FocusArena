@@ -28,6 +28,7 @@ const MUTED = '#94a3b8';
 
 const PACK_ICON = ['🪙', '💰', '🏆'];
 
+
 interface Props {
   visible: boolean;
   onClose: () => void;
