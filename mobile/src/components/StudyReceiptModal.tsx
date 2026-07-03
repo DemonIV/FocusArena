@@ -21,6 +21,8 @@ interface Props {
   subjectName?: string;
   durationMinutes: number;
   xpEarned: number;
+  /** Coins earned this session — shown alongside XP */
+  coinsEarned?: number;
   streak: number;
 }
 
@@ -38,6 +40,7 @@ export function StudyReceiptModal({
   subjectName,
   durationMinutes,
   xpEarned,
+  coinsEarned = 0,
   streak,
 }: Props) {
   const { t } = useTranslation();
@@ -100,6 +103,9 @@ export function StudyReceiptModal({
 
             <View style={styles.statsRow}>
               <Text style={styles.xp}>+{xpEarned.toLocaleString()} XP</Text>
+              {coinsEarned > 0 && (
+                <Text style={styles.coins}>🪙 +{coinsEarned.toLocaleString()}</Text>
+              )}
               {streak > 0 && (
                 <Text style={styles.streak}>🔥 {t('receipt.dayN', { count: streak })}</Text>
               )}
@@ -210,6 +216,11 @@ const styles = StyleSheet.create({
     color: ACCENT,
     fontSize: 18,
     fontWeight: '800',
+  },
+  coins: {
+    color: '#fbbf24',
+    fontSize: 15,
+    fontWeight: '700',
   },
   streak: {
     color: PINK,

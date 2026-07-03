@@ -7,6 +7,7 @@ export { roomsService } from './rooms.service';
 export { friendsService } from './friends.service';
 export { achievementsService } from './achievements.service';
 export { cosmeticsService } from './cosmetics.service';
+export { maybeRequestReview } from './review';
 export {
   registerForPushNotifications,
   unregisterPushNotifications,

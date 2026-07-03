@@ -22,7 +22,7 @@ import { useSocketStore, useBillingStore } from '../../stores';
 import { TimerCircle, StudyReceiptModal, ZenModeModal } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { billingEnabled } from '../../services/billing';
-import { timerService, cosmeticsService } from '../../services';
+import { timerService, cosmeticsService, maybeRequestReview } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
 
@@ -58,6 +58,7 @@ export function TimerScreen() {
     subjectName?: string;
     durationMinutes: number;
     xpEarned: number;
+    coinsEarned: number;
     streak: number;
   } | null>(null);
 
@@ -170,12 +171,15 @@ export function TimerScreen() {
               qc.invalidateQueries({ queryKey: ['lb-global'] });
               qc.invalidateQueries({ queryKey: ['lb-me'] });
               qc.invalidateQueries({ queryKey: ['lb-friends'] });
+              qc.invalidateQueries({ queryKey: ['frames'] }); // coin balance
+              qc.invalidateQueries({ queryKey: ['pets'] });
               if (result && result.xpEarned > 0) {
                 // Celebrate with a shareable Study Receipt
                 setReceipt({
                   subjectName: selectedSubject?.name,
                   durationMinutes: result.durationMinutes,
                   xpEarned: result.xpEarned,
+                  coinsEarned: result.coinsEarned ?? 0,
                   streak: result.newStreak,
                 });
               } else if (result) {
@@ -553,10 +557,15 @@ export function TimerScreen() {
       {receipt && (
         <StudyReceiptModal
           visible={!!receipt}
-          onClose={() => setReceipt(null)}
+          onClose={() => {
+            setReceipt(null);
+            // Happy moment just ended — maybe ask for a store rating.
+            void maybeRequestReview();
+          }}
           subjectName={receipt.subjectName}
           durationMinutes={receipt.durationMinutes}
           xpEarned={receipt.xpEarned}
+          coinsEarned={receipt.coinsEarned}
           streak={receipt.streak}
         />
       )}
