@@ -1,261 +1,129 @@
-# FocusArena — Build Progress
+# FocusArena — Proje İlerleme Özeti
+
+> Sıfırdan bugüne (2026-05-22 → 2026-07-03) tüm adımların kronolojik özeti.
+> Backend canlı: **https://focusarena.fly.dev** · Repo: main branch, direkt push workflow.
 
 ---
 
-## ✅ Auth Module
-`backend/src/modules/auth/`
+## 📅 Zaman Çizelgesi
 
-| Endpoint | Description |
-|----------|-------------|
-| `POST /auth/register` | Supabase auth user + DB trigger → users table, issues token pair |
-| `POST /auth/login` | Supabase signIn, issues token pair |
-| `POST /auth/refresh` | Verifies refresh JWT + Redis match, rotates both tokens |
-| `POST /auth/logout` | Deletes refresh token from Redis |
+### Faz 1 — Temel Kurulum (22–24 Mayıs)
+`418bc02 ilk commit`
 
-**Notes:**
-- Access token: 15 min JWT `{ sub, email, type: 'access' }`
-- Refresh token: 7 day JWT, stored in Redis at `refresh:{userId}`
-- Token reuse detected → Redis entry wiped immediately
-- `authGuard` exported for use in all other modules
+- **Monorepo** npm workspaces ile kuruldu: `backend/` (Fastify + Socket.io) · `mobile/` (React Native / Expo) · `shared/` (ortak tipler).
+- **Backend modülleri** tamamlandı:
+  - **Auth** — register/login/refresh/logout; 15 dk access + 7 gün refresh JWT (Redis'te, rotation + reuse detection); `authGuard` tüm modüllerde.
+  - **Timer** — start/pause/resume/stop + status/sessions/stats + konu CRUD. Pause doğruluğu `accumulatedMs` ile; ≥%90 = tamamlandı; XP 10/dk, Level = ⌊xp/500⌋+1; UTC-gün bazlı streak; Redis TTL 4 saat.
+  - **Leaderboard** — global/friends/me, 4 dönem (daily/weekly/monthly/alltime), competition ranking, dönem başına Redis cache + invalidation.
+  - **Rooms** — CRUD + join/leave/invite; 8 karakterli davet kodları (Redis, 7 gün TTL); sahiplik devri; presence (Redis TTL 5 dk).
+  - **Friends** — istek/kabul/red/engel; cross-request auto-accept; `relationship` enum'u; online status Redis'te.
+  - **Achievements** — 10 rozet türü; `checkAndAward` engine, timer/rooms/friends hook'ları; `achievement:new` socket emit.
+  - **WebSocket** — JWT handshake, `user:{id}` kişisel room, presence:ping, friend:status broadcast.
+  - **Jobs (Bull)** — leaderboard-tick (60 sn), streak-reset (00:05 UTC), session-cleanup (10 dk); graceful shutdown.
+- **Mobil uygulama** tamamlandı: 6 sekme (Home/Timer/Leaderboard/Rooms/Friends/Profile), Zustand + MMKV persist, TanStack Query v5, snake→camelCase mapper katmanı, 401 auto-refresh interceptor, Reanimated timer dairesi.
+
+### Faz 2 — Fly.io Deploy (25 Mayıs)
+`958b453 … f1ca2aa` (7 commit)
+
+- Dockerfile + fly.toml; port 8080; `ws` paketi (Node 20 Supabase realtime); entrypoint path düzeltmeleri.
+- ✅ Backend **https://focusarena.fly.dev** adresinde canlıya alındı.
+
+### Faz 3 — Mobil Çalışır Hale + Bug Temizliği (26–27 Mayıs)
+
+- Expo Go'da çalışır duruma getirildi; NativeWorklets crash çözüldü.
+- Timer bug'ları düzeltildi: pause bug, DELETE body hatası, timeout/race, XP=0 hizalama bug'ı.
+- **Konularım** (subjects) özelliği tamamlandı; timer UI modernize edildi.
+- Odalar: private-only + max 2 oda + üye dakika takibi (migration 002).
+
+### Faz 4 — i18n + UI Modernizasyonu (2–3 Haziran)
+`08f8ec8` → PR #1 merge (`b37fe81`)
+
+- **10 dil × tüm ekranlar** i18n tamamlandı (locales/*.json).
+- Tüm ekranlar tek modern renk paletine taşındı; geçici Tanı sekmesi kaldırıldı.
+- Özel süre girişi düzeltildi; RAPOR.md oluşturuldu.
+
+### Faz 5 — 12/12 Viral Özellik (3 Haziran)
+`14b21fc … ebcfaed` + cache fix `26fd102`
+
+| # | Özellik | Özet |
+|---|---------|------|
+| 1 | Timer canlı sayı | "Şu an X kişi odaklanıyor" (Redis + socket broadcast) + best today + pulse |
+| 2 | Study Receipt | Seans sonu paylaşılabilir fiş kartı (view-shot + expo-sharing) |
+| 3 | Leaderboard konumun | Rank kartı + komşu penceresi + "bir üst sıraya X puan" |
+| 4 | Streak ısı haritası | Profilde 30 günlük aktivite takvimi (saf View, SVG'siz) |
+| 5 | Home redesign | Günlük hedef halkası + 7 günlük grafik + canlı arkadaşlar |
+| 6 | Oda "kütüphane hissi" | Oda içi leaderboard, madalyalar, sen-vurgusu |
+| 7 | Onboarding (3 adım) | Konu → günlük hedef → arkadaş bul |
+| 8 | Push bildirimleri | Expo token kaydı + streak-danger hatırlatıcısı (cron 20:00 UTC) |
+| 9 | Country Wars | Haftalık ülke ligi, bayraklar, ülkene katkın (migration 004) |
+| 10 | Ghost Mode | Dünkü kendinle yarış (bugün vs dün aynı saat) |
+| 11 | Study DNA | Kronotip + odak stili + süper güç; paylaşılabilir kart |
+| 12 | Boss Battle | Haftalık global hedef (100.000 dk), herkesin katkısı |
+
+- Migration 002+003+004 DB'de uygulandı (psql ile doğrulandı).
+- EAS kuruldu: projectId + Android keystore kayıtlı (`d89bf7b`).
+
+### Faz 6 — Gözlemlenebilirlik (4 Haziran)
+`f45a786 … 5bb0910`
+
+- **Sentry** (crash, backend+mobil) + **PostHog** (analytics) kuruldu; env-gated (anahtar girilince aktif).
+- 5xx'ler route catch bloklarından Sentry'ye; PostHog `flushAt:1`.
+
+### Faz 7 — Pro Abonelik (5 Haziran)
+`00403f5` + `6434bb0`
+
+- **RevenueCat** freemium: Pro = sınırsız konu + streak freeze. react-native-purchases 9.15.2.
+- Env-gated; migration 005 + RC anahtarları ile aktive edilecek şekilde hazırlandı.
+
+### Faz 8 — Coin Ekonomisi + Kozmetik + Petler (2 Temmuz)
+`709256a … 72e918e` (7 commit) · Migration 005–009 ✓ · Fly deploy ✓
+
+- **Coin para birimi** + timer çerçeve mağazası; çerçeveler leaderboard/friends/rooms'ta görünüyor.
+- **Coin paketi IAP** (RevenueCat consumables: coins_1000/5500/12000).
+- **Pro'ya özel animasyonlu çerçeveler** (prism, royal) + **sezonluk çerçeveler** (Yaz 2026).
+- **Zen Modu** immersive timer ekranı + 3 Pro rozeti (`12c612c`).
+- **Evcil hayvanlar**: coin ile alınan animasyonlu pet (Noto Emoji lottie, CC BY 4.0) + evrim + Home companion (`72e918e`).
+
+### Faz 9 — Satış Hunisi (3 Temmuz) — SON OTURUM
+`3099ba9`, `c562529`, `3cec2a7`, `fa3f222`
+
+- **Onboarding dönüşüm hunisi**: 5 adım (motivasyon adımı + plan özeti) + **trial paywall** (`3099ba9`).
+- **Push bildirimleri genişletildi** (`3cec2a7`): arkadaşlık isteği/kabul push'ları, win-back cron'u (3/7 gün, pet temalı), bildirime dokununca deep-link, Profil'de opt-out toggle. Fly'a deploy edildi.
+- **In-app review** (`fa3f222`): expo-store-review, koşul: 3+ seans && 45 günde 1; fişte 🪙 +coin gösterimi.
+- 🎉 **Satış öncesi kod işlerinin tamamı bitti.**
+
+---
+
+## 🏗️ Altyapı Durumu
+
+| Bileşen | Durum |
+|---------|-------|
+| Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı) |
+| DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
+| Migration'lar | 002–009 hepsi uygulandı ✓ |
+| EAS | projectId + Android keystore kayıtlı; production profili AAB + autoIncrement hazır |
+| Gözlemlenebilirlik | Sentry + PostHog kodu hazır, env-gated |
+| Faturalama | RevenueCat: Pro abonelik kodu canlı; "coins" offering'i RC panelinde **henüz oluşturulmadı** |
+| iOS | eas.json submit bloğu placeholder'lı (ascAppId, appleTeamId — Apple hesabı açılınca) |
 
 ---
 
-## ✅ Timer Module
-`backend/src/modules/timer/`
+## 🔜 Sıradaki Adımlar (mağaza yayını — kod dışı işler)
 
-| Endpoint | Description |
-|----------|-------------|
-| `POST /timer/start` | Creates DB session + Redis state (`timer:{userId}`) |
-| `POST /timer/pause` | Freezes clock, accumulates elapsed ms |
-| `POST /timer/resume` | Resets `startTime`, resumes clock |
-| `POST /timer/stop` | Finalizes DB record, clears Redis, awards XP |
-| `GET /timer/status` | Live elapsed/remaining ms from Redis |
-| `GET /timer/sessions` | Paginated history (`page`, `limit`, `from`, `to`, `subjectId`) |
-| `GET /timer/stats` | Today / Mon–Sun week / all-time aggregates |
-| `GET /timer/subjects` | List active subjects |
-| `POST /timer/subjects` | Create subject |
-| `PATCH /timer/subjects/:id` | Update subject fields |
-| `DELETE /timer/subjects/:id` | Soft-delete (`is_active = false`) |
-
-**Notes:**
-- Pause accuracy: `accumulatedMs` carries elapsed time across all pause/resume cycles
-- Completion threshold: ≥ 90 % of intended duration = `was_completed: true`
-- XP: 10 XP/min on completion · Level = `⌊xp / 500⌋ + 1`
-- Streak: only first completion of the UTC day updates counter; yesterday check → `+1` or reset to `1`
-- Redis TTL: 4 h; crashed sessions recoverable via `sessions WHERE ended_at IS NULL`
-- Emits `timer:started` to `user:{userId}` Socket.io room on start
+1. **EAS preview APK** al ve gerçek cihazda doğrula (push + paywall + coin akışı Expo Go'da çalışmaz):
+   `cd mobile && eas build --platform android --profile preview`
+   (Son kuyruğa alınan build `5c524c07` — sonucu doğrulanmadı.)
+2. **Gizlilik politikası URL'i** hazırla (iki mağaza için zorunlu; Sentry/PostHog/RC veri işliyor).
+3. **EAS secrets**: Sentry / PostHog / RevenueCat anahtarları.
+4. **Google Play**: $25 hesap → production AAB → Play Console (listing, content rating, Data Safety) → internal track → RC ürünleri (Pro + coin paketleri) → aboneliğe **free trial offer** tanımla (kod introPrice'ı otomatik algılıyor).
+5. **RevenueCat**: "coins" offering'ini oluştur.
+6. **Apple**: $99/yıl hesap → eas.json placeholder'larını doldur → iOS build → ASC sözleşme/banka/vergi + IAP ürünleri + App Privacy → TestFlight → review.
+7. Yayın sonrası fikirler: günlük görevler, ligler, pet besleme, Arena Pass.
 
 ---
 
-## ✅ Leaderboard Module
-`backend/src/modules/leaderboard/`
+## 📌 Çalışma Kuralları
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /leaderboard/global` | Paginated global board · `?period=daily\|weekly\|monthly\|alltime&page&limit` |
-| `GET /leaderboard/friends` | Caller + accepted friends ranked · `?period=` |
-| `GET /leaderboard/me` | Caller's rank, score, total-users count · `?period=` |
-
-**Notes:**
-- Score: `duration_minutes` sum for period windows; `xp` field for alltime
-- Competition ranking: tied scores get same rank (1, 2, 2, 4)
-- Redis cache per period — TTLs: daily 3 min · weekly 10 min · monthly 30 min · alltime 5 min
-- `invalidateCache(period)` exported; `timer.stopTimer` busts all 4 periods on completion (fire-and-forget)
-- `getTop10ForSocket(period)` exported for future WS tick job
-- Friends board always includes the caller even with zero score
-- Max 1,000 users ranked in memory; sessions capped at 50,000 rows per fetch
-
----
-
-## ✅ Rooms Module
-`backend/src/modules/rooms/`
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /rooms` | Public room list · `?search&page&limit` |
-| `GET /rooms/mine` | Rooms caller is active member of |
-| `GET /rooms/:id` | Room detail + members + presence (private: members-only) |
-| `POST /rooms` | Create room (owner auto-joins) |
-| `PATCH /rooms/:id` | Update name / privacy / max_members (owner only) |
-| `DELETE /rooms/:id` | Delete room (owner only) |
-| `POST /rooms/:id/join` | Join room; private rooms require `{ inviteCode }` |
-| `POST /rooms/join-by-code` | Invite code ile odaya katıl `{ code }` → `{ roomId, room }` |
-| `POST /rooms/:id/leave` | Leave room; transfers ownership or deletes if last member |
-| `POST /rooms/:id/invite` | Regenerate invite code (owner + private rooms only) |
-
-**Notes:**
-- Invite codes: 8-char hex stored in Redis (`room:invite:code:{code}` ↔ `room:invite:room:{id}`), TTL 7 days; busted on delete/privacy change
-- Presence: `room:presence:{roomId}:{userId}` in Redis, TTL 5 min; refreshed by WS `presence:ping`
-- Owner leave: earliest-joined remaining member becomes owner; room deleted if no one left
-- `max_members` patch guard: rejects if new value < current active count
-- `room:updated` broadcast via Socket.io on join / leave / patch (best-effort)
-- `getRoomMembers`, `setPresence` exported for WebSocket handler
-
----
-## ✅ Friends Module
-`backend/src/modules/friends/`
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /friends` | Kabul edilmiş arkadaş listesi + online status |
-| `GET /friends/requests` | Gelen bekleyen istekler |
-| `GET /friends/sent` | Gönderilen bekleyen istekler |
-| `GET /friends/blocked` | Engellediğim kullanıcılar |
-| `GET /friends/search?q=` | Kullanıcı ara; her sonuçta `relationship` alanı var |
-| `POST /friends/request` | Arkadaşlık isteği gönder |
-| `POST /friends/:userId/accept` | Gelen isteği kabul et |
-| `POST /friends/:userId/decline` | Gelen isteği reddet |
-| `POST /friends/:userId/block` | Kullanıcıyı engelle |
-| `DELETE /friends/:userId` | Arkadaşlığı kaldır veya engeli kaldır |
-
-**Notes:**
-- Friendship yönü: `(requester_id, addressee_id)` PK; `blocked` satırında `requester_id` her zaman engelleyendir
-- Cross-request auto-accept: B isteği göndermişse A da istek gönderince otomatik `accepted` olur
-- `relationship` enum: `none | friend | request_sent | request_received | blocked_by_me | blocked_by_them`
-- Online status: Redis `user:status:{userId}`, TTL 5 dk; WS `presence:ping` ile güncellenir
-- `setUserStatus` / `getUserStatus` WebSocket handler için export edildi
-
----
-## ✅ Achievements Module
-`backend/src/modules/achievements/`
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /achievements` | Kendi trophy cabinet — earned (meta ile) + locked liste |
-| `GET /achievements/:userId` | Başka kullanıcının sadece earned badge'leri (public) |
-
-**Badge türleri (10 adet):**
-
-| Badge | Koşul |
-|-------|-------|
-| `first_session` | İlk tamamlanan oturum |
-| `streak_3/7/30` | Streak ≥ 3 / 7 / 30 gün |
-| `hours_10/100` | Toplam ≥ 10 / 100 saat çalışma |
-| `level_5/10` | Seviye ≥ 5 / 10 |
-| `room_host` | İlk oda oluşturma |
-| `social_butterfly` | ≥ 5 kabul edilmiş arkadaş |
-
-**Notes:**
-- `checkAndAward(userId, ctx)` — hafif engine; mevcut badge'ler çekilir, yeni koşullar kontrol edilir, tek INSERT ile toplu yazılır
-- Üç hook-in noktası (fire-and-forget `void`):
-  - `timer.service` → session complete sonrası (streak, level, totalMinutes, isFirstSession)
-  - `rooms.service` → createRoom sonrası (`isRoomHost: true`)
-  - `friends.service` → acceptRequest sonrası (her iki taraf için `friendCount`)
-- DB UNIQUE constraint zaten koruma sağladığından race condition risksiz
-- Her yeni badge için Socket.io `achievement:new` emit edilir (`user:{userId}` room)
-
----
-## ✅ WebSocket / Presence
-`backend/src/websocket/`
-
-| Dosya | Sorumluluk |
-|-------|-----------|
-| `index.ts` | Sunucu singleton · `createSocketServer` · `getSocketServer` · `setupHandlers` |
-| `handlers.ts` | Her bağlantı için olay handler'ları |
-
-**Client → Server olayları:**
-
-| Olay | Davranış |
-|------|---------|
-| `timer:start` | `startTimer` çağırır, `timer:started` döner |
-| `timer:pause` | `pauseTimer` çağırır |
-| `timer:complete` | `stopTimer` çağırır (was_completed server tarafında belirlenir) |
-| `room:join` | Socket.io `room:{roomId}`'ye katılır, presence Redis'e yazılır, `room:updated` broadcast |
-| `room:leave` | Room'dan çıkar, presence silinir, `room:updated` broadcast |
-| `presence:ping` | Global `user:status:{id}` + tüm katılınan oda presence'ları güncellenir, arkadaşlara `friend:status` gönderilir |
-
-**Yaşam döngüsü:**
-- **Bağlantı**: JWT `handshake.auth.token` doğrulanır, DB'den username çekilir, `user:{userId}` kişisel room'una katılır
-- **Kopuş**: Global status `offline` yapılır, tüm oda presence'ları silinir, arkadaşlara `friend:status offline` gönderilir
-
-**Notes:**
-- `setupHandlers(jwtVerify)` — Fastify'dan bağımsız; `server.ts`'de `app.jwt.verify` inject edilir
-- Tüm handler'lar try/catch ile sarılır; hata `error:session` olayına yazılır
-- `leaderboard:tick` → jobs modülüne bırakıldı
-
----
-## ✅ Jobs (Bull queues)
-`backend/src/jobs/`
-
-| Job | Tetikleyici | Davranış |
-|-----|------------|---------|
-| `leaderboard-tick` | Her 60sn | Haftalık top-10 çeker → tüm socket'lere `leaderboard:tick` broadcast |
-| `streak-reset` | Her gün 00:05 UTC | Dün oturum tamamlamayanların `streak`'ini 0'a sıfırlar |
-| `session-cleanup` | Her 10dk | `ended_at IS NULL` + 4 saat geçmiş oturumları zorla kapatır, Redis timer key'lerini siler |
-
-**Notes:**
-- `scheduleRepeat()` yardımcısı: sunucu yeniden başlayınca yinelenen job'ları çakıştırmaz (önce siler, sonra ekler)
-- Streak reset: önce tüm streak > 0 kullanıcılar çekilir → dünkü oturumlar ile fark hesaplanır → 100'lük batch UPDATE
-- Session cleanup: `UPDATE … WHERE ended_at IS NULL` guard'ı race condition'a karşı koruma sağlar
-- `removeOnComplete: 50` / `removeOnFail: 100` — Redis'te iş geçmişi saklanır
-- `startJobs()` ve `stopJobs()` server.ts'e bağlandı; SIGTERM/SIGINT graceful shutdown çalışır
-
----
-## ✅ Mobile App (React Native / Expo)
-`mobile/`
-
-### Katmanlar
-
-| Katman | Dosyalar | Notlar |
-|--------|---------|-------|
-| **Utils** | `storage.ts`, `formatTime.ts` | MMKV Zustand adapter; msToDisplay / formatDuration |
-| **Types** | `src/types/index.ts` | Tüm API + navigasyon tipleri camelCase; shared'dan sadece çakışmayan tipler re-export |
-| **Services** | `api.ts`, `auth/timer/leaderboard/rooms/friends/achievements.service.ts` | 401 auto-retry + refresh interceptor; mapper layer (snake → camelCase) |
-| **WebSocket** | `services/websocket.ts` | socket.io-client singleton; `initSocket` / `getSocket` / `disconnect` |
-| **Stores** | `authStore`, `timerStore`, `socketStore` | Zustand + MMKV persist; setInterval ticker; socket event mapping |
-| **Hooks** | `useAuth`, `useTimer` | AppState foreground sync; presence side-effects; `progress` 0–1 |
-| **Components** | `TimerCircle`, `StatCard` | İki yarım-daire overflow:hidden animasyonu (SVG gerekmez); Reanimated |
-| **Screens** | Login, Register, Home, Timer, Leaderboard, Rooms, Friends, Profile | TanStack Query v5; full CRUD UI |
-| **Navigation** | `RootNavigator`, `MainTabs` | Auth / Main stack split; DarkTheme |
-| **App.tsx** | — | SafeAreaProvider → QueryClient → MMKV hydration guard → Navigator |
-
-### Navigasyon Yapısı
-```
-RootNavigator (Stack, headerShown: false)
-├── Auth (Stack) → LoginScreen · RegisterScreen
-└── Main → MainTabs (Bottom Tabs, 6 tab)
-    ├── 🏠 Home    — XP bar + stats + active-timer banner + badges
-    ├── ⏱ Timer   — Animasyonlu daire + süre seçici + konu picker + kontroller
-    ├── 🏆 Leaderboard — Dönem seçici (daily/weekly/monthly/alltime) + canlı WS top10
-    ├── 🚪 Rooms   — Liste / oda oluştur / davet kodu ile katıl
-    ├── 👥 Friends — Friends / Requests / Search sekmeleri
-    └── 👤 Profile — Avatar + XP + stats + tüm badge'ler + çıkış
-```
-
-### Teknik Notlar
-- **Token yenileme**: `api.setOnRefresh` callback; 401 alınca bir kez retry
-- **Zamanlayıcı doğruluğu**: setInterval tick + `accumulatedMs` (pause/resume güvenli)
-- **Socket tipi uyumu**: `RawSocketLbEntry` → `LeaderboardEntry` map, snake→camelCase
-- **TanStack Query v5**: `onSuccess`/`onError` sadece `useMutation`'da; `useQuery.onSuccess` → `useEffect`
-- **Type çakışması çözümü**: `export * from 'focusarena-shared'` kaldırıldı; yalnızca `BadgeType`, `Achievement`, `Friendship`, `MemberStatus` re-export
-- **Rehydration guard**: `AppInner` `isHydrated` false iken navigator render etmez (`null` döner)
-
-
-
-┌───────────────────────────────────────────────────────────────┬─────────────────────────────┐
-  │                             Konu                              │            Durum            │
-  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
-  │ Auth/network kilitlenmesi (URL boşluğu + refresh yarışı)      │ ✅ Çözüldü                  │
-  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
-  │ Friends/Rooms/Leaderboard snake_case uyumsuzlukları           │ ✅ Çözüldü                  │
-  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
-  │ Özel timer süresi                                             │ ✅                          │
-  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
-  │ Odalar private-only + max 2 oda + üye listesi + dakika takibi │ ✅ Deploy + migration canlı │
-  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
-  │ Profile/Home XP=0 bug'ı (nested stats hizalama)               │ ✅                          │
-  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
-  │ Konu silme "Body cannot be empty" (DELETE content-type)       │ ✅                          │
-  ├───────────────────────────────────────────────────────────────┼─────────────────────────────┤
-  │ i18n altyapısı + 10 dil + Login/Register çevirisi             │ ✅                          │
-  └───────────────────────────────────────────────────────────────┴─────────────────────────────┘
-
-  🔜 Sonraki oturumda kaldığımız yer
-
-  Görev: Tüm ekranları (Timer, Profile, Rooms, Leaderboard, Friends, Home + sekme adları) 10 dile çevirmek —
-  metinleri t() anahtarlarına taşıyıp locales/*.json dosyalarını doldurmak. Parti parti ilerleyeceğiz.
-
-  Ayrıca bekleyen küçük işler: geçici 🔍 Tanı sekmesini kaldırmak, Home ekranı UI modernizasyonu.
-
-  Sonraki oturumda "kaldığımız yerden devam" dediğinde hafızadan bu planı okuyup çeviriye başlayacağım. İyi
-  çalışmalar! 🎯
+- Commit'ler kullanıcının kendi adına — **Co-Authored-By trailer'ı yok**.
+- Branch/PR yok — **direkt main'e commit + push** (push reddedilirse fetch + rebase).
+- Hedef: **hem Google Play hem App Store**.
