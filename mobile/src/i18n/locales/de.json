@@ -66,7 +66,20 @@
     "continue": "Weiter",
     "finish": "Los geht’s",
     "nameRequired": "Bitte gib einen Fachnamen ein.",
-    "createFailed": "Fach konnte nicht erstellt werden."
+    "createFailed": "Fach konnte nicht erstellt werden.",
+    "step0Title": "Was führt dich hierher?",
+    "step0Subtitle": "Wähle dein Hauptziel — wir passen dein Erlebnis daran an.",
+    "motivExam": "Auf eine Prüfung vorbereiten",
+    "motivHabit": "Eine Fokus-Gewohnheit aufbauen",
+    "motivProcrastination": "Prokrastination besiegen",
+    "motivFriends": "Mit Freunden lernen",
+    "planTitle": "Dein Fokus-Plan ist fertig! 🎉",
+    "planSubtitle": "Deine Woche auf einen Blick — alles lässt sich später ändern.",
+    "planDailyGoal": "Tagesziel",
+    "planWeekly": "Wochenfokus",
+    "planWhy": "Motivation",
+    "startPlan": "Meinen Plan starten",
+    "continueFree": "Mit dem Gratis-Plan fortfahren"
   },
   "boss": {
     "title": "Boss dieser Woche",
@@ -321,7 +334,11 @@
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Unlimited subjects + streak freeze"
+    "upgradeSub": "Unlimited subjects + streak freeze",
+    "startTrial": "{{days}} Tage gratis testen",
+    "trialTag": "{{days}} Tage kostenlos testen",
+    "trialNote": "Heute keine Zahlung — jederzeit vor Ende der Testphase kündbar.",
+    "savePct": "{{pct}} % SPAREN"
   },
   "shop": {
     "title": "RAHMEN-SHOP",

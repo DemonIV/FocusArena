@@ -16,6 +16,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useOnboardingStore } from '../../stores';
 import { timerService, friendsService } from '../../services';
+import { billingEnabled } from '../../services/billing';
+import { track } from '../../services/analytics';
+import { PaywallModal } from '../../components/PaywallModal';
 import { formatDuration } from '../../utils/formatTime';
 import type { UserSearchResult } from '../../types';
 
@@ -33,7 +36,14 @@ const COLORS = ['#00d2ff', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'
 const ICONS  = ['📚', '💻', '🔬', '🎨', '🏃', '🎵', '🗣️', '✏️', '📊', '🏆', '🌍', '🧪'];
 const GOALS  = [30, 60, 90, 120, 180, 240];
 
-const TOTAL_STEPS = 3;
+const MOTIVATIONS = [
+  { id: 'exam', icon: '📝', labelKey: 'onboarding.motivExam' },
+  { id: 'habit', icon: '🎯', labelKey: 'onboarding.motivHabit' },
+  { id: 'procrastination', icon: '🚀', labelKey: 'onboarding.motivProcrastination' },
+  { id: 'friends', icon: '👥', labelKey: 'onboarding.motivFriends' },
+] as const;
+
+const TOTAL_STEPS = 5;
 
 export function OnboardingScreen() {
   const { t } = useTranslation();
@@ -50,11 +60,17 @@ export function OnboardingScreen() {
   }, [subjectsQ.data, complete]);
 
   const [step, setStep] = useState(0);
+  const [motivation, setMotivation] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(ICONS[0]);
   const [color, setColor] = useState(COLORS[0]);
   const [goal, setGoal] = useState(60);
   const [submitting, setSubmitting] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  useEffect(() => {
+    track('onboarding_step_viewed', { step });
+  }, [step]);
 
   // Friends search
   const [query, setQuery] = useState('');
@@ -90,7 +106,14 @@ export function OnboardingScreen() {
       qc.invalidateQueries({ queryKey: ['subjects'] });
       qc.invalidateQueries({ queryKey: ['subject-stats'] });
       qc.invalidateQueries({ queryKey: ['timer-stats'] });
-      complete();
+      if (billingEnabled) {
+        // Funnel finale: trial paywall right after the commitment moment.
+        // complete() runs when it closes (purchase or dismiss).
+        setSubmitting(false);
+        setShowPaywall(true);
+      } else {
+        complete();
+      }
     } catch (e: any) {
       Alert.alert(t('common.error'), e?.message ?? t('onboarding.createFailed'));
       setSubmitting(false);
@@ -98,7 +121,7 @@ export function OnboardingScreen() {
   }, [name, color, icon, goal, complete, qc, t]);
 
   const next = useCallback(() => {
-    if (step === 0 && !name.trim()) {
+    if (step === 1 && !name.trim()) {
       Alert.alert(t('common.warning'), t('onboarding.nameRequired'));
       return;
     }
@@ -127,14 +150,42 @@ export function OnboardingScreen() {
             <View key={i} style={[styles.dot, i <= step && styles.dotActive]} />
           ))}
         </View>
-        <TouchableOpacity onPress={complete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.skip}>{t('onboarding.skip')}</Text>
-        </TouchableOpacity>
+        {step < TOTAL_STEPS - 1 && (
+          <TouchableOpacity onPress={complete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.skip}>{t('onboarding.skip')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-        {/* ── Step 1: First subject ── */}
+        {/* ── Step 1: Motivation ── */}
         {step === 0 && (
+          <>
+            <Text style={styles.title}>{t('onboarding.step0Title')}</Text>
+            <Text style={styles.subtitle}>{t('onboarding.step0Subtitle')}</Text>
+
+            {MOTIVATIONS.map((m) => {
+              const isSel = motivation === m.id;
+              return (
+                <Pressable
+                  key={m.id}
+                  style={[styles.motivCard, isSel && styles.motivCardSel]}
+                  onPress={() => {
+                    setMotivation(m.id);
+                    track('onboarding_motivation', { choice: m.id });
+                  }}
+                >
+                  <Text style={styles.motivIcon}>{m.icon}</Text>
+                  <Text style={[styles.motivText, isSel && { color: TEXT }]}>{t(m.labelKey)}</Text>
+                  {isSel && <Text style={styles.motivCheck}>✓</Text>}
+                </Pressable>
+              );
+            })}
+          </>
+        )}
+
+        {/* ── Step 2: First subject ── */}
+        {step === 1 && (
           <>
             <Text style={styles.title}>{t('onboarding.step1Title')}</Text>
             <Text style={styles.subtitle}>{t('onboarding.step1Subtitle')}</Text>
@@ -183,8 +234,8 @@ export function OnboardingScreen() {
           </>
         )}
 
-        {/* ── Step 2: Daily goal ── */}
-        {step === 1 && (
+        {/* ── Step 3: Daily goal ── */}
+        {step === 2 && (
           <>
             <Text style={styles.title}>{t('onboarding.step2Title')}</Text>
             <Text style={styles.subtitle}>{t('onboarding.step2Subtitle')}</Text>
@@ -210,8 +261,8 @@ export function OnboardingScreen() {
           </>
         )}
 
-        {/* ── Step 3: Find friends ── */}
-        {step === 2 && (
+        {/* ── Step 4: Find friends ── */}
+        {step === 3 && (
           <>
             <Text style={styles.title}>{t('onboarding.step3Title')}</Text>
             <Text style={styles.subtitle}>{t('onboarding.step3Subtitle')}</Text>
@@ -259,6 +310,40 @@ export function OnboardingScreen() {
             )}
           </>
         )}
+
+        {/* ── Step 5: Plan ready (commitment moment before the paywall) ── */}
+        {step === 4 && (
+          <>
+            <Text style={styles.title}>{t('onboarding.planTitle')}</Text>
+            <Text style={styles.subtitle}>{t('onboarding.planSubtitle')}</Text>
+
+            <View style={styles.planCard}>
+              <View style={[styles.preview, { borderColor: `${color}40`, marginBottom: 0 }]}>
+                <View style={[styles.previewDot, { backgroundColor: color }]}>
+                  <Text style={styles.previewIcon}>{icon}</Text>
+                </View>
+                <Text style={styles.previewName} numberOfLines={1}>{name.trim()}</Text>
+              </View>
+
+              <View style={styles.planRow}>
+                <Text style={styles.planLabel}>{t('onboarding.planDailyGoal')}</Text>
+                <Text style={styles.planValue}>{formatDuration(goal)}</Text>
+              </View>
+              <View style={styles.planRow}>
+                <Text style={styles.planLabel}>{t('onboarding.planWeekly')}</Text>
+                <Text style={[styles.planValue, { color: ACCENT }]}>{formatDuration(goal * 7)}</Text>
+              </View>
+              {motivation && (
+                <View style={[styles.planRow, { borderBottomWidth: 0 }]}>
+                  <Text style={styles.planLabel}>{t('onboarding.planWhy')}</Text>
+                  <Text style={styles.planValue}>
+                    {t(MOTIVATIONS.find((m) => m.id === motivation)!.labelKey)}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
 
       {/* Footer nav */}
@@ -269,16 +354,23 @@ export function OnboardingScreen() {
           </TouchableOpacity>
         )}
         <TouchableOpacity
-          style={[styles.nextBtn, submitting && { opacity: 0.6 }]}
+          style={[styles.nextBtn, (submitting || (step === 0 && !motivation)) && { opacity: 0.5 }]}
           onPress={next}
-          disabled={submitting}
+          disabled={submitting || (step === 0 && !motivation)}
           activeOpacity={0.85}
         >
           {submitting
             ? <ActivityIndicator color="#000" />
-            : <Text style={styles.nextText}>{step < TOTAL_STEPS - 1 ? t('onboarding.continue') : t('onboarding.finish')}</Text>}
+            : <Text style={styles.nextText}>{step < TOTAL_STEPS - 1 ? t('onboarding.continue') : t('onboarding.startPlan')}</Text>}
         </TouchableOpacity>
       </View>
+
+      <PaywallModal
+        visible={showPaywall}
+        onClose={complete}
+        source="onboarding"
+        dismissLabel={t('onboarding.continueFree')}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -353,6 +445,43 @@ const styles = StyleSheet.create({
   colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   colorDot: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   colorCheck: { color: '#fff', fontSize: 18, fontWeight: '800' },
+
+  // Motivation step
+  motivCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: CARD,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: BORDER,
+  },
+  motivCardSel: { borderColor: ACCENT, backgroundColor: `${ACCENT}12` },
+  motivIcon: { fontSize: 26 },
+  motivText: { color: MUTED, fontSize: 16, fontWeight: '600', flex: 1 },
+  motivCheck: { color: ACCENT, fontSize: 18, fontWeight: '800' },
+
+  // Plan-ready step
+  planCard: {
+    backgroundColor: CARD2,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+    gap: 4,
+  },
+  planRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+  },
+  planLabel: { color: MUTED, fontSize: 14, fontWeight: '600' },
+  planValue: { color: TEXT, fontSize: 15, fontWeight: '700' },
 
   // Goal step
   goalDisplay: { alignItems: 'center', marginBottom: 32 },

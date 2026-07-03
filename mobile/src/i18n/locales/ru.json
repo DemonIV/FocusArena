@@ -66,7 +66,20 @@
     "continue": "Далее",
     "finish": "Начать",
     "nameRequired": "Введите название предмета.",
-    "createFailed": "Не удалось создать предмет."
+    "createFailed": "Не удалось создать предмет.",
+    "step0Title": "Что привело тебя сюда?",
+    "step0Subtitle": "Выбери главную цель — мы подстроим приложение под неё.",
+    "motivExam": "Готовлюсь к экзамену",
+    "motivHabit": "Выработать привычку к фокусу",
+    "motivProcrastination": "Победить прокрастинацию",
+    "motivFriends": "Заниматься с друзьями",
+    "planTitle": "Твой план фокусировки готов! 🎉",
+    "planSubtitle": "Вот твоя неделя — всё можно изменить позже.",
+    "planDailyGoal": "Дневная цель",
+    "planWeekly": "Фокус за неделю",
+    "planWhy": "Мотивация",
+    "startPlan": "Начать мой план",
+    "continueFree": "Продолжить с бесплатным планом"
   },
   "boss": {
     "title": "Босс этой недели",
@@ -321,7 +334,11 @@
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Unlimited subjects + streak freeze"
+    "upgradeSub": "Unlimited subjects + streak freeze",
+    "startTrial": "Попробуй {{days}} дн. бесплатно",
+    "trialTag": "Бесплатный период {{days}} дн.",
+    "trialNote": "Сегодня без оплаты — отмени в любой момент до конца пробного периода.",
+    "savePct": "ЭКОНОМИЯ {{pct}}%"
   },
   "shop": {
     "title": "МАГАЗИН РАМОК",

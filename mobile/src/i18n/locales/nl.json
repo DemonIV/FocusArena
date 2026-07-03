@@ -66,7 +66,20 @@
     "continue": "Doorgaan",
     "finish": "Beginnen",
     "nameRequired": "Voer een vaknaam in.",
-    "createFailed": "Kon vak niet aanmaken."
+    "createFailed": "Kon vak niet aanmaken.",
+    "step0Title": "Wat brengt je hier?",
+    "step0Subtitle": "Kies je hoofddoel — we passen je ervaring erop aan.",
+    "motivExam": "Voorbereiden op een examen",
+    "motivHabit": "Een focusgewoonte opbouwen",
+    "motivProcrastination": "Uitstelgedrag verslaan",
+    "motivFriends": "Samen met vrienden studeren",
+    "planTitle": "Je focusplan is klaar! 🎉",
+    "planSubtitle": "Zo ziet je week eruit — je kunt alles later aanpassen.",
+    "planDailyGoal": "Dagelijks doel",
+    "planWeekly": "Wekelijkse focus",
+    "planWhy": "Motivatie",
+    "startPlan": "Start mijn plan",
+    "continueFree": "Doorgaan met het gratis plan"
   },
   "boss": {
     "title": "Boss van deze week",
@@ -321,7 +334,11 @@
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Unlimited subjects + streak freeze"
+    "upgradeSub": "Unlimited subjects + streak freeze",
+    "startTrial": "Probeer {{days}} dagen gratis",
+    "trialTag": "{{days}} dagen gratis proberen",
+    "trialNote": "Vandaag geen betaling — annuleer op elk moment vóór het einde van de proefperiode.",
+    "savePct": "BESPAAR {{pct}}%"
   },
   "shop": {
     "title": "FRAME-WINKEL",

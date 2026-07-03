@@ -66,7 +66,20 @@
     "continue": "Continuer",
     "finish": "Commencer",
     "nameRequired": "Saisis un nom de matière.",
-    "createFailed": "Impossible de créer la matière."
+    "createFailed": "Impossible de créer la matière.",
+    "step0Title": "Qu'est-ce qui t'amène ici ?",
+    "step0Subtitle": "Choisis ton objectif principal — nous adapterons ton expérience.",
+    "motivExam": "Préparer un examen",
+    "motivHabit": "Créer une habitude de concentration",
+    "motivProcrastination": "Vaincre la procrastination",
+    "motivFriends": "Étudier avec des amis",
+    "planTitle": "Ton plan de concentration est prêt ! 🎉",
+    "planSubtitle": "Voici ta semaine en un coup d'œil — tout est modifiable plus tard.",
+    "planDailyGoal": "Objectif quotidien",
+    "planWeekly": "Concentration hebdo",
+    "planWhy": "Motivation",
+    "startPlan": "Lancer mon plan",
+    "continueFree": "Continuer avec l'offre gratuite"
   },
   "boss": {
     "title": "Boss de la semaine",
@@ -321,7 +334,11 @@
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Unlimited subjects + streak freeze"
+    "upgradeSub": "Unlimited subjects + streak freeze",
+    "startTrial": "Essayer {{days}} jours gratuits",
+    "trialTag": "{{days}} jours d'essai gratuit",
+    "trialNote": "Aucun paiement aujourd'hui — annule à tout moment avant la fin de l'essai.",
+    "savePct": "ÉCONOMISE {{pct}} %"
   },
   "shop": {
     "title": "BOUTIQUE DE CADRES",

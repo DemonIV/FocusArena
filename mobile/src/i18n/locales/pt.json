@@ -66,7 +66,20 @@
     "continue": "Continuar",
     "finish": "Começar",
     "nameRequired": "Digite um nome para a matéria.",
-    "createFailed": "Não foi possível criar a matéria."
+    "createFailed": "Não foi possível criar a matéria.",
+    "step0Title": "O que traz você aqui?",
+    "step0Subtitle": "Escolha seu objetivo principal — vamos adaptar sua experiência a ele.",
+    "motivExam": "Preparar para uma prova",
+    "motivHabit": "Criar um hábito de foco",
+    "motivProcrastination": "Vencer a procrastinação",
+    "motivFriends": "Estudar com amigos",
+    "planTitle": "Seu plano de foco está pronto! 🎉",
+    "planSubtitle": "Aqui está sua semana em resumo — você pode mudar tudo depois.",
+    "planDailyGoal": "Meta diária",
+    "planWeekly": "Foco semanal",
+    "planWhy": "Motivação",
+    "startPlan": "Começar meu plano",
+    "continueFree": "Continuar com o plano gratuito"
   },
   "boss": {
     "title": "Chefe desta semana",
@@ -321,7 +334,11 @@
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Unlimited subjects + streak freeze"
+    "upgradeSub": "Unlimited subjects + streak freeze",
+    "startTrial": "Experimente {{days}} dias grátis",
+    "trialTag": "{{days}} dias de teste grátis",
+    "trialNote": "Nada a pagar hoje — cancele quando quiser antes do fim do teste.",
+    "savePct": "ECONOMIZE {{pct}}%"
   },
   "shop": {
     "title": "LOJA DE MOLDURAS",

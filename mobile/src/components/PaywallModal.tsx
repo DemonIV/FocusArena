@@ -32,9 +32,11 @@ interface Props {
   onClose: () => void;
   /** Optional context for analytics ("subject_limit" | "profile" | …). */
   source?: string;
+  /** Overrides the dismiss link text (e.g. "Continue free" in onboarding). */
+  dismissLabel?: string;
 }
 
-export function PaywallModal({ visible, onClose, source = 'unknown' }: Props) {
+export function PaywallModal({ visible, onClose, source = 'unknown', dismissLabel }: Props) {
   const { t } = useTranslation();
   const setPro = useBillingStore((s) => s.setPro);
 
@@ -93,6 +95,17 @@ export function PaywallModal({ visible, onClose, source = 'unknown' }: Props) {
     }
   }, [setPro, onClose, t]);
 
+  const selectedPkg = packages.find((p) => p.identifier === selected);
+  const trialDays = selectedPkg?.trialDays ?? 0;
+
+  // "Save X%" on the annual plan vs. paying monthly (only when both prices are known).
+  const monthly = packages.find((p) => p.period === 'MONTHLY');
+  const annual = packages.find((p) => p.period === 'ANNUAL');
+  const savePct =
+    monthly && annual && monthly.price > 0 && annual.price > 0
+      ? Math.round((1 - annual.price / (monthly.price * 12)) * 100)
+      : 0;
+
   const benefits = [
     { icon: '📚', text: t('pro.benefitSubjects') },
     { icon: '🛡️', text: t('pro.benefitFreeze') },
@@ -128,6 +141,7 @@ export function PaywallModal({ visible, onClose, source = 'unknown' }: Props) {
             ) : (
               packages.map((p) => {
                 const isSel = p.identifier === selected;
+                const isAnnual = p.period === 'ANNUAL';
                 return (
                   <TouchableOpacity
                     key={p.identifier}
@@ -135,13 +149,23 @@ export function PaywallModal({ visible, onClose, source = 'unknown' }: Props) {
                     onPress={() => setSelected(p.identifier)}
                     activeOpacity={0.8}
                   >
-                    <Text style={[styles.pkgTitle, isSel && { color: TEXT }]}>
-                      {p.period === 'ANNUAL'
-                        ? t('pro.yearly')
-                        : p.period === 'MONTHLY'
-                          ? t('pro.monthly')
-                          : p.title || p.identifier}
-                    </Text>
+                    {isAnnual && savePct > 0 && (
+                      <View style={styles.saveBadge}>
+                        <Text style={styles.saveBadgeText}>{t('pro.savePct', { pct: savePct })}</Text>
+                      </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.pkgTitle, isSel && { color: TEXT }]}>
+                        {isAnnual
+                          ? t('pro.yearly')
+                          : p.period === 'MONTHLY'
+                            ? t('pro.monthly')
+                            : p.title || p.identifier}
+                      </Text>
+                      {p.trialDays > 0 && (
+                        <Text style={styles.pkgTrial}>{t('pro.trialTag', { days: p.trialDays })}</Text>
+                      )}
+                    </View>
                     <Text style={[styles.pkgPrice, isSel && { color: ACCENT }]}>{p.priceString}</Text>
                   </TouchableOpacity>
                 );
@@ -158,16 +182,20 @@ export function PaywallModal({ visible, onClose, source = 'unknown' }: Props) {
               {busy ? (
                 <ActivityIndicator color="#001018" />
               ) : (
-                <Text style={styles.ctaText}>{t('pro.subscribe')}</Text>
+                <Text style={styles.ctaText}>
+                  {trialDays > 0 ? t('pro.startTrial', { days: trialDays }) : t('pro.subscribe')}
+                </Text>
               )}
             </TouchableOpacity>
+
+            {trialDays > 0 && <Text style={styles.trialNote}>{t('pro.trialNote')}</Text>}
 
             <TouchableOpacity onPress={handleRestore} disabled={busy}>
               <Text style={styles.restore}>{t('pro.restore')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={onClose} disabled={busy}>
-              <Text style={styles.close}>{t('common.cancel')}</Text>
+              <Text style={styles.close}>{dismissLabel ?? t('common.cancel')}</Text>
             </TouchableOpacity>
 
             <Text style={styles.legal}>{t('pro.legal')}</Text>
@@ -210,7 +238,19 @@ const styles = StyleSheet.create({
   },
   pkgSel: { borderColor: ACCENT },
   pkgTitle: { fontSize: 16, fontWeight: '700', color: MUTED },
+  pkgTrial: { fontSize: 12, fontWeight: '600', color: GOLD, marginTop: 2 },
   pkgPrice: { fontSize: 16, fontWeight: '800', color: MUTED },
+  saveBadge: {
+    position: 'absolute',
+    top: -9,
+    right: 14,
+    backgroundColor: GOLD,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  saveBadgeText: { color: '#1a1000', fontSize: 10, fontWeight: '900', letterSpacing: 0.5 },
+  trialNote: { color: MUTED, fontSize: 12, textAlign: 'center', marginTop: 10 },
   cta: {
     backgroundColor: ACCENT,
     borderRadius: 14,

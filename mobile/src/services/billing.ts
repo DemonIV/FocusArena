@@ -22,8 +22,27 @@ export interface ProPackage {
   title: string;
   /** RevenueCat period type: 'MONTHLY' | 'ANNUAL' | … (best-effort). */
   period: string;
+  /** Numeric price in the store currency (0 when unknown) — for savings math only. */
+  price: number;
+  /** Free-trial length in days (0 = no trial). Trial itself is configured per-product in the stores. */
+  trialDays: number;
   /** Opaque RC package handed straight back to purchase(). */
   raw: unknown;
+}
+
+/** Days in a free introductory offer, 0 when there is none (best-effort across platforms). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function trialDaysFromProduct(product: any): number {
+  const intro = product?.introPrice;
+  if (!intro || (intro.price ?? 0) > 0) return 0;
+  const units = intro.periodNumberOfUnits ?? 0;
+  switch (intro.periodUnit) {
+    case 'DAY': return units;
+    case 'WEEK': return units * 7;
+    case 'MONTH': return units * 30;
+    case 'YEAR': return units * 365;
+    default: return 0;
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,6 +126,8 @@ export async function getProPackages(): Promise<ProPackage[]> {
       priceString: pkg.product?.priceString ?? '',
       title: pkg.product?.title ?? '',
       period: pkg.packageType ?? '',
+      price: pkg.product?.price ?? 0,
+      trialDays: trialDaysFromProduct(pkg.product),
       raw: pkg,
     }));
   } catch {

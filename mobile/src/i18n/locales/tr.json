@@ -66,7 +66,20 @@
     "continue": "Devam",
     "finish": "Başla",
     "nameRequired": "Lütfen bir konu adı gir.",
-    "createFailed": "Konu oluşturulamadı."
+    "createFailed": "Konu oluşturulamadı.",
+    "step0Title": "Seni buraya getiren ne?",
+    "step0Subtitle": "Ana hedefini seç — deneyimini ona göre şekillendirelim.",
+    "motivExam": "Sınava hazırlanıyorum",
+    "motivHabit": "Odaklanma alışkanlığı kazanmak",
+    "motivProcrastination": "Ertelemeyi yenmek",
+    "motivFriends": "Arkadaşlarımla çalışmak",
+    "planTitle": "Odak planın hazır! 🎉",
+    "planSubtitle": "İşte haftana genel bakış — hepsini sonradan değiştirebilirsin.",
+    "planDailyGoal": "Günlük hedef",
+    "planWeekly": "Haftalık odak",
+    "planWhy": "Motivasyon",
+    "startPlan": "Planımı başlat",
+    "continueFree": "Ücretsiz planla devam et"
   },
   "boss": {
     "title": "Bu Haftanın Boss'u",
@@ -321,7 +334,11 @@
     "nothingMsg": "Geri yüklenecek aktif bir abonelik bulunamadı.",
     "activeMember": "Pro üyesin",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Sınırsız konu + streak dondurma"
+    "upgradeSub": "Sınırsız konu + streak dondurma",
+    "startTrial": "{{days}} gün ücretsiz dene",
+    "trialTag": "{{days}} gün ücretsiz deneme",
+    "trialNote": "Bugün ödeme yok — deneme bitmeden istediğin an iptal edebilirsin.",
+    "savePct": "%{{pct}} TASARRUF"
   },
   "shop": {
     "title": "ÇERÇEVE MAĞAZASI",

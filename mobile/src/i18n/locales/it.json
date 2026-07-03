@@ -66,7 +66,20 @@
     "continue": "Continua",
     "finish": "Inizia",
     "nameRequired": "Inserisci un nome per la materia.",
-    "createFailed": "Impossibile creare la materia."
+    "createFailed": "Impossibile creare la materia.",
+    "step0Title": "Cosa ti porta qui?",
+    "step0Subtitle": "Scegli il tuo obiettivo principale: adatteremo la tua esperienza.",
+    "motivExam": "Preparare un esame",
+    "motivHabit": "Costruire l'abitudine alla concentrazione",
+    "motivProcrastination": "Vincere la procrastinazione",
+    "motivFriends": "Studiare con gli amici",
+    "planTitle": "Il tuo piano di concentrazione è pronto! 🎉",
+    "planSubtitle": "Ecco la tua settimana a colpo d'occhio: potrai cambiare tutto in seguito.",
+    "planDailyGoal": "Obiettivo giornaliero",
+    "planWeekly": "Focus settimanale",
+    "planWhy": "Motivazione",
+    "startPlan": "Avvia il mio piano",
+    "continueFree": "Continua con il piano gratuito"
   },
   "boss": {
     "title": "Boss di questa settimana",
@@ -321,7 +334,11 @@
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Unlimited subjects + streak freeze"
+    "upgradeSub": "Unlimited subjects + streak freeze",
+    "startTrial": "Prova {{days}} giorni gratis",
+    "trialTag": "{{days}} giorni di prova gratuita",
+    "trialNote": "Nessun pagamento oggi: annulla in qualsiasi momento prima della fine della prova.",
+    "savePct": "RISPARMIA IL {{pct}}%"
   },
   "shop": {
     "title": "NEGOZIO DI CORNICI",

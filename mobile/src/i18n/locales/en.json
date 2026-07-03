@@ -66,7 +66,20 @@
     "continue": "Continue",
     "finish": "Get started",
     "nameRequired": "Please enter a subject name.",
-    "createFailed": "Could not create subject."
+    "createFailed": "Could not create subject.",
+    "step0Title": "What brings you here?",
+    "step0Subtitle": "Pick your main goal — we'll shape your experience around it.",
+    "motivExam": "Preparing for an exam",
+    "motivHabit": "Building a focus habit",
+    "motivProcrastination": "Beating procrastination",
+    "motivFriends": "Studying with friends",
+    "planTitle": "Your focus plan is ready! 🎉",
+    "planSubtitle": "Here's your week at a glance — you can change everything later.",
+    "planDailyGoal": "Daily goal",
+    "planWeekly": "Weekly focus",
+    "planWhy": "Motivation",
+    "startPlan": "Start my plan",
+    "continueFree": "Continue with the free plan"
   },
   "boss": {
     "title": "This Week's Boss",
@@ -321,7 +334,11 @@
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
     "upgradeTitle": "FocusArena Pro",
-    "upgradeSub": "Unlimited subjects + streak freeze"
+    "upgradeSub": "Unlimited subjects + streak freeze",
+    "startTrial": "Try {{days}} days free",
+    "trialTag": "{{days}}-day free trial",
+    "trialNote": "No payment today — cancel anytime before the trial ends.",
+    "savePct": "SAVE {{pct}}%"
   },
   "shop": {
     "title": "FRAME SHOP",
