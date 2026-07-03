@@ -114,7 +114,7 @@
 | Migration'lar | 002–009 hepsi uygulandı ✓ |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
-| RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android `goog_` anahtarı alındı; ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
+| RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
 | iOS | Kullanıcının telefonu iOS ama Apple hesabı yok; Android testi emülatörde. eas.json submit bloğu placeholder'lı |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
@@ -124,7 +124,7 @@
 ## 🔜 Sıradaki Adımlar
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. EAS preview env'de RC anahtarını gerçek `goog_...` anahtarıyla değiştir (anahtar memory'de kayıtlı) → yeni preview build → emülatörde doğrula (RC hata diyaloğu kalkmalı; paywall paketleri Play ürünleri tanımlanana kadar boş kalır, normal).
+1. EAS preview env'de RC anahtarını gerçek `goog_...` anahtarıyla değiştir (anahtar yukarıdaki tabloda) → yeni preview build → emülatörde doğrula (RC hata diyaloğu kalkmalı; paywall paketleri Play ürünleri tanımlanana kadar boş kalır, normal). Komut: `npx eas-cli env:update --environment preview --variable-name EXPO_PUBLIC_REVENUECAT_ANDROID_KEY --value <goog_anahtar> --non-interactive`
 2. Aynı env'leri **production** ortamına da ekle → production AAB build.
 3. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil).
 
