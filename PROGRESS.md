@@ -92,33 +92,51 @@
 - **In-app review** (`fa3f222`): expo-store-review, koşul: 3+ seans && 45 günde 1; fişte 🪙 +coin gösterimi.
 - 🎉 **Satış öncesi kod işlerinin tamamı bitti.**
 
+### Faz 10 — Rebrand + İlk APK'lar + RevenueCat Kurulumu (3 Temmuz, öğleden sonra)
+`e462c99`, `910528b`, `eea7478`
+
+- **expo-doctor 18/18**: metro watchFolders düzeltildi, `@types/react-native` kaldırıldı, expo 54.0.35 (`e462c99`).
+- **Sentry Gradle fix** (`910528b`): source-map upload org/token olmadan build'i kırıyordu → eas.json'a `SENTRY_DISABLE_AUTO_UPLOAD=true`.
+- **🏷️ REBRAND: FocusArena → StudySquad** (`eea7478`): görünen ad, paket adı `com.studysquad.app`, 10 dildeki appName/upgradeTitle, paylaşım kartları (`studysquad.app`), paywall, backend push metinleri. Fly'a deploy edildi. Dahili isimler (EAS slug, fly.dev URL, repo) bilerek değişmedi.
+- **✅ İlk 2 başarılı EAS APK**: eski markalı `5f6b887b` + StudySquad markalı `89baf50c` (Sentry+PostHog+RC anahtarları EAS preview env'inde). Emülatörde (adb) kuruldu ve test edildi.
+- **RevenueCat paneli kuruldu**: entitlement `pro`, default offering Monthly+Yearly (Lifetime kaldırıldı), Play Store app `com.studysquad.app` + gerçek `goog_...` anahtarı alındı. Ders: **Test Store anahtarı release build'de çalışmıyor** (SDK hata diyaloğu basıyor) → gerçek anahtara geçildi. Service account JSON, Play Console doğrulaması sonrasına ertelendi.
+- **Play Console kaydı başladı**: $25 ödendi, kimlik doğrulama (fotoğraf) sonucu bekleniyor.
+
 ---
 
 ## 🏗️ Altyapı Durumu
 
 | Bileşen | Durum |
 |---------|-------|
-| Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı) |
+| Marka | **StudySquad** · paket `com.studysquad.app` · Play başlığı: "StudySquad: Study w/ Friends" |
+| Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
 | Migration'lar | 002–009 hepsi uygulandı ✓ |
-| EAS | projectId + Android keystore kayıtlı; production profili AAB + autoIncrement hazır |
-| Gözlemlenebilirlik | Sentry + PostHog kodu hazır, env-gated |
-| Faturalama | RevenueCat: Pro abonelik kodu canlı; "coins" offering'i RC panelinde **henüz oluşturulmadı** |
-| iOS | eas.json submit bloğu placeholder'lı (ascAppId, appleTeamId — Apple hesabı açılınca) |
+| EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
+| Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
+| RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android `goog_` anahtarı alındı; ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
+| Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
+| iOS | Kullanıcının telefonu iOS ama Apple hesabı yok; Android testi emülatörde. eas.json submit bloğu placeholder'lı |
+| Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
 
 ---
 
-## 🔜 Sıradaki Adımlar (mağaza yayını — kod dışı işler)
+## 🔜 Sıradaki Adımlar
 
-1. **EAS preview APK** al ve gerçek cihazda doğrula (push + paywall + coin akışı Expo Go'da çalışmaz):
-   `cd mobile && eas build --platform android --profile preview`
-   (Son kuyruğa alınan build `5c524c07` — sonucu doğrulanmadı.)
-2. **Gizlilik politikası URL'i** hazırla (iki mağaza için zorunlu; Sentry/PostHog/RC veri işliyor).
-3. **EAS secrets**: Sentry / PostHog / RevenueCat anahtarları.
-4. **Google Play**: $25 hesap → production AAB → Play Console (listing, content rating, Data Safety) → internal track → RC ürünleri (Pro + coin paketleri) → aboneliğe **free trial offer** tanımla (kod introPrice'ı otomatik algılıyor).
-5. **RevenueCat**: "coins" offering'ini oluştur.
-6. **Apple**: $99/yıl hesap → eas.json placeholder'larını doldur → iOS build → ASC sözleşme/banka/vergi + IAP ürünleri + App Privacy → TestFlight → review.
-7. Yayın sonrası fikirler: günlük görevler, ligler, pet besleme, Arena Pass.
+**Sonraki oturumun ilk işleri (Claude):**
+1. EAS preview env'de RC anahtarını gerçek `goog_...` anahtarıyla değiştir (anahtar memory'de kayıtlı) → yeni preview build → emülatörde doğrula (RC hata diyaloğu kalkmalı; paywall paketleri Play ürünleri tanımlanana kadar boş kalır, normal).
+2. Aynı env'leri **production** ortamına da ekle → production AAB build.
+3. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil).
+
+**Kullanıcı tarafında bekleyenler:**
+4. Play Console kimlik doğrulama sonucu → uygulama oluştur (`com.studysquad.app`) → **closed testing** track'ine AAB + **12 testçi e-postası** (14 gün kullanım şartı — testçileri şimdiden topla!).
+5. Play Console'da IAP ürünleri: Pro abonelik (monthly/yearly + **free trial offer**) + coin paketleri (`coins_1000/5500/12000`).
+6. RC'ye service account JSON bağla + ürünleri eşle + **"coins" offering** oluştur.
+7. `studysquad.app` domain'ini al (~15$/yıl).
+8. **Apple**: $99/yıl hesap → eas.json placeholder'larını doldur → iOS build → TestFlight (kendi iPhone'unda test) → ASC sözleşme/banka/vergi + IAP ürünleri + App Privacy → review.
+9. Yayın sonrası fikirler: günlük görevler, ligler, pet besleme, Arena Pass.
+
+> **Not (Claude için):** Yeni oturuma başlarken güncel durumu görmek için önce bu dosyayı oku; oturum sonunda yapılanları ve sıradaki adımları buraya işle.
 
 ---
 
