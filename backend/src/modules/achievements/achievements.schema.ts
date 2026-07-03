@@ -115,7 +115,7 @@ export const BADGE_META: Record<BadgeType, BadgeMeta> = {
   },
   pro_member: {
     label: 'Pro Member',
-    description: 'Join FocusArena Pro.',
+    description: 'Join StudySquad Pro.',
     icon: '👑',
   },
   pro_marathon: {

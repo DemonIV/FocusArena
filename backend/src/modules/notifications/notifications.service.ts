@@ -100,16 +100,16 @@ const STREAK_DANGER: Record<PushLanguage, { title: string; body: string }> = {
 };
 
 const FRIEND_REQUEST: Record<PushLanguage, { title: string; body: string }> = {
-  en: { title: '👋 New friend request', body: '{name} wants to be your friend on FocusArena.' },
-  tr: { title: '👋 Yeni arkadaşlık isteği', body: '{name} FocusArena’da arkadaşın olmak istiyor.' },
-  de: { title: '👋 Neue Freundschaftsanfrage', body: '{name} möchte auf FocusArena dein Freund sein.' },
-  es: { title: '👋 Nueva solicitud de amistad', body: '{name} quiere ser tu amigo en FocusArena.' },
-  fr: { title: '👋 Nouvelle demande d’ami', body: '{name} veut devenir ton ami sur FocusArena.' },
-  it: { title: '👋 Nuova richiesta di amicizia', body: '{name} vuole essere tuo amico su FocusArena.' },
-  nl: { title: '👋 Nieuw vriendschapsverzoek', body: '{name} wil je vriend zijn op FocusArena.' },
-  pl: { title: '👋 Nowe zaproszenie do znajomych', body: '{name} chce zostać twoim znajomym w FocusArena.' },
-  pt: { title: '👋 Novo pedido de amizade', body: '{name} quer ser seu amigo no FocusArena.' },
-  ru: { title: '👋 Новая заявка в друзья', body: '{name} хочет добавить тебя в друзья в FocusArena.' },
+  en: { title: '👋 New friend request', body: '{name} wants to be your friend on StudySquad.' },
+  tr: { title: '👋 Yeni arkadaşlık isteği', body: '{name} StudySquad’da arkadaşın olmak istiyor.' },
+  de: { title: '👋 Neue Freundschaftsanfrage', body: '{name} möchte auf StudySquad dein Freund sein.' },
+  es: { title: '👋 Nueva solicitud de amistad', body: '{name} quiere ser tu amigo en StudySquad.' },
+  fr: { title: '👋 Nouvelle demande d’ami', body: '{name} veut devenir ton ami sur StudySquad.' },
+  it: { title: '👋 Nuova richiesta di amicizia', body: '{name} vuole essere tuo amico su StudySquad.' },
+  nl: { title: '👋 Nieuw vriendschapsverzoek', body: '{name} wil je vriend zijn op StudySquad.' },
+  pl: { title: '👋 Nowe zaproszenie do znajomych', body: '{name} chce zostać twoim znajomym w StudySquad.' },
+  pt: { title: '👋 Novo pedido de amizade', body: '{name} quer ser seu amigo no StudySquad.' },
+  ru: { title: '👋 Новая заявка в друзья', body: '{name} хочет добавить тебя в друзья в StudySquad.' },
 };
 
 const FRIEND_ACCEPTED: Record<PushLanguage, { title: string; body: string }> = {

@@ -94,7 +94,7 @@ export function StudyReceiptModal({
           {/* ── Captured card ── */}
           <View ref={cardRef} collapsable={false} style={styles.card}>
             <View style={styles.glow} />
-            <Text style={styles.brand}>⚡ FocusArena</Text>
+            <Text style={styles.brand}>⚡ StudySquad</Text>
             <View style={styles.divider} />
 
             {subjectName ? <Text style={styles.subject}>{subjectName}</Text> : null}
@@ -115,7 +115,7 @@ export function StudyReceiptModal({
               <Text style={styles.rank}>{t('receipt.globalRank', { rank })}</Text>
             )}
 
-            <Text style={styles.url}>focusarena.app</Text>
+            <Text style={styles.url}>studysquad.app</Text>
           </View>
 
           {/* ── Actions ── */}

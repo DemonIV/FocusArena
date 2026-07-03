@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FocusArena",
+    "name": "StudySquad",
     "slug": "focusarena",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,14 +13,14 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.focusarena.app"
+      "bundleIdentifier": "com.studysquad.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1a1a2e"
       },
-      "package": "com.focusarena.app",
+      "package": "com.studysquad.app",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",

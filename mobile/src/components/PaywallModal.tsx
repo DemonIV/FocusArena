@@ -120,7 +120,7 @@ export function PaywallModal({ visible, onClose, source = 'unknown', dismissLabe
         <View style={styles.sheet}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={styles.crown}>👑</Text>
-            <Text style={styles.title}>FocusArena Pro</Text>
+            <Text style={styles.title}>StudySquad Pro</Text>
             <Text style={styles.subtitle}>{t('pro.tagline')}</Text>
 
             {/* Benefits */}

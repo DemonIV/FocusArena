@@ -88,7 +88,7 @@ export function MainTabs() {
         ),
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'FocusArena' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'StudySquad' }} />
       <Tab.Screen name="Timer" component={TimerScreen} options={{ title: t('nav.timer') }} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: t('nav.leaderboard') }} />
       <Tab.Screen name="Rooms" component={RoomsScreen} options={{ title: t('nav.rooms') }} />

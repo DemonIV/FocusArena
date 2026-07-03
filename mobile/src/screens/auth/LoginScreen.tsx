@@ -44,7 +44,7 @@ export function LoginScreen({ navigation }: Props) {
       <View style={styles.container}>
         {/* Logo */}
         <View style={styles.logoArea}>
-          <Text style={styles.logoText}>🎯 FocusArena</Text>
+          <Text style={styles.logoText}>🎯 StudySquad</Text>
           <Text style={styles.tagline}>{t('auth.tagline')}</Text>
         </View>
 

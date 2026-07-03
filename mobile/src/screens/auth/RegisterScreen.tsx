@@ -58,7 +58,7 @@ export function RegisterScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.logoArea}>
-          <Text style={styles.logoText}>🎯 FocusArena</Text>
+          <Text style={styles.logoText}>🎯 StudySquad</Text>
           <Text style={styles.tagline}>{t('auth.joinTagline')}</Text>
         </View>
 

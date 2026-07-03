@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "FocusArena",
+    "appName": "StudySquad",
     "error": "Hata",
     "warning": "Uyarı",
     "cancel": "İptal",
@@ -336,7 +336,7 @@
     "nothingTitle": "Bulunamadı",
     "nothingMsg": "Geri yüklenecek aktif bir abonelik bulunamadı.",
     "activeMember": "Pro üyesin",
-    "upgradeTitle": "FocusArena Pro",
+    "upgradeTitle": "StudySquad Pro",
     "upgradeSub": "Sınırsız konu + streak dondurma",
     "startTrial": "{{days}} gün ücretsiz dene",
     "trialTag": "{{days}} gün ücretsiz deneme",

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "FocusArena",
+    "appName": "StudySquad",
     "error": "Error",
     "warning": "Warning",
     "cancel": "Cancel",
@@ -336,7 +336,7 @@
     "nothingTitle": "Nothing to restore",
     "nothingMsg": "No active subscription was found to restore.",
     "activeMember": "You're a Pro member",
-    "upgradeTitle": "FocusArena Pro",
+    "upgradeTitle": "StudySquad Pro",
     "upgradeSub": "Unlimited subjects + streak freeze",
     "startTrial": "Try {{days}} days free",
     "trialTag": "{{days}}-day free trial",

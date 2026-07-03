@@ -127,7 +127,7 @@ export function StudyDnaCard() {
           <Text style={styles.powerValue}>{power.icon} {t(power.key)}</Text>
         </View>
 
-        <Text style={styles.url}>focusarena.app</Text>
+        <Text style={styles.url}>studysquad.app</Text>
       </View>
 
       <TouchableOpacity
