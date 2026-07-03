@@ -219,7 +219,10 @@
     "subjectNameEmpty": "De vaknaam mag niet leeg zijn",
     "subjectAddFailed": "Kan het vak niet toevoegen",
     "subjectUpdateFailed": "Kan het vak niet bijwerken",
-    "subjectDeleteFailed": "Kan het vak niet verwijderen"
+    "subjectDeleteFailed": "Kan het vak niet verwijderen",
+    "settings": "Instellingen",
+    "pushNotifications": "Meldingen",
+    "pushToggleFailed": "Kon de meldingsinstelling niet bijwerken. Probeer opnieuw."
   },
   "rooms": {
     "createRoom": "+ Kamer maken",

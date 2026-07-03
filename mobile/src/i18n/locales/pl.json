@@ -219,7 +219,10 @@
     "subjectNameEmpty": "Nazwa przedmiotu nie może być pusta",
     "subjectAddFailed": "Nie udało się dodać przedmiotu",
     "subjectUpdateFailed": "Nie udało się zaktualizować przedmiotu",
-    "subjectDeleteFailed": "Nie udało się usunąć przedmiotu"
+    "subjectDeleteFailed": "Nie udało się usunąć przedmiotu",
+    "settings": "Ustawienia",
+    "pushNotifications": "Powiadomienia",
+    "pushToggleFailed": "Nie udało się zaktualizować ustawienia powiadomień. Spróbuj ponownie."
   },
   "rooms": {
     "createRoom": "+ Utwórz pokój",

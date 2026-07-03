@@ -4,6 +4,7 @@ import { processLeaderboardTick } from './leaderboard-tick';
 import { processStreakReset } from './streak-reset';
 import { processStreakReminder } from './streak-reminder';
 import { processSessionCleanup } from './session-cleanup';
+import { processWinback } from './winback';
 
 // ─── Redis connection ─────────────────────────────────────────
 
@@ -35,6 +36,7 @@ export const leaderboardQueue    = new Bull('leaderboard-tick',  { createClient,
 export const streakQueue         = new Bull('streak-reset',      { createClient, defaultJobOptions: sharedJobOpts });
 export const streakReminderQueue = new Bull('streak-reminder',   { createClient, defaultJobOptions: sharedJobOpts });
 export const cleanupQueue        = new Bull('session-cleanup',   { createClient, defaultJobOptions: sharedJobOpts });
+export const winbackQueue        = new Bull('winback',           { createClient, defaultJobOptions: sharedJobOpts });
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -69,8 +71,10 @@ function registerProcessors(): void {
 
   cleanupQueue.process('session-cleanup', processSessionCleanup);
 
+  winbackQueue.process('winback', processWinback);
+
   // Global error logging for all queues
-  [leaderboardQueue, streakQueue, streakReminderQueue, cleanupQueue].forEach((q) => {
+  [leaderboardQueue, streakQueue, streakReminderQueue, cleanupQueue, winbackQueue].forEach((q) => {
     q.on('failed', (job, err) => {
       console.error(`[bull] Job ${q.name}#${job.id} failed:`, err.message);
     });
@@ -111,6 +115,15 @@ export async function startJobs(): Promise<void> {
     { attempts: 2, backoff: { type: 'fixed', delay: 30_000 } },
   );
 
+  // Win-back — daily at 17:00 UTC (evening for EU/TR), nudging users whose
+  // last completed session was exactly 3 or 7 days ago.
+  await scheduleRepeat(
+    winbackQueue,
+    'winback',
+    { cron: '0 17 * * *', tz: 'UTC' },
+    { attempts: 2, backoff: { type: 'fixed', delay: 30_000 } },
+  );
+
   // Session cleanup — every 10 minutes
   await scheduleRepeat(
     cleanupQueue,
@@ -131,5 +144,6 @@ export async function stopJobs(): Promise<void> {
     streakQueue.close(),
     streakReminderQueue.close(),
     cleanupQueue.close(),
+    winbackQueue.close(),
   ]);
 }

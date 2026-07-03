@@ -219,7 +219,10 @@
     "subjectNameEmpty": "Le nom de la matière ne peut pas être vide",
     "subjectAddFailed": "Impossible d'ajouter la matière",
     "subjectUpdateFailed": "Impossible de mettre à jour la matière",
-    "subjectDeleteFailed": "Impossible de supprimer la matière"
+    "subjectDeleteFailed": "Impossible de supprimer la matière",
+    "settings": "Paramètres",
+    "pushNotifications": "Notifications",
+    "pushToggleFailed": "Impossible de mettre à jour le paramètre de notifications. Réessaie."
   },
   "rooms": {
     "createRoom": "+ Créer une salle",

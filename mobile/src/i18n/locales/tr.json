@@ -219,7 +219,10 @@
     "subjectNameEmpty": "Konu adı boş olamaz",
     "subjectAddFailed": "Konu eklenemedi",
     "subjectUpdateFailed": "Konu güncellenemedi",
-    "subjectDeleteFailed": "Konu silinemedi"
+    "subjectDeleteFailed": "Konu silinemedi",
+    "settings": "Ayarlar",
+    "pushNotifications": "Bildirimler",
+    "pushToggleFailed": "Bildirim ayarı güncellenemedi. Lütfen tekrar dene."
   },
   "rooms": {
     "createRoom": "+ Oda Kur",

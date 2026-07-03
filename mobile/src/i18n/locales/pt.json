@@ -219,7 +219,10 @@
     "subjectNameEmpty": "O nome da matéria não pode estar vazio",
     "subjectAddFailed": "Não foi possível adicionar a matéria",
     "subjectUpdateFailed": "Não foi possível atualizar a matéria",
-    "subjectDeleteFailed": "Não foi possível excluir a matéria"
+    "subjectDeleteFailed": "Não foi possível excluir a matéria",
+    "settings": "Configurações",
+    "pushNotifications": "Notificações",
+    "pushToggleFailed": "Não foi possível atualizar a configuração de notificações. Tente novamente."
   },
   "rooms": {
     "createRoom": "+ Criar sala",

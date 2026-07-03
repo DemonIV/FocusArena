@@ -219,7 +219,10 @@
     "subjectNameEmpty": "Название предмета не может быть пустым",
     "subjectAddFailed": "Не удалось добавить предмет",
     "subjectUpdateFailed": "Не удалось обновить предмет",
-    "subjectDeleteFailed": "Не удалось удалить предмет"
+    "subjectDeleteFailed": "Не удалось удалить предмет",
+    "settings": "Настройки",
+    "pushNotifications": "Уведомления",
+    "pushToggleFailed": "Не удалось обновить настройку уведомлений. Попробуй ещё раз."
   },
   "rooms": {
     "createRoom": "+ Создать комнату",

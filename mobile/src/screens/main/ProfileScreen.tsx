@@ -12,6 +12,7 @@ import {
   TextInput,
   ActivityIndicator,
   Platform,
+  Switch,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +21,8 @@ import { StatCard, StreakHeatmap, StudyDnaCard } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { CoinShopModal } from '../../components/CoinShopModal';
 import { billingEnabled } from '../../services/billing';
-import { useBillingStore } from '../../stores';
+import { useBillingStore, useSettingsStore } from '../../stores';
+import { setPushEnabled as syncPushEnabled } from '../../services';
 import LottieView from 'lottie-react-native';
 import { timerService, achievementsService, roomsService, cosmeticsService } from '../../services';
 import { FRAMES, getFrameVisual, PETS, getPetVisual } from '../../constants';
@@ -195,6 +197,17 @@ export function ProfileScreen() {
         { text: t('profile.signOut'), style: 'destructive', onPress: () => logout() },
       ],
     );
+  };
+
+  const pushEnabled = useSettingsStore((s) => s.pushEnabled);
+  const setPushPref = useSettingsStore((s) => s.setPushEnabled);
+
+  const togglePush = (value: boolean) => {
+    setPushPref(value); // optimistic — registerForPushNotifications reads this
+    syncPushEnabled(value).catch(() => {
+      setPushPref(!value);
+      Alert.alert(t('common.error'), t('profile.pushToggleFailed'));
+    });
   };
 
   // ── Derived ───────────────────────────────────────────────────────────────────
@@ -447,6 +460,18 @@ export function ProfileScreen() {
             <Text style={styles.emptyHint}>{t('profile.noOwnedRoomsHint')}</Text>
           </View>
         )}
+
+        {/* ── Settings ── */}
+        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.settings')}</Text>
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>🔔 {t('profile.pushNotifications')}</Text>
+          <Switch
+            value={pushEnabled}
+            onValueChange={togglePush}
+            trackColor={{ false: '#334155', true: `${ACCENT}80` }}
+            thumbColor={pushEnabled ? ACCENT : '#94a3b8'}
+          />
+        </View>
 
         {/* ── Sign Out ── */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
@@ -1251,6 +1276,19 @@ const styles = StyleSheet.create({
   roomCodeText: { color: ACCENT, fontSize: 18, fontWeight: '800', letterSpacing: 3, marginTop: 2 },
 
   // Logout
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: CARD,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+    marginBottom: 12,
+  },
+  settingLabel: { color: TEXT, fontSize: 15, fontWeight: '600' },
   logoutBtn: {
     marginTop: 8,
     backgroundColor: `${DANGER}12`,

@@ -219,7 +219,10 @@
     "subjectNameEmpty": "Subject name cannot be empty",
     "subjectAddFailed": "Could not add subject",
     "subjectUpdateFailed": "Could not update subject",
-    "subjectDeleteFailed": "Could not delete subject"
+    "subjectDeleteFailed": "Could not delete subject",
+    "settings": "Settings",
+    "pushNotifications": "Notifications",
+    "pushToggleFailed": "Could not update notification setting. Please try again."
   },
   "rooms": {
     "createRoom": "+ Create Room",

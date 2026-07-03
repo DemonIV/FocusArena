@@ -2,9 +2,14 @@ import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import type { MainTabParamList } from '../types';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import type { MainTabParamList, RootStackParamList } from '../types';
 import * as Localization from 'expo-localization';
-import { registerForPushNotifications, leaderboardService } from '../services';
+import {
+  registerForPushNotifications,
+  subscribeNotificationTaps,
+  leaderboardService,
+} from '../services';
 import {
   HomeScreen,
   TimerScreen,
@@ -36,6 +41,7 @@ const NAV_KEY: Record<string, string> = {
 
 export function MainTabs() {
   const { t } = useTranslation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   // Register this device for push notifications once the user is in the app.
   useEffect(() => {
@@ -47,6 +53,15 @@ export function MainTabs() {
       leaderboardService.setCountry(region).catch(() => { /* ignore */ });
     }
   }, []);
+
+  // Land on the right tab when the user taps a push notification.
+  useEffect(
+    () =>
+      subscribeNotificationTaps((tab) => {
+        navigation.navigate('Main', { screen: tab } as never);
+      }),
+    [navigation],
+  );
 
   return (
     <Tab.Navigator

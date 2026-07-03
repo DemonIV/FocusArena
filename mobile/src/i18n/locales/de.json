@@ -219,7 +219,10 @@
     "subjectNameEmpty": "Der Fachname darf nicht leer sein",
     "subjectAddFailed": "Fach konnte nicht hinzugefügt werden",
     "subjectUpdateFailed": "Fach konnte nicht aktualisiert werden",
-    "subjectDeleteFailed": "Fach konnte nicht gelöscht werden"
+    "subjectDeleteFailed": "Fach konnte nicht gelöscht werden",
+    "settings": "Einstellungen",
+    "pushNotifications": "Benachrichtigungen",
+    "pushToggleFailed": "Benachrichtigungseinstellung konnte nicht aktualisiert werden. Bitte erneut versuchen."
   },
   "rooms": {
     "createRoom": "+ Raum erstellen",

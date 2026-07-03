@@ -1,5 +1,6 @@
 import { supabase, redis } from '../../shared';
 import { checkAndAward } from '../achievements';
+import { notifyFriendRequest, notifyFriendAccepted } from '../notifications';
 import type {
   FriendEntry,
   FriendRequest,
@@ -106,6 +107,7 @@ export async function sendRequest(callerId: string, targetId: string): Promise<v
           .update({ status: 'accepted' })
           .eq('requester_id', targetId)
           .eq('addressee_id', callerId);
+        void getUser(callerId).then((me) => me && notifyFriendAccepted(targetId, me.username));
         return;
       }
       throw Object.assign(new Error('Request already sent'), { code: 'DUPLICATE' });
@@ -124,6 +126,8 @@ export async function sendRequest(callerId: string, targetId: string): Promise<v
     .insert({ requester_id: callerId, addressee_id: targetId, status: 'pending' });
 
   if (error) throw new Error(error.message);
+
+  void getUser(callerId).then((me) => me && notifyFriendRequest(targetId, me.username));
 }
 
 // ─── Accept / Decline ─────────────────────────────────────────
@@ -156,6 +160,8 @@ export async function acceptRequest(callerId: string, requesterId: string): Prom
     countFor(callerId).then((n) => checkAndAward(callerId, { friendCount: n })),
     countFor(requesterId).then((n) => checkAndAward(requesterId, { friendCount: n })),
   ]);
+
+  void getUser(callerId).then((me) => me && notifyFriendAccepted(requesterId, me.username));
 }
 
 export async function declineRequest(callerId: string, requesterId: string): Promise<void> {

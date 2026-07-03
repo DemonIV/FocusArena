@@ -219,7 +219,10 @@
     "subjectNameEmpty": "Il nome della materia non può essere vuoto",
     "subjectAddFailed": "Impossibile aggiungere la materia",
     "subjectUpdateFailed": "Impossibile aggiornare la materia",
-    "subjectDeleteFailed": "Impossibile eliminare la materia"
+    "subjectDeleteFailed": "Impossibile eliminare la materia",
+    "settings": "Impostazioni",
+    "pushNotifications": "Notifiche",
+    "pushToggleFailed": "Impossibile aggiornare l’impostazione delle notifiche. Riprova."
   },
   "rooms": {
     "createRoom": "+ Crea stanza",

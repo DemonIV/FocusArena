@@ -12,6 +12,12 @@ export const RegisterPushSchema = z.object({
 
 export type RegisterPushBody = z.infer<typeof RegisterPushSchema>;
 
+export const PushSettingsSchema = z.object({
+  enabled: z.boolean(),
+});
+
+export type PushSettingsBody = z.infer<typeof PushSettingsSchema>;
+
 /** A single message in the Expo Push API payload. */
 export interface ExpoPushMessage {
   to: string;
