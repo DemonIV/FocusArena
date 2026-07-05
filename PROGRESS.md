@@ -123,6 +123,21 @@
 - **Arkadaş başına 🔔/🔕 toggle**: FriendsScreen satırında zil ikonu (optimistic). `PUT /friends/:id/mute`, `friend_push_mutes` tablosu (migration 012 ✓, satır=muted, varsayılan açık), `GET /friends` yanıtına `muted` bayrağı.
 - Arkadaş online durumu görünürlüğü zaten vardı (satırda canlı durum + renk) — kullanıcı yeterli buldu, dokunulmadı. Ayrıca `referral_redeemed` push'una eksik olan tap-target eklendi (Friends).
 
+### 📝 Oturum Özeti — 2026-07-05 (Faz 11+12+13) — SON OTURUM
+
+Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migration'lar DB'de:
+
+| Commit | Özellik | Durum |
+|--------|---------|-------|
+| `2eac69e` | Referans sistemi (2×500 coin + oto-arkadaşlık) + boş ekran davet CTA'ları + streak shield | ✅ canlı, migration 010 ✓ |
+| `b3b0349` | Sıkı Mod 🔒 (Forest mekaniği: 30 sn tolerans → seans yanar → 200 🪙 kurtarma) | ✅ canlı, migration 011 ✓ |
+| `73e0cb5` | "🔥 Arkadaşın çalışıyor" push'u + arkadaş başına 🔔/🔕 mute | ✅ canlı, migration 012 ✓ |
+
+- **Ürün kararları** (kullanıcıyla konuşuldu): Sıkı Mod ücretsiz (retention), af coin'le satılır, gerçek OS-engelleme ileride Pro amiral gemisi. Arkadaş push'u oda değil **arkadaş** bazlı; spam koruması: çift başına günde 1 + alıcıya günde 3 + odaktakine gönderme. Rekabet analizi yapıldı (Forest/YPT/Focusmate) — konumlandırma: "takımınla çalış".
+- **Doğrulama**: her fazda backend+mobil `tsc` temiz; route'lar canlıda 401 testiyle doğrulandı (`/referrals/redeem`, `/timer/rescue`, `/friends/:id/mute`); `/health` 200.
+- **Henüz test edilmedi (emülatör/cihaz gerekli)**: referans akışı uçtan uca, Sıkı Mod arka plan→bildirim→yanma→kurtarma akışı, arkadaş push'unun gerçek teslimatı. Hepsi **bir sonraki preview build'de** test edilmeli (RC anahtar değişikliğiyle aynı build).
+- **Ortam notları**: Fly deploy'da depot builder TLS hatası → kalıcı çözüm `--depot=false`; PowerShell'de commit mesajında çift tırnak kullanma (native arg aktarımında bozuluyor, here-string bile kurtarmıyor).
+
 ---
 
 ## 🏗️ Altyapı Durumu
@@ -146,6 +161,7 @@
 
 **Sonraki oturumun ilk işleri (Claude):**
 1. EAS preview env'de RC anahtarını gerçek anahtarla değiştir → yeni preview build → emülatörde doğrula (RC hata diyaloğu kalkmalı; paywall paketleri Play ürünleri tanımlanana kadar boş kalır, normal). Komut: `npx eas-cli env:update --environment preview --variable-name EXPO_PUBLIC_REVENUECAT_ANDROID_KEY --value goog_ZabvZUZeqQlkyIWjFOGtRHKstqg --non-interactive`
+   Aynı build'de **5 Temmuz özelliklerini de test et**: referans kodu kullanma (2 hesap), Sıkı Mod (arka plana at → 15 sn'de bildirim → 30 sn'de yanma → coin kurtarma), arkadaş çalışmaya başlayınca push + 🔔 mute toggle'ı.
 2. Aynı env'leri **production** ortamına da ekle → production AAB build.
 3. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil).
 
