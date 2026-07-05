@@ -11,6 +11,7 @@ import { achievementsModule } from './modules/achievements';
 import { notificationsModule } from './modules/notifications';
 import { billingModule } from './modules/billing';
 import { cosmeticsModule } from './modules/cosmetics';
+import { referralsModule } from './modules/referrals';
 import { captureException } from './shared/observability';
 
 export async function buildApp() {
@@ -41,6 +42,7 @@ export async function buildApp() {
   await app.register(notificationsModule, { prefix: '/notifications' });
   await app.register(billingModule, { prefix: '/billing' });
   await app.register(cosmeticsModule, { prefix: '/cosmetics' });
+  await app.register(referralsModule, { prefix: '/referrals' });
 
   app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 

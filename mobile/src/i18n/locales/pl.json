@@ -116,6 +116,8 @@
     "todaysStats": "Dzisiejsze statystyki",
     "dailyGoal": "Cel dzienny",
     "goalReached": "Cel osiągnięty! 🎉",
+    "streakProtected": "Twoja seria jest chroniona",
+    "streakProtectCta": "Chroń swoją {{streak}}-dniową serię",
     "thisWeek": "Ten tydzień",
     "weekTotal": "Razem: {{duration}}",
     "weekdaysShort": "Pn,Wt,Śr,Cz,Pt,So,Nd",
@@ -177,6 +179,22 @@
     "pauseError": "Błąd wstrzymywania",
     "pauseErrorMsg": "Nie udało się wstrzymać",
     "zenMode": "Tryb Zen"
+  },
+  "invite": {
+    "shareMessage": "📚 Ucz się ze mną w StudySquad! Podczas rejestracji wpisz moją nazwę użytkownika {{username}} jako kod zaproszenia — oboje dostaniemy 500 monet! 🪙",
+    "emptyTitle": "Nie masz jeszcze znajomych",
+    "emptySubtitle": "Zaproś znajomego — oboje zdobędziecie 500 monet i razem wespniecie się w rankingu!",
+    "inviteButton": "🎁 Zaproś znajomego",
+    "haveCode": "Masz kod zaproszenia?",
+    "codePlaceholder": "Nazwa użytkownika znajomego",
+    "redeem": "Wykorzystaj",
+    "redeemSuccessTitle": "🎉 +{{coins}} monet!",
+    "redeemSuccessMsg": "Ty i {{name}} zdobyliście po {{coins}} monet — i jesteście teraz znajomymi!",
+    "errNotFound": "Nie znaleziono użytkownika o tej nazwie.",
+    "errAlready": "Kod zaproszenia został już wykorzystany.",
+    "errTooOld": "Kody można wykorzystać tylko w ciągu 7 dni od rejestracji.",
+    "errGeneric": "Nie udało się wykorzystać kodu. Spróbuj ponownie.",
+    "leaderboardEmpty": "Dodaj znajomych, aby rywalizować razem — zaproś kogoś, a oboje zdobędziecie 500 monet!"
   },
   "profile": {
     "level": "Poz {{level}}",

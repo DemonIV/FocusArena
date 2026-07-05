@@ -116,6 +116,8 @@
     "todaysStats": "Bugünün İstatistikleri",
     "dailyGoal": "Günlük Hedef",
     "goalReached": "Hedefe ulaştın! 🎉",
+    "streakProtected": "Serin koruma altında",
+    "streakProtectCta": "{{streak}} günlük serini koru",
     "thisWeek": "Bu Hafta",
     "weekTotal": "Toplam: {{duration}}",
     "weekdaysShort": "Pt,Sa,Ça,Pe,Cu,Ct,Pz",
@@ -177,6 +179,22 @@
     "pauseError": "Duraklama Hatası",
     "pauseErrorMsg": "Duraklama başarısız",
     "zenMode": "Zen Modu"
+  },
+  "invite": {
+    "shareMessage": "📚 StudySquad'da benimle çalış! Kayıt olurken davet kodu olarak {{username}} kullanıcı adımı gir — ikimiz de 500 coin kazanalım! 🪙",
+    "emptyTitle": "Henüz arkadaşın yok",
+    "emptySubtitle": "Bir arkadaşını davet et — ikiniz de 500 coin kazanın, liderlik tablosunda birlikte yükselin!",
+    "inviteButton": "🎁 Arkadaşını Davet Et",
+    "haveCode": "Davet kodun var mı?",
+    "codePlaceholder": "Arkadaşının kullanıcı adı",
+    "redeem": "Kullan",
+    "redeemSuccessTitle": "🎉 +{{coins}} coin!",
+    "redeemSuccessMsg": "Sen ve {{name}} {{coins}}'er coin kazandınız — artık arkadaşsınız!",
+    "errNotFound": "Bu kullanıcı adıyla bir kullanıcı bulunamadı.",
+    "errAlready": "Zaten bir davet kodu kullandın.",
+    "errTooOld": "Davet kodu yalnızca kayıttan sonraki 7 gün içinde kullanılabilir.",
+    "errGeneric": "Kod kullanılamadı. Lütfen tekrar dene.",
+    "leaderboardEmpty": "Birlikte yarışmak için arkadaş ekle — birini davet et, ikiniz de 500 coin kazanın!"
   },
   "profile": {
     "level": "Sv {{level}}",

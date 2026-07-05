@@ -116,6 +116,8 @@
     "todaysStats": "Statistiche di oggi",
     "dailyGoal": "Obiettivo giornaliero",
     "goalReached": "Obiettivo raggiunto! 🎉",
+    "streakProtected": "La tua serie è protetta",
+    "streakProtectCta": "Proteggi la tua serie di {{streak}} giorni",
     "thisWeek": "Questa settimana",
     "weekTotal": "Totale: {{duration}}",
     "weekdaysShort": "Lu,Ma,Me,Gi,Ve,Sa,Do",
@@ -177,6 +179,22 @@
     "pauseError": "Errore di pausa",
     "pauseErrorMsg": "Impossibile mettere in pausa",
     "zenMode": "Modalità Zen"
+  },
+  "invite": {
+    "shareMessage": "📚 Studia con me su StudySquad! Inserisci il mio nome utente {{username}} come codice invito alla registrazione — guadagniamo entrambi 500 monete! 🪙",
+    "emptyTitle": "Ancora nessun amico",
+    "emptySubtitle": "Invita un amico — guadagnate entrambi 500 monete e salite insieme in classifica!",
+    "inviteButton": "🎁 Invita un amico",
+    "haveCode": "Hai un codice invito?",
+    "codePlaceholder": "Nome utente dell'amico",
+    "redeem": "Riscatta",
+    "redeemSuccessTitle": "🎉 +{{coins}} monete!",
+    "redeemSuccessMsg": "Tu e {{name}} avete guadagnato {{coins}} monete ciascuno — e ora siete amici!",
+    "errNotFound": "Nessun utente trovato con questo nome.",
+    "errAlready": "Hai già usato un codice invito.",
+    "errTooOld": "I codici possono essere riscattati solo entro 7 giorni dalla registrazione.",
+    "errGeneric": "Impossibile riscattare il codice. Riprova.",
+    "leaderboardEmpty": "Aggiungi amici per competere insieme — invitane uno e guadagnate entrambi 500 monete!"
   },
   "profile": {
     "level": "Lv {{level}}",

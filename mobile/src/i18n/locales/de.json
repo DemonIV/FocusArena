@@ -116,6 +116,8 @@
     "todaysStats": "Heutige Statistik",
     "dailyGoal": "Tagesziel",
     "goalReached": "Ziel erreicht! 🎉",
+    "streakProtected": "Deine Serie ist geschützt",
+    "streakProtectCta": "Schütze deine {{streak}}-Tage-Serie",
     "thisWeek": "Diese Woche",
     "weekTotal": "Gesamt: {{duration}}",
     "weekdaysShort": "Mo,Di,Mi,Do,Fr,Sa,So",
@@ -177,6 +179,22 @@
     "pauseError": "Fehler beim Pausieren",
     "pauseErrorMsg": "Pausieren fehlgeschlagen",
     "zenMode": "Zen-Modus"
+  },
+  "invite": {
+    "shareMessage": "📚 Lern mit mir auf StudySquad! Gib bei der Registrierung meinen Benutzernamen {{username}} als Einladungscode ein — wir bekommen beide 500 Münzen! 🪙",
+    "emptyTitle": "Noch keine Freunde",
+    "emptySubtitle": "Lade einen Freund ein — ihr bekommt beide 500 Münzen und klettert gemeinsam die Rangliste hoch!",
+    "inviteButton": "🎁 Freund einladen",
+    "haveCode": "Hast du einen Einladungscode?",
+    "codePlaceholder": "Benutzername des Freundes",
+    "redeem": "Einlösen",
+    "redeemSuccessTitle": "🎉 +{{coins}} Münzen!",
+    "redeemSuccessMsg": "Du und {{name}} habt je {{coins}} Münzen erhalten — und seid jetzt Freunde!",
+    "errNotFound": "Kein Benutzer mit diesem Namen gefunden.",
+    "errAlready": "Du hast bereits einen Einladungscode eingelöst.",
+    "errTooOld": "Einladungscodes können nur innerhalb von 7 Tagen nach der Registrierung eingelöst werden.",
+    "errGeneric": "Der Code konnte nicht eingelöst werden. Bitte versuche es erneut.",
+    "leaderboardEmpty": "Füge Freunde hinzu, um gemeinsam anzutreten — lade einen ein und ihr bekommt beide 500 Münzen!"
   },
   "profile": {
     "level": "Lv {{level}}",

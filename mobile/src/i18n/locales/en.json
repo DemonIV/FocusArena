@@ -116,6 +116,8 @@
     "todaysStats": "Today's Stats",
     "dailyGoal": "Daily Goal",
     "goalReached": "Goal reached! 🎉",
+    "streakProtected": "Your streak is protected",
+    "streakProtectCta": "Protect your {{streak}}-day streak",
     "thisWeek": "This Week",
     "weekTotal": "Total: {{duration}}",
     "weekdaysShort": "Mo,Tu,We,Th,Fr,Sa,Su",
@@ -177,6 +179,22 @@
     "pauseError": "Pause Error",
     "pauseErrorMsg": "Could not pause",
     "zenMode": "Zen Mode"
+  },
+  "invite": {
+    "shareMessage": "📚 Study with me on StudySquad! Enter my username {{username}} as the invite code when you sign up — we both earn 500 coins! 🪙",
+    "emptyTitle": "No friends yet",
+    "emptySubtitle": "Invite a friend — you both earn 500 coins and climb the leaderboard together!",
+    "inviteButton": "🎁 Invite a Friend",
+    "haveCode": "Got an invite code?",
+    "codePlaceholder": "Friend's username",
+    "redeem": "Redeem",
+    "redeemSuccessTitle": "🎉 +{{coins}} coins!",
+    "redeemSuccessMsg": "You and {{name}} each earned {{coins}} coins — and you're now friends!",
+    "errNotFound": "No user with that username was found.",
+    "errAlready": "You've already used an invite code.",
+    "errTooOld": "Invite codes can only be redeemed within 7 days of signing up.",
+    "errGeneric": "The code couldn't be redeemed. Please try again.",
+    "leaderboardEmpty": "Add friends to compete together — invite one and you both earn 500 coins!"
   },
   "profile": {
     "level": "Lv {{level}}",

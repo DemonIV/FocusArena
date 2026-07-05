@@ -116,6 +116,8 @@
     "todaysStats": "Estatísticas de hoje",
     "dailyGoal": "Meta diária",
     "goalReached": "Meta alcançada! 🎉",
+    "streakProtected": "Sua sequência está protegida",
+    "streakProtectCta": "Proteja sua sequência de {{streak}} dias",
     "thisWeek": "Esta semana",
     "weekTotal": "Total: {{duration}}",
     "weekdaysShort": "Sg,Te,Qa,Qi,Sx,Sá,Do",
@@ -177,6 +179,22 @@
     "pauseError": "Erro ao pausar",
     "pauseErrorMsg": "Não foi possível pausar",
     "zenMode": "Modo Zen"
+  },
+  "invite": {
+    "shareMessage": "📚 Estude comigo no StudySquad! Digite meu nome de usuário {{username}} como código de convite ao se cadastrar — nós dois ganhamos 500 moedas! 🪙",
+    "emptyTitle": "Ainda sem amigos",
+    "emptySubtitle": "Convide um amigo — vocês dois ganham 500 moedas e sobem juntos no ranking!",
+    "inviteButton": "🎁 Convidar um amigo",
+    "haveCode": "Tem um código de convite?",
+    "codePlaceholder": "Nome de usuário do amigo",
+    "redeem": "Resgatar",
+    "redeemSuccessTitle": "🎉 +{{coins}} moedas!",
+    "redeemSuccessMsg": "Você e {{name}} ganharam {{coins}} moedas cada — e agora são amigos!",
+    "errNotFound": "Nenhum usuário encontrado com esse nome.",
+    "errAlready": "Você já usou um código de convite.",
+    "errTooOld": "Códigos só podem ser resgatados até 7 dias após o cadastro.",
+    "errGeneric": "Não foi possível resgatar o código. Tente novamente.",
+    "leaderboardEmpty": "Adicione amigos para competir juntos — convide um e vocês dois ganham 500 moedas!"
   },
   "profile": {
     "level": "Nv {{level}}",

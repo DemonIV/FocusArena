@@ -112,4 +112,11 @@ export const friendsService = {
   /** Block a user */
   block: (userId: string) =>
     api.post<{ message: string }>(`/friends/${userId}/block`),
+
+  /** Redeem a referral code (the inviter's username). Both sides get coins. */
+  redeemReferral: (username: string) =>
+    api.post<{ coinsAwarded: number; referrerUsername: string; newCoins: number }>(
+      '/referrals/redeem',
+      { username },
+    ),
 };

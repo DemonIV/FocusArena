@@ -14,6 +14,7 @@ import { leaderboardService } from '../../services';
 import { FramedAvatar } from '../../components';
 import { getPetEmoji } from '../../constants';
 import { useSocketStore } from '../../stores';
+import { useInviteShare } from '../../hooks';
 import { formatDuration } from '../../utils/formatTime';
 import i18n from '../../i18n';
 import type { LeaderboardPeriod, LeaderboardEntry, MyRankInfo, CountryEntry } from '../../types';
@@ -159,6 +160,7 @@ export function LeaderboardScreen() {
   const [mode, setMode] = useState<'players' | 'countries'>('players');
   const [period, setPeriod] = useState<LeaderboardPeriod>('weekly');
   const top10Live = useSocketStore((s) => s.top10);
+  const shareInvite = useInviteShare('leaderboard');
 
   const countriesQ = useQuery({
     queryKey: ['lb-countries'],
@@ -256,6 +258,17 @@ export function LeaderboardScreen() {
                     {friendsQ.data.map((entry) => (
                       <RankRow key={entry.userId} entry={entry} />
                     ))}
+                  </>
+                ) : friendsQ.data ? (
+                  // No friends yet → invite CTA instead of a silently missing section
+                  <>
+                    <Text style={[styles.sectionLabel, { marginTop: 24 }]}>{t('leaderboard.friends')}</Text>
+                    <View style={styles.inviteFooter}>
+                      <Text style={styles.inviteFooterText}>{t('invite.leaderboardEmpty')}</Text>
+                      <TouchableOpacity style={styles.inviteFooterBtn} onPress={shareInvite} activeOpacity={0.85}>
+                        <Text style={styles.inviteFooterBtnText}>{t('invite.inviteButton')}</Text>
+                      </TouchableOpacity>
+                    </View>
                   </>
                 ) : null
               }
@@ -417,6 +430,24 @@ const styles = StyleSheet.create({
   },
 
   list: { padding: 16, paddingBottom: 40 },
+
+  inviteFooter: {
+    backgroundColor: CARD,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+    alignItems: 'center',
+  },
+  inviteFooterText: { color: MUTED, fontSize: 13, textAlign: 'center', lineHeight: 19 },
+  inviteFooterBtn: {
+    backgroundColor: ACCENT,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 12,
+  },
+  inviteFooterBtnText: { color: '#001018', fontSize: 13, fontWeight: '800' },
 
   row: {
     flexDirection: 'row',

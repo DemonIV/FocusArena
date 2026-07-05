@@ -10,6 +10,7 @@ export {
   notifyWinback,
   notifyFriendRequest,
   notifyFriendAccepted,
+  notifyReferralRedeemed,
   savePushToken,
   clearPushToken,
   setPushEnabled,

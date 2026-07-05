@@ -1,6 +1,6 @@
 # FocusArena — Proje İlerleme Özeti
 
-> Sıfırdan bugüne (2026-05-22 → 2026-07-03) tüm adımların kronolojik özeti.
+> Sıfırdan bugüne (2026-05-22 → 2026-07-05) tüm adımların kronolojik özeti.
 > Backend canlı: **https://focusarena.fly.dev** · Repo: main branch, direkt push workflow.
 
 ---
@@ -84,7 +84,7 @@
 - **Zen Modu** immersive timer ekranı + 3 Pro rozeti (`12c612c`).
 - **Evcil hayvanlar**: coin ile alınan animasyonlu pet (Noto Emoji lottie, CC BY 4.0) + evrim + Home companion (`72e918e`).
 
-### Faz 9 — Satış Hunisi (3 Temmuz) — SON OTURUM
+### Faz 9 — Satış Hunisi (3 Temmuz)
 `3099ba9`, `c562529`, `3cec2a7`, `fa3f222`
 
 - **Onboarding dönüşüm hunisi**: 5 adım (motivasyon adımı + plan özeti) + **trial paywall** (`3099ba9`).
@@ -102,6 +102,14 @@
 - **RevenueCat paneli kuruldu**: entitlement `pro`, default offering Monthly+Yearly (Lifetime kaldırıldı), Play Store app `com.studysquad.app` + gerçek `goog_...` anahtarı alındı. Ders: **Test Store anahtarı release build'de çalışmıyor** (SDK hata diyaloğu basıyor) → gerçek anahtara geçildi. Service account JSON, Play Console doğrulaması sonrasına ertelendi.
 - **Play Console kaydı başladı**: $25 ödendi, kimlik doğrulama (fotoğraf) sonucu bekleniyor.
 
+### Faz 11 — Referral + Davet CTA'ları + Streak Freeze Görünürlüğü (5 Temmuz)
+
+- **Ödüllü referans sistemi**: davet kodu = davet edenin kullanıcı adı; yeni kullanıcı (≤7 gün) Friends ekranında kodu girer → **iki tarafa 500 coin + otomatik arkadaşlık** + davet edene push bildirimi (10 dil). Backend `modules/referrals/` (`POST /referrals/redeem`), migration `010_referrals.sql` (PK=referred_id → tek kullanım; self/reverse-pair farming guard'ları). Migration DB'de uygulandı ✓.
+- **Boş ekran davet CTA'ları**: Friends boş listesi → 🎁 davet kartı + kod girişi (yalnız yeni hesaplara); Leaderboard arkadaş bölümü boşsa davet footer'ı; Friends sekme çubuğunda kalıcı 🎁 butonu. `useInviteShare` hook'u native share sheet + analytics (`invite_share_opened`).
+- **Streak freeze görünürlüğü**: Home'da streak ≥ 3 ise 🛡️ şeridi — Pro'ya "serin koruma altında", Pro olmayana amber "X günlük serini koru" CTA'sı → `PaywallModal (source: streak_shield)`.
+- i18n: 10 dilde `invite.*` (14 anahtar) + `home.streakProtected/streakProtectCta`; push metni `REFERRAL_REDEEMED`.
+- Backend+mobil `tsc --noEmit` temiz; Fly'a deploy edildi.
+
 ---
 
 ## 🏗️ Altyapı Durumu
@@ -111,7 +119,7 @@
 | Marka | **StudySquad** · paket `com.studysquad.app` · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
-| Migration'lar | 002–009 hepsi uygulandı ✓ |
+| Migration'lar | 002–010 hepsi uygulandı ✓ |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |

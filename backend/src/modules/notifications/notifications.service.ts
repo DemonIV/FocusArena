@@ -125,6 +125,19 @@ const FRIEND_ACCEPTED: Record<PushLanguage, { title: string; body: string }> = {
   ru: { title: '🤝 Заявка принята', body: '{name} принял(а) твою заявку. Пора заниматься вместе!' },
 };
 
+const REFERRAL_REDEEMED: Record<PushLanguage, { title: string; body: string }> = {
+  en: { title: '🎉 Your invite worked!', body: '{name} joined StudySquad — you both earned {coins} coins!' },
+  tr: { title: '🎉 Davetin işe yaradı!', body: '{name} StudySquad’a katıldı — ikiniz de {coins} coin kazandınız!' },
+  de: { title: '🎉 Deine Einladung hat geklappt!', body: '{name} ist StudySquad beigetreten — ihr habt beide {coins} Münzen verdient!' },
+  es: { title: '🎉 ¡Tu invitación funcionó!', body: '{name} se unió a StudySquad — ¡ambos ganaron {coins} monedas!' },
+  fr: { title: '🎉 Ton invitation a fonctionné !', body: '{name} a rejoint StudySquad — vous gagnez chacun {coins} pièces !' },
+  it: { title: '🎉 Il tuo invito ha funzionato!', body: '{name} si è unito a StudySquad — avete guadagnato entrambi {coins} monete!' },
+  nl: { title: '🎉 Je uitnodiging is gelukt!', body: '{name} zit nu op StudySquad — jullie verdienen allebei {coins} munten!' },
+  pl: { title: '🎉 Twoje zaproszenie zadziałało!', body: '{name} dołączył(a) do StudySquad — oboje zdobywacie {coins} monet!' },
+  pt: { title: '🎉 Seu convite funcionou!', body: '{name} entrou no StudySquad — vocês dois ganharam {coins} moedas!' },
+  ru: { title: '🎉 Твоё приглашение сработало!', body: '{name} присоединился(-ась) к StudySquad — вы оба получили {coins} монет!' },
+};
+
 const WINBACK: Record<PushLanguage, { title: string; body: string }> = {
   en: { title: '📚 We miss you!', body: 'It’s been {days} days. A short session today gets you back on track.' },
   tr: { title: '📚 Seni özledik!', body: '{days} gündür yoksun. Bugün kısa bir seansla yeniden başla.' },
@@ -203,6 +216,15 @@ export async function notifyFriendRequest(targetId: string, fromUsername: string
 /** Push to the original requester when their request is accepted. Fire-and-forget. */
 export async function notifyFriendAccepted(requesterId: string, byUsername: string): Promise<void> {
   await notifyUser(requesterId, FRIEND_ACCEPTED, { name: byUsername }, { type: 'friend_accepted' });
+}
+
+/** Push to the referrer when someone redeems their invite. Fire-and-forget. */
+export async function notifyReferralRedeemed(
+  referrerId: string,
+  byUsername: string,
+  coins: number,
+): Promise<void> {
+  await notifyUser(referrerId, REFERRAL_REDEEMED, { name: byUsername, coins }, { type: 'referral_redeemed' });
 }
 
 // ─── High-level notifications ─────────────────────────────────

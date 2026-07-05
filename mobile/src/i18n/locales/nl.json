@@ -116,6 +116,8 @@
     "todaysStats": "Statistieken van vandaag",
     "dailyGoal": "Dagdoel",
     "goalReached": "Doel bereikt! 🎉",
+    "streakProtected": "Je reeks is beschermd",
+    "streakProtectCta": "Bescherm je reeks van {{streak}} dagen",
     "thisWeek": "Deze week",
     "weekTotal": "Totaal: {{duration}}",
     "weekdaysShort": "Ma,Di,Wo,Do,Vr,Za,Zo",
@@ -177,6 +179,22 @@
     "pauseError": "Fout bij pauzeren",
     "pauseErrorMsg": "Kan niet pauzeren",
     "zenMode": "Zen-modus"
+  },
+  "invite": {
+    "shareMessage": "📚 Studeer met mij op StudySquad! Voer mijn gebruikersnaam {{username}} in als uitnodigingscode bij het aanmelden — we krijgen allebei 500 munten! 🪙",
+    "emptyTitle": "Nog geen vrienden",
+    "emptySubtitle": "Nodig een vriend uit — jullie krijgen allebei 500 munten en klimmen samen op het klassement!",
+    "inviteButton": "🎁 Vriend uitnodigen",
+    "haveCode": "Heb je een uitnodigingscode?",
+    "codePlaceholder": "Gebruikersnaam van je vriend",
+    "redeem": "Inwisselen",
+    "redeemSuccessTitle": "🎉 +{{coins}} munten!",
+    "redeemSuccessMsg": "Jij en {{name}} hebben elk {{coins}} munten verdiend — en jullie zijn nu vrienden!",
+    "errNotFound": "Geen gebruiker met die naam gevonden.",
+    "errAlready": "Je hebt al een uitnodigingscode gebruikt.",
+    "errTooOld": "Codes kunnen alleen binnen 7 dagen na aanmelding worden ingewisseld.",
+    "errGeneric": "De code kon niet worden ingewisseld. Probeer het opnieuw.",
+    "leaderboardEmpty": "Voeg vrienden toe om samen te strijden — nodig er één uit en jullie krijgen allebei 500 munten!"
   },
   "profile": {
     "level": "Lv {{level}}",

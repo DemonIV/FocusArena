@@ -116,6 +116,8 @@
     "todaysStats": "Estadísticas de hoy",
     "dailyGoal": "Meta diaria",
     "goalReached": "¡Meta alcanzada! 🎉",
+    "streakProtected": "Tu racha está protegida",
+    "streakProtectCta": "Protege tu racha de {{streak}} días",
     "thisWeek": "Esta semana",
     "weekTotal": "Total: {{duration}}",
     "weekdaysShort": "Lu,Ma,Mi,Ju,Vi,Sá,Do",
@@ -177,6 +179,22 @@
     "pauseError": "Error al pausar",
     "pauseErrorMsg": "No se pudo pausar",
     "zenMode": "Modo Zen"
+  },
+  "invite": {
+    "shareMessage": "📚 ¡Estudia conmigo en StudySquad! Introduce mi nombre de usuario {{username}} como código de invitación al registrarte — ¡ambos ganamos 500 monedas! 🪙",
+    "emptyTitle": "Aún no tienes amigos",
+    "emptySubtitle": "Invita a un amigo — ¡ambos ganan 500 monedas y suben juntos en la clasificación!",
+    "inviteButton": "🎁 Invitar a un amigo",
+    "haveCode": "¿Tienes un código de invitación?",
+    "codePlaceholder": "Nombre de usuario del amigo",
+    "redeem": "Canjear",
+    "redeemSuccessTitle": "🎉 ¡+{{coins}} monedas!",
+    "redeemSuccessMsg": "Tú y {{name}} ganaron {{coins}} monedas cada uno — ¡y ahora son amigos!",
+    "errNotFound": "No se encontró ningún usuario con ese nombre.",
+    "errAlready": "Ya has usado un código de invitación.",
+    "errTooOld": "Los códigos solo pueden canjearse dentro de los 7 días posteriores al registro.",
+    "errGeneric": "No se pudo canjear el código. Inténtalo de nuevo.",
+    "leaderboardEmpty": "Añade amigos para competir juntos: invita a uno y ambos ganan 500 monedas."
   },
   "profile": {
     "level": "Nv {{level}}",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,8 +13,9 @@ import { useTranslation } from 'react-i18next';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList, FriendEntry } from '../../types';
 import { useAuth } from '../../hooks';
-import { useTimerStore, useSocketStore } from '../../stores';
+import { useTimerStore, useSocketStore, useBillingStore } from '../../stores';
 import { StatCard, PetCompanion, PetAdoptTeaser } from '../../components';
+import { PaywallModal } from '../../components/PaywallModal';
 import { timerService, achievementsService, friendsService, cosmeticsService } from '../../services';
 import { formatDuration } from '../../utils/formatTime';
 
@@ -48,6 +49,8 @@ export function HomeScreen({ navigation }: Props) {
   const { user } = useAuth();
   const timerActive = useTimerStore((s) => s.isActive);
   const friendStatuses = useSocketStore((s) => s.friendStatuses);
+  const isPro = useBillingStore((s) => s.isPro);
+  const [paywallVisible, setPaywallVisible] = useState(false);
 
   const statsQ = useQuery({
     queryKey: ['timer-stats'],
@@ -226,6 +229,24 @@ export function HomeScreen({ navigation }: Props) {
         />
       </View>
 
+      {/* ── Streak shield (Pro streak-freeze visibility) ── */}
+      {streak >= 3 && (
+        isPro ? (
+          <View style={styles.shieldStrip}>
+            <Text style={styles.shieldText}>🛡️ {t('home.streakProtected')}</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[styles.shieldStrip, styles.shieldStripCta]}
+            onPress={() => setPaywallVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.shieldTextCta}>🛡️ {t('home.streakProtectCta', { streak })}</Text>
+            <Text style={styles.shieldChevron}>›</Text>
+          </TouchableOpacity>
+        )
+      )}
+
       {/* ── This Week ── */}
       <Text style={styles.sectionTitle}>{t('home.thisWeek')}</Text>
       <WeekChart
@@ -296,6 +317,12 @@ export function HomeScreen({ navigation }: Props) {
           ))}
         </View>
       )}
+
+      <PaywallModal
+        visible={paywallVisible}
+        onClose={() => setPaywallVisible(false)}
+        source="streak_shield"
+      />
     </ScrollView>
   );
 }
@@ -527,6 +554,25 @@ const styles = StyleSheet.create({
   seeAll: { color: ACCENT, fontSize: 22, fontWeight: '300', paddingHorizontal: 6, marginBottom: 12 },
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   statFlex: { flex: 1 },
+
+  // Streak shield strip (sits right under the stats row)
+  shieldStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: `${GREEN}12`,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginTop: -18,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: `${GREEN}40`,
+  },
+  shieldStripCta: { backgroundColor: '#f5a62312', borderColor: '#f5a62350' },
+  shieldText: { color: GREEN, fontSize: 13, fontWeight: '700' },
+  shieldTextCta: { color: '#f5a623', fontSize: 13, fontWeight: '700', flex: 1 },
+  shieldChevron: { color: '#f5a623', fontSize: 18, fontWeight: '700' },
 
   // Week chart
   weekCard: {

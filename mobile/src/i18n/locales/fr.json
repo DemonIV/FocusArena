@@ -116,6 +116,8 @@
     "todaysStats": "Statistiques du jour",
     "dailyGoal": "Objectif du jour",
     "goalReached": "Objectif atteint ! 🎉",
+    "streakProtected": "Ta série est protégée",
+    "streakProtectCta": "Protège ta série de {{streak}} jours",
     "thisWeek": "Cette semaine",
     "weekTotal": "Total : {{duration}}",
     "weekdaysShort": "Lu,Ma,Me,Je,Ve,Sa,Di",
@@ -177,6 +179,22 @@
     "pauseError": "Erreur de pause",
     "pauseErrorMsg": "Impossible de mettre en pause",
     "zenMode": "Mode Zen"
+  },
+  "invite": {
+    "shareMessage": "📚 Étudie avec moi sur StudySquad ! Entre mon nom d'utilisateur {{username}} comme code d'invitation à l'inscription — on gagne chacun 500 pièces ! 🪙",
+    "emptyTitle": "Pas encore d'amis",
+    "emptySubtitle": "Invite un ami — vous gagnez chacun 500 pièces et grimpez ensemble au classement !",
+    "inviteButton": "🎁 Inviter un ami",
+    "haveCode": "Tu as un code d'invitation ?",
+    "codePlaceholder": "Nom d'utilisateur de l'ami",
+    "redeem": "Utiliser",
+    "redeemSuccessTitle": "🎉 +{{coins}} pièces !",
+    "redeemSuccessMsg": "Toi et {{name}} gagnez chacun {{coins}} pièces — et vous êtes maintenant amis !",
+    "errNotFound": "Aucun utilisateur trouvé avec ce nom.",
+    "errAlready": "Tu as déjà utilisé un code d'invitation.",
+    "errTooOld": "Les codes ne peuvent être utilisés que dans les 7 jours suivant l'inscription.",
+    "errGeneric": "Le code n'a pas pu être utilisé. Réessaie.",
+    "leaderboardEmpty": "Ajoute des amis pour vous affronter — invites-en un et vous gagnez chacun 500 pièces !"
   },
   "profile": {
     "level": "Niv {{level}}",

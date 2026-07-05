@@ -15,7 +15,8 @@ import { useTranslation } from 'react-i18next';
 import { friendsService } from '../../services';
 import { FramedAvatar } from '../../components';
 import { getPetEmoji } from '../../constants';
-import { useSocketStore } from '../../stores';
+import { useSocketStore, useAuthStore } from '../../stores';
+import { useInviteShare } from '../../hooks';
 import type { FriendEntry, FriendRequest, UserSearchResult } from '../../types';
 
 const STATUS_COLOR: Record<string, string> = {
@@ -43,6 +44,14 @@ export function FriendsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+
+  const shareInvite = useInviteShare('friends');
+
+  // Referral redeem is only offered to fresh accounts (server enforces 7 days)
+  const createdAt = useAuthStore((s) => s.user?.created_at);
+  const isNewAccount =
+    !!createdAt && Date.now() - new Date(createdAt).getTime() < 7 * 86_400_000;
 
   const friendsQ = useQuery({
     queryKey: ['friends'],
@@ -84,6 +93,28 @@ export function FriendsScreen() {
     mutationFn: (userId: string) => friendsService.remove(userId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['friends'] }),
     onError: (err: any) => Alert.alert(t('common.error'), err?.message),
+  });
+
+  const redeemMut = useMutation({
+    mutationFn: (username: string) => friendsService.redeemReferral(username),
+    onSuccess: (res) => {
+      setReferralCode('');
+      qc.invalidateQueries({ queryKey: ['friends'] });
+      qc.invalidateQueries({ queryKey: ['frames'] }); // coin balance lives here
+      Alert.alert(
+        t('invite.redeemSuccessTitle'),
+        t('invite.redeemSuccessMsg', { name: res.referrerUsername, coins: res.coinsAwarded }),
+      );
+    },
+    onError: (err: any) => {
+      const code = err?.statusCode;
+      const msg =
+        code === 404 ? t('invite.errNotFound')
+        : code === 409 ? t('invite.errAlready')
+        : code === 403 ? t('invite.errTooOld')
+        : t('invite.errGeneric');
+      Alert.alert(t('common.error'), msg);
+    },
   });
 
   const handleSearch = async () => {
@@ -222,6 +253,9 @@ export function FriendsScreen() {
             </Text>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity style={styles.inviteTab} onPress={shareInvite} activeOpacity={0.7}>
+          <Text style={styles.inviteTabIcon}>🎁</Text>
+        </TouchableOpacity>
       </View>
 
       {tab === 'friends' && (
@@ -233,7 +267,45 @@ export function FriendsScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             !friendsQ.isLoading
-              ? <View style={styles.empty}><Text style={styles.emptyText}>{t('friends.noFriends')}</Text></View>
+              ? (
+                <View style={styles.inviteCard}>
+                  <Text style={styles.inviteEmoji}>🎁</Text>
+                  <Text style={styles.inviteTitle}>{t('invite.emptyTitle')}</Text>
+                  <Text style={styles.inviteSubtitle}>{t('invite.emptySubtitle')}</Text>
+                  <TouchableOpacity style={styles.inviteBtn} onPress={shareInvite} activeOpacity={0.85}>
+                    <Text style={styles.inviteBtnText}>{t('invite.inviteButton')}</Text>
+                  </TouchableOpacity>
+
+                  {isNewAccount && (
+                    <View style={styles.redeemBox}>
+                      <Text style={styles.redeemLabel}>{t('invite.haveCode')}</Text>
+                      <View style={styles.redeemRow}>
+                        <TextInput
+                          style={styles.redeemInput}
+                          value={referralCode}
+                          onChangeText={setReferralCode}
+                          placeholder={t('invite.codePlaceholder')}
+                          placeholderTextColor="#4a4a6a"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                          onSubmitEditing={() => referralCode.trim() && redeemMut.mutate(referralCode.trim())}
+                          returnKeyType="send"
+                        />
+                        <TouchableOpacity
+                          style={[styles.redeemBtn, (!referralCode.trim() || redeemMut.isPending) && { opacity: 0.5 }]}
+                          onPress={() => redeemMut.mutate(referralCode.trim())}
+                          disabled={!referralCode.trim() || redeemMut.isPending}
+                          activeOpacity={0.8}
+                        >
+                          {redeemMut.isPending
+                            ? <ActivityIndicator color="#000" size="small" />
+                            : <Text style={styles.redeemBtnText}>{t('invite.redeem')}</Text>}
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )
               : null
           }
           refreshControl={
@@ -323,6 +395,64 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 40 },
   empty: { alignItems: 'center', marginTop: 60 },
   emptyText: { color: MUTED, fontSize: 14 },
+
+  inviteTab: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: `${ACCENT}14`,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: `${ACCENT}50`,
+  },
+  inviteTabIcon: { fontSize: 14 },
+  inviteCard: {
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 18,
+    padding: 24,
+    marginTop: 32,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  inviteEmoji: { fontSize: 44, marginBottom: 8 },
+  inviteTitle: { color: TEXT, fontSize: 17, fontWeight: '700', textAlign: 'center' },
+  inviteSubtitle: { color: MUTED, fontSize: 13, textAlign: 'center', marginTop: 6, lineHeight: 19 },
+  inviteBtn: {
+    backgroundColor: ACCENT,
+    borderRadius: 12,
+    paddingVertical: 13,
+    paddingHorizontal: 24,
+    marginTop: 16,
+  },
+  inviteBtnText: { color: '#001018', fontSize: 15, fontWeight: '800' },
+  redeemBox: {
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+    alignSelf: 'stretch',
+  },
+  redeemLabel: { color: MUTED, fontSize: 13, textAlign: 'center', marginBottom: 10 },
+  redeemRow: { flexDirection: 'row', gap: 8 },
+  redeemInput: {
+    flex: 1,
+    backgroundColor: CARD2,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    color: TEXT,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  redeemBtn: {
+    backgroundColor: ACCENT,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+  },
+  redeemBtnText: { color: '#001018', fontWeight: '800', fontSize: 13 },
 
   row: {
     flexDirection: 'row',
