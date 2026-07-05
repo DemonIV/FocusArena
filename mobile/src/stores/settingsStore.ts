@@ -13,6 +13,16 @@ interface SettingsState {
   /** When we last showed (or tried to show) the native review prompt. */
   lastReviewPromptAt: number | null;
   markReviewPrompted: () => void;
+
+  /** Strict Mode: leaving the app during a running session forfeits it. */
+  strictMode: boolean;
+  setStrictMode: (enabled: boolean) => void;
+  /**
+   * When the app went to background during a strict session (ms epoch).
+   * Persisted so a violation survives the app being killed while away.
+   */
+  strictLeftAt: number | null;
+  setStrictLeftAt: (at: number | null) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -26,6 +36,11 @@ export const useSettingsStore = create<SettingsState>()(
         set((s) => ({ completedSessions: s.completedSessions + 1 })),
       lastReviewPromptAt: null,
       markReviewPrompted: () => set({ lastReviewPromptAt: Date.now() }),
+
+      strictMode: false,
+      setStrictMode: (enabled) => set({ strictMode: enabled }),
+      strictLeftAt: null,
+      setStrictLeftAt: (at) => set({ strictLeftAt: at }),
     }),
     {
       name: 'settings',

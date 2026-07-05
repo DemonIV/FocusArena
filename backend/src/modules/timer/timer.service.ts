@@ -247,6 +247,35 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
   return result;
 }
 
+/** Coins charged to save a strict-mode session after leaving the app. */
+export const RESCUE_COST = 200;
+
+/**
+ * Strict-mode rescue: the user left the app during a strict session and
+ * pays coins to keep it alive instead of forfeiting. The session itself
+ * never stopped server-side — this only charges the fee (atomic via
+ * spend_coins) and requires a live session so the endpoint can't be
+ * called outside the flow.
+ */
+export async function rescueSession(userId: string): Promise<{ coins: number; cost: number }> {
+  const state = await readState(userId);
+  if (!state) throw Object.assign(new Error('No active session'), { code: 'NO_TIMER' });
+
+  const { data, error } = await supabase.rpc('spend_coins', {
+    p_user_id: userId,
+    p_amount: RESCUE_COST,
+  });
+
+  if (error) {
+    if (error.message.includes('insufficient_coins')) {
+      throw Object.assign(new Error('Not enough coins'), { code: 'INSUFFICIENT_COINS' });
+    }
+    throw new Error(error.message);
+  }
+
+  return { coins: data as number, cost: RESCUE_COST };
+}
+
 export async function getTimerStatus(userId: string): Promise<TimerStatusResponse> {
   const state = await readState(userId);
   if (!state) return { active: false };

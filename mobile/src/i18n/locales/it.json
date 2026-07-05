@@ -178,7 +178,21 @@
     "resumeErrorMsg": "Impossibile riprendere",
     "pauseError": "Errore di pausa",
     "pauseErrorMsg": "Impossibile mettere in pausa",
-    "zenMode": "Modalità Zen"
+    "zenMode": "Modalità Zen",
+    "strictMode": "Modalità Rigorosa",
+    "strictModeHint": "Se esci dall’app durante una sessione, brucia — metti prima in pausa se devi andare.",
+    "strictWarnTitle": "⚠️ La tua sessione è in pericolo!",
+    "strictWarnBody": "Torna subito o la tua sessione brucerà 💔",
+    "strictActiveHint": "Modalità Rigorosa attiva — non uscire dall’app!",
+    "strictFailTitle": "Sessione bruciata!",
+    "strictFailMsg": "Sei stato via troppo a lungo. Salvala con le monete o lasciala andare.",
+    "strictFailMsgPet": "Sei stato via troppo a lungo — il tuo cucciolo è triste. Salva la sessione con le monete o lasciala andare.",
+    "strictRescue": "🪙 Salva per {{coins}} monete",
+    "strictNotEnough": "Monete insufficienti (ne hai {{coins}})",
+    "strictNotEnoughAlert": "Non hai abbastanza monete per salvare questa sessione.",
+    "strictForfeit": "Lascia che bruci",
+    "strictForfeitedTitle": "Sessione persa 💔",
+    "strictForfeitedMsg": "Niente ricompense stavolta. La prossima conta!"
   },
   "invite": {
     "shareMessage": "📚 Studia con me su StudySquad! Inserisci il mio nome utente {{username}} come codice invito alla registrazione — guadagniamo entrambi 500 monete! 🪙",

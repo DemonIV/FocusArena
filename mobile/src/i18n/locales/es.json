@@ -178,7 +178,21 @@
     "resumeErrorMsg": "No se pudo reanudar",
     "pauseError": "Error al pausar",
     "pauseErrorMsg": "No se pudo pausar",
-    "zenMode": "Modo Zen"
+    "zenMode": "Modo Zen",
+    "strictMode": "Modo Estricto",
+    "strictModeHint": "Si sales de la app durante una sesión, se quema — pausa primero si tienes que irte.",
+    "strictWarnTitle": "⚠️ ¡Tu sesión está en peligro!",
+    "strictWarnBody": "Vuelve ahora o tu sesión se quemará 💔",
+    "strictActiveHint": "Modo Estricto activado — ¡no salgas de la app!",
+    "strictFailTitle": "¡Tu sesión se quemó!",
+    "strictFailMsg": "Estuviste fuera demasiado tiempo. Recupérala con monedas o déjala ir.",
+    "strictFailMsgPet": "Estuviste fuera demasiado tiempo — tu mascota está triste. Recupera la sesión con monedas o déjala ir.",
+    "strictRescue": "🪙 Rescatar por {{coins}} monedas",
+    "strictNotEnough": "No tienes suficientes monedas (tienes {{coins}})",
+    "strictNotEnoughAlert": "No tienes suficientes monedas para rescatar esta sesión.",
+    "strictForfeit": "Dejar que se queme",
+    "strictForfeitedTitle": "Sesión perdida 💔",
+    "strictForfeitedMsg": "Esta vez sin recompensas. ¡La próxima cuenta!"
   },
   "invite": {
     "shareMessage": "📚 ¡Estudia conmigo en StudySquad! Introduce mi nombre de usuario {{username}} como código de invitación al registrarte — ¡ambos ganamos 500 monedas! 🪙",

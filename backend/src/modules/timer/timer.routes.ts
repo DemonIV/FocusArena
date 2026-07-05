@@ -1,7 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
-import { captureException } from '../../shared/observability';
+import { captureException, track } from '../../shared/observability';
 import {
   StartTimerSchema,
   CreateSubjectSchema,
@@ -13,6 +13,7 @@ import {
   pauseTimer,
   resumeTimer,
   stopTimer,
+  rescueSession,
   getTimerStatus,
   getSessions,
   getStats,
@@ -109,6 +110,23 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       const e = err as { code?: string; message: string };
       if (e.code === 'NO_TIMER') return reply.code(404).send({ error: 'Not Found', message: e.message });
       request.log.error(err, 'timer/stop failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** POST /timer/rescue — pay coins to save a strict-mode session */
+  fastify.post('/rescue', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    try {
+      const result = await rescueSession(userId);
+      track(userId, 'strict_session_rescued', { cost: result.cost });
+      return reply.send(result);
+    } catch (err: unknown) {
+      const e = err as { code?: string; message: string };
+      if (e.code === 'NO_TIMER') return reply.code(404).send({ error: 'Not Found', message: e.message });
+      if (e.code === 'INSUFFICIENT_COINS') return reply.code(402).send({ error: 'insufficient_coins' });
+      request.log.error(err, 'timer/rescue failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }

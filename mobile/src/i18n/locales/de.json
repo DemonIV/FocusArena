@@ -178,7 +178,21 @@
     "resumeErrorMsg": "Konnte nicht fortgesetzt werden",
     "pauseError": "Fehler beim Pausieren",
     "pauseErrorMsg": "Pausieren fehlgeschlagen",
-    "zenMode": "Zen-Modus"
+    "zenMode": "Zen-Modus",
+    "strictMode": "Strikter Modus",
+    "strictModeHint": "Verlässt du die App während einer Session, verbrennt sie — pausiere zuerst, wenn du weg musst.",
+    "strictWarnTitle": "⚠️ Deine Session ist in Gefahr!",
+    "strictWarnBody": "Komm sofort zurück, sonst verbrennt deine Session 💔",
+    "strictActiveHint": "Strikter Modus aktiv — verlasse die App nicht!",
+    "strictFailTitle": "Session verbrannt!",
+    "strictFailMsg": "Du warst zu lange weg. Rette sie mit Münzen oder lass sie los.",
+    "strictFailMsgPet": "Du warst zu lange weg — dein Haustier ist traurig. Rette die Session mit Münzen oder lass sie los.",
+    "strictRescue": "🪙 Für {{coins}} Münzen retten",
+    "strictNotEnough": "Nicht genug Münzen (du hast {{coins}})",
+    "strictNotEnoughAlert": "Du hast nicht genug Münzen, um diese Session zu retten.",
+    "strictForfeit": "Verbrennen lassen",
+    "strictForfeitedTitle": "Session verloren 💔",
+    "strictForfeitedMsg": "Diesmal keine Belohnung. Die nächste zählt!"
   },
   "invite": {
     "shareMessage": "📚 Lern mit mir auf StudySquad! Gib bei der Registrierung meinen Benutzernamen {{username}} als Einladungscode ein — wir bekommen beide 500 Münzen! 🪙",

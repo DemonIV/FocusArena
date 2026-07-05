@@ -178,7 +178,21 @@
     "resumeErrorMsg": "Kan niet hervatten",
     "pauseError": "Fout bij pauzeren",
     "pauseErrorMsg": "Kan niet pauzeren",
-    "zenMode": "Zen-modus"
+    "zenMode": "Zen-modus",
+    "strictMode": "Strikte Modus",
+    "strictModeHint": "Verlaat je de app tijdens een sessie, dan verbrandt die — pauzeer eerst als je weg moet.",
+    "strictWarnTitle": "⚠️ Je sessie is in gevaar!",
+    "strictWarnBody": "Kom nu terug, anders verbrandt je sessie 💔",
+    "strictActiveHint": "Strikte Modus aan — verlaat de app niet!",
+    "strictFailTitle": "Sessie verbrand!",
+    "strictFailMsg": "Je was te lang weg. Red hem met munten of laat hem gaan.",
+    "strictFailMsgPet": "Je was te lang weg — je huisdier is verdrietig. Red de sessie met munten of laat hem gaan.",
+    "strictRescue": "🪙 Redden voor {{coins}} munten",
+    "strictNotEnough": "Niet genoeg munten (je hebt er {{coins}})",
+    "strictNotEnoughAlert": "Je hebt niet genoeg munten om deze sessie te redden.",
+    "strictForfeit": "Laat maar verbranden",
+    "strictForfeitedTitle": "Sessie verloren 💔",
+    "strictForfeitedMsg": "Deze keer geen beloning. De volgende telt!"
   },
   "invite": {
     "shareMessage": "📚 Studeer met mij op StudySquad! Voer mijn gebruikersnaam {{username}} in als uitnodigingscode bij het aanmelden — we krijgen allebei 500 munten! 🪙",

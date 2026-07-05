@@ -14,12 +14,14 @@ import {
   TextInput,
   Keyboard,
   KeyboardAvoidingView,
+  Switch,
 } from 'react-native';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useTimer } from '../../hooks';
-import { useSocketStore, useBillingStore } from '../../stores';
-import { TimerCircle, StudyReceiptModal, ZenModeModal } from '../../components';
+import { useTimer, useStrictMode } from '../../hooks';
+import { useSocketStore, useBillingStore, useSettingsStore } from '../../stores';
+import { getPetEmoji } from '../../constants';
+import { TimerCircle, StudyReceiptModal, ZenModeModal, StrictModeFailModal } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { billingEnabled } from '../../services/billing';
 import { timerService, cosmeticsService, maybeRequestReview } from '../../services';
@@ -68,6 +70,11 @@ export function TimerScreen() {
   const [zenVisible, setZenVisible] = useState(false);
   const [zenPaywallVisible, setZenPaywallVisible] = useState(false);
 
+  // Strict Mode — leaving the app burns the session (Forest-style)
+  const strictMode = useSettingsStore((s) => s.strictMode);
+  const setStrictMode = useSettingsStore((s) => s.setStrictMode);
+  const strict = useStrictMode();
+
   const isCustomDuration = !DURATIONS.includes(selectedDuration);
 
   const confirmCustomDuration = useCallback(() => {
@@ -112,7 +119,61 @@ export function TimerScreen() {
   });
   const ghost = ghostQ.data;
 
+  // Equipped pet — it gets sad in the strict-mode fail modal
+  const petsQ = useQuery({
+    queryKey: ['pets'],
+    queryFn: () => cosmeticsService.getPets(),
+    staleTime: 60_000,
+  });
+  const petEmoji = getPetEmoji(petsQ.data?.selectedPet);
+
   // ── Handlers ────────────────────────────────────────────────────────────────
+
+  const invalidateAfterStop = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ['timer-stats'] });
+    qc.invalidateQueries({ queryKey: ['timer-ghost'] });
+    qc.invalidateQueries({ queryKey: ['subject-stats'] });
+    qc.invalidateQueries({ queryKey: ['my-rooms'] });
+    qc.invalidateQueries({ queryKey: ['lb-global'] });
+    qc.invalidateQueries({ queryKey: ['lb-me'] });
+    qc.invalidateQueries({ queryKey: ['lb-friends'] });
+    qc.invalidateQueries({ queryKey: ['frames'] }); // coin balance
+    qc.invalidateQueries({ queryKey: ['pets'] });
+  }, [qc]);
+
+  // Strict Mode: pay coins to keep the burned session alive…
+  const rescueMut = useMutation({
+    mutationFn: () => timerService.rescue(),
+    onSuccess: () => {
+      strict.clearViolation();
+      qc.invalidateQueries({ queryKey: ['frames'] }); // coin balance
+      qc.invalidateQueries({ queryKey: ['pets'] });
+    },
+    onError: (err: any) => {
+      if (err?.statusCode === 404) {
+        // Session no longer exists server-side — nothing left to rescue
+        strict.clearViolation();
+        void timer.syncWithServer();
+      } else if (err?.statusCode === 402) {
+        Alert.alert(t('common.error'), t('timer.strictNotEnoughAlert'));
+      } else {
+        Alert.alert(t('common.error'), err?.message);
+      }
+    },
+  });
+
+  // …or accept the loss: stop now (an early stop earns nothing anyway).
+  const handleForfeit = useCallback(async () => {
+    strict.clearViolation();
+    try {
+      await timer.stop();
+      setZenVisible(false);
+      invalidateAfterStop();
+      Alert.alert(t('timer.strictForfeitedTitle'), t('timer.strictForfeitedMsg'));
+    } catch {
+      void timer.syncWithServer();
+    }
+  }, [strict, timer, invalidateAfterStop, t]);
 
   const handleStart = useCallback(async () => {
     try {
@@ -164,15 +225,7 @@ export function TimerScreen() {
               const result = await timer.stop();
               setZenVisible(false);
               // Refresh anything that depends on the finished session
-              qc.invalidateQueries({ queryKey: ['timer-stats'] });
-              qc.invalidateQueries({ queryKey: ['timer-ghost'] });
-              qc.invalidateQueries({ queryKey: ['subject-stats'] });
-              qc.invalidateQueries({ queryKey: ['my-rooms'] });
-              qc.invalidateQueries({ queryKey: ['lb-global'] });
-              qc.invalidateQueries({ queryKey: ['lb-me'] });
-              qc.invalidateQueries({ queryKey: ['lb-friends'] });
-              qc.invalidateQueries({ queryKey: ['frames'] }); // coin balance
-              qc.invalidateQueries({ queryKey: ['pets'] });
+              invalidateAfterStop();
               if (result && result.xpEarned > 0) {
                 // Celebrate with a shareable Study Receipt
                 setReceipt({
@@ -206,7 +259,7 @@ export function TimerScreen() {
         },
       ],
     );
-  }, [timer, selectedSubject]);
+  }, [timer, selectedSubject, invalidateAfterStop]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -357,6 +410,20 @@ export function TimerScreen() {
               </View>
             </Pressable>
 
+            {/* Strict Mode toggle */}
+            <View style={styles.strictRow}>
+              <View style={styles.strictTextWrap}>
+                <Text style={styles.strictTitle}>🔒 {t('timer.strictMode')}</Text>
+                <Text style={styles.strictHint}>{t('timer.strictModeHint')}</Text>
+              </View>
+              <Switch
+                value={strictMode}
+                onValueChange={setStrictMode}
+                trackColor={{ false: 'rgba(255,255,255,0.12)', true: `${ACCENT}66` }}
+                thumbColor={strictMode ? ACCENT : '#94a3b8'}
+              />
+            </View>
+
             {/* Start Button */}
             <TouchableOpacity
               style={[styles.startBtn, timer.isLoading && { opacity: 0.6 }]}
@@ -446,6 +513,12 @@ export function TimerScreen() {
             {timer.isPaused && (
               <Text style={styles.pausedHint}>
                 {t('timer.pausedHint')}
+              </Text>
+            )}
+
+            {strictMode && !timer.isPaused && (
+              <Text style={styles.strictActiveHint}>
+                🔒 {t('timer.strictActiveHint')}
               </Text>
             )}
           </View>
@@ -589,6 +662,16 @@ export function TimerScreen() {
         visible={zenPaywallVisible}
         onClose={() => setZenPaywallVisible(false)}
         source="zen_mode"
+      />
+
+      {/* ── Strict Mode violation — rescue or forfeit ── */}
+      <StrictModeFailModal
+        visible={strict.violated && timer.isActive}
+        coins={framesQ.data?.coins ?? 0}
+        petEmoji={petEmoji}
+        rescuing={rescueMut.isPending}
+        onRescue={() => rescueMut.mutate()}
+        onForfeit={() => void handleForfeit()}
       />
     </View>
   );
@@ -789,6 +872,30 @@ const styles = StyleSheet.create({
   subjectCardText: { color: MUTED, fontSize: 15, fontWeight: '500' },
   clearBtn: { color: DANGER, fontSize: 15, fontWeight: '700', paddingHorizontal: 4 },
   chevron: { color: MUTED, fontSize: 20, fontWeight: '300' },
+
+  // Strict Mode toggle
+  strictRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    marginTop: 12,
+    gap: 12,
+  },
+  strictTextWrap: { flex: 1 },
+  strictTitle: { color: TEXT, fontSize: 14, fontWeight: '700' },
+  strictHint: { color: MUTED, fontSize: 12, marginTop: 2, lineHeight: 17 },
+  strictActiveHint: {
+    textAlign: 'center',
+    color: PAUSE_C,
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: -4,
+  },
 
   startBtn: {
     flexDirection: 'row',

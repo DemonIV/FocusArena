@@ -178,7 +178,21 @@
     "resumeErrorMsg": "Devam ettirilemedi",
     "pauseError": "Duraklama Hatası",
     "pauseErrorMsg": "Duraklama başarısız",
-    "zenMode": "Zen Modu"
+    "zenMode": "Zen Modu",
+    "strictMode": "Sıkı Mod",
+    "strictModeHint": "Seans sırasında uygulamadan çıkarsan seansın yanar — çıkman gerekiyorsa önce duraklat.",
+    "strictWarnTitle": "⚠️ Seansın tehlikede!",
+    "strictWarnBody": "Hemen geri dön yoksa seansın yanacak 💔",
+    "strictActiveHint": "Sıkı Mod açık — uygulamadan çıkma!",
+    "strictFailTitle": "Seansın yandı!",
+    "strictFailMsg": "Uygulamadan çok uzun süre ayrı kaldın. Coin ile kurtar ya da bırak gitsin.",
+    "strictFailMsgPet": "Uygulamadan çok uzun süre ayrı kaldın — petin çok üzgün. Seansı coin ile kurtar ya da bırak gitsin.",
+    "strictRescue": "🪙 {{coins}} coin ile kurtar",
+    "strictNotEnough": "Yeterli coin yok (elinde {{coins}} var)",
+    "strictNotEnoughAlert": "Bu seansı kurtarmak için yeterli coin’in yok.",
+    "strictForfeit": "Bırak yansın",
+    "strictForfeitedTitle": "Seans kaybedildi 💔",
+    "strictForfeitedMsg": "Bu sefer ödül yok. Bir sonraki sayılır!"
   },
   "invite": {
     "shareMessage": "📚 StudySquad'da benimle çalış! Kayıt olurken davet kodu olarak {{username}} kullanıcı adımı gir — ikimiz de 500 coin kazanalım! 🪙",

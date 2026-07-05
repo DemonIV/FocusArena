@@ -178,7 +178,21 @@
     "resumeErrorMsg": "Impossible de reprendre",
     "pauseError": "Erreur de pause",
     "pauseErrorMsg": "Impossible de mettre en pause",
-    "zenMode": "Mode Zen"
+    "zenMode": "Mode Zen",
+    "strictMode": "Mode Strict",
+    "strictModeHint": "Quitte l’app pendant une session et elle brûle — mets d’abord en pause si tu dois partir.",
+    "strictWarnTitle": "⚠️ Ta session est en danger !",
+    "strictWarnBody": "Reviens vite ou ta session va brûler 💔",
+    "strictActiveHint": "Mode Strict activé — ne quitte pas l’app !",
+    "strictFailTitle": "Session brûlée !",
+    "strictFailMsg": "Tu es resté(e) absent(e) trop longtemps. Sauve-la avec des pièces ou laisse-la partir.",
+    "strictFailMsgPet": "Tu es resté(e) absent(e) trop longtemps — ton compagnon est triste. Sauve la session avec des pièces ou laisse-la partir.",
+    "strictRescue": "🪙 Sauver pour {{coins}} pièces",
+    "strictNotEnough": "Pas assez de pièces (tu en as {{coins}})",
+    "strictNotEnoughAlert": "Tu n’as pas assez de pièces pour sauver cette session.",
+    "strictForfeit": "Laisser brûler",
+    "strictForfeitedTitle": "Session perdue 💔",
+    "strictForfeitedMsg": "Pas de récompense cette fois. La prochaine compte !"
   },
   "invite": {
     "shareMessage": "📚 Étudie avec moi sur StudySquad ! Entre mon nom d'utilisateur {{username}} comme code d'invitation à l'inscription — on gagne chacun 500 pièces ! 🪙",

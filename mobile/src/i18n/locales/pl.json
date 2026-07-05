@@ -178,7 +178,21 @@
     "resumeErrorMsg": "Nie udało się wznowić",
     "pauseError": "Błąd wstrzymywania",
     "pauseErrorMsg": "Nie udało się wstrzymać",
-    "zenMode": "Tryb Zen"
+    "zenMode": "Tryb Zen",
+    "strictMode": "Tryb Ścisły",
+    "strictModeHint": "Wyjdziesz z aplikacji podczas sesji — sesja spłonie. Najpierw wstrzymaj, jeśli musisz wyjść.",
+    "strictWarnTitle": "⚠️ Twoja sesja jest w niebezpieczeństwie!",
+    "strictWarnBody": "Wróć teraz, albo twoja sesja spłonie 💔",
+    "strictActiveHint": "Tryb Ścisły włączony — nie wychodź z aplikacji!",
+    "strictFailTitle": "Sesja spłonęła!",
+    "strictFailMsg": "Zbyt długo cię nie było. Uratuj ją monetami albo odpuść.",
+    "strictFailMsgPet": "Zbyt długo cię nie było — twój zwierzak jest smutny. Uratuj sesję monetami albo odpuść.",
+    "strictRescue": "🪙 Uratuj za {{coins}} monet",
+    "strictNotEnough": "Za mało monet (masz {{coins}})",
+    "strictNotEnoughAlert": "Nie masz wystarczająco monet, aby uratować tę sesję.",
+    "strictForfeit": "Niech płonie",
+    "strictForfeitedTitle": "Sesja stracona 💔",
+    "strictForfeitedMsg": "Tym razem bez nagród. Następna się liczy!"
   },
   "invite": {
     "shareMessage": "📚 Ucz się ze mną w StudySquad! Podczas rejestracji wpisz moją nazwę użytkownika {{username}} jako kod zaproszenia — oboje dostaniemy 500 monet! 🪙",

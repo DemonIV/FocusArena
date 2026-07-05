@@ -30,6 +30,10 @@ export const timerService = {
   stop: () =>
     api.post<StopResponse>('/timer/stop'),
 
+  /** Pay coins to save a strict-mode session after leaving the app */
+  rescue: () =>
+    api.post<{ coins: number; cost: number }>('/timer/rescue'),
+
   status: () =>
     api.get<TimerStatusResponse>('/timer/status'),
 

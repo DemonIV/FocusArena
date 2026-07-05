@@ -178,7 +178,21 @@
     "resumeErrorMsg": "Could not resume",
     "pauseError": "Pause Error",
     "pauseErrorMsg": "Could not pause",
-    "zenMode": "Zen Mode"
+    "zenMode": "Zen Mode",
+    "strictMode": "Strict Mode",
+    "strictModeHint": "Leave the app during a session and it burns — pause first if you must go.",
+    "strictWarnTitle": "⚠️ Your session is in danger!",
+    "strictWarnBody": "Come back now or your session burns 💔",
+    "strictActiveHint": "Strict Mode on — don’t leave the app!",
+    "strictFailTitle": "Session burned!",
+    "strictFailMsg": "You were away too long. Rescue it with coins or let it go.",
+    "strictFailMsgPet": "You were away too long — your pet is sad. Rescue the session with coins or let it go.",
+    "strictRescue": "🪙 Rescue for {{coins}} coins",
+    "strictNotEnough": "Not enough coins (you have {{coins}})",
+    "strictNotEnoughAlert": "You don’t have enough coins to rescue this session.",
+    "strictForfeit": "Let it burn",
+    "strictForfeitedTitle": "Session lost 💔",
+    "strictForfeitedMsg": "No rewards this time. The next one counts!"
   },
   "invite": {
     "shareMessage": "📚 Study with me on StudySquad! Enter my username {{username}} as the invite code when you sign up — we both earn 500 coins! 🪙",
