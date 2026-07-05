@@ -11,6 +11,10 @@ export const SearchQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 
+export const MuteBodySchema = z.object({
+  muted: z.boolean(),
+});
+
 export type SendRequestBody = z.infer<typeof SendRequestSchema>;
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 
@@ -42,6 +46,8 @@ export interface FriendEntry {
   level: number;
   friends_since: string;
   online_status: OnlineStatus;
+  /** Caller muted this friend's "started studying" pushes */
+  muted: boolean;
 }
 
 export interface FriendRequest {

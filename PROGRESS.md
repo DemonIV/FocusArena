@@ -117,6 +117,12 @@
 - Monetizasyon: mekanik ücretsiz (retention), af coin'le (IAP talebi), gerçek OS-engelleme ileride Pro amiral gemisi. Analytics: `strict_left_app`, `strict_violation`, `strict_session_rescued`.
 - i18n: 10 dilde `timer.strict*` (14 anahtar). Backend+mobil tsc temiz; Fly'a deploy edildi.
 
+### Faz 13 — "Arkadaşın çalışıyor" push'u + arkadaş başına 🔔 (5 Temmuz)
+
+- **"🔥 {name} şu an çalışıyor" push'u**: `startTimer`'dan fire-and-forget `notifyFriendsStudying` (10 dil). **Spam korkulukları**: arkadaş çifti başına günde 1 (Redis SET NX, UTC gün anahtarlı), alıcı başına günde max 3 (`push:fscap` INCR), alıcı o an odaktaysa gönderilmez (Sıkı Mod'la çelişmesin), global `push_enabled` + kişi bazlı mute'a saygılı. Dokununca Timer'a deep-link.
+- **Arkadaş başına 🔔/🔕 toggle**: FriendsScreen satırında zil ikonu (optimistic). `PUT /friends/:id/mute`, `friend_push_mutes` tablosu (migration 012 ✓, satır=muted, varsayılan açık), `GET /friends` yanıtına `muted` bayrağı.
+- Arkadaş online durumu görünürlüğü zaten vardı (satırda canlı durum + renk) — kullanıcı yeterli buldu, dokunulmadı. Ayrıca `referral_redeemed` push'una eksik olan tap-target eklendi (Friends).
+
 ---
 
 ## 🏗️ Altyapı Durumu
@@ -126,7 +132,7 @@
 | Marka | **StudySquad** · paket `com.studysquad.app` · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
-| Migration'lar | 002–011 hepsi uygulandı ✓ |
+| Migration'lar | 002–012 hepsi uygulandı ✓ |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |

@@ -1,4 +1,4 @@
-import { supabase } from '../../shared';
+import { supabase, redis } from '../../shared';
 import type { ExpoPushMessage, PushLanguage } from './notifications.schema';
 import { PUSH_LANGUAGES } from './notifications.schema';
 
@@ -138,6 +138,19 @@ const REFERRAL_REDEEMED: Record<PushLanguage, { title: string; body: string }> =
   ru: { title: '🎉 Твоё приглашение сработало!', body: '{name} присоединился(-ась) к StudySquad — вы оба получили {coins} монет!' },
 };
 
+const FRIEND_STUDYING: Record<PushLanguage, { title: string; body: string }> = {
+  en: { title: '🔥 {name} is studying right now', body: 'Don’t let them grind alone — start a session and join in!' },
+  tr: { title: '🔥 {name} şu an çalışıyor', body: 'Onu yalnız bırakma — bir seans başlat, sen de katıl!' },
+  de: { title: '🔥 {name} lernt gerade', body: 'Lass sie/ihn nicht allein lernen — starte eine Session und mach mit!' },
+  es: { title: '🔥 {name} está estudiando ahora', body: 'No le dejes solo/a — ¡empieza una sesión y únete!' },
+  fr: { title: '🔥 {name} est en train d’étudier', body: 'Ne le/la laisse pas seul(e) — lance une session et rejoins-le/la !' },
+  it: { title: '🔥 {name} sta studiando ora', body: 'Non lasciarlo/a da solo/a — avvia una sessione e unisciti!' },
+  nl: { title: '🔥 {name} is nu aan het studeren', body: 'Laat ze niet alleen blokken — start een sessie en doe mee!' },
+  pl: { title: '🔥 {name} właśnie się uczy', body: 'Nie zostawiaj go/jej samego — zacznij sesję i dołącz!' },
+  pt: { title: '🔥 {name} está estudando agora', body: 'Não deixe seu amigo sozinho — comece uma sessão e entre junto!' },
+  ru: { title: '🔥 {name} сейчас занимается', body: 'Не оставляй друга одного — начни сессию и присоединяйся!' },
+};
+
 const WINBACK: Record<PushLanguage, { title: string; body: string }> = {
   en: { title: '📚 We miss you!', body: 'It’s been {days} days. A short session today gets you back on track.' },
   tr: { title: '📚 Seni özledik!', body: '{days} gündür yoksun. Bugün kısa bir seansla yeniden başla.' },
@@ -225,6 +238,79 @@ export async function notifyReferralRedeemed(
   coins: number,
 ): Promise<void> {
   await notifyUser(referrerId, REFERRAL_REDEEMED, { name: byUsername, coins }, { type: 'referral_redeemed' });
+}
+
+// ─── Friend-studying pushes ───────────────────────────────────
+
+/** Max "friend is studying" pushes one user receives per UTC day. */
+const FRIEND_STUDYING_DAILY_CAP = 3;
+
+const utcDay = () => new Date().toISOString().slice(0, 10);
+
+/**
+ * Notify a starter's friends that they just began a session.
+ * Guardrails against notification fatigue:
+ *  - per-friend-pair: only the starter's FIRST session of the day pings you
+ *  - per-recipient: at most FRIEND_STUDYING_DAILY_CAP of these per day
+ *  - skipped while the recipient is mid-session themselves
+ *  - per-friend mute (friend_push_mutes) and the global push opt-out
+ * Best-effort and fire-and-forget from the timer start path — never throws.
+ */
+export async function notifyFriendsStudying(starterId: string): Promise<void> {
+  try {
+    const { data: starter } = await supabase
+      .from('users')
+      .select('username')
+      .eq('id', starterId)
+      .single();
+    if (!starter) return;
+
+    const { data: rows } = await supabase
+      .from('friendships')
+      .select('requester_id, addressee_id')
+      .eq('status', 'accepted')
+      .or(`requester_id.eq.${starterId},addressee_id.eq.${starterId}`);
+    if (!rows || rows.length === 0) return;
+
+    const friendIds = rows.map((r) =>
+      r.requester_id === starterId ? (r.addressee_id as string) : (r.requester_id as string),
+    );
+
+    const { data: mutes } = await supabase
+      .from('friend_push_mutes')
+      .select('user_id')
+      .eq('friend_id', starterId)
+      .in('user_id', friendIds);
+    const mutedBy = new Set((mutes ?? []).map((m) => m.user_id as string));
+
+    const day = utcDay();
+    for (const friendId of friendIds) {
+      if (mutedBy.has(friendId)) continue;
+
+      // Don't interrupt someone who is focusing right now (Strict Mode!)
+      if (await redis.exists(`timer:${friendId}`)) continue;
+
+      // First session of the day per pair — SET NX is the atomic gate
+      const pairKey = `push:fs:${day}:${starterId}:${friendId}`;
+      const first = await redis.set(pairKey, '1', 'EX', 60 * 60 * 26, 'NX');
+      if (first === null) continue;
+
+      // Daily cap per recipient
+      const capKey = `push:fscap:${day}:${friendId}`;
+      const n = await redis.incr(capKey);
+      if (n === 1) await redis.expire(capKey, 60 * 60 * 26);
+      if (n > FRIEND_STUDYING_DAILY_CAP) continue;
+
+      await notifyUser(
+        friendId,
+        FRIEND_STUDYING,
+        { name: starter.username as string },
+        { type: 'friend_studying' },
+      );
+    }
+  } catch (err) {
+    console.error('[push] notifyFriendsStudying failed:', (err as Error).message);
+  }
 }
 
 // ─── High-level notifications ─────────────────────────────────

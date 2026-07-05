@@ -12,6 +12,7 @@ interface RawFriend {
   level: number;
   online_status: 'studying' | 'break' | 'offline';
   friends_since: string;
+  muted?: boolean;
 }
 
 interface RawRequest {
@@ -55,6 +56,7 @@ export const friendsService = {
       level: f.level,
       status: f.online_status,
       friendsSince: f.friends_since,
+      muted: f.muted ?? false,
     }));
   },
 
@@ -112,6 +114,10 @@ export const friendsService = {
   /** Block a user */
   block: (userId: string) =>
     api.post<{ message: string }>(`/friends/${userId}/block`),
+
+  /** Mute/unmute one friend's "started studying" pushes */
+  setMuted: (userId: string, muted: boolean) =>
+    api.put<{ message: string }>(`/friends/${userId}/mute`, { muted }),
 
   /** Redeem a referral code (the inviter's username). Both sides get coins. */
   redeemReferral: (username: string) =>

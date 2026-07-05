@@ -102,6 +102,8 @@ const TAP_TARGET: Record<string, string> = {
   winback: 'Timer',
   friend_request: 'Friends',
   friend_accepted: 'Friends',
+  friend_studying: 'Timer', // "join them" — land ready to start a session
+  referral_redeemed: 'Friends',
 };
 
 /**

@@ -218,6 +218,13 @@ export async function listFriends(callerId: string): Promise<FriendEntry[]> {
   const rows = await allRowsFor(callerId);
   const accepted = rows.filter((r) => r.status === 'accepted');
 
+  // Which friends has the caller muted "started studying" pushes for?
+  const { data: mutes } = await supabase
+    .from('friend_push_mutes')
+    .select('friend_id')
+    .eq('user_id', callerId);
+  const mutedSet = new Set((mutes ?? []).map((m) => m.friend_id as string));
+
   const entries = await Promise.all(
     accepted.map(async (row) => {
       const friendId = row.requester_id === callerId ? row.addressee_id : row.requester_id;
@@ -233,11 +240,42 @@ export async function listFriends(callerId: string): Promise<FriendEntry[]> {
         level: user.level,
         friends_since: row.created_at,
         online_status,
+        muted: mutedSet.has(friendId),
       } satisfies FriendEntry;
     }),
   );
 
   return entries.filter((e): e is FriendEntry => e !== null);
+}
+
+// ─── Per-friend push mute ─────────────────────────────────────
+
+/**
+ * Toggle "friend started studying" pushes for one friend. A mute row's
+ * presence = muted; default is on. Only meaningful between accepted friends.
+ */
+export async function setFriendMuted(callerId: string, friendId: string, muted: boolean): Promise<void> {
+  const existing = await findRow(callerId, friendId);
+  if (!existing || existing.status !== 'accepted') {
+    throw Object.assign(new Error('Not friends with this user'), { code: 'NOT_FOUND' });
+  }
+
+  if (muted) {
+    const { error } = await supabase
+      .from('friend_push_mutes')
+      .upsert(
+        { user_id: callerId, friend_id: friendId },
+        { onConflict: 'user_id,friend_id', ignoreDuplicates: true },
+      );
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from('friend_push_mutes')
+      .delete()
+      .eq('user_id', callerId)
+      .eq('friend_id', friendId);
+    if (error) throw new Error(error.message);
+  }
 }
 
 export async function listIncomingRequests(callerId: string): Promise<FriendRequest[]> {

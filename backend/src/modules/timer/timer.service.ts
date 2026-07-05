@@ -3,6 +3,7 @@ import { invalidateCache, invalidateCountries } from '../leaderboard';
 import { checkAndAward } from '../achievements';
 import { addStudyMinutesToRooms } from '../rooms/rooms.service';
 import { billingEnabled, isUserPro, getProStatus, FREE_SUBJECT_LIMIT } from '../billing';
+import { notifyFriendsStudying } from '../notifications';
 import { getSocketServer } from '../../websocket';
 import { track } from '../../shared/observability';
 import type {
@@ -152,6 +153,7 @@ export async function startTimer(
 
   await writeState(userId, state);
   refreshActiveFocusCount(); // one more user is now focusing
+  void notifyFriendsStudying(userId); // "🔥 X is studying" — rate-limited inside
   return state;
 }
 

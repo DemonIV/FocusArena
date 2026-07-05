@@ -11,6 +11,7 @@ export {
   notifyFriendRequest,
   notifyFriendAccepted,
   notifyReferralRedeemed,
+  notifyFriendsStudying,
   savePushToken,
   clearPushToken,
   setPushEnabled,

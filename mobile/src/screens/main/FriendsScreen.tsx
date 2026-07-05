@@ -95,6 +95,24 @@ export function FriendsScreen() {
     onError: (err: any) => Alert.alert(t('common.error'), err?.message),
   });
 
+  // Per-friend 🔔/🔕 for "friend started studying" pushes — optimistic toggle
+  const muteMut = useMutation({
+    mutationFn: ({ userId, muted }: { userId: string; muted: boolean }) =>
+      friendsService.setMuted(userId, muted),
+    onMutate: async ({ userId, muted }) => {
+      await qc.cancelQueries({ queryKey: ['friends'] });
+      const prev = qc.getQueryData<FriendEntry[]>(['friends']);
+      qc.setQueryData<FriendEntry[]>(['friends'], (old) =>
+        old?.map((f) => (f.friendId === userId ? { ...f, muted } : f)),
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['friends'], ctx.prev);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['friends'] }),
+  });
+
   const redeemMut = useMutation({
     mutationFn: (username: string) => friendsService.redeemReferral(username),
     onSuccess: (res) => {
@@ -151,6 +169,15 @@ export function FriendsScreen() {
             {STATUS_ICON[status] ?? '💤'} {t(`status.${status}`, { defaultValue: status })}
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={() => muteMut.mutate({ userId: item.friendId, muted: !item.muted })}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.bellBtn}
+        >
+          <Text style={[styles.bellIcon, item.muted && styles.bellIconMuted]}>
+            {item.muted ? '🔕' : '🔔'}
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() =>
             Alert.alert(
@@ -481,6 +508,9 @@ const styles = StyleSheet.create({
   rowStatus: { fontSize: 12, marginTop: 2 },
   rowSub: { color: MUTED, fontSize: 12, marginTop: 2 },
   removeIcon: { color: MUTED, fontSize: 16 },
+  bellBtn: { marginRight: 14 },
+  bellIcon: { fontSize: 15 },
+  bellIconMuted: { opacity: 0.45 },
 
   reqActions: { flexDirection: 'row', gap: 8 },
   acceptBtn: {

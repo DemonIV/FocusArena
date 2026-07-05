@@ -272,6 +272,8 @@ export interface FriendEntry {
   level: number;
   status: 'studying' | 'break' | 'offline';
   friendsSince: string;
+  /** You muted this friend's "started studying" pushes */
+  muted: boolean;
 }
 
 export interface FriendRequest {

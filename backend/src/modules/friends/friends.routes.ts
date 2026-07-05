@@ -2,7 +2,7 @@ import type { FastifyPluginAsync, FastifyReply } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
 import { captureException } from '../../shared/observability';
-import { SendRequestSchema, SearchQuerySchema } from './friends.schema';
+import { SendRequestSchema, SearchQuerySchema, MuteBodySchema } from './friends.schema';
 import {
   sendRequest,
   acceptRequest,
@@ -14,6 +14,7 @@ import {
   listSentRequests,
   listBlocked,
   searchUsers,
+  setFriendMuted,
 } from './friends.service';
 
 // ─── Error code → HTTP status ─────────────────────────────────
@@ -142,6 +143,29 @@ export const friendsRoutes: FastifyPluginAsync = async (fastify) => {
       const handled = handleErr(err, reply);
       if (handled !== null) return handled;
       request.log.error(err, 'friends decline failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // ── PUT /friends/:userId/mute ─────────────────────────────
+  // Toggle "friend started studying" pushes for one friend.
+  fastify.put('/:userId/mute', async (request, reply) => {
+    const { sub: callerId } = request.user as JwtPayload;
+    const { userId: friendId } = request.params as { userId: string };
+
+    const parsed = MuteBodySchema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: 'Validation error', details: parsed.error.flatten() });
+    }
+
+    try {
+      await setFriendMuted(callerId, friendId, parsed.data.muted);
+      return reply.send({ message: parsed.data.muted ? 'Muted' : 'Unmuted' });
+    } catch (err) {
+      const handled = handleErr(err, reply);
+      if (handled !== null) return handled;
+      request.log.error(err, 'friends mute failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
