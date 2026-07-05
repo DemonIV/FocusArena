@@ -18,6 +18,7 @@ import {
   storeRefreshToken,
   validateRefreshToken,
   deleteRefreshToken,
+  deleteAuthUser,
 } from './auth.service';
 import { track } from '../../shared/observability';
 
@@ -181,5 +182,29 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post('/logout', { preHandler: authGuard }, async (request, reply) => {
     await deleteRefreshToken(request.user.sub);
     return reply.send({ message: 'Logged out successfully' });
+  });
+
+  // ── DELETE /account ───────────────────────────────────────────
+  // Permanent account deletion (App Store / Play Store requirement).
+
+  fastify.delete('/account', { preHandler: authGuard }, async (request, reply) => {
+    const userId = request.user.sub;
+    try {
+      track(userId, 'account_deleted');
+      await deleteAuthUser(userId);
+      await deleteRefreshToken(userId);
+      return reply.send({ message: 'Account deleted' });
+    } catch (err: unknown) {
+      // Already gone (double-tap / retry with a still-valid JWT) — the
+      // desired end state holds, so report success instead of a 500.
+      const msg = err instanceof Error ? err.message : '';
+      if (/user not found/i.test(msg)) {
+        await deleteRefreshToken(userId);
+        return reply.send({ message: 'Account deleted' });
+      }
+      request.log.error(err, 'account deletion failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
   });
 };

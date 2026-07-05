@@ -12,4 +12,6 @@ export const authService = {
     api.post<{ accessToken: string; refreshToken: string }>('/auth/refresh', { refreshToken }),
 
   logout: () => api.post<void>('/auth/logout'),
+
+  deleteAccount: () => api.delete<{ message: string }>('/auth/account'),
 };

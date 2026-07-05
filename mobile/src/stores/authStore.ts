@@ -21,6 +21,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, username: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   refreshAccessToken: () => Promise<string | null>;
   setHydrated: () => void;
 }
@@ -77,6 +78,13 @@ export const useAuthStore = create<AuthState>()(
         // but DON'T await it — clear local state immediately so the UI redirects
         // to the login screen instantly, even when offline or token is expired.
         void authService.logout().catch(() => { /* ignore */ });
+        get().clearAuth();
+      },
+
+      deleteAccount: async () => {
+        // Unlike logout this MUST succeed server-side first — clearing local
+        // state on failure would leave the account alive while looking deleted.
+        await authService.deleteAccount();
         get().clearAuth();
       },
 

@@ -4,7 +4,7 @@ import { useOnboardingStore } from '../stores/onboardingStore';
 import { unregisterPushNotifications } from '../services';
 
 export function useAuth() {
-  const { user, isLoading, login, register, logout, accessToken } = useAuthStore();
+  const { user, isLoading, login, register, logout, deleteAccount, accessToken } = useAuthStore();
   const { connect, disconnect } = useSocketStore();
 
   const handleLogin = async (email: string, password: string) => {
@@ -28,6 +28,14 @@ export function useAuth() {
     await logout();
   };
 
+  const handleDeleteAccount = async () => {
+    // Server deletion first (throws on failure). No push unregister needed:
+    // the token lives on the users row, which is gone after deletion.
+    await deleteAccount();
+    disconnect();
+    useOnboardingStore.getState().reset();
+  };
+
   return {
     user,
     isLoading,
@@ -35,5 +43,6 @@ export function useAuth() {
     login: handleLogin,
     register: handleRegister,
     logout: handleLogout,
+    deleteAccount: handleDeleteAccount,
   };
 }

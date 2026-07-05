@@ -26,6 +26,16 @@ export async function createAuthUser(
 }
 
 /**
+ * Permanently delete a user. Removing the auth.users row cascades to
+ * public.users and from there to every user-owned table (all FKs are
+ * ON DELETE CASCADE), so no per-table cleanup is needed.
+ */
+export async function deleteAuthUser(userId: string): Promise<void> {
+  const { error } = await supabase.auth.admin.deleteUser(userId);
+  if (error) throw new Error(error.message);
+}
+
+/**
  * Validate credentials via Supabase and return the auth user.
  */
 export async function signInUser(

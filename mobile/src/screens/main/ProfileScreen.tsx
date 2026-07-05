@@ -66,7 +66,7 @@ function fmtMinutes(m: number): string {
 
 export function ProfileScreen() {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const queryClient = useQueryClient();
 
   // ── Queries ──────────────────────────────────────────────────────────────────
@@ -195,6 +195,45 @@ export function ProfileScreen() {
       [
         { text: t('common.cancel'), style: 'cancel' },
         { text: t('profile.signOut'), style: 'destructive', onPress: () => logout() },
+      ],
+    );
+  };
+
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      t('profile.deleteAccount'),
+      t('profile.deleteAccountMsg'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.continue'),
+          style: 'destructive',
+          onPress: () =>
+            // Second, final confirmation — deletion is irreversible.
+            Alert.alert(
+              t('profile.deleteAccountFinalTitle'),
+              t('profile.deleteAccountFinalMsg'),
+              [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                  text: t('profile.deleteAccount'),
+                  style: 'destructive',
+                  onPress: async () => {
+                    setDeletingAccount(true);
+                    try {
+                      await deleteAccount();
+                      // No success alert needed — clearing auth redirects to login.
+                    } catch {
+                      setDeletingAccount(false);
+                      Alert.alert(t('common.error'), t('profile.deleteAccountFailed'));
+                    }
+                  },
+                },
+              ],
+            ),
+        },
       ],
     );
   };
@@ -476,6 +515,20 @@ export function ProfileScreen() {
         {/* ── Sign Out ── */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
           <Text style={styles.logoutText}>{t('profile.signOut')}</Text>
+        </TouchableOpacity>
+
+        {/* ── Delete Account (store requirement) ── */}
+        <TouchableOpacity
+          style={styles.deleteAccountBtn}
+          onPress={handleDeleteAccount}
+          disabled={deletingAccount}
+          activeOpacity={0.8}
+        >
+          {deletingAccount ? (
+            <ActivityIndicator size="small" color={DANGER} />
+          ) : (
+            <Text style={styles.deleteAccountText}>{t('profile.deleteAccount')}</Text>
+          )}
         </TouchableOpacity>
 
       </ScrollView>
@@ -1299,6 +1352,12 @@ const styles = StyleSheet.create({
     borderColor: `${DANGER}40`,
   },
   logoutText: { color: DANGER, fontSize: 15, fontWeight: '700' },
+  deleteAccountBtn: {
+    marginTop: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  deleteAccountText: { color: `${DANGER}99`, fontSize: 13, fontWeight: '600' },
 });
 
 // ─── SubjectCard Styles ───────────────────────────────────────────────────────
