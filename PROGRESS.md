@@ -123,7 +123,33 @@
 - **Arkadaş başına 🔔/🔕 toggle**: FriendsScreen satırında zil ikonu (optimistic). `PUT /friends/:id/mute`, `friend_push_mutes` tablosu (migration 012 ✓, satır=muted, varsayılan açık), `GET /friends` yanıtına `muted` bayrağı.
 - Arkadaş online durumu görünürlüğü zaten vardı (satırda canlı durum + renk) — kullanıcı yeterli buldu, dokunulmadı. Ayrıca `referral_redeemed` push'una eksik olan tap-target eklendi (Friends).
 
-### 📝 Oturum Özeti — 2026-07-06 (RC anahtarı + yeni preview build) — SON OTURUM
+### 📝 Oturum Özeti — 2026-07-06 (öğleden sonra: EMÜLATÖR TEST OTURUMU) — SON OTURUM
+
+Sabahki yarım kalan doğrulama tamamlandı + Faz 11–13 testleri yapıldı (build `13448391` APK'sı, Pixel_8):
+
+**✅ Doğrulanan (uçtan uca, 2 test hesabı: testalpha1 + testbeta2):**
+- **Emülatör interneti**: cold boot + `-dns-server` ile ağ VALIDATED (not: `adb shell ping` emülatörde HER ZAMAN %100 loss verir — ICMP forward edilmiyor, yanlış alarm; doğru test `dumpsys connectivity | grep VALIDATED`).
+- **RC init temiz**: gerçek `goog_` anahtar kabul ✓, ConfigurationError diyaloğu YOK; sadece beklenen "offerings'te ürün yok, yoksayabilirsin" log'u + emülatörde BILLING_UNAVAILABLE (normal). Onboarding sonrası paywall boş paketlerle zarifçe atlanıyor.
+- **Backend bağlantısı**: kayıt/login/timer/boss battle canlı veriyle çalışıyor.
+- **Referans sistemi**: kod kullanma → "+500 coin & arkadaşsınız" ✓, iki tarafta da coin 500 ✓ (DB'den doğrulandı), oto-arkadaşlık iki yönde listede ✓, boş ekran davet kartı + Redeem UI tasarlandığı gibi.
+- **Sıkı Mod**: arka planda 30 sn aşımı → dönüşte "Session burned!" modalı ✓ → **200 coin kurtarma** ✓ (coin 500→300, seans kaldığı yerden devam ✓, tamamlanınca normal ödül: beta 300+50=350 DB'de doğru) → ikinci testte **"Let it burn"** yolu ✓ ("Session lost, no rewards"). Duraklatma/uygulama içi gezinme yanmıyor ✓.
+- **Arkadaş başına 🔔 mute toggle**: optimistic 🔔↔🔕 çalışıyor ✓.
+- **Rozet sistemi**: First Focus rozeti seans sonrası göründü ✓.
+
+**❌ Emülatörde TEST EDİLEMEYEN — gerçek cihaz gerekiyor:**
+- **Push teslimatı** (arkadaş çalışıyor / referral / streak): `notifications.ts` `Device.isDevice` guard'ı emülatörde token kaydını bilerek atlıyor → `expo_push_token` hep NULL. Gerçek cihazda test edilmeli.
+- **Sıkı Mod 15 sn uyarı bildirimi**: `channelId 'default'` kanalı yalnızca `registerForPushNotifications` içinde oluşturuluyor; emülatörde o fonksiyon erken çıktığı için kanal yok → bildirim sessizce düşüyor. (Yanma mekaniği bildirimden bağımsız ÇALIŞIYOR.)
+
+**🐛 Bulunan bug'lar:**
+- ✅ DÜZELTİLDİ (`6264a8a`): referans başarı diyaloğu başlığı `+{{coins}} coins!` gösteriyordu — `FriendsScreen.tsx` t() çağrısına `coins` parametresi eksikti.
+- ⚠️ AÇIK: Onboarding **Skip butonu hiç tepki vermiyor** (2 farklı adımda 3+ deneme; Continue akışı çalışıyor). Düşük öncelik ama huni analitiğini bozar.
+- ⚠️ AÇIK (edge case): kullanıcı app-içi bildirim toggle'ını kapatırsa `registerForPushNotifications` kanal oluşturmadan dönüyor → Sıkı Mod yerel uyarısı gerçek cihazda da gösterilmez. Kanal oluşturma `Device.isDevice`/pushEnabled guard'larından ÖNCE yapılmalı.
+- ⚠️ NOT: `notifyFriendsStudying` pair-anahtarını token kontrolünden ÖNCE SET NX'liyor → alıcının token'ı yoksa o günkü hak boşa yanıyor (bilinçli tasarım olabilir; gerçek cihaz testinden önce hatırla — bugünkü test için Upstash'tan `push:fs*` anahtarları elle silindi).
+- ⚠️ Push token'ının **FCM (Firebase) kurulumu** olmadan Android'de alınamayabileceği doğrulanmadı — mağaza öncesi gerçek cihazda push testi ŞART; gerekirse Firebase projesi + EAS'a FCM anahtarı eklenecek.
+
+**Ortam notları:** `adb shell input text` kullanırken Gboard "stylus" eğitim ekranı araya girebiliyor (Cancel'la kapat); PowerShell `>` ile binary bozuluyor → screencap için Bash kullan; emülatörde `pm grant com.studysquad.app android.permission.POST_NOTIFICATIONS` ile bildirim izni verilebiliyor (uygulama içinde runtime prompt akışı hiç görülmedi — gerçek cihazda kontrol et).
+
+### 📝 Oturum Özeti — 2026-07-06 (sabah: RC anahtarı + yeni preview build)
 
 Kısa oturum; "Sıradaki Adımlar" 1. maddesinin ilk yarısı yapıldı:
 
@@ -172,8 +198,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 ## 🔜 Sıradaki Adımlar
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. ~~RC anahtarını değiştir → yeni preview build~~ ✅ yapıldı (6 Tem, build `13448391`). **Kalan**: emülatörde internetli doğrulama — RC init temiz mi + backend bağlanıyor mu (emülatör ağ sorunu yaşandı; cold boot dene: `-no-snapshot-load`). Paywall paketleri Play ürünleri tanımlanana kadar boş kalır, normal.
-   Aynı build'de **5 Temmuz özelliklerini de test et**: referans kodu kullanma (2 hesap), Sıkı Mod (arka plana at → 15 sn'de bildirim → 30 sn'de yanma → coin kurtarma), arkadaş çalışmaya başlayınca push + 🔔 mute toggle'ı.
+1. ~~RC anahtarı + emülatör doğrulama + Faz 11–13 testleri~~ ✅ yapıldı (6 Tem öğleden sonra — üstteki oturum özetine bak). **Kalan pürüzler**: onboarding Skip butonu bug'ı + bildirim kanalı oluşturmayı guard'ların önüne alma (küçük kod düzeltmeleri) + push teslimatı yalnız gerçek cihazda test edilebilir (FCM kurulumu gerekebilir!).
 2. Aynı env'leri **production** ortamına da ekle → production AAB build.
 3. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil).
 
