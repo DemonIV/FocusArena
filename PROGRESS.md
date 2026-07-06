@@ -123,7 +123,19 @@
 - **Arkadaş başına 🔔/🔕 toggle**: FriendsScreen satırında zil ikonu (optimistic). `PUT /friends/:id/mute`, `friend_push_mutes` tablosu (migration 012 ✓, satır=muted, varsayılan açık), `GET /friends` yanıtına `muted` bayrağı.
 - Arkadaş online durumu görünürlüğü zaten vardı (satırda canlı durum + renk) — kullanıcı yeterli buldu, dokunulmadı. Ayrıca `referral_redeemed` push'una eksik olan tap-target eklendi (Friends).
 
-### 📝 Oturum Özeti — 2026-07-05 (Faz 11+12+13) — SON OTURUM
+### 📝 Oturum Özeti — 2026-07-06 (RC anahtarı + yeni preview build) — SON OTURUM
+
+Kısa oturum; "Sıradaki Adımlar" 1. maddesinin ilk yarısı yapıldı:
+
+- ✅ EAS **preview** env'de `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` gerçek anahtarla (`goog_Zabv...`) değiştirildi (`eas env:update`), `env:list` ile doğrulandı (4 anahtar tam).
+- ✅ **Yeni preview build FINISHED**: build ID `13448391-ebbb-4e97-9ca0-aaa3ffed084f`, APK: https://expo.dev/artifacts/eas/B6CCJsrnNDeT5rNQaQXewUJc2OxZaNsf4evf_ssu9p0.apk
+- ✅ APK emülatöre (Pixel_8) kuruldu, uygulama açıldı; logcat'te **RC ConfigurationError diyaloğu YOK** (test anahtarı sorunu çözülmüş görünüyor).
+- ⚠️ **AMA emülatörde internet yoktu** (ping %100 loss, PostHog network hatası) → RC/backend doğrulaması **sonuçsuz**. `-dns-server 8.8.8.8,1.1.1.1` ile yeniden başlatıldı → adb "offline"da takıldı, oturum burada kapatıldı.
+- ❌ Faz 11–13 özellik testleri (referans, Sıkı Mod, arkadaş push'u) **yapılamadı** — sonraki oturuma kaldı.
+
+**Sonraki oturumun ilk işi**: Emülatörü aç (gerekirse cold boot: `emulator -avd Pixel_8 -no-snapshot-load`), interneti doğrula (`adb shell ping 8.8.8.8`), uygulamayı aç → RC init + backend bağlantısını doğrula → Faz 11–13 testleri. APK zaten kurulu; değilse yukarıdaki URL'den indir + `adb install -r`.
+
+### 📝 Oturum Özeti — 2026-07-05 (Faz 11+12+13)
 
 Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migration'lar DB'de:
 
@@ -160,7 +172,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 ## 🔜 Sıradaki Adımlar
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. EAS preview env'de RC anahtarını gerçek anahtarla değiştir → yeni preview build → emülatörde doğrula (RC hata diyaloğu kalkmalı; paywall paketleri Play ürünleri tanımlanana kadar boş kalır, normal). Komut: `npx eas-cli env:update --environment preview --variable-name EXPO_PUBLIC_REVENUECAT_ANDROID_KEY --value goog_ZabvZUZeqQlkyIWjFOGtRHKstqg --non-interactive`
+1. ~~RC anahtarını değiştir → yeni preview build~~ ✅ yapıldı (6 Tem, build `13448391`). **Kalan**: emülatörde internetli doğrulama — RC init temiz mi + backend bağlanıyor mu (emülatör ağ sorunu yaşandı; cold boot dene: `-no-snapshot-load`). Paywall paketleri Play ürünleri tanımlanana kadar boş kalır, normal.
    Aynı build'de **5 Temmuz özelliklerini de test et**: referans kodu kullanma (2 hesap), Sıkı Mod (arka plana at → 15 sn'de bildirim → 30 sn'de yanma → coin kurtarma), arkadaş çalışmaya başlayınca push + 🔔 mute toggle'ı.
 2. Aynı env'leri **production** ortamına da ekle → production AAB build.
 3. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil).
