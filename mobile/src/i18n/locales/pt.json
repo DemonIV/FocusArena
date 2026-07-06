@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Não foi possível excluir a matéria",
     "settings": "Configurações",
     "pushNotifications": "Notificações",
-    "pushToggleFailed": "Não foi possível atualizar a configuração de notificações. Tente novamente."
+    "pushToggleFailed": "Não foi possível atualizar a configuração de notificações. Tente novamente.",
+    "subjectDistribution": "Distribuição de estudo"
   },
   "rooms": {
     "createRoom": "+ Criar sala",

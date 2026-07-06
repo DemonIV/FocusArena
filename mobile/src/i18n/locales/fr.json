@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Impossible de supprimer la matière",
     "settings": "Paramètres",
     "pushNotifications": "Notifications",
-    "pushToggleFailed": "Impossible de mettre à jour le paramètre de notifications. Réessaie."
+    "pushToggleFailed": "Impossible de mettre à jour le paramètre de notifications. Réessaie.",
+    "subjectDistribution": "Répartition du travail"
   },
   "rooms": {
     "createRoom": "+ Créer une salle",

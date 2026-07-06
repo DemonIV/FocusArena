@@ -5,7 +5,7 @@ export { StatCard } from './StatCard';
 export { LanguagePicker } from './LanguagePicker';
 export { StudyReceiptModal } from './StudyReceiptModal';
 export { StreakHeatmap } from './StreakHeatmap';
-export { StudyDnaCard } from './StudyDnaCard';
+export { SubjectDonutCard } from './SubjectDonutCard';
 export { ZenModeModal } from './ZenModeModal';
 export { PetCompanion, PetAdoptTeaser } from './PetCompanion';
 export { StrictModeFailModal } from './StrictModeFailModal';

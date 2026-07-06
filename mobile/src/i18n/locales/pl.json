@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Nie udało się usunąć przedmiotu",
     "settings": "Ustawienia",
     "pushNotifications": "Powiadomienia",
-    "pushToggleFailed": "Nie udało się zaktualizować ustawienia powiadomień. Spróbuj ponownie."
+    "pushToggleFailed": "Nie udało się zaktualizować ustawienia powiadomień. Spróbuj ponownie.",
+    "subjectDistribution": "Rozkład nauki"
   },
   "rooms": {
     "createRoom": "+ Utwórz pokój",

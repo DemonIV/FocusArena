@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Kan het vak niet verwijderen",
     "settings": "Instellingen",
     "pushNotifications": "Meldingen",
-    "pushToggleFailed": "Kon de meldingsinstelling niet bijwerken. Probeer opnieuw."
+    "pushToggleFailed": "Kon de meldingsinstelling niet bijwerken. Probeer opnieuw.",
+    "subjectDistribution": "Studieverdeling"
   },
   "rooms": {
     "createRoom": "+ Kamer maken",

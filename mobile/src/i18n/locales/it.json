@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Impossibile eliminare la materia",
     "settings": "Impostazioni",
     "pushNotifications": "Notifiche",
-    "pushToggleFailed": "Impossibile aggiornare l’impostazione delle notifiche. Riprova."
+    "pushToggleFailed": "Impossibile aggiornare l’impostazione delle notifiche. Riprova.",
+    "subjectDistribution": "Distribuzione dello studio"
   },
   "rooms": {
     "createRoom": "+ Crea stanza",

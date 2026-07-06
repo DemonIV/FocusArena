@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Konu silinemedi",
     "settings": "Ayarlar",
     "pushNotifications": "Bildirimler",
-    "pushToggleFailed": "Bildirim ayarı güncellenemedi. Lütfen tekrar dene."
+    "pushToggleFailed": "Bildirim ayarı güncellenemedi. Lütfen tekrar dene.",
+    "subjectDistribution": "Çalışma Dağılımı"
   },
   "rooms": {
     "createRoom": "+ Oda Kur",

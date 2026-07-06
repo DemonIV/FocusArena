@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Could not delete subject",
     "settings": "Settings",
     "pushNotifications": "Notifications",
-    "pushToggleFailed": "Could not update notification setting. Please try again."
+    "pushToggleFailed": "Could not update notification setting. Please try again.",
+    "subjectDistribution": "Study Distribution"
   },
   "rooms": {
     "createRoom": "+ Create Room",

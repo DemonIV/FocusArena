@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "No se pudo eliminar la materia",
     "settings": "Ajustes",
     "pushNotifications": "Notificaciones",
-    "pushToggleFailed": "No se pudo actualizar el ajuste de notificaciones. Inténtalo de nuevo."
+    "pushToggleFailed": "No se pudo actualizar el ajuste de notificaciones. Inténtalo de nuevo.",
+    "subjectDistribution": "Distribución de estudio"
   },
   "rooms": {
     "createRoom": "+ Crear sala",

@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Fach konnte nicht gelöscht werden",
     "settings": "Einstellungen",
     "pushNotifications": "Benachrichtigungen",
-    "pushToggleFailed": "Benachrichtigungseinstellung konnte nicht aktualisiert werden. Bitte erneut versuchen."
+    "pushToggleFailed": "Benachrichtigungseinstellung konnte nicht aktualisiert werden. Bitte erneut versuchen.",
+    "subjectDistribution": "Lernverteilung"
   },
   "rooms": {
     "createRoom": "+ Raum erstellen",

@@ -17,7 +17,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
-import { StatCard, StreakHeatmap, StudyDnaCard, MonthlyStatsModal } from '../../components';
+import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { CoinShopModal } from '../../components/CoinShopModal';
 import { billingEnabled } from '../../services/billing';
@@ -367,9 +367,13 @@ export function ProfileScreen() {
           username={user?.username}
         />
 
-        {/* ── Study DNA ── */}
-        <Text style={styles.sectionLabel}>{t('dna.title')}</Text>
-        <StudyDnaCard />
+        {/* ── Study distribution donut (per-subject focus time) ── */}
+        {subjects.some((s) => s.totalMinutes > 0) && (
+          <>
+            <Text style={styles.sectionLabel}>{t('profile.subjectDistribution')}</Text>
+            <SubjectDonutCard subjects={subjects} />
+          </>
+        )}
 
         {/* ── Stats Grid ── */}
         <Text style={styles.sectionLabel}>{t('profile.statistics')}</Text>

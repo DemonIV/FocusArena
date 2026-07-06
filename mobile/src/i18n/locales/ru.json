@@ -272,7 +272,8 @@
     "subjectDeleteFailed": "Не удалось удалить предмет",
     "settings": "Настройки",
     "pushNotifications": "Уведомления",
-    "pushToggleFailed": "Не удалось обновить настройку уведомлений. Попробуй ещё раз."
+    "pushToggleFailed": "Не удалось обновить настройку уведомлений. Попробуй ещё раз.",
+    "subjectDistribution": "Распределение занятий"
   },
   "rooms": {
     "createRoom": "+ Создать комнату",
