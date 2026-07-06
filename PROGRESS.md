@@ -123,7 +123,17 @@
 - **Arkadaş başına 🔔/🔕 toggle**: FriendsScreen satırında zil ikonu (optimistic). `PUT /friends/:id/mute`, `friend_push_mutes` tablosu (migration 012 ✓, satır=muted, varsayılan açık), `GET /friends` yanıtına `muted` bayrağı.
 - Arkadaş online durumu görünürlüğü zaten vardı (satırda canlı durum + renk) — kullanıcı yeterli buldu, dokunulmadı. Ayrıca `referral_redeemed` push'una eksik olan tap-target eklendi (Friends).
 
-### 📝 Oturum Özeti — 2026-07-06 (öğleden sonra: EMÜLATÖR TEST OTURUMU) — SON OTURUM
+### Faz 14 — Aylık İstatistikler (gün gün + konu bazlı, arkadaş profilleri) (6 Temmuz akşam)
+`59f656b` + kritik fix `72ff607`
+
+- **Yeni endpoint** `GET /timer/monthly?month=YYYY-MM&userId=…`: takvim ayı gün gün dakikalar + gün başına ve ay toplamı **konu kırılımı** (isim/ikon/renk, silinmiş konular "Konusuz" kovasında) + özet (toplam, aktif gün, en iyi gün, seans sayısı). **Yetki**: kendin veya kabul edilmiş arkadaş; yabancıya 403 (canlıda test edildi ✓). Redis cache: geçen aylar 24 saat (değişmez), içinde bulunulan ay 5 dk.
+- **Mobil `MonthlyStatsModal`**: ay gezgini (‹ ay ›, 24 ay geriye), dokunulabilir takvim ısı haritası (günün konu kırılımı açılır), özet kutuları, pay çubuklu konu listesi. Girişler: Friends'te arkadaş satırına dokun → arkadaşın ayı; Profil'de heatmap kartına dokun → kendi ayın. i18n 10 dilde `monthly.*` (10 anahtar).
+- Ürün kararı: gün gün detay **sadece arkadaşlara** (yabancıya kartvizit bile yok, düz 403) — gizlilik + mağaza incelemesi için muhafazakâr varsayılan. İleride "istatistiklerim arkadaşlara açık" toggle'ı eklenebilir.
+- 🚨 **KRİTİK BUG BULUNDU ve DÜZELTİLDİ** (`72ff607`): `auth.service` login'i paylaşılan supabase istemcisinde `signInWithPassword` ile yapıyordu → supabase-js oturumu istemciye yapışıyor ve **sonraki TÜM sorgular service key yerine son giren kullanıcının JWT'siyle gidiyordu** (RLS satırları sessizce filtreliyor). Belirtiler: arkadaş istatistikleri hep 0; Boss Battle "5dk/1 savaşçı" (gerçek 10dk/2); leaderboard'lar login sonrası muhtemelen eksik. Fix: auth işlemleri izole `supabaseAuth` istemcisine taşındı + ana istemciye `persistSession:false`. Canlıda doğrulandı: self ✓ arkadaş (11dk, Physics 3+konusuz 8) ✓ 403 ✓.
+- Ek sağlamlık: sessions sorgusu hata verirse sıfır hesaplanıp CACHE'lenmesin diye `sessionsRes.error` artık fırlatılıyor.
+- Backend+mobil tsc temiz; Fly'a deploy ✓. **Mobil UI henüz cihazda görülmedi** — sonraki preview build'de test edilecek. Not: 403 testi için `testgamma3@studysquad.test` hesabı oluşturuldu (3. test hesabı).
+
+### 📝 Oturum Özeti — 2026-07-06 (öğleden sonra: EMÜLATÖR TEST OTURUMU)
 
 Sabahki yarım kalan doğrulama tamamlandı + Faz 11–13 testleri yapıldı (build `13448391` APK'sı, Pixel_8):
 
