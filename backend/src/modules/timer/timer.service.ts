@@ -617,6 +617,8 @@ export async function getMonthlyStats(targetId: string, month: string): Promise<
   if (!userRes.data) {
     throw Object.assign(new Error('User not found'), { code: 'NOT_FOUND' });
   }
+  // A failed sessions query must not get computed (and cached!) as zeros.
+  if (sessionsRes.error) throw new Error(sessionsRes.error.message);
 
   // Seed every day of the month, then accumulate per day + per subject.
   const byDate = new Map<string, { totalMinutes: number; subjects: Record<string, number> }>();

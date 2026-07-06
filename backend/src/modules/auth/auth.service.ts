@@ -1,4 +1,4 @@
-import { supabase, redis } from '../../shared';
+import { supabase, supabaseAuth, redis } from '../../shared';
 import type { PublicUser } from './auth.schema';
 
 const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -14,7 +14,7 @@ export async function createAuthUser(
   password: string,
   username: string,
 ): Promise<{ id: string; email: string }> {
-  const { data, error } = await supabase.auth.admin.createUser({
+  const { data, error } = await supabaseAuth.auth.admin.createUser({
     email,
     password,
     user_metadata: { username },
@@ -31,7 +31,7 @@ export async function createAuthUser(
  * ON DELETE CASCADE), so no per-table cleanup is needed.
  */
 export async function deleteAuthUser(userId: string): Promise<void> {
-  const { error } = await supabase.auth.admin.deleteUser(userId);
+  const { error } = await supabaseAuth.auth.admin.deleteUser(userId);
   if (error) throw new Error(error.message);
 }
 
@@ -42,7 +42,9 @@ export async function signInUser(
   email: string,
   password: string,
 ): Promise<{ id: string; email: string }> {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  // NOTE: sign-in attaches the user's session to the client it runs on —
+  // must stay on the isolated supabaseAuth client, never the shared one.
+  const { data, error } = await supabaseAuth.auth.signInWithPassword({ email, password });
 
   if (error) throw new Error(error.message);
   return { id: data.user.id, email: data.user.email! };
