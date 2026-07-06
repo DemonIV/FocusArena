@@ -133,6 +133,17 @@
 - Ek sağlamlık: sessions sorgusu hata verirse sıfır hesaplanıp CACHE'lenmesin diye `sessionsRes.error` artık fırlatılıyor.
 - Backend+mobil tsc temiz; Fly'a deploy ✓. **Mobil UI henüz cihazda görülmedi** — sonraki preview build'de test edilecek. Not: 403 testi için `testgamma3@studysquad.test` hesabı oluşturuldu (3. test hesabı).
 
+### Faz 15 — Donut Grafik + 🍅 Pomodoro Döngüsü & Mola (6 Temmuz akşam-gece)
+`bd064fa` (donut) + `0a4a2e2` (pomodoro)
+
+- **Study DNA kaldırıldı → Konu Dağılımı donut grafiği** (`bd064fa`): Profil'de her konu kendi rengiyle dilim (dilim aralarında 2px boşluk), ortada toplam süre, altında legend (ikon + isim + süre + %). `react-native-svg 15.12.1` eklendi (**YENİ NATIVE MODÜL — sonraki build cache'siz olur**). Verisi yoksa bölüm gizli. `StudyDnaCard` silindi (backend `/timer/dna` + `timerService.getDNA` duruyor, ileride paylaşım kartında kullanılabilir).
+- **Pomodoro döngüsü + mola** (`0a4a2e2`): Timer'da `Klasik | 🍅 Pomodoro` segmenti; önayarlar 25/5 ve 50/10; 4 tur; molada yeşil halka + geri sayım + "Molayı Atla" + "Döngüden çık"; mola bitiminde yerel bildirim; döngü sonunda özet (toplam odak/XP/coin) + toplanmış fiş paylaşımı. **Onaylanan tasarım mockup'ı**: https://claude.ai/code/artifact/dbe2533b-e6c3-42ff-adac-b18d4a099ad9
+  - Mimari: her tur = backend'de normal seans (sıfır backend değişikliği, migration yok); mola tamamen istemcide (`pomodoroStore`, MMKV persist — app kill'e dayanıklı, `breakNotifId` persist'i çift bildirim planlamayı önler); Sıkı Mod molada otomatik askıda (aktif seans yokken `sessionBurnable` false); sonraki tur elle başlar; `breaksSkipped` sayacı ileriki **Focus Score**'un "molaya uyma" bileşeni için loglanıyor.
+  - `timerStore`'a `onComplete` callback'i eklendi (doğal tamamlanma) → pomodoro turu ilerletiyor; **bonus fix**: klasik modda süre doğal bitince artık fiş gösteriliyor (eskiden sessizdi).
+  - **Bildirim kanalı fix'i**: `ensureNotificationChannel()` artık app açılışında koşulsuz çağrılıyor (MainTabs) — kanalın `Device.isDevice`/pushEnabled guard'ları arkasında kalması yüzünden Sıkı Mod 15sn uyarısının hiç görünmemesi bug'ı KAPANDI.
+- i18n: 10 dilde `timer.*` +25 anahtar (pomodoro) + `profile.subjectDistribution`.
+- **SIRADAKİ KARAR (kullanıcı istedi)**: **Focus Score** — süre + uygulamadan çıkış sayısı (AppState) + dışarıda geçen süre (telefon kullanımı proxy'si; UsageStats/ScreenTime İSTENMEYECEK, iOS'ta imkânsız) + tamamlama + molaya uyma → 0-100 skor, sunucuda hesaplanır (`sessions.focus_score`, migration 013), fişte kırılımla gösterilir, leaderboard'a karışmaz. Formül taslağı konuşuldu, onay bekliyor/başlanacak.
+
 ### 📝 Oturum Özeti — 2026-07-06 (öğleden sonra: EMÜLATÖR TEST OTURUMU)
 
 Sabahki yarım kalan doğrulama tamamlandı + Faz 11–13 testleri yapıldı (build `13448391` APK'sı, Pixel_8):
@@ -208,9 +219,11 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 ## 🔜 Sıradaki Adımlar
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. ~~RC anahtarı + emülatör doğrulama + Faz 11–13 testleri~~ ✅ yapıldı (6 Tem öğleden sonra — üstteki oturum özetine bak). **Kalan pürüzler**: onboarding Skip butonu bug'ı + bildirim kanalı oluşturmayı guard'ların önüne alma (küçük kod düzeltmeleri) + push teslimatı yalnız gerçek cihazda test edilebilir (FCM kurulumu gerekebilir!).
-2. Aynı env'leri **production** ortamına da ekle → production AAB build.
-3. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil).
+1. **YENİ PREVIEW BUILD** (kullanıcı erteledi — kuyruktaki 3 build iptal edildi): `cd mobile && npx eas-cli build --platform android --profile preview --non-interactive --no-wait`. İçereceği YENİ ve CİHAZDA HİÇ TEST EDİLMEMİŞ özellikler: **aylık takvim modalı (Faz 14) + donut grafik + pomodoro döngüsü (Faz 15)**. react-native-svg native modülü eklendiği için build cache'siz/uzun olacak. Bitince emülatöre kur (`adb install -r`) ve bu üç özelliği + mola bildirimini (kanal fix'i sonrası artık emülatörde de görünmeli) test et.
+2. **Focus Score V1** (tasarım PROGRESS Faz 15 notunda + konuşuldu): mobil exits/awayMs/pauses takibi → stop gövdesinde gönder → sunucuda skor (migration 013 `sessions.focus_score`) → fişte kırılım + profilde haftalık ortalama.
+3. Kalan küçük bug: onboarding **Skip butonu çalışmıyor**.
+4. Aynı env'leri **production** ortamına da ekle → production AAB build.
+5. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil). Push teslimatı gerçek cihaz + muhtemel FCM kurulumu gerektiriyor.
 
 **Kullanıcı tarafında bekleyenler:**
 4. Play Console kimlik doğrulama sonucu → uygulama oluştur (`com.studysquad.app`) → **closed testing** track'ine AAB + **12 testçi e-postası** (14 gün kullanım şartı — testçileri şimdiden topla!).
