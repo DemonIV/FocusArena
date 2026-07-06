@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,12 +19,26 @@ import {
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useTimer, useStrictMode } from '../../hooks';
-import { useSocketStore, useBillingStore, useSettingsStore } from '../../stores';
+import {
+  useSocketStore,
+  useBillingStore,
+  useSettingsStore,
+  useTimerStore,
+  usePomodoroStore,
+  POMODORO_PRESETS,
+  ROUNDS_PER_CYCLE,
+} from '../../stores';
 import { getPetEmoji } from '../../constants';
 import { TimerCircle, StudyReceiptModal, ZenModeModal, StrictModeFailModal } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { billingEnabled } from '../../services/billing';
-import { timerService, cosmeticsService, maybeRequestReview } from '../../services';
+import {
+  timerService,
+  cosmeticsService,
+  maybeRequestReview,
+  scheduleBreakOverNotification,
+  cancelScheduledNotification,
+} from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
 
@@ -37,6 +51,7 @@ const MIN_MIN = 1;
 const MAX_MIN = 180;
 
 const ACCENT   = '#00d2ff';
+const BREAK_C  = '#10b981';
 const PAUSE_C  = '#f59e0b';
 const DANGER   = '#ef4444';
 const BG       = '#0d0d1a';
@@ -74,6 +89,13 @@ export function TimerScreen() {
   const strictMode = useSettingsStore((s) => s.strictMode);
   const setStrictMode = useSettingsStore((s) => s.setStrictMode);
   const strict = useStrictMode();
+
+  // ── Pomodoro cycle ───────────────────────────────────────────────────────────
+  const pomo = usePomodoroStore();
+  const preset = POMODORO_PRESETS[pomo.presetId];
+  const inPomodoro = pomo.mode === 'pomodoro';
+  const [breakRemainingMs, setBreakRemainingMs] = useState(0);
+  const sendPresence = useSocketStore((s) => s.sendPresence);
 
   const isCustomDuration = !DURATIONS.includes(selectedDuration);
 
@@ -141,6 +163,120 @@ export function TimerScreen() {
     qc.invalidateQueries({ queryKey: ['pets'] });
   }, [qc]);
 
+  // ── Natural session completion (countdown hit zero) ────────────────────────
+  // In a pomodoro cycle: advance the round. In classic mode: celebrate with the
+  // receipt (manual stops already do; natural completions used to end silently).
+  useEffect(() => {
+    useTimerStore.getState().setOnComplete((result) => {
+      const p = usePomodoroStore.getState();
+      invalidateAfterStop();
+      setZenVisible(false);
+      if (p.mode === 'pomodoro' && p.phase === 'focus') {
+        if (result) {
+          p.completeRound({
+            durationMinutes: result.durationMinutes,
+            xpEarned: result.xpEarned,
+            coinsEarned: result.coinsEarned ?? 0,
+            newStreak: result.newStreak,
+          });
+        } else {
+          p.abortCycle(); // session vanished server-side — nothing to continue
+        }
+      } else if (result && result.xpEarned > 0) {
+        setReceipt({
+          subjectName: selectedSubject?.name,
+          durationMinutes: result.durationMinutes,
+          xpEarned: result.xpEarned,
+          coinsEarned: result.coinsEarned ?? 0,
+          streak: result.newStreak,
+        });
+      }
+    });
+    return () => useTimerStore.getState().setOnComplete(null);
+  }, [invalidateAfterStop, selectedSubject]);
+
+  // ── Break countdown + "break over" local notification ──────────────────────
+  useEffect(() => {
+    if (pomo.phase !== 'break' || !pomo.breakEndsAt) return;
+
+    // Schedule the notification once per break (survives app relaunch — the
+    // persisted breakNotifId guards against double-scheduling).
+    if (!pomo.breakNotifId) {
+      const secs = (pomo.breakEndsAt - Date.now()) / 1000;
+      if (secs > 1) {
+        void scheduleBreakOverNotification(
+          secs,
+          t('timer.breakOverTitle'),
+          t('timer.breakOverBody', { round: pomo.round + 1 }),
+        ).then((id) => usePomodoroStore.getState().setBreakNotifId(id));
+      }
+    }
+
+    sendPresence('break');
+    setBreakRemainingMs(Math.max(0, pomo.breakEndsAt - Date.now()));
+    const iv = setInterval(() => {
+      const endsAt = usePomodoroStore.getState().breakEndsAt;
+      const rem = (endsAt ?? 0) - Date.now();
+      if (rem <= 0) {
+        usePomodoroStore.getState().breakOver();
+      } else {
+        setBreakRemainingMs(rem);
+      }
+    }, 500);
+    return () => clearInterval(iv);
+  }, [pomo.phase, pomo.breakEndsAt]);
+
+  const handleStartCycle = useCallback(async () => {
+    pomo.beginCycle();
+    try {
+      await timer.start(preset.focus, selectedSubjectId);
+    } catch (err: any) {
+      usePomodoroStore.getState().abortCycle();
+      if (err?.statusCode === 409) {
+        Alert.alert(
+          t('timer.activeSessionFound'),
+          t('timer.activeSessionMsg'),
+          [{ text: t('common.ok'), onPress: () => void timer.syncWithServer() }],
+        );
+      } else {
+        Alert.alert(t('common.error'), err?.message ?? t('timer.startFailed'));
+      }
+    }
+  }, [pomo, preset.focus, selectedSubjectId, timer, t]);
+
+  const handleStartNextRound = useCallback(async () => {
+    try {
+      await timer.start(preset.focus, selectedSubjectId);
+      usePomodoroStore.getState().startedNextRound();
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err?.message ?? t('timer.startFailed'));
+    }
+  }, [preset.focus, selectedSubjectId, timer, t]);
+
+  const handleSkipBreak = useCallback(() => {
+    void cancelScheduledNotification(usePomodoroStore.getState().breakNotifId);
+    usePomodoroStore.getState().skipBreak();
+  }, []);
+
+  const handleExitCycle = useCallback(() => {
+    Alert.alert(
+      t('timer.exitCycleTitle'),
+      t('timer.exitCycleMsg'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('timer.exitCycle'),
+          style: 'destructive',
+          onPress: () => {
+            void cancelScheduledNotification(usePomodoroStore.getState().breakNotifId);
+            usePomodoroStore.getState().abortCycle();
+            sendPresence('offline');
+          },
+        },
+      ],
+    );
+  }, [t, sendPresence]);
+
   // Strict Mode: pay coins to keep the burned session alive…
   const rescueMut = useMutation({
     mutationFn: () => timerService.rescue(),
@@ -165,6 +301,7 @@ export function TimerScreen() {
   // …or accept the loss: stop now (an early stop earns nothing anyway).
   const handleForfeit = useCallback(async () => {
     strict.clearViolation();
+    usePomodoroStore.getState().abortCycle();
     try {
       await timer.stop();
       setZenVisible(false);
@@ -223,6 +360,8 @@ export function TimerScreen() {
           onPress: async () => {
             try {
               const result = await timer.stop();
+              // A manual stop mid-cycle drops the pomodoro cycle
+              usePomodoroStore.getState().abortCycle();
               setZenVisible(false);
               // Refresh anything that depends on the finished session
               invalidateAfterStop();
@@ -281,21 +420,34 @@ export function TimerScreen() {
           )}
         </View>
 
-        {/* ── Timer Circle ── */}
+        {/* ── Timer Circle / Break Circle ── */}
         <View style={styles.circleWrap}>
-          <TimerCircle
-            progress={timer.progress}
-            remainingMs={timer.remainingMs}
-            isActive={timer.isActive}
-            isPaused={timer.isPaused}
-            frameId={selectedFrame}
-          />
-
-          {/* Duration badge when idle */}
-          {!timer.isActive && (
-            <View style={styles.durationBadge}>
-              <Text style={styles.durationBadgeText}>{selectedDuration} {t('common.minShort')}</Text>
+          {inPomodoro && !timer.isActive && pomo.phase === 'break' ? (
+            <View style={styles.breakCircle}>
+              <Text style={styles.breakTime}>{msToClock(breakRemainingMs)}</Text>
+              <View style={styles.breakTagPill}>
+                <Text style={styles.breakTagText}>{t('timer.breakTag')}</Text>
+              </View>
             </View>
+          ) : inPomodoro && !timer.isActive && (pomo.phase === 'awaitNext' || pomo.phase === 'done') ? null : (
+            <>
+              <TimerCircle
+                progress={timer.progress}
+                remainingMs={timer.remainingMs}
+                isActive={timer.isActive}
+                isPaused={timer.isPaused}
+                frameId={selectedFrame}
+              />
+
+              {/* Duration badge when idle */}
+              {!timer.isActive && (
+                <View style={styles.durationBadge}>
+                  <Text style={styles.durationBadgeText}>
+                    {inPomodoro ? preset.focus : selectedDuration} {t('common.minShort')}
+                  </Text>
+                </View>
+              )}
+            </>
           )}
         </View>
 
@@ -326,10 +478,56 @@ export function TimerScreen() {
         </View>
 
         {/* ── IDLE STATE ── */}
-        {!timer.isActive && (
+        {!timer.isActive && (!inPomodoro || pomo.phase === 'idle') && (
           <View style={styles.idleSection}>
 
-            {/* Duration Row */}
+            {/* Mode: classic single session ↔ pomodoro cycle */}
+            <View style={styles.modeSeg}>
+              {(['classic', 'pomodoro'] as const).map((m) => {
+                const on = pomo.mode === m;
+                return (
+                  <Pressable
+                    key={m}
+                    style={[styles.modeSegBtn, on && styles.modeSegBtnOn]}
+                    onPress={() => pomo.setMode(m)}
+                  >
+                    <Text style={[styles.modeSegText, on && styles.modeSegTextOn]}>
+                      {m === 'classic' ? t('timer.modeClassic') : `🍅 ${t('timer.modePomodoro')}`}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {inPomodoro && (
+              <>
+                <Text style={styles.sectionLabel}>{t('timer.duration')}</Text>
+                <View style={styles.presetRow}>
+                  {(['classic', 'deep'] as const).map((id) => {
+                    const p = POMODORO_PRESETS[id];
+                    const on = pomo.presetId === id;
+                    return (
+                      <Pressable
+                        key={id}
+                        style={[styles.durationPill, styles.presetChip, on && styles.durationPillActive]}
+                        onPress={() => pomo.setPresetId(id)}
+                      >
+                        <Text style={[styles.durationPillText, on && styles.durationPillTextActive]}>
+                          {p.focus} / {p.brk} · {t(id === 'classic' ? 'timer.presetClassicName' : 'timer.presetDeepName')}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <RoundDots completed={0} />
+                <Text style={styles.pomoInfo}>
+                  {t('timer.pomodoroInfo', { rounds: ROUNDS_PER_CYCLE, brk: preset.brk, long: preset.longBrk })}
+                </Text>
+              </>
+            )}
+
+            {/* Duration Row (classic mode) */}
+            {!inPomodoro && (<>
             <Text style={styles.sectionLabel}>{t('timer.duration')}</Text>
             <ScrollView
               horizontal
@@ -379,6 +577,7 @@ export function TimerScreen() {
                 <Text style={styles.customPillText}>{t('timer.custom')}</Text>
               </Pressable>
             </ScrollView>
+            </>)}
 
             {/* Subject Picker */}
             <Text style={[styles.sectionLabel, { marginTop: 20 }]}>{t('timer.subject')}</Text>
@@ -414,7 +613,9 @@ export function TimerScreen() {
             <View style={styles.strictRow}>
               <View style={styles.strictTextWrap}>
                 <Text style={styles.strictTitle}>🔒 {t('timer.strictMode')}</Text>
-                <Text style={styles.strictHint}>{t('timer.strictModeHint')}</Text>
+                <Text style={styles.strictHint}>
+                  {inPomodoro ? t('timer.strictPomodoroHint') : t('timer.strictModeHint')}
+                </Text>
               </View>
               <Switch
                 value={strictMode}
@@ -427,7 +628,7 @@ export function TimerScreen() {
             {/* Start Button */}
             <TouchableOpacity
               style={[styles.startBtn, timer.isLoading && { opacity: 0.6 }]}
-              onPress={handleStart}
+              onPress={inPomodoro ? handleStartCycle : handleStart}
               disabled={timer.isLoading}
               activeOpacity={0.85}
             >
@@ -436,7 +637,9 @@ export function TimerScreen() {
                 : (
                   <>
                     <Text style={styles.startBtnIcon}>▶</Text>
-                    <Text style={styles.startBtnText}>{t('timer.startSession')}</Text>
+                    <Text style={styles.startBtnText}>
+                      {inPomodoro ? t('timer.startCycle') : t('timer.startSession')}
+                    </Text>
                   </>
                 )
               }
@@ -444,9 +647,112 @@ export function TimerScreen() {
           </View>
         )}
 
+        {/* ── POMODORO: BREAK ── */}
+        {!timer.isActive && inPomodoro && pomo.phase === 'break' && (
+          <View style={styles.pomoSection}>
+            <RoundDots completed={pomo.round} active={pomo.round + 1} activeColor={BREAK_C} />
+            <Text style={styles.pomoInfo}>
+              {t('timer.breakInfo', { count: pomo.round, next: pomo.round + 1 })}
+            </Text>
+            <View style={styles.breakCard}>
+              <Text style={styles.breakCardTitle}>{t('timer.breakCardTitle')}</Text>
+              <Text style={styles.breakCardBody}>{t('timer.breakCardBody')}</Text>
+            </View>
+            <Text style={styles.breakFreeHint}>{t('timer.breakFreeHint')}</Text>
+            <TouchableOpacity style={styles.ghostBtn} onPress={handleSkipBreak} activeOpacity={0.8}>
+              <Text style={styles.ghostBtnText}>{t('timer.skipBreak')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleExitCycle} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Text style={styles.exitCycleText}>{t('timer.exitCycle')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── POMODORO: BREAK OVER — waiting for the next round ── */}
+        {!timer.isActive && inPomodoro && pomo.phase === 'awaitNext' && (
+          <View style={styles.pomoSection}>
+            <Text style={styles.awaitEmoji}>🔥</Text>
+            <Text style={styles.awaitTitle}>{t('timer.breakOverTitle')}</Text>
+            <RoundDots completed={pomo.round} active={pomo.round + 1} activeColor={BREAK_C} />
+            <TouchableOpacity
+              style={[styles.startBtn, { marginTop: 12 }, timer.isLoading && { opacity: 0.6 }]}
+              onPress={handleStartNextRound}
+              disabled={timer.isLoading}
+              activeOpacity={0.85}
+            >
+              {timer.isLoading
+                ? <ActivityIndicator color="#000" />
+                : (
+                  <>
+                    <Text style={styles.startBtnIcon}>▶</Text>
+                    <Text style={styles.startBtnText}>{t('timer.startNextRound', { round: pomo.round + 1 })}</Text>
+                  </>
+                )
+              }
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleExitCycle} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Text style={styles.exitCycleText}>{t('timer.exitCycle')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── POMODORO: CYCLE DONE — summary ── */}
+        {!timer.isActive && inPomodoro && pomo.phase === 'done' && (
+          <View style={styles.pomoSection}>
+            <Text style={styles.doneEmoji}>🎉</Text>
+            <Text style={styles.doneTitle}>{t('timer.cycleDoneTitle')}</Text>
+            <Text style={styles.doneSub}>
+              {t('timer.cycleDoneSub', { rounds: ROUNDS_PER_CYCLE, focus: preset.focus })}
+            </Text>
+            <RoundDots completed={ROUNDS_PER_CYCLE} />
+            <View style={styles.doneStats}>
+              <View style={styles.doneStat}>
+                <Text style={styles.doneStatValue}>{formatDuration(pomo.totalMinutes)}</Text>
+                <Text style={styles.doneStatLabel}>{t('timer.cycleStatFocus')}</Text>
+              </View>
+              <View style={styles.doneStat}>
+                <Text style={styles.doneStatValue}>+{pomo.totalXp}</Text>
+                <Text style={styles.doneStatLabel}>XP</Text>
+              </View>
+              <View style={styles.doneStat}>
+                <Text style={[styles.doneStatValue, { color: PAUSE_C }]}>+{pomo.totalCoins}</Text>
+                <Text style={styles.doneStatLabel}>🪙 COIN</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.startBtn}
+              activeOpacity={0.85}
+              onPress={() =>
+                setReceipt({
+                  subjectName: selectedSubject?.name,
+                  durationMinutes: pomo.totalMinutes,
+                  xpEarned: pomo.totalXp,
+                  coinsEarned: pomo.totalCoins,
+                  streak: pomo.lastStreak,
+                })
+              }
+            >
+              <Text style={styles.startBtnText}>📤 {t('timer.cycleShare')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.ghostBtn} onPress={() => pomo.finishCycle()} activeOpacity={0.8}>
+              <Text style={styles.ghostBtnText}>{t('timer.newCycle')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* ── ACTIVE STATE ── */}
         {timer.isActive && (
           <View style={styles.activeSection}>
+            {/* Pomodoro round indicator */}
+            {inPomodoro && pomo.phase === 'focus' && (
+              <View style={styles.focusRounds}>
+                <RoundDots completed={pomo.round - 1} active={pomo.round} />
+                <Text style={styles.pomoInfo}>
+                  {t('timer.roundOf', { current: pomo.round, total: ROUNDS_PER_CYCLE })}
+                </Text>
+              </View>
+            )}
+
             {/* Zen Mode — Pro-exclusive immersive focus screen */}
             <TouchableOpacity style={styles.zenBtn} onPress={handleZenPress} activeOpacity={0.8}>
               <Text style={styles.zenBtnText}>🧘 {t('timer.zenMode')}</Text>
@@ -678,6 +984,68 @@ export function TimerScreen() {
 }
 
 // ─── Small helpers ────────────────────────────────────────────────────────────
+
+/** ms → "MM:SS" for the break countdown */
+function msToClock(ms: number) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+/** Pomodoro round progress dots: done → filled, active → enlarged + colored. */
+function RoundDots({
+  completed,
+  active,
+  activeColor,
+}: {
+  completed: number;
+  active?: number;
+  activeColor?: string;
+}) {
+  return (
+    <View style={dotStyles.row}>
+      {Array.from({ length: ROUNDS_PER_CYCLE }, (_, i) => {
+        const n = i + 1;
+        const isActive = n === active;
+        const isDone = n <= completed;
+        return (
+          <View
+            key={n}
+            style={[
+              dotStyles.dot,
+              isDone && dotStyles.done,
+              isActive && [dotStyles.active, { backgroundColor: activeColor ?? ACCENT }],
+            ]}
+          />
+        );
+      })}
+    </View>
+  );
+}
+
+const dotStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+  },
+  done: { backgroundColor: ACCENT },
+  active: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.18)',
+  },
+});
 
 function msToMin(ms: number) {
   const min = i18n.t('common.minShort');
@@ -914,6 +1282,120 @@ const styles = StyleSheet.create({
   },
   startBtnIcon: { fontSize: 18, color: '#000' },
   startBtnText: { fontSize: 17, fontWeight: '800', color: '#000', letterSpacing: 0.3 },
+
+  // ── Pomodoro ──
+  modeSeg: {
+    flexDirection: 'row',
+    backgroundColor: CARD,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    padding: 4,
+    gap: 4,
+    marginBottom: 20,
+  },
+  modeSegBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 9,
+    borderRadius: 9,
+  },
+  modeSegBtnOn: {
+    backgroundColor: `${ACCENT}1f`,
+    borderWidth: 1,
+    borderColor: `${ACCENT}73`,
+  },
+  modeSegText: { color: MUTED, fontSize: 13, fontWeight: '700' },
+  modeSegTextOn: { color: ACCENT },
+
+  presetRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
+  presetChip: { flex: 1, alignItems: 'center' },
+  pomoInfo: {
+    textAlign: 'center',
+    color: MUTED,
+    fontSize: 12,
+    marginTop: 10,
+    marginBottom: 4,
+  },
+
+  pomoSection: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    gap: 14,
+  },
+
+  breakCircle: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    borderWidth: 10,
+    borderColor: `${BREAK_C}44`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: BREAK_C,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  breakTime: { color: TEXT, fontSize: 44, fontWeight: '800', letterSpacing: -0.5 },
+  breakTagPill: {
+    marginTop: 8,
+    backgroundColor: `${BREAK_C}1f`,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  breakTagText: { color: BREAK_C, fontSize: 11, fontWeight: '800', letterSpacing: 2 },
+
+  breakCard: {
+    backgroundColor: CARD,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    padding: 16,
+  },
+  breakCardTitle: { color: TEXT, fontSize: 14, fontWeight: '700' },
+  breakCardBody: { color: MUTED, fontSize: 12.5, marginTop: 4, lineHeight: 18 },
+  breakFreeHint: { textAlign: 'center', color: BREAK_C, fontSize: 13, fontWeight: '700' },
+
+  ghostBtn: {
+    alignItems: 'center',
+    paddingVertical: 13,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    backgroundColor: CARD,
+  },
+  ghostBtnText: { color: MUTED, fontSize: 14, fontWeight: '700' },
+  exitCycleText: {
+    textAlign: 'center',
+    color: MUTED,
+    fontSize: 12,
+    textDecorationLine: 'underline',
+    marginTop: 2,
+  },
+
+  awaitEmoji: { textAlign: 'center', fontSize: 40 },
+  awaitTitle: { textAlign: 'center', color: TEXT, fontSize: 20, fontWeight: '800' },
+
+  doneEmoji: { textAlign: 'center', fontSize: 44 },
+  doneTitle: { textAlign: 'center', color: TEXT, fontSize: 22, fontWeight: '800' },
+  doneSub: { textAlign: 'center', color: MUTED, fontSize: 13, marginTop: -6 },
+  doneStats: { flexDirection: 'row', gap: 10 },
+  doneStat: {
+    flex: 1,
+    backgroundColor: CARD,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  doneStatValue: { color: ACCENT, fontSize: 17, fontWeight: '800' },
+  doneStatLabel: { color: MUTED, fontSize: 10, marginTop: 4, letterSpacing: 0.5 },
+
+  focusRounds: { alignItems: 'center', gap: 2, marginBottom: -6 },
 
   // ── ACTIVE ──
   activeSection: {

@@ -8,6 +8,7 @@ import * as Localization from 'expo-localization';
 import {
   registerForPushNotifications,
   subscribeNotificationTaps,
+  ensureNotificationChannel,
   leaderboardService,
 } from '../services';
 import {
@@ -45,6 +46,9 @@ export function MainTabs() {
 
   // Register this device for push notifications once the user is in the app.
   useEffect(() => {
+    // Channel first — local notifications (strict warning, break-over) need it
+    // even when push registration bails out (emulator, opt-out).
+    void ensureNotificationChannel();
     void registerForPushNotifications();
 
     // Auto-report the device's country for Country Wars (best-effort).

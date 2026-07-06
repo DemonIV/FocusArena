@@ -25,6 +25,26 @@ function getProjectId(): string | undefined {
 }
 
 /**
+ * Make sure the Android notification channel exists. LOCAL notifications
+ * (strict-mode warning, break-over) depend on it too, so this must run
+ * unconditionally at app start — NOT only inside the push-registration path,
+ * which returns early on emulators and when push is opted out.
+ */
+export async function ensureNotificationChannel(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  try {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#00d2ff',
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
+/**
  * Ask for permission, obtain the Expo push token, and register it with the
  * backend (together with the current UI language so reminders are localized).
  *
@@ -40,14 +60,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
     if (!useSettingsStore.getState().pushEnabled) return null;
 
     // Android needs an explicit channel for notifications to show.
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.DEFAULT,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#00d2ff',
-      });
-    }
+    await ensureNotificationChannel();
 
     const { status: existing } = await Notifications.getPermissionsAsync();
     let status = existing;
@@ -73,6 +86,40 @@ export async function registerForPushNotifications(): Promise<string | null> {
   } catch (err) {
     console.warn('[push] registration skipped:', (err as Error).message);
     return null;
+  }
+}
+
+/**
+ * Schedule the local "break is over" notification for the Pomodoro cycle.
+ * Returns the notification id so the caller can cancel it (skip / foreground).
+ */
+export async function scheduleBreakOverNotification(
+  seconds: number,
+  title: string,
+  body: string,
+): Promise<string | null> {
+  try {
+    await ensureNotificationChannel();
+    return await Notifications.scheduleNotificationAsync({
+      content: { title, body, sound: true },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: Math.max(1, Math.round(seconds)),
+        channelId: 'default',
+      },
+    });
+  } catch {
+    return null; // permission denied / Expo Go — the in-app countdown still works
+  }
+}
+
+/** Cancel a scheduled local notification (best-effort). */
+export async function cancelScheduledNotification(id: string | null): Promise<void> {
+  if (!id) return;
+  try {
+    await Notifications.cancelScheduledNotificationAsync(id);
+  } catch {
+    /* best-effort */
   }
 }
 

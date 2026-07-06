@@ -24,6 +24,13 @@ interface TimerStore {
   // Ticker
   _interval: ReturnType<typeof setInterval> | null;
 
+  /**
+   * Fired when a session finishes NATURALLY (countdown reached zero) — not on
+   * manual stop. The Pomodoro cycle (and the classic-mode receipt) hook in here.
+   */
+  _onComplete: ((result: StopTimerResult | null) => void) | null;
+  setOnComplete: (cb: ((result: StopTimerResult | null) => void) | null) => void;
+
   // Actions
   start: (duration: number, subjectId?: string) => Promise<void>;
   pause: () => Promise<void>;
@@ -39,6 +46,7 @@ interface TimerStore {
 const INITIAL: Omit<
   TimerStore,
   'start' | 'pause' | 'resume' | 'stop' | 'syncWithServer' | 'tick' | 'loadSubjects' | 'loadStats' | 'reset'
+  | '_onComplete' | 'setOnComplete'
 > = {
   sessionId: null,
   duration: 25,
@@ -57,6 +65,8 @@ const INITIAL: Omit<
 
 export const useTimerStore = create<TimerStore>((set, get) => ({
   ...INITIAL,
+  _onComplete: null,
+  setOnComplete: (cb) => set({ _onComplete: cb }),
 
   tick: () => {
     const s = get();
@@ -64,7 +74,14 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     const elapsed = s.accumulatedMs + (Date.now() - s.startTime);
     const remaining = Math.max(0, s.duration * 60_000 - elapsed);
     set({ elapsedMs: elapsed, remainingMs: remaining });
-    if (remaining === 0) void get().stop();
+    if (remaining === 0) {
+      // Natural completion — stop, then let subscribers (pomodoro cycle,
+      // classic receipt) react to the finished session's rewards.
+      void get()
+        .stop()
+        .then((result) => get()._onComplete?.(result))
+        .catch(() => { /* stop() already restored state for retry */ });
+    }
   },
 
   start: async (duration, subjectId) => {
