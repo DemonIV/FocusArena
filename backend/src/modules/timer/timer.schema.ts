@@ -136,6 +136,45 @@ export interface HeatmapResponse {
   currentStreak: number;
 }
 
+// ─── Monthly profile stats (own or a friend's) ───────────────
+
+export const MonthlyQuerySchema = z.object({
+  /** Calendar month to aggregate, UTC. Defaults to the current month. */
+  month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'month must be YYYY-MM').optional(),
+  /** Whose stats to fetch. Defaults to the caller; other users require friendship. */
+  userId: z.string().uuid().optional(),
+});
+export type MonthlyQuery = z.infer<typeof MonthlyQuerySchema>;
+
+export interface MonthlySubjectTotal {
+  /** null = bucket for sessions without a subject (or a deleted subject) */
+  id: string | null;
+  name: string | null;
+  icon: string | null;
+  color: string | null;
+  totalMinutes: number;
+}
+
+export interface MonthlyDay {
+  date: string;               // YYYY-MM-DD (UTC)
+  totalMinutes: number;
+  /** Minutes per subject id for this day ('' = no subject). Omitted when empty. */
+  subjects?: Record<string, number>;
+}
+
+export interface MonthlyStatsResponse {
+  user: { id: string; username: string; level: number; streak: number };
+  month: string;              // YYYY-MM
+  days: MonthlyDay[];         // every day of the month, ascending, zeros filled
+  subjects: MonthlySubjectTotal[]; // month totals, descending by minutes
+  summary: {
+    totalMinutes: number;
+    activeDays: number;
+    sessionsCount: number;
+    bestDayMinutes: number;
+  };
+}
+
 export interface TimerStats {
   today: {
     totalMinutes: number;

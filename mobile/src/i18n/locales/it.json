@@ -210,6 +210,18 @@
     "errGeneric": "Impossibile riscattare il codice. Riprova.",
     "leaderboardEmpty": "Aggiungi amici per competere insieme — invitane uno e guadagnate entrambi 500 monete!"
   },
+  "monthly": {
+    "title": "Statistiche mensili",
+    "open": "Vedi statistiche mensili e materie",
+    "loadFailed": "Impossibile caricare le statistiche. Riprova.",
+    "noSubject": "Senza materia",
+    "noActivityDay": "Nessun focus in questo giorno.",
+    "noActivityMonth": "Ancora nessun tempo di focus questo mese.",
+    "totalLabel": "Focus totale",
+    "activeDaysLabel": "Giorni attivi",
+    "bestDayLabel": "Giorno migliore",
+    "subjectsTitle": "Materie"
+  },
   "profile": {
     "level": "Lv {{level}}",
     "levelN": "Livello {{level}}",

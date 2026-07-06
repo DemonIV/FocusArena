@@ -210,6 +210,18 @@
     "errGeneric": "De code kon niet worden ingewisseld. Probeer het opnieuw.",
     "leaderboardEmpty": "Voeg vrienden toe om samen te strijden — nodig er één uit en jullie krijgen allebei 500 munten!"
   },
+  "monthly": {
+    "title": "Maandstatistieken",
+    "open": "Bekijk maandstatistieken & vakken",
+    "loadFailed": "Kon statistieken niet laden. Probeer opnieuw.",
+    "noSubject": "Geen vak",
+    "noActivityDay": "Geen focus op deze dag.",
+    "noActivityMonth": "Nog geen focustijd deze maand.",
+    "totalLabel": "Totale focus",
+    "activeDaysLabel": "Actieve dagen",
+    "bestDayLabel": "Beste dag",
+    "subjectsTitle": "Vakken"
+  },
   "profile": {
     "level": "Lv {{level}}",
     "levelN": "Niveau {{level}}",

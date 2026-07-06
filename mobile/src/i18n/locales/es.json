@@ -210,6 +210,18 @@
     "errGeneric": "No se pudo canjear el código. Inténtalo de nuevo.",
     "leaderboardEmpty": "Añade amigos para competir juntos: invita a uno y ambos ganan 500 monedas."
   },
+  "monthly": {
+    "title": "Estadísticas mensuales",
+    "open": "Ver estadísticas mensuales y materias",
+    "loadFailed": "No se pudieron cargar las estadísticas. Inténtalo de nuevo.",
+    "noSubject": "Sin materia",
+    "noActivityDay": "Sin enfoque este día.",
+    "noActivityMonth": "Aún no hay tiempo de enfoque este mes.",
+    "totalLabel": "Enfoque total",
+    "activeDaysLabel": "Días activos",
+    "bestDayLabel": "Mejor día",
+    "subjectsTitle": "Materias"
+  },
   "profile": {
     "level": "Nv {{level}}",
     "levelN": "Nivel {{level}}",

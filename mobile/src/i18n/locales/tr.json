@@ -210,6 +210,18 @@
     "errGeneric": "Kod kullanılamadı. Lütfen tekrar dene.",
     "leaderboardEmpty": "Birlikte yarışmak için arkadaş ekle — birini davet et, ikiniz de 500 coin kazanın!"
   },
+  "monthly": {
+    "title": "Aylık İstatistikler",
+    "open": "Aylık istatistikler ve konular",
+    "loadFailed": "İstatistikler yüklenemedi. Lütfen tekrar dene.",
+    "noSubject": "Konusuz",
+    "noActivityDay": "Bu gün odaklanma yok.",
+    "noActivityMonth": "Bu ay henüz odak süresi yok.",
+    "totalLabel": "Toplam odak",
+    "activeDaysLabel": "Aktif gün",
+    "bestDayLabel": "En iyi gün",
+    "subjectsTitle": "Konular"
+  },
   "profile": {
     "level": "Sv {{level}}",
     "levelN": "Seviye {{level}}",

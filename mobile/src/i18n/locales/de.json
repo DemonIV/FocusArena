@@ -210,6 +210,18 @@
     "errGeneric": "Der Code konnte nicht eingelöst werden. Bitte versuche es erneut.",
     "leaderboardEmpty": "Füge Freunde hinzu, um gemeinsam anzutreten — lade einen ein und ihr bekommt beide 500 Münzen!"
   },
+  "monthly": {
+    "title": "Monatsstatistik",
+    "open": "Monatsstatistik & Fächer ansehen",
+    "loadFailed": "Statistik konnte nicht geladen werden. Bitte erneut versuchen.",
+    "noSubject": "Ohne Fach",
+    "noActivityDay": "An diesem Tag kein Fokus.",
+    "noActivityMonth": "Diesen Monat noch keine Fokuszeit.",
+    "totalLabel": "Fokus gesamt",
+    "activeDaysLabel": "Aktive Tage",
+    "bestDayLabel": "Bester Tag",
+    "subjectsTitle": "Fächer"
+  },
   "profile": {
     "level": "Lv {{level}}",
     "levelN": "Level {{level}}",

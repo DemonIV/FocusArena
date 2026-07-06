@@ -210,6 +210,18 @@
     "errGeneric": "Não foi possível resgatar o código. Tente novamente.",
     "leaderboardEmpty": "Adicione amigos para competir juntos — convide um e vocês dois ganham 500 moedas!"
   },
+  "monthly": {
+    "title": "Estatísticas mensais",
+    "open": "Ver estatísticas mensais e matérias",
+    "loadFailed": "Não foi possível carregar as estatísticas. Tente novamente.",
+    "noSubject": "Sem matéria",
+    "noActivityDay": "Sem foco neste dia.",
+    "noActivityMonth": "Ainda sem tempo de foco este mês.",
+    "totalLabel": "Foco total",
+    "activeDaysLabel": "Dias ativos",
+    "bestDayLabel": "Melhor dia",
+    "subjectsTitle": "Matérias"
+  },
   "profile": {
     "level": "Nv {{level}}",
     "levelN": "Nível {{level}}",

@@ -210,6 +210,18 @@
     "errGeneric": "The code couldn't be redeemed. Please try again.",
     "leaderboardEmpty": "Add friends to compete together — invite one and you both earn 500 coins!"
   },
+  "monthly": {
+    "title": "Monthly Stats",
+    "open": "See monthly stats & subjects",
+    "loadFailed": "Couldn't load stats. Please try again.",
+    "noSubject": "No subject",
+    "noActivityDay": "No focus this day.",
+    "noActivityMonth": "No focus time this month yet.",
+    "totalLabel": "Total focus",
+    "activeDaysLabel": "Active days",
+    "bestDayLabel": "Best day",
+    "subjectsTitle": "Subjects"
+  },
   "profile": {
     "level": "Lv {{level}}",
     "levelN": "Level {{level}}",

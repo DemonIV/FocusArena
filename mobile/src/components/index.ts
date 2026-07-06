@@ -9,3 +9,4 @@ export { StudyDnaCard } from './StudyDnaCard';
 export { ZenModeModal } from './ZenModeModal';
 export { PetCompanion, PetAdoptTeaser } from './PetCompanion';
 export { StrictModeFailModal } from './StrictModeFailModal';
+export { MonthlyStatsModal } from './MonthlyStatsModal';

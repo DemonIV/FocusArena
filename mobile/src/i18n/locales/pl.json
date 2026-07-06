@@ -210,6 +210,18 @@
     "errGeneric": "Nie udało się wykorzystać kodu. Spróbuj ponownie.",
     "leaderboardEmpty": "Dodaj znajomych, aby rywalizować razem — zaproś kogoś, a oboje zdobędziecie 500 monet!"
   },
+  "monthly": {
+    "title": "Statystyki miesięczne",
+    "open": "Zobacz statystyki miesięczne i przedmioty",
+    "loadFailed": "Nie udało się wczytać statystyk. Spróbuj ponownie.",
+    "noSubject": "Bez przedmiotu",
+    "noActivityDay": "Brak skupienia tego dnia.",
+    "noActivityMonth": "W tym miesiącu nie ma jeszcze czasu skupienia.",
+    "totalLabel": "Łączny czas",
+    "activeDaysLabel": "Aktywne dni",
+    "bestDayLabel": "Najlepszy dzień",
+    "subjectsTitle": "Przedmioty"
+  },
   "profile": {
     "level": "Poz {{level}}",
     "levelN": "Poziom {{level}}",

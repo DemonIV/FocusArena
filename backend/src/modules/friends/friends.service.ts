@@ -179,6 +179,12 @@ export async function declineRequest(callerId: string, requesterId: string): Pro
   }
 }
 
+/** True when an accepted friendship exists between the two users (either direction). */
+export async function areFriends(userA: string, userB: string): Promise<boolean> {
+  const row = await findRow(userA, userB);
+  return row?.status === 'accepted';
+}
+
 // ─── Block ────────────────────────────────────────────────────
 
 export async function blockUser(callerId: string, targetId: string): Promise<void> {

@@ -17,7 +17,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
-import { StatCard, StreakHeatmap, StudyDnaCard } from '../../components';
+import { StatCard, StreakHeatmap, StudyDnaCard, MonthlyStatsModal } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { CoinShopModal } from '../../components/CoinShopModal';
 import { billingEnabled } from '../../services/billing';
@@ -107,6 +107,7 @@ export function ProfileScreen() {
   // ── Modal state ───────────────────────────────────────────────────────────────
 
   const [modalVisible,   setModalVisible]   = useState(false);
+  const [monthlyVisible, setMonthlyVisible] = useState(false);
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [paywallSource,  setPaywallSource]  = useState('profile');
   const isPro = useBillingStore((s) => s.isPro);
@@ -348,14 +349,23 @@ export function ProfileScreen() {
         {/* ── Pet Shop ── */}
         <PetShopSection />
 
-        {/* ── Streak Heat Map ── */}
+        {/* ── Streak Heat Map (tap → full monthly view) ── */}
         {heatmapQ.data && heatmapQ.data.days.length > 0 && (
-          <StreakHeatmap
-            days={heatmapQ.data.days}
-            currentStreak={heatmapQ.data.currentStreak}
-            longestStreak={heatmapQ.data.longestStreak}
-          />
+          <TouchableOpacity activeOpacity={0.85} onPress={() => setMonthlyVisible(true)}>
+            <StreakHeatmap
+              days={heatmapQ.data.days}
+              currentStreak={heatmapQ.data.currentStreak}
+              longestStreak={heatmapQ.data.longestStreak}
+            />
+            <Text style={styles.monthlyHint}>📅 {t('monthly.open')}</Text>
+          </TouchableOpacity>
         )}
+
+        <MonthlyStatsModal
+          visible={monthlyVisible}
+          onClose={() => setMonthlyVisible(false)}
+          username={user?.username}
+        />
 
         {/* ── Study DNA ── */}
         <Text style={styles.sectionLabel}>{t('dna.title')}</Text>
@@ -1096,6 +1106,14 @@ function SubjectCard({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: BG },
+  monthlyHint: {
+    color: MUTED,
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: -16,
+    marginBottom: 24,
+  },
   content: {
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 16 : 24,

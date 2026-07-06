@@ -4,6 +4,7 @@ import type {
   StopTimerResult,
   TimerStats,
   HeatmapResponse,
+  MonthlyStats,
   GhostInfo,
   DnaInfo,
   BossInfo,
@@ -54,6 +55,18 @@ export const timerService = {
   /** Daily focus minutes for the activity heat map (default last 30 days) */
   getHeatmap: (days = 30) =>
     api.get<HeatmapResponse>(`/timer/heatmap?days=${days}`),
+
+  /**
+   * Calendar-month day-by-day + per-subject stats. Own stats when userId is
+   * omitted; a friend's when given (backend enforces the friendship).
+   */
+  getMonthly: (month?: string, userId?: string) => {
+    const qs = new URLSearchParams();
+    if (month) qs.set('month', month);
+    if (userId) qs.set('userId', userId);
+    const q = qs.toString();
+    return api.get<MonthlyStats>(`/timer/monthly${q ? `?${q}` : ''}`);
+  },
 
   /** Ghost race vs. yesterday-you at the same point in the day */
   getGhost: () =>

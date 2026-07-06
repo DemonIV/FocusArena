@@ -7,7 +7,9 @@ import {
   CreateSubjectSchema,
   UpdateSubjectSchema,
   SessionQuerySchema,
+  MonthlyQuerySchema,
 } from './timer.schema';
+import { areFriends } from '../friends';
 import {
   startTimer,
   pauseTimer,
@@ -18,6 +20,7 @@ import {
   getSessions,
   getStats,
   getActivityHeatmap,
+  getMonthlyStats,
   getGhost,
   getStudyDNA,
   getBossBattle,
@@ -189,6 +192,36 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(heatmap);
     } catch (err) {
       request.log.error(err, 'timer/heatmap failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /**
+   * GET /timer/monthly?month=YYYY-MM&userId=…
+   * Calendar-month day-by-day + per-subject stats. Own stats by default;
+   * another user's require an accepted friendship (403 otherwise).
+   */
+  fastify.get('/monthly', async (request, reply) => {
+    const { sub: callerId } = request.user as JwtPayload;
+
+    const parsed = MonthlyQuerySchema.safeParse(request.query);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: 'Validation error', details: parsed.error.flatten() });
+    }
+    const month = parsed.data.month ?? new Date().toISOString().slice(0, 7);
+    const targetId = parsed.data.userId ?? callerId;
+
+    try {
+      if (targetId !== callerId && !(await areFriends(callerId, targetId))) {
+        return reply.code(403).send({ error: 'Forbidden', message: 'Stats are visible to friends only' });
+      }
+      const stats = await getMonthlyStats(targetId, month);
+      return reply.send(stats);
+    } catch (err: unknown) {
+      const e = err as { code?: string; message: string };
+      if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
+      request.log.error(err, 'timer/monthly failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }

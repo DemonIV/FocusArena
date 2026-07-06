@@ -13,6 +13,9 @@ import type {
   TimerStats,
   DailyStat,
   HeatmapResponse,
+  MonthlyStatsResponse,
+  MonthlyDay,
+  MonthlySubjectTotal,
   GhostResponse,
   StudyDnaResponse,
   BossBattleResponse,
@@ -577,6 +580,117 @@ export async function getActivityHeatmap(userId: string, days = 30): Promise<Hea
     longestStreak: userRes.data?.longest_streak ?? 0,
     currentStreak: userRes.data?.streak ?? 0,
   };
+}
+
+/**
+ * Calendar-month stats for a user profile (own or a friend's): every day of
+ * the month with total minutes + per-subject breakdown, and month totals per
+ * subject. Authorization (self / friendship) is the route's responsibility.
+ *
+ * Cached in Redis — past months are immutable so they cache for a day; the
+ * current month refreshes every 5 minutes.
+ */
+export async function getMonthlyStats(targetId: string, month: string): Promise<MonthlyStatsResponse> {
+  const cacheKey = `monthly:${targetId}:${month}`;
+  const cached = await redis.get(cacheKey);
+  if (cached) return JSON.parse(cached) as MonthlyStatsResponse;
+
+  const [year, mon] = month.split('-').map(Number);
+  const start = new Date(Date.UTC(year, mon - 1, 1));
+  const end = new Date(Date.UTC(year, mon, 1));
+  const daysInMonth = Math.round((end.getTime() - start.getTime()) / 86_400_000);
+
+  const [sessionsRes, userRes] = await Promise.all([
+    supabase
+      .from('sessions')
+      .select('started_at, duration_minutes, subject_id')
+      .eq('user_id', targetId)
+      .gte('started_at', start.toISOString())
+      .lt('started_at', end.toISOString()),
+    supabase
+      .from('users')
+      .select('id, username, level, streak')
+      .eq('id', targetId)
+      .single(),
+  ]);
+
+  if (!userRes.data) {
+    throw Object.assign(new Error('User not found'), { code: 'NOT_FOUND' });
+  }
+
+  // Seed every day of the month, then accumulate per day + per subject.
+  const byDate = new Map<string, { totalMinutes: number; subjects: Record<string, number> }>();
+  for (let d = 0; d < daysInMonth; d++) {
+    const key = new Date(start.getTime() + d * 86_400_000).toISOString().slice(0, 10);
+    byDate.set(key, { totalMinutes: 0, subjects: {} });
+  }
+
+  const subjectMinutes = new Map<string, number>(); // '' = no subject
+  let totalMinutes = 0;
+  let sessionsCount = 0;
+
+  for (const row of sessionsRes.data ?? []) {
+    const day = byDate.get(new Date(row.started_at).toISOString().slice(0, 10));
+    if (!day) continue;
+    const minutes = row.duration_minutes ?? 0;
+    if (minutes <= 0) continue;
+    const sid = (row.subject_id as string | null) ?? '';
+
+    day.totalMinutes += minutes;
+    day.subjects[sid] = (day.subjects[sid] ?? 0) + minutes;
+    subjectMinutes.set(sid, (subjectMinutes.get(sid) ?? 0) + minutes);
+    totalMinutes += minutes;
+    sessionsCount += 1;
+  }
+
+  // Resolve subject names/colors — include inactive ones so history stays labelled.
+  const subjectIds = [...subjectMinutes.keys()].filter((id) => id !== '');
+  const subjectRows = subjectIds.length
+    ? (await supabase
+        .from('subjects')
+        .select('id, name, icon, color')
+        .in('id', subjectIds)).data ?? []
+    : [];
+  const subjectInfo = new Map(subjectRows.map((s) => [s.id as string, s]));
+
+  const subjects: MonthlySubjectTotal[] = [...subjectMinutes.entries()]
+    .map(([id, minutes]) => {
+      const info = id ? subjectInfo.get(id) : undefined;
+      return {
+        id: id || null,
+        name: (info?.name as string | undefined) ?? null,
+        icon: (info?.icon as string | undefined) ?? null,
+        color: (info?.color as string | undefined) ?? null,
+        totalMinutes: minutes,
+      };
+    })
+    .sort((a, b) => b.totalMinutes - a.totalMinutes);
+
+  const days: MonthlyDay[] = [...byDate.entries()].map(([date, d]) => ({
+    date,
+    totalMinutes: d.totalMinutes,
+    ...(d.totalMinutes > 0 ? { subjects: d.subjects } : {}),
+  }));
+
+  const activeDays = days.filter((d) => d.totalMinutes > 0).length;
+  const bestDayMinutes = days.reduce((max, d) => Math.max(max, d.totalMinutes), 0);
+
+  const result: MonthlyStatsResponse = {
+    user: {
+      id: userRes.data.id as string,
+      username: userRes.data.username as string,
+      level: (userRes.data.level as number) ?? 1,
+      streak: (userRes.data.streak as number) ?? 0,
+    },
+    month,
+    days,
+    subjects,
+    summary: { totalMinutes, activeDays, sessionsCount, bestDayMinutes },
+  };
+
+  const isCurrentMonth = month === new Date().toISOString().slice(0, 7);
+  await redis.set(cacheKey, JSON.stringify(result), 'EX', isCurrentMonth ? 300 : 86_400);
+  return result;
 }
 
 /**

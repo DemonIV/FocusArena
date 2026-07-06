@@ -210,6 +210,18 @@
     "errGeneric": "Le code n'a pas pu être utilisé. Réessaie.",
     "leaderboardEmpty": "Ajoute des amis pour vous affronter — invites-en un et vous gagnez chacun 500 pièces !"
   },
+  "monthly": {
+    "title": "Statistiques mensuelles",
+    "open": "Voir les stats mensuelles et matières",
+    "loadFailed": "Impossible de charger les statistiques. Réessaie.",
+    "noSubject": "Sans matière",
+    "noActivityDay": "Pas de concentration ce jour-là.",
+    "noActivityMonth": "Pas encore de temps de concentration ce mois-ci.",
+    "totalLabel": "Concentration totale",
+    "activeDaysLabel": "Jours actifs",
+    "bestDayLabel": "Meilleur jour",
+    "subjectsTitle": "Matières"
+  },
   "profile": {
     "level": "Niv {{level}}",
     "levelN": "Niveau {{level}}",

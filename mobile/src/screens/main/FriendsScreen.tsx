@@ -13,7 +13,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { friendsService } from '../../services';
-import { FramedAvatar } from '../../components';
+import { FramedAvatar, MonthlyStatsModal } from '../../components';
 import { getPetEmoji } from '../../constants';
 import { useSocketStore, useAuthStore } from '../../stores';
 import { useInviteShare } from '../../hooks';
@@ -45,6 +45,8 @@ export function FriendsScreen() {
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [referralCode, setReferralCode] = useState('');
+  // Friend whose monthly stats are open (tap a friend row)
+  const [statsFriend, setStatsFriend] = useState<{ id: string; username: string } | null>(null);
 
   const shareInvite = useInviteShare('friends');
 
@@ -160,15 +162,18 @@ export function FriendsScreen() {
             <Text style={styles.avatarLetter}>{item.username.charAt(0).toUpperCase()}</Text>
           </View>
         )}
-        <View style={styles.rowInfo}>
+        <TouchableOpacity
+          style={styles.rowInfo}
+          onPress={() => setStatsFriend({ id: item.friendId, username: item.username })}
+        >
           <Text style={styles.rowName}>
             {item.username}
             {getPetEmoji(item.pet) ? ` ${getPetEmoji(item.pet)}` : ''}
           </Text>
           <Text style={[styles.rowStatus, { color: STATUS_COLOR[status] ?? '#3a3a5a' }]}>
-            {STATUS_ICON[status] ?? '💤'} {t(`status.${status}`, { defaultValue: status })}
+            {STATUS_ICON[status] ?? '💤'} {t(`status.${status}`, { defaultValue: status })} 📊
           </Text>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => muteMut.mutate({ userId: item.friendId, muted: !item.muted })}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -389,6 +394,13 @@ export function FriendsScreen() {
           />
         </View>
       )}
+
+      <MonthlyStatsModal
+        visible={statsFriend !== null}
+        onClose={() => setStatsFriend(null)}
+        userId={statsFriend?.id}
+        username={statsFriend?.username}
+      />
     </View>
   );
 }

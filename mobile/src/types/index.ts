@@ -182,6 +182,35 @@ export interface HeatmapResponse {
   currentStreak: number;
 }
 
+// ── Monthly profile stats (own or a friend's) ──
+
+export interface MonthlySubjectTotal {
+  id: string | null;     // null = sessions without a (surviving) subject
+  name: string | null;
+  icon: string | null;
+  color: string | null;
+  totalMinutes: number;
+}
+
+export interface MonthlyDay {
+  date: string;          // YYYY-MM-DD (UTC)
+  totalMinutes: number;
+  subjects?: Record<string, number>; // minutes per subject id ('' = none)
+}
+
+export interface MonthlyStats {
+  user: { id: string; username: string; level: number; streak: number };
+  month: string;         // YYYY-MM
+  days: MonthlyDay[];    // full month, ascending, zeros filled
+  subjects: MonthlySubjectTotal[]; // month totals, descending
+  summary: {
+    totalMinutes: number;
+    activeDays: number;
+    sessionsCount: number;
+    bestDayMinutes: number;
+  };
+}
+
 export interface CountryEntry {
   rank: number;
   country: string;       // ISO 3166-1 alpha-2 (uppercase)

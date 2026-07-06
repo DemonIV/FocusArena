@@ -7,3 +7,5 @@ export const friendsModule: FastifyPluginAsync = async (fastify) => {
 
 // Exported for the WebSocket handler (presence:ping updates global user status)
 export { setUserStatus, getUserStatus } from './friends.service';
+// Exported for cross-module authorization (e.g. viewing a friend's monthly stats)
+export { areFriends } from './friends.service';
