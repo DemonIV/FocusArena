@@ -120,7 +120,7 @@ export function FriendsScreen() {
       qc.invalidateQueries({ queryKey: ['friends'] });
       qc.invalidateQueries({ queryKey: ['frames'] }); // coin balance lives here
       Alert.alert(
-        t('invite.redeemSuccessTitle'),
+        t('invite.redeemSuccessTitle', { coins: res.coinsAwarded }),
         t('invite.redeemSuccessMsg', { name: res.referrerUsername, coins: res.coinsAwarded }),
       );
     },
