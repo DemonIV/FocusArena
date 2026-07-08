@@ -298,7 +298,9 @@
     "settings": "Настройки",
     "pushNotifications": "Уведомления",
     "pushToggleFailed": "Не удалось обновить настройку уведомлений. Попробуй ещё раз.",
-    "subjectDistribution": "Распределение занятий"
+    "subjectDistribution": "Распределение занятий",
+    "focusScoreWeek": "Качество фокуса на этой неделе",
+    "focusScoreHint": "Средний балл по сессиям"
   },
   "rooms": {
     "createRoom": "+ Создать комнату",
@@ -388,6 +390,10 @@
     "focused": "в фокусе",
     "dayN": "День {{count}}",
     "globalRank": "Мировой ранг: #{{rank}}",
+    "focusScore": "Оценка фокуса",
+    "focusCompletion": "Завершение",
+    "focusPresence": "Присутствие",
+    "focusSteadiness": "Стабильность",
     "shareUnavailable": "Общий доступ недоступен на этом устройстве",
     "shareFailed": "Не удалось поделиться"
   },

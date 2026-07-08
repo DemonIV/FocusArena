@@ -4,6 +4,7 @@ import type { JwtPayload } from '../auth/auth.schema';
 import { captureException, track } from '../../shared/observability';
 import {
   StartTimerSchema,
+  StopTimerSchema,
   CreateSubjectSchema,
   UpdateSubjectSchema,
   SessionQuerySchema,
@@ -106,8 +107,12 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
   /** POST /timer/stop */
   fastify.post('/stop', async (request, reply) => {
     const { sub: userId } = request.user as JwtPayload;
+    // Distraction telemetry is optional — an empty/missing body scores on
+    // completion alone (safe default for older clients).
+    const parsed = StopTimerSchema.safeParse(request.body ?? {});
+    const telemetry = parsed.success ? parsed.data : { exits: 0, awayMs: 0, pauses: 0 };
     try {
-      const result = await stopTimer(userId);
+      const result = await stopTimer(userId, telemetry);
       return reply.send({ result });
     } catch (err: unknown) {
       const e = err as { code?: string; message: string };

@@ -298,7 +298,9 @@
     "settings": "Settings",
     "pushNotifications": "Notifications",
     "pushToggleFailed": "Could not update notification setting. Please try again.",
-    "subjectDistribution": "Study Distribution"
+    "subjectDistribution": "Study Distribution",
+    "focusScoreWeek": "This week's focus quality",
+    "focusScoreHint": "Avg score across your sessions"
   },
   "rooms": {
     "createRoom": "+ Create Room",
@@ -388,6 +390,10 @@
     "focused": "focused",
     "dayN": "Day {{count}}",
     "globalRank": "Global Rank: #{{rank}}",
+    "focusScore": "Focus Score",
+    "focusCompletion": "Completion",
+    "focusPresence": "Presence",
+    "focusSteadiness": "Steadiness",
     "shareUnavailable": "Sharing isn't available on this device",
     "shareFailed": "Couldn't share"
   },

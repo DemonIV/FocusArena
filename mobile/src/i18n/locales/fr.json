@@ -298,7 +298,9 @@
     "settings": "Paramètres",
     "pushNotifications": "Notifications",
     "pushToggleFailed": "Impossible de mettre à jour le paramètre de notifications. Réessaie.",
-    "subjectDistribution": "Répartition du travail"
+    "subjectDistribution": "Répartition du travail",
+    "focusScoreWeek": "Qualité de concentration cette semaine",
+    "focusScoreHint": "Score moyen de vos sessions"
   },
   "rooms": {
     "createRoom": "+ Créer une salle",
@@ -388,6 +390,10 @@
     "focused": "concentré",
     "dayN": "Jour {{count}}",
     "globalRank": "Rang mondial : #{{rank}}",
+    "focusScore": "Score de concentration",
+    "focusCompletion": "Achèvement",
+    "focusPresence": "Présence",
+    "focusSteadiness": "Régularité",
     "shareUnavailable": "Le partage n'est pas disponible sur cet appareil",
     "shareFailed": "Échec du partage"
   },

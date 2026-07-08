@@ -41,6 +41,7 @@ import {
 } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
+import type { FocusScoreBreakdown } from '../../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,7 @@ export function TimerScreen() {
     xpEarned: number;
     coinsEarned: number;
     streak: number;
+    focus?: FocusScoreBreakdown | null;
   } | null>(null);
 
   // Zen Mode — Pro-exclusive immersive focus screen
@@ -189,6 +191,7 @@ export function TimerScreen() {
           xpEarned: result.xpEarned,
           coinsEarned: result.coinsEarned ?? 0,
           streak: result.newStreak,
+          focus: result.focus,
         });
       }
     });
@@ -373,6 +376,7 @@ export function TimerScreen() {
                   xpEarned: result.xpEarned,
                   coinsEarned: result.coinsEarned ?? 0,
                   streak: result.newStreak,
+                  focus: result.focus,
                 });
               } else if (result) {
                 Alert.alert(
@@ -946,6 +950,7 @@ export function TimerScreen() {
           xpEarned={receipt.xpEarned}
           coinsEarned={receipt.coinsEarned}
           streak={receipt.streak}
+          focus={receipt.focus}
         />
       )}
 

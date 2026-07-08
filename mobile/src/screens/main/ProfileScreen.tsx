@@ -52,6 +52,13 @@ const SUBJECT_ICONS = ['📚', '💻', '🔬', '🎨', '🏃', '🎵', '🗣️'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+/** Focus Score → colour tier (matches the receipt badge). */
+function focusScoreColor(score: number): string {
+  if (score >= 85) return '#10b981';
+  if (score >= 60) return '#fbbf24';
+  return '#f87171';
+}
+
 function fmtMinutes(m: number): string {
   if (m === 0) return '—';
   const min = i18n.t('common.minShort');
@@ -373,6 +380,20 @@ export function ProfileScreen() {
             <Text style={styles.sectionLabel}>{t('profile.subjectDistribution')}</Text>
             <SubjectDonutCard subjects={subjects} />
           </>
+        )}
+
+        {/* ── Weekly Focus Score ── */}
+        {stats?.week?.avgFocusScore != null && (
+          <View style={styles.focusWeekCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.focusWeekLabel}>🎯 {t('profile.focusScoreWeek')}</Text>
+              <Text style={styles.focusWeekHint}>{t('profile.focusScoreHint')}</Text>
+            </View>
+            <Text style={[styles.focusWeekValue, { color: focusScoreColor(stats.week.avgFocusScore) }]}>
+              {stats.week.avgFocusScore}
+              <Text style={styles.focusWeekMax}>/100</Text>
+            </Text>
+          </View>
         )}
 
         {/* ── Stats Grid ── */}
@@ -1237,6 +1258,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
+
+  // ── Weekly Focus Score card ──
+  focusWeekCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    marginBottom: 16,
+    gap: 12,
+  },
+  focusWeekLabel: { color: TEXT, fontSize: 15, fontWeight: '700' },
+  focusWeekHint: { color: MUTED, fontSize: 12, marginTop: 3 },
+  focusWeekValue: { fontSize: 30, fontWeight: '900', letterSpacing: -1 },
+  focusWeekMax: { color: MUTED, fontSize: 13, fontWeight: '700' },
   addButton: {
     backgroundColor: `${ACCENT}18`,
     borderRadius: 20,

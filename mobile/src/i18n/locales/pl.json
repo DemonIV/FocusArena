@@ -298,7 +298,9 @@
     "settings": "Ustawienia",
     "pushNotifications": "Powiadomienia",
     "pushToggleFailed": "Nie udało się zaktualizować ustawienia powiadomień. Spróbuj ponownie.",
-    "subjectDistribution": "Rozkład nauki"
+    "subjectDistribution": "Rozkład nauki",
+    "focusScoreWeek": "Jakość skupienia w tym tygodniu",
+    "focusScoreHint": "Średni wynik z twoich sesji"
   },
   "rooms": {
     "createRoom": "+ Utwórz pokój",
@@ -388,6 +390,10 @@
     "focused": "skupienia",
     "dayN": "Dzień {{count}}",
     "globalRank": "Pozycja globalna: #{{rank}}",
+    "focusScore": "Wynik skupienia",
+    "focusCompletion": "Ukończenie",
+    "focusPresence": "Obecność",
+    "focusSteadiness": "Stabilność",
     "shareUnavailable": "Udostępnianie jest niedostępne na tym urządzeniu",
     "shareFailed": "Nie udało się udostępnić"
   },

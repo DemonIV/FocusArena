@@ -15,6 +15,8 @@ import { useQuery } from '@tanstack/react-query';
 import { leaderboardService } from '../services';
 import { track } from '../services/analytics';
 
+import type { FocusScoreBreakdown } from '../types';
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -24,6 +26,15 @@ interface Props {
   /** Coins earned this session — shown alongside XP */
   coinsEarned?: number;
   streak: number;
+  /** Focus Score breakdown for this session (omitted for aggregated cycle receipts) */
+  focus?: FocusScoreBreakdown | null;
+}
+
+/** Score → colour tier for the Focus Score badge. */
+function scoreColor(score: number): string {
+  if (score >= 85) return '#10b981'; // green — dialed in
+  if (score >= 60) return '#fbbf24'; // amber — decent
+  return '#f87171';                  // red — distracted
 }
 
 const ACCENT = '#00d2ff';
@@ -42,6 +53,7 @@ export function StudyReceiptModal({
   xpEarned,
   coinsEarned = 0,
   streak,
+  focus,
 }: Props) {
   const { t } = useTranslation();
   const cardRef = useRef<View>(null);
@@ -111,6 +123,21 @@ export function StudyReceiptModal({
               )}
             </View>
 
+            {focus && (
+              <View style={styles.focusBox}>
+                <View style={styles.focusHead}>
+                  <Text style={styles.focusLabel}>🎯 {t('receipt.focusScore')}</Text>
+                  <Text style={[styles.focusScore, { color: scoreColor(focus.score) }]}>
+                    {focus.score}
+                    <Text style={styles.focusScoreMax}>/100</Text>
+                  </Text>
+                </View>
+                <FocusBar label={t('receipt.focusCompletion')} value={focus.completion} />
+                <FocusBar label={t('receipt.focusPresence')} value={focus.presence} />
+                <FocusBar label={t('receipt.focusSteadiness')} value={focus.steadiness} />
+              </View>
+            )}
+
             {rank != null && (
               <Text style={styles.rank}>{t('receipt.globalRank', { rank })}</Text>
             )}
@@ -138,6 +165,19 @@ export function StudyReceiptModal({
         </View>
       </View>
     </Modal>
+  );
+}
+
+/** One labelled 0–100 bar in the Focus Score breakdown. */
+function FocusBar({ label, value }: { label: string; value: number }) {
+  return (
+    <View style={styles.barRow}>
+      <Text style={styles.barLabel}>{label}</Text>
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, { width: `${Math.max(3, value)}%`, backgroundColor: scoreColor(value) }]} />
+      </View>
+      <Text style={styles.barValue}>{value}</Text>
+    </View>
   );
 }
 
@@ -233,6 +273,39 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 14,
   },
+
+  // ── Focus Score ──
+  focusBox: {
+    marginTop: 24,
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 8,
+  },
+  focusHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  focusLabel: { color: TEXT, fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
+  focusScore: { fontSize: 22, fontWeight: '900', letterSpacing: -0.5 },
+  focusScoreMax: { color: MUTED, fontSize: 12, fontWeight: '700' },
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  barLabel: { color: MUTED, fontSize: 11, fontWeight: '600', width: 78 },
+  barTrack: {
+    flex: 1,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
+  },
+  barFill: { height: '100%', borderRadius: 3 },
+  barValue: { color: TEXT, fontSize: 11, fontWeight: '700', width: 24, textAlign: 'right' },
   url: {
     color: MUTED,
     fontSize: 12,

@@ -298,7 +298,9 @@
     "settings": "Instellingen",
     "pushNotifications": "Meldingen",
     "pushToggleFailed": "Kon de meldingsinstelling niet bijwerken. Probeer opnieuw.",
-    "subjectDistribution": "Studieverdeling"
+    "subjectDistribution": "Studieverdeling",
+    "focusScoreWeek": "Focuskwaliteit deze week",
+    "focusScoreHint": "Gem. score over je sessies"
   },
   "rooms": {
     "createRoom": "+ Kamer maken",
@@ -388,6 +390,10 @@
     "focused": "gefocust",
     "dayN": "Dag {{count}}",
     "globalRank": "Wereldwijde positie: #{{rank}}",
+    "focusScore": "Focusscore",
+    "focusCompletion": "Voltooiing",
+    "focusPresence": "Aanwezigheid",
+    "focusSteadiness": "Standvastigheid",
     "shareUnavailable": "Delen is niet beschikbaar op dit apparaat",
     "shareFailed": "Kon niet delen"
   },

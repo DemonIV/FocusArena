@@ -17,6 +17,12 @@ interface TimerStore {
   isActive: boolean;
   isLoading: boolean;
 
+  // Focus Score telemetry — accumulated over the session, sent on stop
+  exits: number;       // app→background transitions while running
+  awayMs: number;      // total ms spent outside the app while running
+  pauses: number;      // number of pauses
+  _bgAt: number | null; // epoch ms of the current background spell (null if foreground)
+
   // Data
   subjects: Subject[];
   stats: TimerStats | null;
@@ -41,12 +47,16 @@ interface TimerStore {
   loadSubjects: () => Promise<void>;
   loadStats: () => Promise<void>;
   reset: () => void;
+
+  // Focus Score telemetry (driven by the AppState listener in useFocusTracking)
+  noteBackground: () => void;
+  noteForeground: () => void;
 }
 
 const INITIAL: Omit<
   TimerStore,
   'start' | 'pause' | 'resume' | 'stop' | 'syncWithServer' | 'tick' | 'loadSubjects' | 'loadStats' | 'reset'
-  | '_onComplete' | 'setOnComplete'
+  | '_onComplete' | 'setOnComplete' | 'noteBackground' | 'noteForeground'
 > = {
   sessionId: null,
   duration: 25,
@@ -58,6 +68,10 @@ const INITIAL: Omit<
   remainingMs: 0,
   isActive: false,
   isLoading: false,
+  exits: 0,
+  awayMs: 0,
+  pauses: 0,
+  _bgAt: null,
   subjects: [],
   stats: null,
   _interval: null,
@@ -67,6 +81,20 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   ...INITIAL,
   _onComplete: null,
   setOnComplete: (cb) => set({ _onComplete: cb }),
+
+  // ── Focus Score telemetry ──────────────────────────────────────────────
+  // Only count leaving while genuinely focusing: a paused session is a
+  // legitimate way to step away, so it doesn't hurt the presence score.
+  noteBackground: () => {
+    const s = get();
+    if (!s.isActive || s.isPaused || s._bgAt !== null) return;
+    set({ _bgAt: Date.now(), exits: s.exits + 1 });
+  },
+  noteForeground: () => {
+    const s = get();
+    if (s._bgAt === null) return;
+    set({ awayMs: s.awayMs + (Date.now() - s._bgAt), _bgAt: null });
+  },
 
   tick: () => {
     const s = get();
@@ -99,6 +127,10 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
         elapsedMs: 0,
         remainingMs: duration * 60_000,
         isActive: true,
+        exits: 0,
+        awayMs: 0,
+        pauses: 0,
+        _bgAt: null,
         _interval: interval,
       });
     } finally {
@@ -111,8 +143,16 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     const { _interval } = get();
     if (_interval) { clearInterval(_interval); set({ _interval: null }); }
 
-    // 2️⃣ Optimistic update: mark paused NOW so tick() guard works
-    set({ isLoading: true, isPaused: true });
+    // 2️⃣ Optimistic update: mark paused NOW so tick() guard works.
+    //    Also close any in-flight away spell and count the pause (Focus Score).
+    const bg = get()._bgAt;
+    set({
+      isLoading: true,
+      isPaused: true,
+      pauses: get().pauses + 1,
+      awayMs: get().awayMs + (bg !== null ? Date.now() - bg : 0),
+      _bgAt: null,
+    });
 
     let apiFailed = false;
     try {
@@ -174,9 +214,16 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   stop: async () => {
     const { _interval } = get();
     if (_interval) { clearInterval(_interval); set({ _interval: null }); }
+    // Snapshot Focus Score telemetry, folding in any still-open away spell.
+    const s = get();
+    const telemetry = {
+      exits: s.exits,
+      awayMs: s.awayMs + (s._bgAt !== null ? Date.now() - s._bgAt : 0),
+      pauses: s.pauses,
+    };
     set({ isLoading: true });
     try {
-      const { result } = await timerService.stop();
+      const { result } = await timerService.stop(telemetry);
       set({ ...INITIAL });
       return result;
     } catch (err: any) {

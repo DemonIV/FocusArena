@@ -298,7 +298,9 @@
     "settings": "Ajustes",
     "pushNotifications": "Notificaciones",
     "pushToggleFailed": "No se pudo actualizar el ajuste de notificaciones. Inténtalo de nuevo.",
-    "subjectDistribution": "Distribución de estudio"
+    "subjectDistribution": "Distribución de estudio",
+    "focusScoreWeek": "Calidad de enfoque esta semana",
+    "focusScoreHint": "Puntuación media de tus sesiones"
   },
   "rooms": {
     "createRoom": "+ Crear sala",
@@ -388,6 +390,10 @@
     "focused": "concentrado",
     "dayN": "Día {{count}}",
     "globalRank": "Rango global: #{{rank}}",
+    "focusScore": "Puntuación de enfoque",
+    "focusCompletion": "Finalización",
+    "focusPresence": "Presencia",
+    "focusSteadiness": "Constancia",
     "shareUnavailable": "Compartir no está disponible en este dispositivo",
     "shareFailed": "No se pudo compartir"
   },

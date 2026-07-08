@@ -69,6 +69,14 @@ export type TimerStatusResponse =
       subjectId?: string;
     };
 
+/** 0–100 sub-scores that make up a session's Focus Score. */
+export interface FocusScoreBreakdown {
+  score: number;
+  completion: number;
+  presence: number;
+  steadiness: number;
+}
+
 export interface StopTimerResult {
   sessionId: string;
   durationMinutes: number;
@@ -80,6 +88,15 @@ export interface StopTimerResult {
   newCoins: number;
   newLevel: number;
   newStreak: number;
+  /** Focus Score breakdown (null when the session had 0 minutes) */
+  focus: FocusScoreBreakdown | null;
+}
+
+/** Distraction telemetry sent to /timer/stop to compute the Focus Score. */
+export interface FocusTelemetry {
+  exits: number;
+  awayMs: number;
+  pauses: number;
 }
 
 export interface Subject {
@@ -130,6 +147,8 @@ export interface TimerStats {
     totalMinutes: number;
     sessionsCount: number;
     dailyBreakdown: DailyStat[];
+    /** Average Focus Score this week (null if no scored sessions; absent on older backends) */
+    avgFocusScore?: number | null;
   };
   allTime: {
     totalMinutes: number;

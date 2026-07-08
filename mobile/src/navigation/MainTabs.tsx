@@ -19,6 +19,7 @@ import {
   FriendsScreen,
   ProfileScreen,
 } from '../screens';
+import { useFocusTracking } from '../hooks';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -43,6 +44,9 @@ const NAV_KEY: Record<string, string> = {
 export function MainTabs() {
   const { t } = useTranslation();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  // App-wide AppState tracking for the Focus Score (away time / app-switches).
+  useFocusTracking();
 
   // Register this device for push notifications once the user is in the app.
   useEffect(() => {

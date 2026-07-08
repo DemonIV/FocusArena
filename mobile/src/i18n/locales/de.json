@@ -298,7 +298,9 @@
     "settings": "Einstellungen",
     "pushNotifications": "Benachrichtigungen",
     "pushToggleFailed": "Benachrichtigungseinstellung konnte nicht aktualisiert werden. Bitte erneut versuchen.",
-    "subjectDistribution": "Lernverteilung"
+    "subjectDistribution": "Lernverteilung",
+    "focusScoreWeek": "Fokusqualität diese Woche",
+    "focusScoreHint": "Durchschnitt deiner Sitzungen"
   },
   "rooms": {
     "createRoom": "+ Raum erstellen",
@@ -388,6 +390,10 @@
     "focused": "fokussiert",
     "dayN": "Tag {{count}}",
     "globalRank": "Globaler Rang: #{{rank}}",
+    "focusScore": "Fokus-Score",
+    "focusCompletion": "Abschluss",
+    "focusPresence": "Präsenz",
+    "focusSteadiness": "Beständigkeit",
     "shareUnavailable": "Teilen ist auf diesem Gerät nicht verfügbar",
     "shareFailed": "Konnte nicht geteilt werden"
   },

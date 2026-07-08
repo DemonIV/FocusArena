@@ -7,6 +7,21 @@ export const StartTimerSchema = z.object({
   subjectId: z.string().uuid('Invalid subject ID').optional(),
 });
 
+/**
+ * Optional distraction telemetry the client gathers over the session, used to
+ * compute the Focus Score. All fields default to 0 so older clients (which
+ * don't send a body) still get a sensible, presence-perfect score.
+ */
+export const StopTimerSchema = z.object({
+  /** Times the app was sent to the background while the session was running */
+  exits: z.number().int().min(0).max(1000).default(0),
+  /** Total ms spent outside the app while the session was running */
+  awayMs: z.number().int().min(0).default(0),
+  /** Times the session was paused */
+  pauses: z.number().int().min(0).max(1000).default(0),
+});
+export type StopTimerBody = z.infer<typeof StopTimerSchema>;
+
 export const CreateSubjectSchema = z.object({
   name: z.string().min(1).max(50),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex color e.g. #FF5733'),
@@ -64,6 +79,18 @@ export type TimerStatusResponse =
       subjectId?: string;
     };
 
+/** 0–100 sub-scores that make up the Focus Score (shown as a receipt breakdown). */
+export interface FocusScoreBreakdown {
+  /** Overall 0–100 focus quality */
+  score: number;
+  /** Fraction of the planned duration actually focused */
+  completion: number;
+  /** How much of the session was spent inside the app (away time penalised) */
+  presence: number;
+  /** Freedom from app-switches and pauses */
+  steadiness: number;
+}
+
 export interface StopTimerResult {
   sessionId: string;
   durationMinutes: number;
@@ -75,6 +102,8 @@ export interface StopTimerResult {
   newCoins: number;
   newLevel: number;
   newStreak: number;
+  /** Focus Score breakdown for this session (null when the session had 0 minutes) */
+  focus: FocusScoreBreakdown | null;
 }
 
 export interface DailyStat {
@@ -186,6 +215,8 @@ export interface TimerStats {
     totalMinutes: number;
     sessionsCount: number;
     dailyBreakdown: DailyStat[];
+    /** Average Focus Score across this week's scored sessions (null if none) */
+    avgFocusScore: number | null;
   };
   allTime: {
     totalMinutes: number;

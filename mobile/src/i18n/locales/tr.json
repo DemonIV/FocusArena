@@ -298,7 +298,9 @@
     "settings": "Ayarlar",
     "pushNotifications": "Bildirimler",
     "pushToggleFailed": "Bildirim ayarı güncellenemedi. Lütfen tekrar dene.",
-    "subjectDistribution": "Çalışma Dağılımı"
+    "subjectDistribution": "Çalışma Dağılımı",
+    "focusScoreWeek": "Bu haftaki odak kalitesi",
+    "focusScoreHint": "Seanslarının ortalama skoru"
   },
   "rooms": {
     "createRoom": "+ Oda Kur",
@@ -388,6 +390,10 @@
     "focused": "odaklanıldı",
     "dayN": "{{count}}. gün",
     "globalRank": "Küresel Sıra: #{{rank}}",
+    "focusScore": "Odak Skoru",
+    "focusCompletion": "Tamamlama",
+    "focusPresence": "Varlık",
+    "focusSteadiness": "İstikrar",
     "shareUnavailable": "Bu cihazda paylaşım kullanılamıyor",
     "shareFailed": "Paylaşılamadı"
   },

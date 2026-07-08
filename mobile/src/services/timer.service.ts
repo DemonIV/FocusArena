@@ -28,8 +28,8 @@ export const timerService = {
   resume: () =>
     api.post<StateResponse>('/timer/resume'),
 
-  stop: () =>
-    api.post<StopResponse>('/timer/stop'),
+  stop: (telemetry?: import('../types').FocusTelemetry) =>
+    api.post<StopResponse>('/timer/stop', telemetry),
 
   /** Pay coins to save a strict-mode session after leaving the app */
   rescue: () =>

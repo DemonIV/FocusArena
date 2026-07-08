@@ -10,6 +10,8 @@ import type {
   ActiveTimerState,
   TimerStatusResponse,
   StopTimerResult,
+  StopTimerBody,
+  FocusScoreBreakdown,
   TimerStats,
   DailyStat,
   HeatmapResponse,
@@ -81,6 +83,34 @@ function refreshActiveFocusCount(): void {
 
 function computeLevel(xp: number): number {
   return Math.floor(xp / XP_PER_LEVEL) + 1;
+}
+
+const clamp100 = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
+
+/**
+ * Focus Score (0–100) — a quality score for a single session, blending three
+ * 0–100 components:
+ *   • completion — how much of the planned duration was actually focused
+ *   • presence   — time spent inside the app (away time penalised ~1.5×)
+ *   • steadiness — freedom from app-switches (exits) and pauses
+ * Rewards undistracted focus, unlike XP/coins which reward raw volume. Never
+ * feeds leaderboards. Distraction inputs default to 0, so a client that sends
+ * no telemetry scores on completion alone (presence/steadiness = perfect).
+ */
+function computeFocusScore(
+  durationMinutes: number,
+  intendedMinutes: number,
+  { exits, awayMs, pauses }: StopTimerBody,
+): FocusScoreBreakdown | null {
+  if (durationMinutes <= 0) return null;
+
+  const sessionMs = durationMinutes * 60_000;
+  const completion = clamp100((durationMinutes / Math.max(1, intendedMinutes)) * 100);
+  const presence = clamp100(100 - (awayMs / sessionMs) * 150);
+  const steadiness = clamp100(100 - exits * 12 - pauses * 5);
+  const score = clamp100(0.35 * completion + 0.35 * presence + 0.3 * steadiness);
+
+  return { score, completion, presence, steadiness };
 }
 
 /** Total elapsed ms for a state snapshot taken right now */
@@ -195,13 +225,17 @@ export async function resumeTimer(userId: string): Promise<ActiveTimerState> {
   return updated;
 }
 
-export async function stopTimer(userId: string): Promise<StopTimerResult> {
+export async function stopTimer(
+  userId: string,
+  telemetry: StopTimerBody = { exits: 0, awayMs: 0, pauses: 0 },
+): Promise<StopTimerResult> {
   const state = await readState(userId);
   if (!state) throw Object.assign(new Error('No active session'), { code: 'NO_TIMER' });
 
   const elapsedMs = computeElapsedMs(state);
   const durationMinutes = Math.max(0, Math.floor(elapsedMs / 60_000));
   const wasCompleted = elapsedMs >= state.duration * 60_000 * COMPLETION_THRESHOLD;
+  const focus = computeFocusScore(durationMinutes, state.duration, telemetry);
 
   // 🔑 Clear Redis FIRST — even if the DB update below fails, the user won't be
   // stuck with "A session is already active" on their next start attempt.
@@ -215,13 +249,14 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
       ended_at: new Date().toISOString(),
       duration_minutes: durationMinutes,
       was_completed: wasCompleted,
+      focus_score: focus?.score ?? null,
     })
     .eq('id', state.sessionId);
 
   if (error) {
     // Log but don't re-throw — Redis is already cleared, no point blocking the user
     console.error(`stopTimer: DB update failed (session=${state.sessionId}): ${error.message}`);
-    return { sessionId: state.sessionId, durationMinutes, wasCompleted: false, xpEarned: 0, coinsEarned: 0, newXp: 0, newCoins: 0, newLevel: 1, newStreak: 0 };
+    return { sessionId: state.sessionId, durationMinutes, wasCompleted: false, xpEarned: 0, coinsEarned: 0, newXp: 0, newCoins: 0, newLevel: 1, newStreak: 0, focus: null };
   }
 
   // Attribute studied minutes to every room the user is in (fire-and-forget).
@@ -234,10 +269,11 @@ export async function stopTimer(userId: string): Promise<StopTimerResult> {
 
   // XP + streak — only on completion
   if (!wasCompleted || durationMinutes === 0) {
-    return { sessionId: state.sessionId, durationMinutes, wasCompleted, xpEarned: 0, coinsEarned: 0, newXp: 0, newCoins: 0, newLevel: 1, newStreak: 0 };
+    return { sessionId: state.sessionId, durationMinutes, wasCompleted, xpEarned: 0, coinsEarned: 0, newXp: 0, newCoins: 0, newLevel: 1, newStreak: 0, focus };
   }
 
   const result = await awardXpAndStreak(userId, state.sessionId, durationMinutes);
+  result.focus = focus;
 
   // Bust leaderboard and aggregate caches (fire-and-forget)
   void Promise.allSettled([
@@ -393,6 +429,7 @@ async function awardXpAndStreak(
     newCoins,
     newLevel,
     newStreak,
+    focus: null, // filled in by the caller (stopTimer) with the computed breakdown
   };
 }
 
@@ -454,7 +491,7 @@ export async function getStats(userId: string): Promise<TimerStats> {
 
     supabase
       .from('sessions')
-      .select('started_at, duration_minutes, was_completed')
+      .select('started_at, duration_minutes, was_completed, focus_score')
       .eq('user_id', userId)
       .gte('started_at', weekStart.toISOString())
       .lt('started_at', weekEnd.toISOString()),
@@ -511,10 +548,16 @@ export async function getStats(userId: string): Promise<TimerStats> {
   }
 
   const dailyBreakdown = [...byDate.values()];
+  // Average Focus Score over this week's scored sessions (older sessions are null)
+  const scored = weekSessions.filter((r) => r.focus_score != null);
+  const avgFocusScore = scored.length
+    ? Math.round(scored.reduce((s, r) => s + (r.focus_score as number), 0) / scored.length)
+    : null;
   const week = {
     totalMinutes: weekSessions.reduce((s, r) => s + r.duration_minutes, 0),
     sessionsCount: weekSessions.length,
     dailyBreakdown,
+    avgFocusScore,
   };
 
   // All time
