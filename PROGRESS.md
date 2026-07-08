@@ -161,7 +161,18 @@
 - **GERÇEK APP ICON tasarlandı** (`c0fcf6f`): "birlikte ders çalışan iki figür" — cyan + pembe iki dost (oturan/eğik poz, versiyon B), paylaşılan açık kitap, aydınlanma ışıltısı, koyu gradyan + cyan hale (uygulama teması). Vektör SVG → `sharp` ile raster (scratchpad'de kuruldu). **`icon.png` 1024×1024 OPAK (alpha yok)** = App Store uyumlu; ayrıca `adaptive-icon.png` (Android), `splash.png` (şeffaf ön-plan), `notification-icon.png` (beyaz silüet). Onay artif:  https://claude.ai/code/artifact/714f6bf3-0683-497c-a4e5-cd1337d0ec09
 - `ios.buildNumber` 2→**3** (autoIncrement zaten açık; build 2 reddedilen submit'te kullanıldığı için unique olmalı).
 - **App Store Connect'te uygulama OLUŞTURULDU**: "StudySquad" / `com.studysquadhq.app`, TestFlight grubu + `alperentorun334@icloud.com` test erişimi. App Store'da "StudySquad" ismi müsaitti (kullanıcı baktı).
-- **SIRADAKİ (kullanıcı çalıştırıyor)**: yeni ikonlu build + auto-submit: `cd mobile && npx eas-cli build --platform ios --profile production --auto-submit`. Bitince Apple işler (~5-15dk) → App Store Connect → TestFlight → Internal Testing'e kendini ekle → iPhone'da TestFlight ile kur → **ilk kez gerçek cihazda: push + Focus Score + aylık takvim + donut + pomodoro testi**.
+- ✅ **Yeni ikonlu build (buildNumber 4) BAŞARILI → TestFlight'a yüklendi → iPhone'a kuruldu**. Gerçek cihazda **giriş DOĞRULANDI** (testalpha1 ile; ilk denemede yanlış şifre → sonra çalıştı). Backend bağlantısı sorunsuz. İkon reddi ÇÖZÜLDÜ. StudySquad artık gerçek iPhone'da TestFlight üzerinden çalışıyor. 🎉
+- **Test hesapları** (backend/Supabase'de kayıtlı; TestFlight aynı backend'e bağlı): `testalpha1@studysquad.test` + `testbeta2@studysquad.test` (+ `testgamma3`), şifre `Passw0rd123`. Alpha & Beta arkadaş.
+
+### 📝 Oturum Özeti — 2026-07-08/09 (Focus Score + iOS/TestFlight + App Icon)
+
+Yoğun oturum, 3 büyük iş bitti — hepsi main'de:
+1. **Focus Score V1** (Faz 16) — backend+mobil, migration 013 ✓, Fly deploy ✓, tsc temiz. Cihaz UI testi bekliyor.
+2. **iOS/TestFlight kurulumu** (Faz 17) — Apple hesap kilidi açıldı, bundle ID çakışması çözüldü (`com.studysquadhq.app`), ASC uygulaması + TestFlight oluşturuldu, build başarılı, iPhone'a kuruldu, **giriş cihazda doğrulandı**.
+3. **Gerçek App Icon** — placeholder 1×1/alpha'lı ikonlar (iOS'un reddetme sebebi) → "birlikte ders çalışan iki figür" (cyan+pembe, kitap, ışıltı). SVG→sharp, icon.png opak.
+
+- **Öğrenilen tuzaklar**: iOS bundle ID globalde benzersiz olmalı (Android paket adı değil); App Store ikonu OPAK (alpha yok) + 1024×1024 şart; Apple yeni hesaplar ilk 3.parti girişte `-20209` kilitleyebiliyor (iforgot ile açılır); `EXPO_PUBLIC_API_URL` production env'de baked (giriş cihazda çalışıyor = doğru).
+- **SONRAKİ OTURUM (kullanıcı test edip dönecek)**: gerçek cihaz test geri bildirimleri — özellikle **push teslimatı** (arkadaş çalışıyor/referral/streak; iOS APNs otomatik olduğu için Android FCM'siz çalışabilir), **Focus Score** fiş+profil UI, **aylık takvim + donut + pomodoro** (Faz 14/15 ilk kez cihazda), **Sıkı Mod** yanma akışı. Kullanıcı bulguları bildirecek → düzeltmeler yapılacak.
 
 ### 📝 Oturum Özeti — 2026-07-06 (öğleden sonra: EMÜLATÖR TEST OTURUMU)
 
