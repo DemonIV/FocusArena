@@ -142,7 +142,15 @@
   - `timerStore`'a `onComplete` callback'i eklendi (doğal tamamlanma) → pomodoro turu ilerletiyor; **bonus fix**: klasik modda süre doğal bitince artık fiş gösteriliyor (eskiden sessizdi).
   - **Bildirim kanalı fix'i**: `ensureNotificationChannel()` artık app açılışında koşulsuz çağrılıyor (MainTabs) — kanalın `Device.isDevice`/pushEnabled guard'ları arkasında kalması yüzünden Sıkı Mod 15sn uyarısının hiç görünmemesi bug'ı KAPANDI.
 - i18n: 10 dilde `timer.*` +25 anahtar (pomodoro) + `profile.subjectDistribution`.
-- **SIRADAKİ KARAR (kullanıcı istedi)**: **Focus Score** — süre + uygulamadan çıkış sayısı (AppState) + dışarıda geçen süre (telefon kullanımı proxy'si; UsageStats/ScreenTime İSTENMEYECEK, iOS'ta imkânsız) + tamamlama + molaya uyma → 0-100 skor, sunucuda hesaplanır (`sessions.focus_score`, migration 013), fişte kırılımla gösterilir, leaderboard'a karışmaz. Formül taslağı konuşuldu, onay bekliyor/başlanacak.
+- **SIRADAKİ KARAR (kullanıcı istedi)**: **Focus Score** — Faz 16'da yapıldı ↓.
+
+### Faz 16 — 🎯 Focus Score V1 (8 Temmuz)
+`1127011` · Migration 013 ✓ · Fly deploy ✓
+
+- **Her seansa 0-100 odak kalitesi skoru**, sunucuda hesaplanır; XP/coin (hacim ödülü) ile ayrı, **leaderboard'a karışmaz**. Ağırlıklı 3 bileşen: **Tamamlanma %35** (gerçek dk / hedef dk) + **Varlık %35** (uygulamada kalma; `awayMs/sessionMs × 150` cezası) + **İstikrar %30** (`100 − exits×12 − pauses×5`). Formül `computeFocusScore` (timer.service.ts). Renk tier: ≥85 yeşil, ≥60 amber, <60 kırmızı.
+- **Backend**: migration 013 `sessions.focus_score smallint` (nullable — eski seanslar + 0-dk seanslar skorsuz). `POST /timer/stop` artık opsiyonel `{exits,awayMs,pauses}` gövdesi alır (Zod `StopTimerSchema`, hepsi default 0 → **eski istemciler tamamlanma üzerinden skorlanır, kırılmaz**). `StopTimerResult.focus` kırılımı döner. `getStats` → `week.avgFocusScore` (haftalık ortalama, scored seanslar; null olabilir).
+- **Mobil**: `timerStore` seans boyunca `exits`/`awayMs`/`pauses` toplar; `stop()`'ta açık away-spell'i katlayıp gönderir. AppState takibi **uygulama genelinde** `useFocusTracking` hook'uyla (MainTabs'te mount — sekme değişse de yakalar); sadece `background`/`active` dinlenir (iOS `inactive` exit'i şişirir → yoksayıldı); **duraklatılmış seansta dışarı çıkmak varlığı düşürmez** (meşru çıkış). Fişte renkli skor rozeti + 3 bileşen çubuğu (`StudyReceiptModal`, paylaşılan görüntüye dahil); profilde "bu haftaki odak kalitesi" kartı. Pomodoro döngü-sonu birleşik fişinde focus GÖSTERİLMEZ (her tur ayrı skorlanır, DB'de). i18n 10 dilde `receipt.focus*` (4) + `profile.focusScore*` (2).
+- **Doğrulama**: backend+mobil `tsc` temiz; migration psql pooler ile uygulandı + kolon doğrulandı; `/health` 200, `/timer/stop` yeni gövdeyle 401 (route canlı). **Mobil UI cihazda GÖRÜLMEDİ** — sonraki preview build'de test edilecek (Faz 14+15+16 birlikte).
 
 ### 📝 Oturum Özeti — 2026-07-06 (öğleden sonra: EMÜLATÖR TEST OTURUMU)
 
@@ -206,12 +214,12 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Marka | **StudySquad** · paket `com.studysquad.app` · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
-| Migration'lar | 002–012 hepsi uygulandı ✓ |
+| Migration'lar | 002–013 hepsi uygulandı ✓ (013 = focus_score) |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | Kullanıcının telefonu iOS ama Apple hesabı yok; Android testi emülatörde. eas.json submit bloğu placeholder'lı |
+| iOS | ✅ **Apple Developer hesabı ONAYLANDI (8 Tem)** → iOS build + TestFlight yolu açık. Kullanıcının telefonu iOS (gerçek cihaz push testi mümkün). eas.json submit bloğu hâlâ placeholder'lı — doldurulacak |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
 
 ---
@@ -220,7 +228,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 **Sonraki oturumun ilk işleri (Claude):**
 1. **YENİ PREVIEW BUILD** (kullanıcı erteledi — kuyruktaki 3 build iptal edildi): `cd mobile && npx eas-cli build --platform android --profile preview --non-interactive --no-wait`. İçereceği YENİ ve CİHAZDA HİÇ TEST EDİLMEMİŞ özellikler: **aylık takvim modalı (Faz 14) + donut grafik + pomodoro döngüsü (Faz 15)**. react-native-svg native modülü eklendiği için build cache'siz/uzun olacak. Bitince emülatöre kur (`adb install -r`) ve bu üç özelliği + mola bildirimini (kanal fix'i sonrası artık emülatörde de görünmeli) test et.
-2. **Focus Score V1** (tasarım PROGRESS Faz 15 notunda + konuşuldu): mobil exits/awayMs/pauses takibi → stop gövdesinde gönder → sunucuda skor (migration 013 `sessions.focus_score`) → fişte kırılım + profilde haftalık ortalama.
+2. ✅ **Focus Score V1** — Faz 16'da yapıldı + deploy edildi (cihazda test bekliyor).
 3. Kalan küçük bug: onboarding **Skip butonu çalışmıyor**.
 4. Aynı env'leri **production** ortamına da ekle → production AAB build.
 5. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil). Push teslimatı gerçek cihaz + muhtemel FCM kurulumu gerektiriyor.
