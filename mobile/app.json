@@ -13,7 +13,11 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.studysquad.app"
+      "bundleIdentifier": "com.studysquad.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
