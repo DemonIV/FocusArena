@@ -150,7 +150,18 @@
 - **Her seansa 0-100 odak kalitesi skoru**, sunucuda hesaplanır; XP/coin (hacim ödülü) ile ayrı, **leaderboard'a karışmaz**. Ağırlıklı 3 bileşen: **Tamamlanma %35** (gerçek dk / hedef dk) + **Varlık %35** (uygulamada kalma; `awayMs/sessionMs × 150` cezası) + **İstikrar %30** (`100 − exits×12 − pauses×5`). Formül `computeFocusScore` (timer.service.ts). Renk tier: ≥85 yeşil, ≥60 amber, <60 kırmızı.
 - **Backend**: migration 013 `sessions.focus_score smallint` (nullable — eski seanslar + 0-dk seanslar skorsuz). `POST /timer/stop` artık opsiyonel `{exits,awayMs,pauses}` gövdesi alır (Zod `StopTimerSchema`, hepsi default 0 → **eski istemciler tamamlanma üzerinden skorlanır, kırılmaz**). `StopTimerResult.focus` kırılımı döner. `getStats` → `week.avgFocusScore` (haftalık ortalama, scored seanslar; null olabilir).
 - **Mobil**: `timerStore` seans boyunca `exits`/`awayMs`/`pauses` toplar; `stop()`'ta açık away-spell'i katlayıp gönderir. AppState takibi **uygulama genelinde** `useFocusTracking` hook'uyla (MainTabs'te mount — sekme değişse de yakalar); sadece `background`/`active` dinlenir (iOS `inactive` exit'i şişirir → yoksayıldı); **duraklatılmış seansta dışarı çıkmak varlığı düşürmez** (meşru çıkış). Fişte renkli skor rozeti + 3 bileşen çubuğu (`StudyReceiptModal`, paylaşılan görüntüye dahil); profilde "bu haftaki odak kalitesi" kartı. Pomodoro döngü-sonu birleşik fişinde focus GÖSTERİLMEZ (her tur ayrı skorlanır, DB'de). i18n 10 dilde `receipt.focus*` (4) + `profile.focusScore*` (2).
-- **Doğrulama**: backend+mobil `tsc` temiz; migration psql pooler ile uygulandı + kolon doğrulandı; `/health` 200, `/timer/stop` yeni gövdeyle 401 (route canlı). **Mobil UI cihazda GÖRÜLMEDİ** — sonraki preview build'de test edilecek (Faz 14+15+16 birlikte).
+- **Doğrulama**: backend+mobil `tsc` temiz; migration psql pooler ile uygulandı + kolon doğrulandı; `/health` 200, `/timer/stop` yeni gövdeyle 401 (route canlı). **Mobil UI cihazda GÖRÜLMEDİ** — sonraki build'de test edilecek (Faz 14+15+16 birlikte).
+
+### Faz 17 — 🍎 iOS/TestFlight kurulumu + gerçek App Icon (8 Temmuz)
+`adeb407` (ios config) + `79b5199` (bundle ID) + `5b6ff46` (submit temizlik) + `c0fcf6f` (app icon)
+
+- **Apple Developer hesabı ONAYLANDI** → iOS yolu açıldı. Auth engelleri (sırayla çözüldü): (1) hesap güvenlik kilidi `-20209` → iforgot.apple.com ile açıldı; (2) `com.studysquad.app` bundle ID **başka bir Apple hesabında kayıtlı** (iOS bundle ID globalde benzersiz olmalı) → **iOS bundle ID `com.studysquadhq.app`** yapıldı. **Android paketi `com.studysquad.app` DEĞİŞMEDİ** (Play + RC ona bağlı); marka ismi StudySquad kaldı (kullanıcı "A — ismi koru" seçti, tam rebrand YAPILMADI). iOS bundle ID kullanıcıya görünmez/dahili.
+- **app.json iOS**: `buildNumber` + `infoPlist.ITSAppUsesNonExemptEncryption:false` (yalnız standart TLS → her TestFlight yüklemesindeki export-compliance sorusunu atlar). `eas.json` submit.ios placeholder'ları (ascAppId/appleTeamId) silindi → auto-create. Auth yöntemi: **interaktif Apple login** (2FA), APP_MANAGER rollü ASC API key.
+- **İlk iOS build FINISHED** (.ipa) ama **submit REDDEDİLDİ → app icon**: tüm asset'ler **1×1 placeholder + alpha kanallı** (proje kurulumundan kalma; Android hoş görüyordu, iOS App Store alpha'lı/eksik ikonu reddediyor). Ayrıca build 2 "kullanıldı" hatası.
+- **GERÇEK APP ICON tasarlandı** (`c0fcf6f`): "birlikte ders çalışan iki figür" — cyan + pembe iki dost (oturan/eğik poz, versiyon B), paylaşılan açık kitap, aydınlanma ışıltısı, koyu gradyan + cyan hale (uygulama teması). Vektör SVG → `sharp` ile raster (scratchpad'de kuruldu). **`icon.png` 1024×1024 OPAK (alpha yok)** = App Store uyumlu; ayrıca `adaptive-icon.png` (Android), `splash.png` (şeffaf ön-plan), `notification-icon.png` (beyaz silüet). Onay artif:  https://claude.ai/code/artifact/714f6bf3-0683-497c-a4e5-cd1337d0ec09
+- `ios.buildNumber` 2→**3** (autoIncrement zaten açık; build 2 reddedilen submit'te kullanıldığı için unique olmalı).
+- **App Store Connect'te uygulama OLUŞTURULDU**: "StudySquad" / `com.studysquadhq.app`, TestFlight grubu + `alperentorun334@icloud.com` test erişimi. App Store'da "StudySquad" ismi müsaitti (kullanıcı baktı).
+- **SIRADAKİ (kullanıcı çalıştırıyor)**: yeni ikonlu build + auto-submit: `cd mobile && npx eas-cli build --platform ios --profile production --auto-submit`. Bitince Apple işler (~5-15dk) → App Store Connect → TestFlight → Internal Testing'e kendini ekle → iPhone'da TestFlight ile kur → **ilk kez gerçek cihazda: push + Focus Score + aylık takvim + donut + pomodoro testi**.
 
 ### 📝 Oturum Özeti — 2026-07-06 (öğleden sonra: EMÜLATÖR TEST OTURUMU)
 
@@ -211,7 +222,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 | Bileşen | Durum |
 |---------|-------|
-| Marka | **StudySquad** · paket `com.studysquad.app` · Play başlığı: "StudySquad: Study w/ Friends" |
+| Marka | **StudySquad** · Android paketi `com.studysquad.app` · **iOS bundle `com.studysquadhq.app`** (com.studysquad.app başka hesapta kayıtlı) · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
 | Migration'lar | 002–013 hepsi uygulandı ✓ (013 = focus_score) |
@@ -219,7 +230,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ **Apple Developer hesabı ONAYLANDI (8 Tem)** → iOS build + TestFlight yolu açık. Kullanıcının telefonu iOS (gerçek cihaz push testi mümkün). eas.json submit bloğu hâlâ placeholder'lı — doldurulacak |
+| iOS | ✅ Apple hesabı onaylı; **App Store Connect uygulaması oluşturuldu** (`com.studysquadhq.app`, TestFlight grubu + `alperentorun334@icloud.com` test erişimi). İlk build .ipa ✓ (ikon reddi düzeltildi). ⏳ yeni ikonlu build + auto-submit çalıştırılıyor. ASC API key (APP_MANAGER) EAS'te saklı |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
 
 ---
@@ -238,7 +249,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 5. Play Console'da IAP ürünleri: Pro abonelik (monthly/yearly + **free trial offer**) + coin paketleri (`coins_1000/5500/12000`).
 6. RC'ye service account JSON bağla + ürünleri eşle + **"coins" offering** oluştur.
 7. `studysquad.app` domain'ini al (~15$/yıl).
-8. **Apple**: $99/yıl hesap → eas.json placeholder'larını doldur → iOS build → TestFlight (kendi iPhone'unda test) → ASC sözleşme/banka/vergi + IAP ürünleri + App Privacy → review.
+8. **Apple**: ✅ hesap onaylı + ASC uygulaması + ilk build. Kalan: yeni ikonlu build TestFlight'ta işlensin → iPhone'da test (özellikle **push**) → sonra ASC sözleşme/banka/vergi + iOS IAP ürünleri + **RevenueCat iOS `appl_` anahtarı** (IAP kurulunca) + App Privacy → public review. Not: iOS bundle `com.studysquadhq.app`.
 9. Yayın sonrası fikirler: günlük görevler, ligler, pet besleme, Arena Pass.
 
 > **Not (Claude için):** Yeni oturuma başlarken güncel durumu görmek için önce bu dosyayı oku; oturum sonunda yapılanları ve sıradaki adımları buraya işle.
