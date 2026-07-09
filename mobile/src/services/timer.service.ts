@@ -85,6 +85,13 @@ export const timerService = {
   claimChallenge: () =>
     api.post<ChallengeClaimResult>('/timer/challenge/claim'),
 
+  /**
+   * Report the device's UTC offset (minutes to add to UTC → local) so the
+   * backend computes streak/goal/week windows on the user's local midnight.
+   */
+  setTimezone: (offsetMinutes: number) =>
+    api.put<{ ok: boolean }>('/timer/timezone', { offsetMinutes }),
+
   // ── Subjects ─────────────────────────────────────────────
   /** Returns subjects array directly */
   getSubjects: async (): Promise<Subject[]> => {

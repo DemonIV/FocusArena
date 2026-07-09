@@ -89,6 +89,57 @@ function computeLevel(xp: number): number {
 
 const clamp100 = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 
+// ─── Local-time helpers ───────────────────────────────────────
+// Day/week boundaries must fall on the USER's local midnight, not UTC's, or a
+// UTC+3 student's day resets at 03:00 and a 01:00 session lands on "yesterday".
+// We store a fixed offset (minutes to add to UTC → local, e.g. UTC+3 = 180),
+// reported by the client. A fixed offset (not an IANA zone) keeps the maths
+// trivial and DST-free; the client re-reports on launch so it stays current.
+
+const DAY_MS = 86_400_000;
+/** Clamp to a sane real-world range (−14 h … +14 h). */
+const clampOffset = (m: number) => Math.max(-840, Math.min(840, Math.round(m || 0)));
+
+/** UTC instant of local midnight for the day containing `ref`, at `offsetMin`. */
+function localDayStart(offsetMin: number, ref: Date = new Date()): Date {
+  const shifted = new Date(ref.getTime() + offsetMin * 60_000);
+  shifted.setUTCHours(0, 0, 0, 0);
+  return new Date(shifted.getTime() - offsetMin * 60_000);
+}
+
+/** UTC instant of the start of the local week (Monday) for `ref`, at `offsetMin`. */
+function localWeekStart(offsetMin: number, ref: Date = new Date()): Date {
+  const dayStart = localDayStart(offsetMin, ref);
+  const localDow = new Date(dayStart.getTime() + offsetMin * 60_000).getUTCDay(); // 0 Sun … 6 Sat, local
+  const daysSinceMonday = (localDow + 6) % 7;
+  return new Date(dayStart.getTime() - daysSinceMonday * DAY_MS);
+}
+
+/** Local calendar date (YYYY-MM-DD) of a timestamp, at `offsetMin`. */
+function localDateKey(ts: string | Date, offsetMin: number): string {
+  const t = typeof ts === 'string' ? new Date(ts) : ts;
+  return new Date(t.getTime() + offsetMin * 60_000).toISOString().slice(0, 10);
+}
+
+/** The caller's stored UTC offset in minutes (0 = UTC, the safe default). */
+async function getUserOffset(userId: string): Promise<number> {
+  const { data } = await supabase
+    .from('users')
+    .select('utc_offset_minutes')
+    .eq('id', userId)
+    .single();
+  return clampOffset((data?.utc_offset_minutes as number | null) ?? 0);
+}
+
+/** Persist the device's current UTC offset (minutes to add to UTC → local). */
+export async function setUserTimezone(userId: string, offsetMinutes: number): Promise<void> {
+  const { error } = await supabase
+    .from('users')
+    .update({ utc_offset_minutes: clampOffset(offsetMinutes) })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+}
+
 /**
  * Focus Score (0–100) — a quality score for a single session, blending three
  * 0–100 components:
@@ -347,7 +398,7 @@ async function awardXpAndStreak(
 
   const { data: user, error: userErr } = await supabase
     .from('users')
-    .select('xp, level, streak, longest_streak, coins')
+    .select('xp, level, streak, longest_streak, coins, utc_offset_minutes')
     .eq('id', userId)
     .single();
 
@@ -359,10 +410,12 @@ async function awardXpAndStreak(
   const newCoins = (user.coins ?? 0) + xpGained;
 
   // ── Streak logic ──────────────────────────────────────────
-  const todayUtcStart = new Date();
-  todayUtcStart.setUTCHours(0, 0, 0, 0);
-  const tomorrowUtcStart = new Date(todayUtcStart.getTime() + 86_400_000);
-  const yesterdayUtcStart = new Date(todayUtcStart.getTime() - 86_400_000);
+  // Day boundaries follow the user's local midnight, so a late-night session
+  // counts toward the right day (a UTC-only "today" reset at 03:00 in Turkey).
+  const offset = clampOffset((user.utc_offset_minutes as number | null) ?? 0);
+  const todayUtcStart = localDayStart(offset);
+  const tomorrowUtcStart = new Date(todayUtcStart.getTime() + DAY_MS);
+  const yesterdayUtcStart = new Date(todayUtcStart.getTime() - DAY_MS);
 
   // Count completed sessions TODAY (excluding the one we just recorded)
   const { count: todayCount } = await supabase
@@ -469,18 +522,13 @@ export async function getSessions(userId: string, query: SessionQuery) {
 // ─── Stats ────────────────────────────────────────────────────
 
 export async function getStats(userId: string): Promise<TimerStats> {
-  const now = new Date();
+  const offset = await getUserOffset(userId);
 
-  // Today
-  const todayStart = new Date(now);
-  todayStart.setUTCHours(0, 0, 0, 0);
-  const tomorrowStart = new Date(todayStart.getTime() + 86_400_000);
-
-  // This week (Mon → Sun)
-  const dayOfWeek = now.getUTCDay(); // 0=Sun … 6=Sat
-  const daysSinceMonday = (dayOfWeek + 6) % 7;
-  const weekStart = new Date(todayStart.getTime() - daysSinceMonday * 86_400_000);
-  const weekEnd = new Date(weekStart.getTime() + 7 * 86_400_000);
+  // Local day + week windows (UTC instants at the user's local midnight / Monday)
+  const todayStart = localDayStart(offset);
+  const tomorrowStart = new Date(todayStart.getTime() + DAY_MS);
+  const weekStart = localWeekStart(offset);
+  const weekEnd = new Date(weekStart.getTime() + 7 * DAY_MS);
 
   const [todayRes, weekRes, allTimeRes, userRes, goalRes] = await Promise.all([
     supabase
@@ -533,13 +581,12 @@ export async function getStats(userId: string): Promise<TimerStats> {
   const byDate = new Map<string, DailyStat>();
 
   for (let d = 0; d < 7; d++) {
-    const date = new Date(weekStart.getTime() + d * 86_400_000);
-    const key = date.toISOString().slice(0, 10);
+    const key = localDateKey(new Date(weekStart.getTime() + d * DAY_MS), offset);
     byDate.set(key, { date: key, totalMinutes: 0, sessionsCount: 0, completedSessions: 0 });
   }
 
   for (const row of weekSessions) {
-    const key = new Date(row.started_at).toISOString().slice(0, 10);
+    const key = localDateKey(row.started_at, offset);
     const entry = byDate.get(key);
     if (entry) {
       entry.totalMinutes += row.duration_minutes;
@@ -586,11 +633,10 @@ export async function getStats(userId: string): Promise<TimerStats> {
 export async function getActivityHeatmap(userId: string, days = 30): Promise<HeatmapResponse> {
   const span = Math.min(Math.max(Math.trunc(days), 1), 366);
 
-  const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setUTCHours(0, 0, 0, 0);
-  const rangeStart = new Date(todayStart.getTime() - (span - 1) * 86_400_000);
-  const tomorrowStart = new Date(todayStart.getTime() + 86_400_000);
+  const offset = await getUserOffset(userId);
+  const todayStart = localDayStart(offset);
+  const rangeStart = new Date(todayStart.getTime() - (span - 1) * DAY_MS);
+  const tomorrowStart = new Date(todayStart.getTime() + DAY_MS);
 
   const [sessionsRes, userRes] = await Promise.all([
     supabase
@@ -609,11 +655,11 @@ export async function getActivityHeatmap(userId: string, days = 30): Promise<Hea
   // Seed every day in range with 0, then accumulate
   const byDate = new Map<string, number>();
   for (let d = 0; d < span; d++) {
-    const key = new Date(rangeStart.getTime() + d * 86_400_000).toISOString().slice(0, 10);
+    const key = localDateKey(new Date(rangeStart.getTime() + d * DAY_MS), offset);
     byDate.set(key, 0);
   }
   for (const row of sessionsRes.data ?? []) {
-    const key = new Date(row.started_at).toISOString().slice(0, 10);
+    const key = localDateKey(row.started_at, offset);
     if (byDate.has(key)) byDate.set(key, (byDate.get(key) ?? 0) + row.duration_minutes);
   }
 
@@ -635,14 +681,18 @@ export async function getActivityHeatmap(userId: string, days = 30): Promise<Hea
  * current month refreshes every 5 minutes.
  */
 export async function getMonthlyStats(targetId: string, month: string): Promise<MonthlyStatsResponse> {
-  const cacheKey = `monthly:${targetId}:${month}`;
+  const offset = await getUserOffset(targetId);
+  const cacheKey = `monthly:${targetId}:${month}:${offset}`;
   const cached = await redis.get(cacheKey);
   if (cached) return JSON.parse(cached) as MonthlyStatsResponse;
 
+  // Month spans the user's LOCAL calendar month (its 1st-midnight → next
+  // 1st-midnight, expressed as UTC instants), so day grouping matches the
+  // week windows used elsewhere.
   const [year, mon] = month.split('-').map(Number);
-  const start = new Date(Date.UTC(year, mon - 1, 1));
-  const end = new Date(Date.UTC(year, mon, 1));
-  const daysInMonth = Math.round((end.getTime() - start.getTime()) / 86_400_000);
+  const start = new Date(Date.UTC(year, mon - 1, 1) - offset * 60_000);
+  const end = new Date(Date.UTC(year, mon, 1) - offset * 60_000);
+  const daysInMonth = Math.round((end.getTime() - start.getTime()) / DAY_MS);
 
   const [sessionsRes, userRes] = await Promise.all([
     supabase
@@ -667,7 +717,7 @@ export async function getMonthlyStats(targetId: string, month: string): Promise<
   // Seed every day of the month, then accumulate per day + per subject.
   const byDate = new Map<string, { totalMinutes: number; subjects: Record<string, number> }>();
   for (let d = 0; d < daysInMonth; d++) {
-    const key = new Date(start.getTime() + d * 86_400_000).toISOString().slice(0, 10);
+    const key = localDateKey(new Date(start.getTime() + d * DAY_MS), offset);
     byDate.set(key, { totalMinutes: 0, subjects: {} });
   }
 
@@ -676,7 +726,7 @@ export async function getMonthlyStats(targetId: string, month: string): Promise<
   let sessionsCount = 0;
 
   for (const row of sessionsRes.data ?? []) {
-    const day = byDate.get(new Date(row.started_at).toISOString().slice(0, 10));
+    const day = byDate.get(localDateKey(row.started_at, offset));
     if (!day) continue;
     const minutes = row.duration_minutes ?? 0;
     if (minutes <= 0) continue;
@@ -734,7 +784,7 @@ export async function getMonthlyStats(targetId: string, month: string): Promise<
     summary: { totalMinutes, activeDays, sessionsCount, bestDayMinutes },
   };
 
-  const isCurrentMonth = month === new Date().toISOString().slice(0, 7);
+  const isCurrentMonth = month === localDateKey(new Date(), offset).slice(0, 7);
   await redis.set(cacheKey, JSON.stringify(result), 'EX', isCurrentMonth ? 300 : 86_400);
   return result;
 }
@@ -745,12 +795,12 @@ export async function getMonthlyStats(targetId: string, month: string): Promise<
  * user competes with their past self in real time.
  */
 export async function getGhost(userId: string): Promise<GhostResponse> {
+  const offset = await getUserOffset(userId);
   const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setUTCHours(0, 0, 0, 0);
+  const todayStart = localDayStart(offset, now);
 
   const elapsedMs = now.getTime() - todayStart.getTime();
-  const yesterdayStart = new Date(todayStart.getTime() - 86_400_000);
+  const yesterdayStart = new Date(todayStart.getTime() - DAY_MS);
   const yesterdayCutoff = new Date(yesterdayStart.getTime() + elapsedMs);
 
   const [todayRes, yResRes] = await Promise.all([
@@ -886,15 +936,10 @@ export async function getStudyDNA(userId: string): Promise<StudyDnaResponse> {
 const WEEKLY_REWARD_COINS = 300; // coins for completing the personal weekly goal
 const WEEKLY_GOAL_FALLBACK = 120 * 7; // minutes, when the user has no subject goals
 
-/** This week's Monday 00:00 UTC → next Monday 00:00 UTC. */
-function currentWeekWindow(): { weekStart: Date; weekEnd: Date } {
-  const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setUTCHours(0, 0, 0, 0);
-  const dayOfWeek = now.getUTCDay(); // 0 Sun … 6 Sat
-  const daysSinceMonday = (dayOfWeek + 6) % 7;
-  const weekStart = new Date(todayStart.getTime() - daysSinceMonday * 86_400_000);
-  const weekEnd = new Date(weekStart.getTime() + 7 * 86_400_000);
+/** This week's local Monday 00:00 → next local Monday 00:00 (as UTC instants). */
+function currentWeekWindow(offsetMin: number): { weekStart: Date; weekEnd: Date } {
+  const weekStart = localWeekStart(offsetMin);
+  const weekEnd = new Date(weekStart.getTime() + 7 * DAY_MS);
   return { weekStart, weekEnd };
 }
 
@@ -911,7 +956,8 @@ async function acceptedFriendIds(userId: string): Promise<string[]> {
 }
 
 export async function getWeeklyChallenge(userId: string): Promise<WeeklyChallengeResponse> {
-  const { weekStart, weekEnd } = currentWeekWindow();
+  const offset = await getUserOffset(userId);
+  const { weekStart, weekEnd } = currentWeekWindow(offset);
 
   // Personal weekly goal = sum of active subject daily goals × 7.
   const { data: goalRows } = await supabase
@@ -992,7 +1038,8 @@ export async function getWeeklyChallenge(userId: string): Promise<WeeklyChalleng
  * `GOAL_NOT_REACHED` / `ALREADY_CLAIMED` for the route to map to 4xx.
  */
 export async function claimWeeklyReward(userId: string): Promise<WeeklyClaimResult> {
-  const { weekStart } = currentWeekWindow();
+  const offset = await getUserOffset(userId);
+  const { weekStart } = currentWeekWindow(offset);
   const weekStartDate = weekStart.toISOString().slice(0, 10);
 
   // Re-verify the goal server-side (never trust the client).

@@ -9,6 +9,7 @@ import {
   UpdateSubjectSchema,
   SessionQuerySchema,
   MonthlyQuerySchema,
+  SetTimezoneSchema,
 } from './timer.schema';
 import { areFriends } from '../friends';
 import {
@@ -26,6 +27,7 @@ import {
   getStudyDNA,
   getWeeklyChallenge,
   claimWeeklyReward,
+  setUserTimezone,
   getSubjectStats,
   getSubjects,
   createSubject,
@@ -284,6 +286,25 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'GOAL_NOT_REACHED') return reply.code(409).send({ error: 'goal_not_reached' });
       if (e.code === 'ALREADY_CLAIMED') return reply.code(409).send({ error: 'already_claimed' });
       request.log.error(err, 'timer/challenge/claim failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** PUT /timer/timezone — device reports its UTC offset for local day/week windows */
+  fastify.put('/timezone', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+
+    const parsed = SetTimezoneSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: 'Validation error', details: parsed.error.flatten() });
+    }
+
+    try {
+      await setUserTimezone(userId, parsed.data.offsetMinutes);
+      return reply.send({ ok: true });
+    } catch (err) {
+      request.log.error(err, 'timer/timezone failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }

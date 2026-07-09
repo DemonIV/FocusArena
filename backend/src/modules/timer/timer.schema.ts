@@ -22,6 +22,12 @@ export const StopTimerSchema = z.object({
 });
 export type StopTimerBody = z.infer<typeof StopTimerSchema>;
 
+export const SetTimezoneSchema = z.object({
+  /** Minutes to ADD to UTC to get local time (e.g. UTC+3 → 180). ±14 h range. */
+  offsetMinutes: z.number().int().min(-840).max(840),
+});
+export type SetTimezoneBody = z.infer<typeof SetTimezoneSchema>;
+
 export const CreateSubjectSchema = z.object({
   name: z.string().min(1).max(50),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex color e.g. #FF5733'),

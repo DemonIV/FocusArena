@@ -40,19 +40,23 @@ interface Slice {
   minutes: number;
 }
 
-/** Monday 00:00 UTC of the week `offset` weeks from the current one. */
-function weekMondayUTC(offset: number): Date {
-  const now = new Date();
-  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const daysSinceMonday = (todayStart.getUTCDay() + 6) % 7; // 0=Sun → 6, 1=Mon → 0
-  return new Date(todayStart.getTime() - daysSinceMonday * DAY + offset * 7 * DAY);
+const pad = (n: number) => String(n).padStart(2, '0');
+/** Local calendar date (YYYY-MM-DD) — matches the backend's local-day grouping. */
+function localKey(d: Date): string {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-/** The seven YYYY-MM-DD keys of the week starting at `monday`. */
+/** Local Monday 00:00 of the week `offset` weeks from the current one. */
+function weekMonday(offset: number): Date {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // local midnight
+  const daysSinceMonday = (today.getDay() + 6) % 7; // 0=Sun → 6, 1=Mon → 0
+  return new Date(today.getTime() - daysSinceMonday * DAY + offset * 7 * DAY);
+}
+
+/** The seven local YYYY-MM-DD keys of the week starting at `monday`. */
 function weekDateKeys(monday: Date): string[] {
-  return Array.from({ length: 7 }, (_, i) =>
-    new Date(monday.getTime() + i * DAY).toISOString().slice(0, 10),
-  );
+  return Array.from({ length: 7 }, (_, i) => localKey(new Date(monday.getTime() + i * DAY)));
 }
 
 export function WeeklySubjectDonutCard() {
@@ -60,7 +64,7 @@ export function WeeklySubjectDonutCard() {
   // 0 = this week, -1 = last week, …
   const [offset, setOffset] = useState(0);
 
-  const monday = useMemo(() => weekMondayUTC(offset), [offset]);
+  const monday = useMemo(() => weekMonday(offset), [offset]);
   const dateKeys = useMemo(() => weekDateKeys(monday), [monday]);
   const monthA = dateKeys[0].slice(0, 7);
   const monthB = dateKeys[6].slice(0, 7);

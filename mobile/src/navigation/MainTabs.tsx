@@ -10,6 +10,7 @@ import {
   subscribeNotificationTaps,
   ensureNotificationChannel,
   leaderboardService,
+  timerService,
 } from '../services';
 import {
   HomeScreen,
@@ -64,6 +65,10 @@ export function MainTabs() {
     if (region && /^[A-Za-z]{2}$/.test(region)) {
       leaderboardService.setCountry(region).catch(() => { /* ignore */ });
     }
+
+    // Report the device's UTC offset so streak/goal/week windows use local
+    // midnight, not UTC's (getTimezoneOffset is inverted: UTC+3 → -180).
+    timerService.setTimezone(-new Date().getTimezoneOffset()).catch(() => { /* ignore */ });
   }, []);
 
   // Land on the right tab when the user taps a push notification.
