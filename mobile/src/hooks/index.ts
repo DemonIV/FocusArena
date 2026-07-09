@@ -4,3 +4,4 @@ export { useInviteShare } from './useInviteShare';
 export { useStrictMode, STRICT_RESCUE_COST } from './useStrictMode';
 export { useFocusTracking } from './useFocusTracking';
 export { useKeepAwakeDuringSession } from './useKeepAwakeDuringSession';
+export { useFocusLiveActivity } from './useFocusLiveActivity';

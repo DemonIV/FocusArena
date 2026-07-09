@@ -512,5 +512,11 @@
     "elite": "Élite",
     "social": "Sociable",
     "pro": "Pro"
+  },
+  "liveActivity": {
+    "title": "🎯 Concentrado",
+    "subtitle": "Sigue así",
+    "pausedTitle": "⏸ En pausa",
+    "done": "✅ Completado"
   }
 }

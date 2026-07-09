@@ -512,5 +512,11 @@
     "elite": "Элита",
     "social": "Общительный",
     "pro": "Pro"
+  },
+  "liveActivity": {
+    "title": "🎯 Фокус",
+    "subtitle": "Так держать",
+    "pausedTitle": "⏸ Пауза",
+    "done": "✅ Готово"
   }
 }

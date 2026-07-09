@@ -512,5 +512,11 @@
     "elite": "Elite",
     "social": "Gesellig",
     "pro": "Pro"
+  },
+  "liveActivity": {
+    "title": "🎯 Fokus läuft",
+    "subtitle": "Weiter so",
+    "pausedTitle": "⏸ Pausiert",
+    "done": "✅ Fertig"
   }
 }

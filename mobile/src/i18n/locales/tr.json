@@ -512,5 +512,11 @@
     "elite": "Elit",
     "social": "Sosyal",
     "pro": "Pro"
+  },
+  "liveActivity": {
+    "title": "🎯 Odaklanıyorsun",
+    "subtitle": "Böyle devam et",
+    "pausedTitle": "⏸ Duraklatıldı",
+    "done": "✅ Tamamlandı"
   }
 }

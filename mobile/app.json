@@ -3,6 +3,7 @@
     "name": "StudySquad",
     "slug": "focusarena",
     "version": "1.0.0",
+    "scheme": "studysquad",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -14,9 +15,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.studysquadhq.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSSupportsLiveActivities": true
       }
     },
     "android": {
@@ -41,7 +43,8 @@
           "color": "#00d2ff"
         }
       ],
-      "@sentry/react-native"
+      "@sentry/react-native",
+      "expo-live-activity"
     ],
     "extra": {
       "eas": {

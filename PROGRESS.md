@@ -192,6 +192,15 @@ Migration 016 ✓ · backend+mobil tsc temiz · Fly deploy ✓ · commit `061e1f
 - **Geri uyumlu**: offset varsayılan 0 = eski UTC davranışı → eski/in-flight build'ler bozulmaz; sadece yeni build offset raporlayınca yerel davranış aktifleşir. Not: sabit offset (IANA değil), DST'de bir sonraki açılışta düzelir; TR zaten sabit UTC+3.
 - **Doğrulama**: migration pooler ile uygulandı + kolon doğrulandı; Fly deploy sonrası `/health` 200, `PUT /timer/timezone` 401 (route canlı). **Cihazda test bekliyor** (yeni build ile).
 
+### Faz 21 — 🔒 iOS Live Activity (kilit ekranı sayacı) (10 Temmuz)
+Sadece mobil · iOS-only · tsc temiz · **CİHAZDA TEST EDİLMEDİ (iOS build gerekli)**
+
+- **Kütüphane seçimi**: `expo-widgets` (Expo resmi) **SDK 57** gerektiriyor (biz SDK 54) + yerleşik native timer yok → elendi. **`expo-live-activity` (Software Mansion) v0.4.2** seçildi: arşivlenmiş (1 Haz 2026) ama SDK 54'te çalışıyor ve **kilit ekranında kendi kendine sayan native countdown**'ı var (`progressBar: { date }`). Config plugin native widget target'ı build sırasında üretiyor — el yazımı Swift YOK.
+- **Kod**: `services/liveActivity.ts` (start/running/paused/end sarmalayıcı, `Platform.OS==='ios'` guard'lı — Android'de no-op; native modül `requireOptionalNativeModule` → Android'de null, Android build etkilenmez). `hooks/useFocusLiveActivity.ts` timerStore'u izliyor: seans başında başlat (endDate = now+remainingMs), duraklat → dondurulmuş progress bar, devam → yeni countdown, durunca bitir. MainTabs'te mount (keep-awake yanında).
+- **Config**: app.json `NSSupportsLiveActivities:true`, `scheme:"studysquad"` (deep-link `studysquad://timer`), `plugins:["expo-live-activity"]`, iOS `buildNumber 4→5`. i18n `liveActivity.*` (4 anahtar × 10 dil).
+- **Gerçekler/limitler**: iOS 16.2+; Windows'ta test edilemez → **cihazda kullanıcı test eder, 1-2 tur iterasyon beklenir**. Bilinen minör: app mid-session öldürülürse yetim activity kalır (end date'te iOS otomatik kapatır); relaunch'ta ikinci başlayabilir. Görsel/App Groups yok (sade başlık+altbaşlık+timer).
+- **SONRAKİ ADIM**: iOS **production** build + TestFlight submit (autoIncrement buildNumber'ı yönetir) → iPhone'da kilit ekranı/Dynamic Island countdown'u test et. Komut: `cd mobile && npx eas-cli build --platform ios --profile production --non-interactive --auto-submit`.
+
 ### 📝 Oturum Özeti — 2026-07-09 (Faz 18: Challenge + Ünvanlar + Çoklu Konu)
 
 Kullanıcı 3 karar verdi, hepsi uygulandı — commit `7717003`, main'de:

@@ -512,5 +512,11 @@
     "elite": "Elita",
     "social": "Towarzyski",
     "pro": "Pro"
+  },
+  "liveActivity": {
+    "title": "🎯 Skupienie",
+    "subtitle": "Tak trzymaj",
+    "pausedTitle": "⏸ Wstrzymano",
+    "done": "✅ Gotowe"
   }
 }

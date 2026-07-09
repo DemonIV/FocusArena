@@ -512,5 +512,11 @@
     "elite": "Elite",
     "social": "Sociaal",
     "pro": "Pro"
+  },
+  "liveActivity": {
+    "title": "🎯 Aan het focussen",
+    "subtitle": "Ga zo door",
+    "pausedTitle": "⏸ Gepauzeerd",
+    "done": "✅ Klaar"
   }
 }

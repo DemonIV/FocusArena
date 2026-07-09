@@ -20,7 +20,7 @@ import {
   FriendsScreen,
   ProfileScreen,
 } from '../screens';
-import { useFocusTracking, useKeepAwakeDuringSession } from '../hooks';
+import { useFocusTracking, useKeepAwakeDuringSession, useFocusLiveActivity } from '../hooks';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -52,6 +52,9 @@ export function MainTabs() {
   // Hold the screen awake during an active session so auto-lock can't silently
   // burn a Strict-Mode session or wreck the Focus Score (see the hook's note).
   useKeepAwakeDuringSession();
+
+  // iOS lock-screen / Dynamic Island countdown for the running session.
+  useFocusLiveActivity();
 
   // Register this device for push notifications once the user is in the app.
   useEffect(() => {
