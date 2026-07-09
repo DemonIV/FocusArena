@@ -184,6 +184,14 @@ Sadece mobil (backend değişmedi) · tsc temiz
 - **⚠️ Bulunan açık bug (henüz düzeltilmedi)**: Gün sınırı UTC — streak/günlük hedef Türkiye'de saat 03:00'te resetleniyor; gece çalışması yanlış güne düşüyor. Kullanıcı bazlı timezone offset gerek.
 - **SONRAKİ İŞ (kullanıcı seçti)**: 🔒 **Live Activity / kilit ekranı sayacı** — native iOS ActivityKit + SwiftUI Widget Extension (Expo config plugin, ör. `@bacons/apple-targets`) + JS köprü; iOS 16.1+. Ayrı native build + cihaz doğrulaması gerektirir (mevcut TestFlight pipeline'ını riske atmamak için kendi başına yapılacak). Android'de karşılığı ongoing chronometer notification.
 
+### Faz 20 — Yerel gün/hafta sınırları (UTC bug fix) (9 Temmuz)
+Migration 016 ✓ · backend+mobil tsc temiz · Fly deploy ✓ · commit `061e1f6`
+
+- **Sorun**: streak + günlük hedef + haftalık pencereler UTC'ye göreydi → TR (UTC+3) kullanıcısında gün **03:00'te** resetleniyor, gece 01:00 seansı yanlış güne düşüyordu.
+- **Çözüm**: kullanıcı bazlı `utc_offset_minutes` (migration 016, default 0). Client açılışta `-getTimezoneOffset()` ile offset raporlar (`PUT /timer/timezone`). Backend yardımcıları `localDayStart`/`localWeekStart`/`localDateKey`; şu fonksiyonlar artık yerel pencere kullanıyor: `getStats` (bugün+hafta+dailyBreakdown), `awardXpAndStreak` (**streak** — en kritik), `getActivityHeatmap`, `getGhost`, `getWeeklyChallenge`, `getMonthlyStats` (yerel ay/gün + cache key'e offset eklendi). `WeeklySubjectDonutCard` yerel tarih anahtarlarına geçti (aylık yerel gruplama ile tutarlı).
+- **Geri uyumlu**: offset varsayılan 0 = eski UTC davranışı → eski/in-flight build'ler bozulmaz; sadece yeni build offset raporlayınca yerel davranış aktifleşir. Not: sabit offset (IANA değil), DST'de bir sonraki açılışta düzelir; TR zaten sabit UTC+3.
+- **Doğrulama**: migration pooler ile uygulandı + kolon doğrulandı; Fly deploy sonrası `/health` 200, `PUT /timer/timezone` 401 (route canlı). **Cihazda test bekliyor** (yeni build ile).
+
 ### 📝 Oturum Özeti — 2026-07-09 (Faz 18: Challenge + Ünvanlar + Çoklu Konu)
 
 Kullanıcı 3 karar verdi, hepsi uygulandı — commit `7717003`, main'de:
@@ -267,7 +275,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Marka | **StudySquad** · Android paketi `com.studysquad.app` · **iOS bundle `com.studysquadhq.app`** (com.studysquad.app başka hesapta kayıtlı) · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
-| Migration'lar | 002–015 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title) |
+| Migration'lar | 002–016 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title, 016 = users.utc_offset_minutes) |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
