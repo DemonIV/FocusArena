@@ -80,14 +80,8 @@
     "planWeekly": "Tygodniowe skupienie",
     "planWhy": "Motywacja",
     "startPlan": "Rozpocznij mój plan",
-    "continueFree": "Kontynuuj z darmowym planem"
-  },
-  "boss": {
-    "title": "Boss tego tygodnia",
-    "timeLeft": "zostało {{days}}d {{hours}}h",
-    "participants_one": "{{count}} wojownik",
-    "participants_other": "{{count}} wojowników",
-    "yourContribution": "Twój wkład: {{duration}}"
+    "continueFree": "Kontynuuj z darmowym planem",
+    "addAnotherSubject": "Dodaj kolejny przedmiot"
   },
   "dna": {
     "title": "DNA nauki",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Nie udało się zaktualizować ustawienia powiadomień. Spróbuj ponownie.",
     "subjectDistribution": "Rozkład nauki",
     "focusScoreWeek": "Jakość skupienia w tym tygodniu",
-    "focusScoreHint": "Średni wynik z twoich sesji"
+    "focusScoreHint": "Średni wynik z twoich sesji",
+    "titles": "Tytuły",
+    "titlesHint": "Wybierz zdobyty tytuł, który pokażesz w profilu."
   },
   "rooms": {
     "createRoom": "+ Utwórz pokój",
@@ -489,5 +485,27 @@
     "unavailable": "Nie udało się załadować pakietów. Spróbuj później.",
     "comingSoon": "Pakiety monet już wkrótce!",
     "footer": "Monety możesz też zdobywać skupiając się — każda sesja daje monety równe XP"
+  },
+  "challenge": {
+    "title": "Wyzwanie tygodnia",
+    "claimReward": "Odbierz +{{coins}}",
+    "claimed": "+{{coins}} odebrano",
+    "rewardHint": "Osiągnij cel tygodnia → +{{coins}}",
+    "friendRanking": "Ranking znajomych",
+    "you": "Ty",
+    "yourRank": "Twoje miejsce: #{{rank}}",
+    "claimFailed": "Nie udało się odebrać",
+    "timeLeft": "zostało {{days}}d {{hours}}h"
+  },
+  "titles": {
+    "novice": "Nowicjusz",
+    "focused": "Skupiony",
+    "roller": "W ciągu",
+    "week_warrior": "Wojownik tygodnia",
+    "iron_will": "Żelazna wola",
+    "centurion": "Centurion",
+    "elite": "Elita",
+    "social": "Towarzyski",
+    "pro": "Pro"
   }
 }

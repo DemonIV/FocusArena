@@ -5,7 +5,7 @@ import { checkAndAward } from '../achievements';
 // ─── Tunables ─────────────────────────────────────────────────
 
 /** Free plan is capped to this many active subjects; Pro is unlimited. */
-export const FREE_SUBJECT_LIMIT = 3;
+export const FREE_SUBJECT_LIMIT = 8;
 /** Streak freezes a Pro user is topped up to on each purchase/renewal. */
 export const STREAK_FREEZE_MAX = 2;
 

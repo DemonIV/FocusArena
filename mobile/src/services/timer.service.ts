@@ -7,7 +7,8 @@ import type {
   MonthlyStats,
   GhostInfo,
   DnaInfo,
-  BossInfo,
+  ChallengeInfo,
+  ChallengeClaimResult,
   Subject,
   SubjectStat,
   Session,
@@ -76,9 +77,13 @@ export const timerService = {
   getDNA: () =>
     api.get<DnaInfo>('/timer/dna'),
 
-  /** Weekly global Boss Battle progress */
-  getBoss: () =>
-    api.get<BossInfo>('/timer/boss'),
+  /** Weekly Challenge — personal goal + friend ranking */
+  getChallenge: () =>
+    api.get<ChallengeInfo>('/timer/challenge'),
+
+  /** Claim this week's personal-goal coin reward */
+  claimChallenge: () =>
+    api.post<ChallengeClaimResult>('/timer/challenge/claim'),
 
   // ── Subjects ─────────────────────────────────────────────
   /** Returns subjects array directly */

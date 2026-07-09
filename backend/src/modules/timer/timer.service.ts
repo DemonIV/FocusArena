@@ -20,7 +20,9 @@ import type {
   MonthlySubjectTotal,
   GhostResponse,
   StudyDnaResponse,
-  BossBattleResponse,
+  WeeklyChallengeResponse,
+  WeeklyChallengeRanked,
+  WeeklyClaimResult,
   CreateSubjectBody,
   UpdateSubjectBody,
   SessionQuery,
@@ -282,7 +284,6 @@ export async function stopTimer(
     invalidateCache('monthly'),
     invalidateCache('alltime'),
     invalidateCountries(),              // Country Wars weekly aggregate
-    redis.del(BOSS_CACHE_KEY),         // Boss Battle weekly total
   ]);
 
   return result;
@@ -873,69 +874,156 @@ export async function getStudyDNA(userId: string): Promise<StudyDnaResponse> {
 }
 
 /**
- * Boss Battle — a weekly global focus goal everyone works toward together.
- * The collective total is computed from this week's sessions (cached, short
- * TTL) and resets automatically each Monday via the week window. No cron or
- * Redis counter needed.
+ * Weekly Challenge — replaces the old global Boss Battle.
+ *
+ * Two mechanics, both scoped to the current UTC week (Monday → next Monday,
+ * resets automatically via the week window — no cron):
+ *   1. Personal goal: hit `dailyGoalSum × 7` focus minutes this week → claim a
+ *      coin reward (once per week, guarded by the `weekly_goal_claims` table).
+ *   2. Friend ranking: the caller + accepted friends ranked by this week's
+ *      focus minutes, for a bit of friendly competition.
  */
-const BOSS_WEEKLY_GOAL = 100_000; // minutes — tunable
-const BOSS_CACHE_KEY = 'boss:weekly';
-const BOSS_CACHE_TTL = 60; // seconds
+const WEEKLY_REWARD_COINS = 300; // coins for completing the personal weekly goal
+const WEEKLY_GOAL_FALLBACK = 120 * 7; // minutes, when the user has no subject goals
 
-export async function getBossBattle(userId: string): Promise<BossBattleResponse> {
+/** This week's Monday 00:00 UTC → next Monday 00:00 UTC. */
+function currentWeekWindow(): { weekStart: Date; weekEnd: Date } {
   const now = new Date();
   const todayStart = new Date(now);
   todayStart.setUTCHours(0, 0, 0, 0);
-
-  // This week's Monday → next Monday (UTC)
   const dayOfWeek = now.getUTCDay(); // 0 Sun … 6 Sat
   const daysSinceMonday = (dayOfWeek + 6) % 7;
   const weekStart = new Date(todayStart.getTime() - daysSinceMonday * 86_400_000);
   const weekEnd = new Date(weekStart.getTime() + 7 * 86_400_000);
+  return { weekStart, weekEnd };
+}
 
-  // Collective total + participants (cached briefly — shared across all callers)
-  let totalMinutes: number;
-  let participants: number;
-  const cached = await redis.get(BOSS_CACHE_KEY);
-  if (cached) {
-    const parsed = JSON.parse(cached) as { totalMinutes: number; participants: number };
-    totalMinutes = parsed.totalMinutes;
-    participants = parsed.participants;
-  } else {
-    const { data, error } = await supabase
-      .from('sessions')
-      .select('user_id, duration_minutes')
-      .gte('started_at', weekStart.toISOString())
-      .lt('started_at', weekEnd.toISOString())
-      .limit(50_000);
-    if (error) throw new Error(error.message);
+/** IDs of the caller's accepted friends (either direction of the friendship). */
+async function acceptedFriendIds(userId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from('friendships')
+    .select('requester_id, addressee_id, status')
+    .eq('status', 'accepted')
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+  return (data ?? []).map((r) =>
+    r.requester_id === userId ? (r.addressee_id as string) : (r.requester_id as string),
+  );
+}
 
-    const users = new Set<string>();
-    totalMinutes = 0;
-    for (const row of data ?? []) {
-      totalMinutes += row.duration_minutes;
-      users.add(row.user_id);
-    }
-    participants = users.size;
-    await redis.set(BOSS_CACHE_KEY, JSON.stringify({ totalMinutes, participants }), 'EX', BOSS_CACHE_TTL);
+export async function getWeeklyChallenge(userId: string): Promise<WeeklyChallengeResponse> {
+  const { weekStart, weekEnd } = currentWeekWindow();
+
+  // Personal weekly goal = sum of active subject daily goals × 7.
+  const { data: goalRows } = await supabase
+    .from('subjects')
+    .select('daily_goal_minutes')
+    .eq('user_id', userId)
+    .eq('is_active', true);
+  const dailyGoalSum = (goalRows ?? []).reduce((s, r) => s + (r.daily_goal_minutes ?? 0), 0);
+  const goalMinutes = dailyGoalSum > 0 ? dailyGoalSum * 7 : WEEKLY_GOAL_FALLBACK;
+
+  // Everyone in the ranking: caller + accepted friends.
+  const friendIds = await acceptedFriendIds(userId);
+  const everyoneIds = [userId, ...friendIds];
+
+  // This week's minutes per user (single query over the whole cohort).
+  const { data: sessionRows, error: sErr } = await supabase
+    .from('sessions')
+    .select('user_id, duration_minutes')
+    .in('user_id', everyoneIds)
+    .gte('started_at', weekStart.toISOString())
+    .lt('started_at', weekEnd.toISOString())
+    .limit(50_000);
+  if (sErr) throw new Error(sErr.message);
+
+  const minutesByUser = new Map<string, number>();
+  for (const id of everyoneIds) minutesByUser.set(id, 0);
+  for (const row of sessionRows ?? []) {
+    minutesByUser.set(row.user_id, (minutesByUser.get(row.user_id) ?? 0) + row.duration_minutes);
   }
 
-  // Caller's own contribution (uncached — cheap, per-user)
-  const { data: mine, error: mineErr } = await supabase
-    .from('sessions')
-    .select('duration_minutes')
+  // Usernames for the ranking rows.
+  const { data: userRows } = await supabase
+    .from('users')
+    .select('id, username')
+    .in('id', everyoneIds);
+  const usernameById = new Map((userRows ?? []).map((u) => [u.id as string, u.username as string]));
+
+  const friends: WeeklyChallengeRanked[] = everyoneIds
+    .map((id) => ({
+      userId: id,
+      username: usernameById.get(id) ?? '—',
+      minutes: minutesByUser.get(id) ?? 0,
+      isMe: id === userId,
+    }))
+    .sort((a, b) => b.minutes - a.minutes);
+  const myRank = friends.findIndex((f) => f.isMe) + 1;
+
+  const myMinutes = minutesByUser.get(userId) ?? 0;
+  const reached = myMinutes >= goalMinutes;
+
+  // Already claimed this week?
+  const weekStartDate = weekStart.toISOString().slice(0, 10);
+  const { data: claimRow } = await supabase
+    .from('weekly_goal_claims')
+    .select('user_id')
     .eq('user_id', userId)
-    .gte('started_at', weekStart.toISOString())
-    .lt('started_at', weekEnd.toISOString());
-  if (mineErr) throw new Error(mineErr.message);
-  const myContribution = (mine ?? []).reduce((s, r) => s + r.duration_minutes, 0);
+    .eq('week_start', weekStartDate)
+    .maybeSingle();
 
   return {
-    totalMinutes,
-    goalMinutes: BOSS_WEEKLY_GOAL,
-    myContribution,
-    participants,
+    weekStartsAt: weekStart.toISOString(),
     weekEndsAt: weekEnd.toISOString(),
+    personal: {
+      goalMinutes,
+      minutes: myMinutes,
+      reward: WEEKLY_REWARD_COINS,
+      reached,
+      claimed: Boolean(claimRow),
+    },
+    friends,
+    myRank,
+  };
+}
+
+/**
+ * Claim this week's personal-goal reward. Idempotent: the unique
+ * (user_id, week_start) row guards against double-claims. Throws
+ * `GOAL_NOT_REACHED` / `ALREADY_CLAIMED` for the route to map to 4xx.
+ */
+export async function claimWeeklyReward(userId: string): Promise<WeeklyClaimResult> {
+  const { weekStart } = currentWeekWindow();
+  const weekStartDate = weekStart.toISOString().slice(0, 10);
+
+  // Re-verify the goal server-side (never trust the client).
+  const challenge = await getWeeklyChallenge(userId);
+  if (!challenge.personal.reached) {
+    throw Object.assign(new Error('Weekly goal not reached'), { code: 'GOAL_NOT_REACHED' });
+  }
+
+  // Insert the claim row first — the PK makes a double-claim fail here.
+  const { error: insErr } = await supabase
+    .from('weekly_goal_claims')
+    .insert({ user_id: userId, week_start: weekStartDate, coins: WEEKLY_REWARD_COINS });
+  if (insErr) {
+    // 23505 = unique_violation → already claimed this week
+    if ((insErr as { code?: string }).code === '23505') {
+      throw Object.assign(new Error('Reward already claimed'), { code: 'ALREADY_CLAIMED' });
+    }
+    throw new Error(insErr.message);
+  }
+
+  // Credit the coins atomically (the claim row is the audit log / dedup guard).
+  const { data: newCoins, error: coinErr } = await supabase.rpc('add_coins', {
+    p_user_id: userId,
+    p_amount: WEEKLY_REWARD_COINS,
+  });
+  if (coinErr) throw new Error(coinErr.message);
+
+  return {
+    claimed: true,
+    coinsAwarded: WEEKLY_REWARD_COINS,
+    newCoins: (newCoins as number | null) ?? 0,
   };
 }
 

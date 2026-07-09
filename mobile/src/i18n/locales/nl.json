@@ -80,14 +80,8 @@
     "planWeekly": "Wekelijkse focus",
     "planWhy": "Motivatie",
     "startPlan": "Start mijn plan",
-    "continueFree": "Doorgaan met het gratis plan"
-  },
-  "boss": {
-    "title": "Boss van deze week",
-    "timeLeft": "{{days}}d {{hours}}u resterend",
-    "participants_one": "{{count}} vechter",
-    "participants_other": "{{count}} vechters",
-    "yourContribution": "Jouw aandeel: {{duration}}"
+    "continueFree": "Doorgaan met het gratis plan",
+    "addAnotherSubject": "Nog een vak toevoegen"
   },
   "dna": {
     "title": "Studie-DNA",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Kon de meldingsinstelling niet bijwerken. Probeer opnieuw.",
     "subjectDistribution": "Studieverdeling",
     "focusScoreWeek": "Focuskwaliteit deze week",
-    "focusScoreHint": "Gem. score over je sessies"
+    "focusScoreHint": "Gem. score over je sessies",
+    "titles": "Titels",
+    "titlesHint": "Kies een verdiende titel om op je profiel te tonen."
   },
   "rooms": {
     "createRoom": "+ Kamer maken",
@@ -489,5 +485,27 @@
     "unavailable": "Pakketten konden niet worden geladen. Probeer het later opnieuw.",
     "comingSoon": "Muntenpakketten komen eraan!",
     "footer": "Je kunt ook munten verdienen door te focussen — elke sessie geeft munten gelijk aan XP"
+  },
+  "challenge": {
+    "title": "Weekchallenge",
+    "claimReward": "+{{coins}} claimen",
+    "claimed": "+{{coins}} geclaimd",
+    "rewardHint": "Haal je weekdoel → +{{coins}}",
+    "friendRanking": "Vriendenranglijst",
+    "you": "Jij",
+    "yourRank": "Jouw plek: #{{rank}}",
+    "claimFailed": "Claimen mislukt",
+    "timeLeft": "{{days}}d {{hours}}u resterend"
+  },
+  "titles": {
+    "novice": "Beginner",
+    "focused": "Gefocust",
+    "roller": "Op dreef",
+    "week_warrior": "Weekstrijder",
+    "iron_will": "IJzeren wil",
+    "centurion": "Centurion",
+    "elite": "Elite",
+    "social": "Sociaal",
+    "pro": "Pro"
   }
 }

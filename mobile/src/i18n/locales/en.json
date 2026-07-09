@@ -80,14 +80,8 @@
     "planWeekly": "Weekly focus",
     "planWhy": "Motivation",
     "startPlan": "Start my plan",
-    "continueFree": "Continue with the free plan"
-  },
-  "boss": {
-    "title": "This Week's Boss",
-    "timeLeft": "{{days}}d {{hours}}h left",
-    "participants_one": "{{count}} fighter",
-    "participants_other": "{{count}} fighters",
-    "yourContribution": "Your share: {{duration}}"
+    "continueFree": "Continue with the free plan",
+    "addAnotherSubject": "Add another subject"
   },
   "dna": {
     "title": "Study DNA",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Could not update notification setting. Please try again.",
     "subjectDistribution": "Study Distribution",
     "focusScoreWeek": "This week's focus quality",
-    "focusScoreHint": "Avg score across your sessions"
+    "focusScoreHint": "Avg score across your sessions",
+    "titles": "Titles",
+    "titlesHint": "Pick a title you've earned to show on your profile."
   },
   "rooms": {
     "createRoom": "+ Create Room",
@@ -489,5 +485,27 @@
     "unavailable": "Packs could not be loaded right now. Try again later.",
     "comingSoon": "Coin packs are coming soon!",
     "footer": "You can also earn coins by focusing — every session gives coins equal to XP"
+  },
+  "challenge": {
+    "title": "Weekly Challenge",
+    "claimReward": "Claim +{{coins}}",
+    "claimed": "+{{coins}} claimed",
+    "rewardHint": "Hit your weekly goal → +{{coins}}",
+    "friendRanking": "Friend ranking",
+    "you": "You",
+    "yourRank": "Your rank: #{{rank}}",
+    "claimFailed": "Couldn't claim the reward",
+    "timeLeft": "{{days}}d {{hours}}h left"
+  },
+  "titles": {
+    "novice": "Novice",
+    "focused": "Focused",
+    "roller": "On a Roll",
+    "week_warrior": "Week Warrior",
+    "iron_will": "Iron Will",
+    "centurion": "Centurion",
+    "elite": "Elite",
+    "social": "Socialite",
+    "pro": "Pro"
   }
 }

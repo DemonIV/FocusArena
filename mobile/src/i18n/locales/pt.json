@@ -80,14 +80,8 @@
     "planWeekly": "Foco semanal",
     "planWhy": "Motivação",
     "startPlan": "Começar meu plano",
-    "continueFree": "Continuar com o plano gratuito"
-  },
-  "boss": {
-    "title": "Chefe desta semana",
-    "timeLeft": "faltam {{days}}d {{hours}}h",
-    "participants_one": "{{count}} lutador",
-    "participants_other": "{{count}} lutadores",
-    "yourContribution": "Sua parte: {{duration}}"
+    "continueFree": "Continuar com o plano gratuito",
+    "addAnotherSubject": "Adicionar outra matéria"
   },
   "dna": {
     "title": "DNA de estudo",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Não foi possível atualizar a configuração de notificações. Tente novamente.",
     "subjectDistribution": "Distribuição de estudo",
     "focusScoreWeek": "Qualidade de foco esta semana",
-    "focusScoreHint": "Pontuação média das suas sessões"
+    "focusScoreHint": "Pontuação média das suas sessões",
+    "titles": "Títulos",
+    "titlesHint": "Escolha um título conquistado para exibir no seu perfil."
   },
   "rooms": {
     "createRoom": "+ Criar sala",
@@ -489,5 +485,27 @@
     "unavailable": "Não foi possível carregar os pacotes. Tente novamente mais tarde.",
     "comingSoon": "Pacotes de moedas em breve!",
     "footer": "Você também pode ganhar moedas focando — cada sessão dá moedas iguais ao XP"
+  },
+  "challenge": {
+    "title": "Desafio semanal",
+    "claimReward": "Resgatar +{{coins}}",
+    "claimed": "+{{coins}} resgatado",
+    "rewardHint": "Alcance sua meta semanal → +{{coins}}",
+    "friendRanking": "Ranking de amigos",
+    "you": "Você",
+    "yourRank": "Sua posição: #{{rank}}",
+    "claimFailed": "Falha ao resgatar",
+    "timeLeft": "faltam {{days}}d {{hours}}h"
+  },
+  "titles": {
+    "novice": "Novato",
+    "focused": "Focado",
+    "roller": "Embalado",
+    "week_warrior": "Guerreiro da semana",
+    "iron_will": "Vontade de ferro",
+    "centurion": "Centurião",
+    "elite": "Elite",
+    "social": "Sociável",
+    "pro": "Pro"
   }
 }

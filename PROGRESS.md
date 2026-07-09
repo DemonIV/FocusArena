@@ -164,6 +164,15 @@
 - ✅ **Yeni ikonlu build (buildNumber 4) BAŞARILI → TestFlight'a yüklendi → iPhone'a kuruldu**. Gerçek cihazda **giriş DOĞRULANDI** (testalpha1 ile; ilk denemede yanlış şifre → sonra çalıştı). Backend bağlantısı sorunsuz. İkon reddi ÇÖZÜLDÜ. StudySquad artık gerçek iPhone'da TestFlight üzerinden çalışıyor. 🎉
 - **Test hesapları** (backend/Supabase'de kayıtlı; TestFlight aynı backend'e bağlı): `testalpha1@studysquad.test` + `testbeta2@studysquad.test` (+ `testgamma3`), şifre `Passw0rd123`. Alpha & Beta arkadaş.
 
+### Faz 18 — Haftalık Challenge + Ünvanlar + Çoklu Konu (9 Temmuz)
+Migration 014 (weekly_goal_claims) + 015 (users.selected_title) ✓ · backend+mobil tsc temiz
+
+- **Boss Battle KALDIRILDI → Haftalık Challenge** (kullanıcı "kişisel/arkadaş challenge" seçti). Global 100.000 dk hedefi yerine: (1) **kişisel haftalık hedef** = aktif konuların günlük hedef toplamı × 7; hedefe ulaşınca **300 🪙 ödül** (`weekly_goal_claims` tablosu PK=(user_id, week_start) → haftada 1, çift-claim guard'ı; `add_coins` RPC). (2) **Arkadaş sıralaması** — sen + kabul edilmiş arkadaşlar bu haftaki dakikaya göre sıralı (madalyalar, sen-vurgusu). Backend: `getWeeklyChallenge` + `claimWeeklyReward` (`timer.service.ts`), `GET /timer/challenge` + `POST /timer/challenge/claim` (eski `GET /timer/boss` silindi). Home'daki `<WeeklyChallengeCard>` yeni kart: kişisel progress bar + "Ödülü Al" butonu + arkadaş mini-sıralaması.
+- **Ünvan (title) sistemi** (yeni — önceden sadece rozet vardı). Rozete bağlı 9 seçilebilir ünvan (`novice`→null default, `focused`→first_session, `roller`→streak_3, `week_warrior`→streak_7, `iron_will`→streak_30, `centurion`→hours_100, `elite`→level_10, `social`→social_butterfly, `pro`→pro_member). Katalog `achievements.schema.ts` (`TITLE_META`). `GET /achievements` artık `titles[]` + `selectedTitle` döner; `PUT /achievements/title` seçili ünvanı yazar (kilitliyse 409). Kolon `users.selected_title` (migration 015). Profil'de: seçili ünvan kullanıcı adının altında, ayrıca "Ünvanlar" bölümünde chip'lerle seçim (kilitliler 🔒).
+- **Çoklu konu**: (1) ücretsiz konu limiti **3 → 8** (`FREE_SUBJECT_LIMIT`). (2) **Onboarding'de çoklu konu** — step 1'e "＋ Başka konu ekle" (chip listesi + kaldır), plan adımı hepsini gösterir; seçilen günlük hedef konulara bölünür (backend goal'leri topladığı için toplam = seçilen hedef); finish max 8'e slice'lar.
+- i18n: 10 dilde `challenge.*` (9 anahtar, `boss.*` yerine), `titles.*` (9), `profile.titles/titlesHint`, `onboarding.addAnotherSubject`.
+- **Doğrulama**: backend+mobil `tsc --noEmit` temiz; migration 014+015 pooler ile uygulandı + doğrulandı. **Backend Fly'a HENÜZ DEPLOY EDİLMEDİ + cihazda test EDİLMEDİ** — `/timer/boss` kaldırıldığı için deploy YENİ mobil build ile eşzamanlı olmalı (eski TestFlight build'i eski endpoint'i çağırır).
+
 ### 📝 Oturum Özeti — 2026-07-08/09 (Focus Score + iOS/TestFlight + App Icon)
 
 Yoğun oturum, 3 büyük iş bitti — hepsi main'de:

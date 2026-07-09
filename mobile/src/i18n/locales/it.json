@@ -80,14 +80,8 @@
     "planWeekly": "Focus settimanale",
     "planWhy": "Motivazione",
     "startPlan": "Avvia il mio piano",
-    "continueFree": "Continua con il piano gratuito"
-  },
-  "boss": {
-    "title": "Boss di questa settimana",
-    "timeLeft": "mancano {{days}}g {{hours}}h",
-    "participants_one": "{{count}} combattente",
-    "participants_other": "{{count}} combattenti",
-    "yourContribution": "Il tuo contributo: {{duration}}"
+    "continueFree": "Continua con il piano gratuito",
+    "addAnotherSubject": "Aggiungi un'altra materia"
   },
   "dna": {
     "title": "DNA di studio",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Impossibile aggiornare l’impostazione delle notifiche. Riprova.",
     "subjectDistribution": "Distribuzione dello studio",
     "focusScoreWeek": "Qualità del focus questa settimana",
-    "focusScoreHint": "Punteggio medio delle sessioni"
+    "focusScoreHint": "Punteggio medio delle sessioni",
+    "titles": "Titoli",
+    "titlesHint": "Scegli un titolo che hai sbloccato da mostrare sul profilo."
   },
   "rooms": {
     "createRoom": "+ Crea stanza",
@@ -489,5 +485,27 @@
     "unavailable": "Impossibile caricare i pacchetti. Riprova più tardi.",
     "comingSoon": "I pacchetti di monete arrivano presto!",
     "footer": "Puoi guadagnare monete anche concentrandoti — ogni sessione dà monete pari agli XP"
+  },
+  "challenge": {
+    "title": "Sfida settimanale",
+    "claimReward": "Riscuoti +{{coins}}",
+    "claimed": "+{{coins}} riscosso",
+    "rewardHint": "Raggiungi l'obiettivo settimanale → +{{coins}}",
+    "friendRanking": "Classifica amici",
+    "you": "Tu",
+    "yourRank": "La tua posizione: #{{rank}}",
+    "claimFailed": "Riscatto non riuscito",
+    "timeLeft": "mancano {{days}}g {{hours}}h"
+  },
+  "titles": {
+    "novice": "Novizio",
+    "focused": "Concentrato",
+    "roller": "In serie",
+    "week_warrior": "Guerriero settimanale",
+    "iron_will": "Volontà di ferro",
+    "centurion": "Centurione",
+    "elite": "Élite",
+    "social": "Socievole",
+    "pro": "Pro"
   }
 }

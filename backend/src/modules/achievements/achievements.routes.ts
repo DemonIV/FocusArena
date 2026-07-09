@@ -2,7 +2,8 @@ import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
 import { captureException } from '../../shared/observability';
-import { getAchievementsWithProgress, getUserAchievements } from './achievements.service';
+import { getAchievementsWithProgress, getUserAchievements, setSelectedTitle } from './achievements.service';
+import { TITLE_IDS, type TitleId } from './achievements.schema';
 
 export const achievementsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.addHook('preHandler', authGuard);
@@ -16,6 +17,31 @@ export const achievementsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.send(result);
     } catch (err) {
       request.log.error(err, 'achievements GET / failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // ── PUT /achievements/title ───────────────────────────────
+  // Set (or clear with null) the caller's selected profile title.
+  fastify.put('/title', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    const body = (request.body ?? {}) as { title?: unknown };
+    const raw = body.title;
+
+    if (raw !== null && (typeof raw !== 'string' || !TITLE_IDS.includes(raw as TitleId))) {
+      return reply.code(400).send({ error: 'Validation error', message: 'Invalid title' });
+    }
+
+    try {
+      const selectedTitle = await setSelectedTitle(userId, (raw ?? null) as TitleId | null);
+      return reply.send({ selectedTitle });
+    } catch (err: unknown) {
+      const e = err as { code?: string; message: string };
+      if (e.code === 'TITLE_LOCKED' || e.code === 'BAD_TITLE') {
+        return reply.code(409).send({ error: e.code === 'BAD_TITLE' ? 'bad_title' : 'title_locked' });
+      }
+      request.log.error(err, 'achievements PUT /title failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }

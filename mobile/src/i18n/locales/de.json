@@ -80,14 +80,8 @@
     "planWeekly": "Wochenfokus",
     "planWhy": "Motivation",
     "startPlan": "Meinen Plan starten",
-    "continueFree": "Mit dem Gratis-Plan fortfahren"
-  },
-  "boss": {
-    "title": "Boss dieser Woche",
-    "timeLeft": "noch {{days}}T {{hours}}Std",
-    "participants_one": "{{count}} Kämpfer",
-    "participants_other": "{{count}} Kämpfer",
-    "yourContribution": "Dein Anteil: {{duration}}"
+    "continueFree": "Mit dem Gratis-Plan fortfahren",
+    "addAnotherSubject": "Weiteres Fach hinzufügen"
   },
   "dna": {
     "title": "Lern-DNA",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Benachrichtigungseinstellung konnte nicht aktualisiert werden. Bitte erneut versuchen.",
     "subjectDistribution": "Lernverteilung",
     "focusScoreWeek": "Fokusqualität diese Woche",
-    "focusScoreHint": "Durchschnitt deiner Sitzungen"
+    "focusScoreHint": "Durchschnitt deiner Sitzungen",
+    "titles": "Titel",
+    "titlesHint": "Wähle einen verdienten Titel für dein Profil."
   },
   "rooms": {
     "createRoom": "+ Raum erstellen",
@@ -489,5 +485,27 @@
     "unavailable": "Pakete konnten gerade nicht geladen werden. Versuche es später erneut.",
     "comingSoon": "Münzpakete kommen bald!",
     "footer": "Münzen kannst du auch durch Fokussieren verdienen — jede Sitzung bringt Münzen in Höhe der XP"
+  },
+  "challenge": {
+    "title": "Wochen-Challenge",
+    "claimReward": "+{{coins}} abholen",
+    "claimed": "+{{coins}} erhalten",
+    "rewardHint": "Wochenziel erreichen → +{{coins}}",
+    "friendRanking": "Freunde-Rangliste",
+    "you": "Du",
+    "yourRank": "Dein Rang: #{{rank}}",
+    "claimFailed": "Belohnung fehlgeschlagen",
+    "timeLeft": "noch {{days}}T {{hours}}Std"
+  },
+  "titles": {
+    "novice": "Neuling",
+    "focused": "Fokussiert",
+    "roller": "In Fahrt",
+    "week_warrior": "Wochenkrieger",
+    "iron_will": "Eiserner Wille",
+    "centurion": "Zenturio",
+    "elite": "Elite",
+    "social": "Gesellig",
+    "pro": "Pro"
   }
 }

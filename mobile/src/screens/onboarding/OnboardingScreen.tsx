@@ -64,9 +64,34 @@ export function OnboardingScreen() {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(ICONS[0]);
   const [color, setColor] = useState(COLORS[0]);
+  // Extra subjects the user committed with "add another" (the live inputs above
+  // are the subject currently being edited).
+  const [subjects, setSubjects] = useState<{ name: string; icon: string; color: string }[]>([]);
   const [goal, setGoal] = useState(60);
   const [submitting, setSubmitting] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+
+  // Full plan = committed extras + the in-progress input (if named).
+  const plannedSubjects = [
+    ...subjects,
+    ...(name.trim() ? [{ name: name.trim(), icon, color }] : []),
+  ];
+
+  // Commit the current input to the list and reset for the next subject.
+  const addAnother = useCallback(() => {
+    if (subjects.length >= 8) return; // free-plan cap
+    const trimmed = name.trim();
+    if (!trimmed) { Alert.alert(t('common.warning'), t('onboarding.nameRequired')); return; }
+    const nextIdx = subjects.length + 1;
+    setSubjects((prev) => [...prev, { name: trimmed, icon, color }]);
+    setName('');
+    setIcon(ICONS[nextIdx % ICONS.length]);
+    setColor(COLORS[nextIdx % COLORS.length]);
+  }, [name, icon, color, subjects.length, t]);
+
+  const removeSubject = useCallback((idx: number) => {
+    setSubjects((prev) => prev.filter((_, i) => i !== idx));
+  }, []);
 
   useEffect(() => {
     track('onboarding_step_viewed', { step });
@@ -100,9 +125,24 @@ export function OnboardingScreen() {
   }, []);
 
   const finish = useCallback(async () => {
+    // Free plan allows up to 8 subjects — cap here so we never hit a mid-loop 402.
+    const all = [...plannedSubjects].slice(0, 8);
+    if (all.length === 0) { Alert.alert(t('common.warning'), t('onboarding.nameRequired')); return; }
     setSubmitting(true);
     try {
-      await timerService.createSubject({ name: name.trim(), color, icon, daily_goal_minutes: goal });
+      // Split the chosen daily goal across the subjects so the summed daily
+      // target (backend sums per-subject goals) equals what the user picked.
+      const n = all.length;
+      const base = Math.floor(goal / n);
+      for (let i = 0; i < n; i++) {
+        const g = i === 0 ? goal - base * (n - 1) : base;
+        await timerService.createSubject({
+          name: all[i].name,
+          color: all[i].color,
+          icon: all[i].icon,
+          daily_goal_minutes: Math.max(1, g),
+        });
+      }
       qc.invalidateQueries({ queryKey: ['subjects'] });
       qc.invalidateQueries({ queryKey: ['subject-stats'] });
       qc.invalidateQueries({ queryKey: ['timer-stats'] });
@@ -118,16 +158,16 @@ export function OnboardingScreen() {
       Alert.alert(t('common.error'), e?.message ?? t('onboarding.createFailed'));
       setSubmitting(false);
     }
-  }, [name, color, icon, goal, complete, qc, t]);
+  }, [subjects, name, color, icon, goal, complete, qc, t]);
 
   const next = useCallback(() => {
-    if (step === 1 && !name.trim()) {
+    if (step === 1 && subjects.length === 0 && !name.trim()) {
       Alert.alert(t('common.warning'), t('onboarding.nameRequired'));
       return;
     }
     if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
     else void finish();
-  }, [step, name, finish, t]);
+  }, [step, name, subjects.length, finish, t]);
 
   // While we don't yet know whether to skip, show a spinner.
   if (subjectsQ.isLoading) {
@@ -231,6 +271,33 @@ export function OnboardingScreen() {
                 </Pressable>
               ))}
             </View>
+
+            {/* Already-added subjects (tap ✕ to remove) */}
+            {subjects.length > 0 && (
+              <View style={styles.addedWrap}>
+                {subjects.map((s, idx) => (
+                  <Pressable
+                    key={idx}
+                    style={[styles.addedChip, { borderColor: `${s.color}66` }]}
+                    onPress={() => removeSubject(idx)}
+                  >
+                    <Text style={styles.addedChipIcon}>{s.icon}</Text>
+                    <Text style={styles.addedChipName} numberOfLines={1}>{s.name}</Text>
+                    <Text style={styles.addedChipX}>✕</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+
+            {/* Add another subject */}
+            <TouchableOpacity
+              style={[styles.addAnotherBtn, plannedSubjects.length >= 8 && { opacity: 0.4 }]}
+              onPress={addAnother}
+              disabled={plannedSubjects.length >= 8}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.addAnotherText}>＋ {t('onboarding.addAnotherSubject')}</Text>
+            </TouchableOpacity>
           </>
         )}
 
@@ -318,12 +385,20 @@ export function OnboardingScreen() {
             <Text style={styles.subtitle}>{t('onboarding.planSubtitle')}</Text>
 
             <View style={styles.planCard}>
-              <View style={[styles.preview, { borderColor: `${color}40`, marginBottom: 0 }]}>
-                <View style={[styles.previewDot, { backgroundColor: color }]}>
-                  <Text style={styles.previewIcon}>{icon}</Text>
+              {plannedSubjects.map((s, idx) => (
+                <View
+                  key={idx}
+                  style={[
+                    styles.preview,
+                    { borderColor: `${s.color}40`, marginBottom: idx === plannedSubjects.length - 1 ? 0 : 10 },
+                  ]}
+                >
+                  <View style={[styles.previewDot, { backgroundColor: s.color }]}>
+                    <Text style={styles.previewIcon}>{s.icon}</Text>
+                  </View>
+                  <Text style={styles.previewName} numberOfLines={1}>{s.name}</Text>
                 </View>
-                <Text style={styles.previewName} numberOfLines={1}>{name.trim()}</Text>
-              </View>
+              ))}
 
               <View style={styles.planRow}>
                 <Text style={styles.planLabel}>{t('onboarding.planDailyGoal')}</Text>
@@ -445,6 +520,33 @@ const styles = StyleSheet.create({
   colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   colorDot: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   colorCheck: { color: '#fff', fontSize: 18, fontWeight: '800' },
+
+  // Added-subjects chips + add-another button
+  addedWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 22 },
+  addedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: CARD,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    maxWidth: '100%',
+  },
+  addedChipIcon: { fontSize: 15 },
+  addedChipName: { color: TEXT, fontSize: 13, fontWeight: '600', flexShrink: 1 },
+  addedChipX: { color: MUTED, fontSize: 13, fontWeight: '800' },
+  addAnotherBtn: {
+    marginTop: 16,
+    paddingVertical: 13,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: `${ACCENT}55`,
+    backgroundColor: `${ACCENT}12`,
+    alignItems: 'center',
+  },
+  addAnotherText: { color: ACCENT, fontSize: 14, fontWeight: '700' },
 
   // Motivation step
   motivCard: {

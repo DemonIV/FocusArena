@@ -129,3 +129,48 @@ export const BADGE_META: Record<BadgeType, BadgeMeta> = {
     icon: '⚜️',
   },
 };
+
+// ─── Titles (ünvanlar) ────────────────────────────────────────
+// Selectable display titles shown on the profile. Each is unlocked by earning
+// the matching badge (or always available when `requires` is null). Labels are
+// localized on the client via the `titles.<id>` i18n keys — the backend only
+// owns the unlock rule + icon.
+
+export const TITLE_IDS = [
+  'novice',       // always unlocked (default)
+  'focused',      // first_session
+  'roller',       // streak_3
+  'week_warrior', // streak_7
+  'iron_will',    // streak_30
+  'centurion',    // hours_100
+  'elite',        // level_10
+  'social',       // social_butterfly
+  'pro',          // pro_member
+] as const;
+
+export type TitleId = (typeof TITLE_IDS)[number];
+
+export interface TitleMeta {
+  /** Badge that unlocks this title; null = always available. */
+  requires: BadgeType | null;
+  icon: string;
+}
+
+export const TITLE_META: Record<TitleId, TitleMeta> = {
+  novice:       { requires: null,               icon: '🌱' },
+  focused:      { requires: 'first_session',    icon: '🎯' },
+  roller:       { requires: 'streak_3',         icon: '🔥' },
+  week_warrior: { requires: 'streak_7',         icon: '⚡' },
+  iron_will:    { requires: 'streak_30',        icon: '💎' },
+  centurion:    { requires: 'hours_100',        icon: '🏆' },
+  elite:        { requires: 'level_10',         icon: '👑' },
+  social:       { requires: 'social_butterfly', icon: '🦋' },
+  pro:          { requires: 'pro_member',       icon: '⚜️' },
+};
+
+export interface TitleEntry {
+  id: TitleId;
+  icon: string;
+  requires: BadgeType | null;
+  unlocked: boolean;
+}

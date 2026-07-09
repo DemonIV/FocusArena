@@ -80,14 +80,8 @@
     "planWeekly": "Concentration hebdo",
     "planWhy": "Motivation",
     "startPlan": "Lancer mon plan",
-    "continueFree": "Continuer avec l'offre gratuite"
-  },
-  "boss": {
-    "title": "Boss de la semaine",
-    "timeLeft": "{{days}}j {{hours}}h restantes",
-    "participants_one": "{{count}} combattant",
-    "participants_other": "{{count}} combattants",
-    "yourContribution": "Ta part : {{duration}}"
+    "continueFree": "Continuer avec l'offre gratuite",
+    "addAnotherSubject": "Ajouter une autre matière"
   },
   "dna": {
     "title": "ADN d’étude",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Impossible de mettre à jour le paramètre de notifications. Réessaie.",
     "subjectDistribution": "Répartition du travail",
     "focusScoreWeek": "Qualité de concentration cette semaine",
-    "focusScoreHint": "Score moyen de vos sessions"
+    "focusScoreHint": "Score moyen de vos sessions",
+    "titles": "Titres",
+    "titlesHint": "Choisis un titre gagné à afficher sur ton profil."
   },
   "rooms": {
     "createRoom": "+ Créer une salle",
@@ -489,5 +485,27 @@
     "unavailable": "Impossible de charger les packs. Réessaie plus tard.",
     "comingSoon": "Les packs de pièces arrivent bientôt !",
     "footer": "Tu peux aussi gagner des pièces en te concentrant — chaque session rapporte autant de pièces que d’XP"
+  },
+  "challenge": {
+    "title": "Défi hebdo",
+    "claimReward": "Récupérer +{{coins}}",
+    "claimed": "+{{coins}} récupéré",
+    "rewardHint": "Atteins ton objectif hebdo → +{{coins}}",
+    "friendRanking": "Classement des amis",
+    "you": "Toi",
+    "yourRank": "Ton rang : #{{rank}}",
+    "claimFailed": "Échec de la récompense",
+    "timeLeft": "{{days}}j {{hours}}h restantes"
+  },
+  "titles": {
+    "novice": "Novice",
+    "focused": "Concentré",
+    "roller": "En série",
+    "week_warrior": "Guerrier de la semaine",
+    "iron_will": "Volonté de fer",
+    "centurion": "Centurion",
+    "elite": "Élite",
+    "social": "Sociable",
+    "pro": "Pro"
   }
 }

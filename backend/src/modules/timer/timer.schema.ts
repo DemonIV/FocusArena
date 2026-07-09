@@ -113,18 +113,47 @@ export interface DailyStat {
   completedSessions: number;
 }
 
-/** "Boss Battle" — a weekly global focus goal everyone works toward together. */
-export interface BossBattleResponse {
-  /** Total focus minutes logged by all users this week */
-  totalMinutes: number;
-  /** Collective goal for the week */
-  goalMinutes: number;
-  /** Caller's own focus minutes this week */
-  myContribution: number;
-  /** Distinct users who contributed this week */
-  participants: number;
-  /** ISO timestamp when the weekly battle resets (next Monday 00:00 UTC) */
+/**
+ * "Weekly Challenge" — replaces the old global Boss Battle. Each user works
+ * toward a personal weekly focus goal (coin reward on completion) and competes
+ * against their friends in a weekly focus-minutes ranking.
+ */
+export interface WeeklyChallengeRanked {
+  userId: string;
+  username: string;
+  minutes: number;
+  /** True for the caller's own row (highlighted in the UI) */
+  isMe: boolean;
+}
+
+export interface WeeklyChallengeResponse {
+  /** ISO — this week's Monday 00:00 UTC */
+  weekStartsAt: string;
+  /** ISO — next Monday 00:00 UTC (when the challenge resets) */
   weekEndsAt: string;
+  personal: {
+    /** Weekly focus goal in minutes (daily-goal sum × 7) */
+    goalMinutes: number;
+    /** Caller's focus minutes so far this week */
+    minutes: number;
+    /** Coins awarded for hitting the goal */
+    reward: number;
+    /** minutes >= goalMinutes */
+    reached: boolean;
+    /** This week's reward already claimed? */
+    claimed: boolean;
+  };
+  /** Caller + accepted friends, ranked by this week's minutes (desc) */
+  friends: WeeklyChallengeRanked[];
+  /** Caller's 1-based rank within `friends` */
+  myRank: number;
+}
+
+/** Result of claiming the weekly personal-goal reward. */
+export interface WeeklyClaimResult {
+  claimed: boolean;
+  coinsAwarded: number;
+  newCoins: number;
 }
 
 /** "Study DNA" — a personality snapshot derived from session history. */

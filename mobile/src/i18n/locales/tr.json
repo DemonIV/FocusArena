@@ -80,14 +80,8 @@
     "planWeekly": "Haftalık odak",
     "planWhy": "Motivasyon",
     "startPlan": "Planımı başlat",
-    "continueFree": "Ücretsiz planla devam et"
-  },
-  "boss": {
-    "title": "Bu Haftanın Boss'u",
-    "timeLeft": "{{days}}g {{hours}}sa kaldı",
-    "participants_one": "{{count}} savaşçı",
-    "participants_other": "{{count}} savaşçı",
-    "yourContribution": "Katkın: {{duration}}"
+    "continueFree": "Ücretsiz planla devam et",
+    "addAnotherSubject": "Başka konu ekle"
   },
   "dna": {
     "title": "Çalışma DNA'sı",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Bildirim ayarı güncellenemedi. Lütfen tekrar dene.",
     "subjectDistribution": "Çalışma Dağılımı",
     "focusScoreWeek": "Bu haftaki odak kalitesi",
-    "focusScoreHint": "Seanslarının ortalama skoru"
+    "focusScoreHint": "Seanslarının ortalama skoru",
+    "titles": "Ünvanlar",
+    "titlesHint": "Rozetlerinden kazandığın bir ünvanı seçip profilinde göster."
   },
   "rooms": {
     "createRoom": "+ Oda Kur",
@@ -489,5 +485,27 @@
     "unavailable": "Paketler şu an yüklenemedi. Daha sonra tekrar dene.",
     "comingSoon": "Coin paketleri çok yakında!",
     "footer": "Odaklanarak da coin kazanabilirsin — her seans XP kadar coin verir"
+  },
+  "challenge": {
+    "title": "Haftalık Challenge",
+    "claimReward": "+{{coins}} Ödülü Al",
+    "claimed": "+{{coins}} alındı",
+    "rewardHint": "Haftalık hedefini tamamla → +{{coins}}",
+    "friendRanking": "Arkadaş sıralaması",
+    "you": "Sen",
+    "yourRank": "Sıran: #{{rank}}",
+    "claimFailed": "Ödül alınamadı",
+    "timeLeft": "{{days}}g {{hours}}sa kaldı"
+  },
+  "titles": {
+    "novice": "Acemi",
+    "focused": "Odaklı",
+    "roller": "Seri Yakaladı",
+    "week_warrior": "Hafta Savaşçısı",
+    "iron_will": "Çelik İrade",
+    "centurion": "Yüzyıl Bilgini",
+    "elite": "Elit",
+    "social": "Sosyal",
+    "pro": "Pro"
   }
 }

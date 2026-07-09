@@ -3,7 +3,11 @@ import { getSocketServer } from '../../websocket';
 import {
   BADGE_TYPES,
   BADGE_META,
+  TITLE_IDS,
+  TITLE_META,
   type BadgeType,
+  type TitleId,
+  type TitleEntry,
   type AchievementContext,
   type AchievementEntry,
 } from './achievements.schema';
@@ -117,12 +121,15 @@ export async function getUserAchievements(userId: string): Promise<AchievementEn
 }
 
 /**
- * Returns all badge types with earned/locked status —
- * useful for a trophy-cabinet view.
+ * Returns all badge types with earned/locked status, plus the caller's titles
+ * (unlocked/locked, derived from earned badges) and their currently selected
+ * title — everything the profile trophy cabinet needs in one call.
  */
 export async function getAchievementsWithProgress(userId: string): Promise<{
   earned: AchievementEntry[];
   locked: { badge_type: BadgeType; meta: (typeof BADGE_META)[BadgeType] }[];
+  titles: TitleEntry[];
+  selectedTitle: TitleId | null;
 }> {
   const earned = await getUserAchievements(userId);
   const earnedSet = new Set(earned.map((e) => e.badge_type));
@@ -132,5 +139,57 @@ export async function getAchievementsWithProgress(userId: string): Promise<{
     meta: BADGE_META[b],
   }));
 
-  return { earned, locked };
+  const titles: TitleEntry[] = TITLE_IDS.map((id) => {
+    const meta = TITLE_META[id];
+    return {
+      id,
+      icon: meta.icon,
+      requires: meta.requires,
+      unlocked: meta.requires === null || earnedSet.has(meta.requires),
+    };
+  });
+
+  // Selected title from the user row; ignore a stale/locked selection.
+  const { data: userRow } = await supabase
+    .from('users')
+    .select('selected_title')
+    .eq('id', userId)
+    .maybeSingle();
+  const raw = (userRow?.selected_title as TitleId | null) ?? null;
+  const selectedTitle = raw && titles.find((t) => t.id === raw)?.unlocked ? raw : null;
+
+  return { earned, locked, titles, selectedTitle };
+}
+
+/**
+ * Set (or clear, with null) the caller's selected profile title. Rejects a
+ * title the user hasn't unlocked. Returns the value that was persisted.
+ */
+export async function setSelectedTitle(
+  userId: string,
+  title: TitleId | null,
+): Promise<TitleId | null> {
+  if (title !== null) {
+    if (!TITLE_IDS.includes(title)) {
+      throw Object.assign(new Error('Unknown title'), { code: 'BAD_TITLE' });
+    }
+    const meta = TITLE_META[title];
+    if (meta.requires !== null) {
+      const { data } = await supabase
+        .from('achievements')
+        .select('badge_type')
+        .eq('user_id', userId)
+        .eq('badge_type', meta.requires)
+        .maybeSingle();
+      if (!data) throw Object.assign(new Error('Title locked'), { code: 'TITLE_LOCKED' });
+    }
+  }
+
+  const { error } = await supabase
+    .from('users')
+    .update({ selected_title: title })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+
+  return title;
 }

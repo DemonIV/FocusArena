@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   RefreshControl,
   Platform,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList, FriendEntry } from '../../types';
@@ -67,12 +69,6 @@ export function HomeScreen({ navigation }: Props) {
     queryFn: () => friendsService.list(),
   });
 
-  const bossQ = useQuery({
-    queryKey: ['boss-battle'],
-    queryFn: () => timerService.getBoss(),
-    refetchInterval: 120_000,
-  });
-
   // Companion pet — shared cache with the Profile pet shop
   const petsQ = useQuery({
     queryKey: ['pets'],
@@ -83,8 +79,6 @@ export function HomeScreen({ navigation }: Props) {
   const selectedPet = selectedPetId
     ? petsQ.data?.pets.find((p) => p.id === selectedPetId)
     : undefined;
-  const boss = bossQ.data;
-  const bossPct = boss && boss.goalMinutes > 0 ? Math.min(boss.totalMinutes / boss.goalMinutes, 1) : 0;
 
   const stats = statsQ.data;
   const badges = achievQ.data?.earned ?? [];
@@ -162,28 +156,8 @@ export function HomeScreen({ navigation }: Props) {
         </TouchableOpacity>
       )}
 
-      {/* ── Boss Battle (weekly global event) ── */}
-      {boss && (
-        <View style={styles.bossCard}>
-          <View style={styles.bossHeader}>
-            <Text style={styles.bossTitle}>⚔️ {t('boss.title')}</Text>
-            <Text style={styles.bossTimeLeft}>{timeLeft(boss.weekEndsAt, t)}</Text>
-          </View>
-          <Text style={styles.bossGoal}>
-            {Math.round(boss.totalMinutes).toLocaleString()}
-            <Text style={styles.bossGoalMuted}> / {boss.goalMinutes.toLocaleString()} {t('common.minShort')}</Text>
-          </Text>
-          <View style={styles.bossTrack}>
-            <View style={[styles.bossFill, { width: `${bossPct * 100}%` }]} />
-          </View>
-          <View style={styles.bossFooter}>
-            <Text style={styles.bossMeta}>👥 {t('boss.participants', { count: boss.participants })}</Text>
-            <Text style={styles.bossMeta}>
-              {t('boss.yourContribution', { duration: formatDuration(boss.myContribution) })}
-            </Text>
-          </View>
-        </View>
-      )}
+      {/* ── Weekly Challenge (personal goal + friend ranking) ── */}
+      <WeeklyChallengeCard />
 
       {/* ── Daily Goal ── */}
       <View style={styles.goalCard}>
@@ -327,6 +301,102 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
+// ─── Weekly Challenge card ─────────────────────────────────────────────────────
+// Personal weekly focus goal (coin reward on completion) + a ranking of the
+// caller against their accepted friends. Replaces the old global Boss Battle.
+
+function WeeklyChallengeCard() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+
+  const challengeQ = useQuery({
+    queryKey: ['weekly-challenge'],
+    queryFn: () => timerService.getChallenge(),
+    refetchInterval: 120_000,
+  });
+
+  const claimMut = useMutation({
+    mutationFn: () => timerService.claimChallenge(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['weekly-challenge'] });
+      qc.invalidateQueries({ queryKey: ['frames'] }); // shared coin balance
+      qc.invalidateQueries({ queryKey: ['pets'] });
+    },
+    onError: (e: any) => {
+      // 409 = already claimed / goal not reached → just resync, no scary alert
+      if (e?.statusCode === 409) { qc.invalidateQueries({ queryKey: ['weekly-challenge'] }); return; }
+      Alert.alert(t('common.error'), e?.message ?? t('challenge.claimFailed'));
+    },
+  });
+
+  const c = challengeQ.data;
+  if (!c) return null;
+
+  const pct = c.personal.goalMinutes > 0 ? Math.min(c.personal.minutes / c.personal.goalMinutes, 1) : 0;
+  const canClaim = c.personal.reached && !c.personal.claimed;
+  const ranked = c.friends.slice(0, 5);
+  const hasFriends = c.friends.length > 1;
+  const barColor = c.personal.reached ? GREEN : '#e94560';
+
+  return (
+    <View style={styles.chalCard}>
+      <View style={styles.chalHeader}>
+        <Text style={styles.chalTitle}>⚔️ {t('challenge.title')}</Text>
+        <Text style={styles.chalTimeLeft}>{timeLeft(c.weekEndsAt, t)}</Text>
+      </View>
+
+      {/* Personal weekly goal */}
+      <Text style={styles.chalGoal}>
+        {Math.round(c.personal.minutes).toLocaleString()}
+        <Text style={styles.chalGoalMuted}> / {c.personal.goalMinutes.toLocaleString()} {t('common.minShort')}</Text>
+      </Text>
+      <View style={styles.chalTrack}>
+        <View style={[styles.chalFill, { width: `${pct * 100}%`, backgroundColor: barColor, shadowColor: barColor }]} />
+      </View>
+
+      {/* Reward state */}
+      {canClaim ? (
+        <TouchableOpacity
+          style={styles.chalClaimBtn}
+          onPress={() => claimMut.mutate()}
+          disabled={claimMut.isPending}
+          activeOpacity={0.85}
+        >
+          {claimMut.isPending
+            ? <ActivityIndicator color="#000" size="small" />
+            : <Text style={styles.chalClaimText}>🪙 {t('challenge.claimReward', { coins: c.personal.reward })}</Text>}
+        </TouchableOpacity>
+      ) : c.personal.claimed ? (
+        <Text style={styles.chalClaimed}>✓ {t('challenge.claimed', { coins: c.personal.reward })}</Text>
+      ) : (
+        <Text style={styles.chalRewardHint}>🪙 {t('challenge.rewardHint', { coins: c.personal.reward })}</Text>
+      )}
+
+      {/* Friend ranking */}
+      {hasFriends && (
+        <View style={styles.chalRankBox}>
+          <Text style={styles.chalRankLabel}>{t('challenge.friendRanking')}</Text>
+          {ranked.map((r, i) => (
+            <View key={r.userId} style={styles.chalRankRow}>
+              <Text style={[styles.chalRankNum, r.isMe && { color: ACCENT }]}>{medal(i)}</Text>
+              <Text
+                style={[styles.chalRankName, r.isMe && { color: ACCENT, fontWeight: '800' }]}
+                numberOfLines={1}
+              >
+                {r.isMe ? t('challenge.you') : r.username}
+              </Text>
+              <Text style={[styles.chalRankMin, r.isMe && { color: ACCENT }]}>{formatDuration(r.minutes)}</Text>
+            </View>
+          ))}
+          {c.myRank > ranked.length && (
+            <Text style={styles.chalRankSelf}>{t('challenge.yourRank', { rank: c.myRank })}</Text>
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
+
 // ─── Week mini bar chart ───────────────────────────────────────────────────────
 
 function WeekChart({
@@ -380,13 +450,16 @@ function statusRank(s: string): number {
 }
 function timeLeft(iso: string, t: (k: string, o?: any) => string): string {
   const ms = new Date(iso).getTime() - Date.now();
-  if (ms <= 0) return t('boss.timeLeft', { days: 0, hours: 0 });
+  if (ms <= 0) return t('challenge.timeLeft', { days: 0, hours: 0 });
   const days = Math.floor(ms / 86_400_000);
   const hours = Math.floor((ms % 86_400_000) / 3_600_000);
-  return t('boss.timeLeft', { days, hours });
+  return t('challenge.timeLeft', { days, hours });
 }
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function medal(i: number): string {
+  return i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
 }
 
 const styles = StyleSheet.create({
@@ -428,8 +501,8 @@ const styles = StyleSheet.create({
   },
   levelText: { color: ACCENT, fontWeight: '700', fontSize: 13 },
 
-  // Boss Battle card
-  bossCard: {
+  // Weekly Challenge card
+  chalCard: {
     backgroundColor: 'rgba(233,69,96,0.08)',
     borderRadius: 16,
     padding: 18,
@@ -437,28 +510,54 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(233,69,96,0.35)',
   },
-  bossHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  bossTitle: { color: '#e94560', fontSize: 14, fontWeight: '800', letterSpacing: 0.3 },
-  bossTimeLeft: { color: MUTED2, fontSize: 12, fontWeight: '600' },
-  bossGoal: { color: TEXT, fontSize: 20, fontWeight: '800', marginBottom: 10 },
-  bossGoalMuted: { color: MUTED, fontSize: 14, fontWeight: '600' },
-  bossTrack: {
+  chalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  chalTitle: { color: '#e94560', fontSize: 14, fontWeight: '800', letterSpacing: 0.3 },
+  chalTimeLeft: { color: MUTED2, fontSize: 12, fontWeight: '600' },
+  chalGoal: { color: TEXT, fontSize: 20, fontWeight: '800', marginBottom: 10 },
+  chalGoalMuted: { color: MUTED, fontSize: 14, fontWeight: '600' },
+  chalTrack: {
     height: 10,
     backgroundColor: 'rgba(255,255,255,0.07)',
     borderRadius: 5,
     overflow: 'hidden',
   },
-  bossFill: {
+  chalFill: {
     height: '100%',
     borderRadius: 5,
-    backgroundColor: '#e94560',
-    shadowColor: '#e94560',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.7,
     shadowRadius: 6,
   },
-  bossFooter: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
-  bossMeta: { color: MUTED2, fontSize: 12, fontWeight: '600' },
+  chalRewardHint: { color: MUTED2, fontSize: 12, fontWeight: '600', marginTop: 12 },
+  chalClaimed: { color: GREEN, fontSize: 13, fontWeight: '800', marginTop: 12 },
+  chalClaimBtn: {
+    marginTop: 14,
+    backgroundColor: '#ffd700',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chalClaimText: { color: '#000', fontSize: 14, fontWeight: '800' },
+  chalRankBox: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    paddingTop: 12,
+  },
+  chalRankLabel: {
+    color: MUTED,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  chalRankRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5, gap: 10 },
+  chalRankNum: { color: MUTED2, fontSize: 13, fontWeight: '700', width: 24, textAlign: 'center' },
+  chalRankName: { flex: 1, color: TEXT, fontSize: 14, fontWeight: '600' },
+  chalRankMin: { color: MUTED2, fontSize: 13, fontWeight: '700' },
+  chalRankSelf: { color: ACCENT, fontSize: 12, fontWeight: '700', marginTop: 8 },
 
   // Daily goal card
   goalCard: {

@@ -109,7 +109,17 @@ export function ProfileScreen() {
   const stats    = statsQ.data;
   const earned   = achievQ.data?.earned  ?? [];
   const locked   = achievQ.data?.locked  ?? [];
+  const titles   = achievQ.data?.titles  ?? [];
+  const selectedTitle = achievQ.data?.selectedTitle ?? null;
+  const activeTitle = titles.find((tt) => tt.id === selectedTitle) ?? null;
   const subjects: SubjectStat[] = subjectStatsQ.data?.subjects ?? [];
+
+  // Selecting a title (or clearing it by tapping the active one again).
+  const titleMut = useMutation({
+    mutationFn: (id: string | null) => achievementsService.setTitle(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['achievements'] }),
+    onError:   (e: any) => Alert.alert(t('common.error'), e?.message ?? t('common.error')),
+  });
 
   // ── Modal state ───────────────────────────────────────────────────────────────
 
@@ -303,7 +313,11 @@ export function ProfileScreen() {
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.username}>{user?.username ?? '—'}</Text>
-            <Text style={styles.email}>{user?.email ?? ''}</Text>
+            {activeTitle ? (
+              <Text style={styles.titleTag}>{activeTitle.icon} {t(`titles.${activeTitle.id}`)}</Text>
+            ) : (
+              <Text style={styles.email}>{user?.email ?? ''}</Text>
+            )}
           </View>
           <View style={styles.levelBadge}>
             <Text style={styles.levelText}>{t('profile.level', { level })}</Text>
@@ -511,6 +525,39 @@ export function ProfileScreen() {
             <Text style={styles.emptyHint}>{t('profile.noBadgesHint')}</Text>
           </View>
         )}
+
+        {/* ── Titles (ünvanlar) ── */}
+        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.titles')}</Text>
+        <Text style={styles.titlesHint}>{t('profile.titlesHint')}</Text>
+        <View style={styles.titlesRow}>
+          {titles.map((tt) => {
+            const isSel = tt.id === selectedTitle;
+            return (
+              <Pressable
+                key={tt.id}
+                style={[
+                  styles.titleChip,
+                  isSel && styles.titleChipSel,
+                  !tt.unlocked && styles.titleChipLocked,
+                ]}
+                disabled={!tt.unlocked || titleMut.isPending}
+                onPress={() => titleMut.mutate(isSel ? null : tt.id)}
+              >
+                <Text style={styles.titleChipIcon}>{tt.unlocked ? tt.icon : '🔒'}</Text>
+                <Text
+                  style={[
+                    styles.titleChipLabel,
+                    isSel && { color: ACCENT },
+                    !tt.unlocked && { color: MUTED },
+                  ]}
+                >
+                  {t(`titles.${tt.id}`)}
+                </Text>
+                {isSel && <Text style={styles.titleChipCheck}>✓</Text>}
+              </Pressable>
+            );
+          })}
+        </View>
 
         {/* ── My Rooms / Invite Codes ── */}
         <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.myRooms')}</Text>
@@ -1171,6 +1218,7 @@ const styles = StyleSheet.create({
   profileInfo: { flex: 1 },
   username: { color: TEXT, fontSize: 18, fontWeight: '700' },
   email: { color: MUTED, fontSize: 12, marginTop: 2 },
+  titleTag: { color: ACCENT, fontSize: 12, fontWeight: '700', marginTop: 3 },
   levelBadge: {
     backgroundColor: `${ACCENT}22`,
     borderRadius: 20,
@@ -1364,6 +1412,26 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 10,
   },
+
+  // Titles (ünvanlar)
+  titlesHint: { color: MUTED, fontSize: 12, marginTop: -6, marginBottom: 12, lineHeight: 17 },
+  titlesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  titleChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: CARD,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  titleChipSel: { borderColor: ACCENT, backgroundColor: `${ACCENT}12` },
+  titleChipLocked: { opacity: 0.45 },
+  titleChipIcon: { fontSize: 15 },
+  titleChipLabel: { color: TEXT, fontSize: 13, fontWeight: '600' },
+  titleChipCheck: { color: ACCENT, fontSize: 13, fontWeight: '800' },
 
   // Room invite codes
   roomCodeRow: {

@@ -174,12 +174,34 @@ export interface GhostInfo {
   hasGhost: boolean;
 }
 
-export interface BossInfo {
-  totalMinutes: number;
-  goalMinutes: number;
-  myContribution: number;
-  participants: number;
+/** One row in the weekly friend ranking (caller + accepted friends). */
+export interface ChallengeRanked {
+  userId: string;
+  username: string;
+  minutes: number;
+  isMe: boolean;
+}
+
+/** Weekly Challenge — personal goal + friend ranking (replaces Boss Battle). */
+export interface ChallengeInfo {
+  weekStartsAt: string;  // ISO
   weekEndsAt: string;    // ISO
+  personal: {
+    goalMinutes: number;
+    minutes: number;
+    reward: number;
+    reached: boolean;
+    claimed: boolean;
+  };
+  friends: ChallengeRanked[];
+  myRank: number;
+}
+
+/** Result of claiming the weekly personal-goal reward. */
+export interface ChallengeClaimResult {
+  claimed: boolean;
+  coinsAwarded: number;
+  newCoins: number;
 }
 
 export interface DnaInfo {
@@ -360,6 +382,14 @@ export interface LockedAchievement {
   icon: string;
   label: string;
   description: string;
+}
+
+/** A selectable profile title, unlocked by earning the matching badge. */
+export interface TitleEntry {
+  id: string;
+  icon: string;
+  requires: string | null;
+  unlocked: boolean;
 }
 
 /** Cosmetics shop — one catalog frame with ownership state */

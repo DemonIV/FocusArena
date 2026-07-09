@@ -80,14 +80,8 @@
     "planWeekly": "Фокус за неделю",
     "planWhy": "Мотивация",
     "startPlan": "Начать мой план",
-    "continueFree": "Продолжить с бесплатным планом"
-  },
-  "boss": {
-    "title": "Босс этой недели",
-    "timeLeft": "осталось {{days}}д {{hours}}ч",
-    "participants_one": "{{count}} боец",
-    "participants_other": "{{count}} бойцов",
-    "yourContribution": "Твой вклад: {{duration}}"
+    "continueFree": "Продолжить с бесплатным планом",
+    "addAnotherSubject": "Добавить ещё предмет"
   },
   "dna": {
     "title": "ДНК учёбы",
@@ -300,7 +294,9 @@
     "pushToggleFailed": "Не удалось обновить настройку уведомлений. Попробуй ещё раз.",
     "subjectDistribution": "Распределение занятий",
     "focusScoreWeek": "Качество фокуса на этой неделе",
-    "focusScoreHint": "Средний балл по сессиям"
+    "focusScoreHint": "Средний балл по сессиям",
+    "titles": "Титулы",
+    "titlesHint": "Выбери полученный титул для профиля."
   },
   "rooms": {
     "createRoom": "+ Создать комнату",
@@ -489,5 +485,27 @@
     "unavailable": "Не удалось загрузить наборы. Попробуй позже.",
     "comingSoon": "Наборы монет скоро появятся!",
     "footer": "Монеты можно зарабатывать и фокусировкой — каждая сессия даёт монеты, равные XP"
+  },
+  "challenge": {
+    "title": "Челлендж недели",
+    "claimReward": "Забрать +{{coins}}",
+    "claimed": "+{{coins}} получено",
+    "rewardHint": "Достигни цели недели → +{{coins}}",
+    "friendRanking": "Рейтинг друзей",
+    "you": "Ты",
+    "yourRank": "Твоё место: #{{rank}}",
+    "claimFailed": "Не удалось получить награду",
+    "timeLeft": "осталось {{days}}д {{hours}}ч"
+  },
+  "titles": {
+    "novice": "Новичок",
+    "focused": "Сосредоточенный",
+    "roller": "На волне",
+    "week_warrior": "Воин недели",
+    "iron_will": "Железная воля",
+    "centurion": "Центурион",
+    "elite": "Элита",
+    "social": "Общительный",
+    "pro": "Pro"
   }
 }

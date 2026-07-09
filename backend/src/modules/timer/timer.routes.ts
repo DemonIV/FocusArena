@@ -24,7 +24,8 @@ import {
   getMonthlyStats,
   getGhost,
   getStudyDNA,
-  getBossBattle,
+  getWeeklyChallenge,
+  claimWeeklyReward,
   getSubjectStats,
   getSubjects,
   createSubject,
@@ -258,14 +259,31 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
-  /** GET /timer/boss — weekly global Boss Battle progress */
-  fastify.get('/boss', async (request, reply) => {
+  /** GET /timer/challenge — weekly personal goal + friend ranking */
+  fastify.get('/challenge', async (request, reply) => {
     const { sub: userId } = request.user as JwtPayload;
     try {
-      const boss = await getBossBattle(userId);
-      return reply.send(boss);
+      const challenge = await getWeeklyChallenge(userId);
+      return reply.send(challenge);
     } catch (err) {
-      request.log.error(err, 'timer/boss failed');
+      request.log.error(err, 'timer/challenge failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  /** POST /timer/challenge/claim — claim this week's personal-goal coin reward */
+  fastify.post('/challenge/claim', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    try {
+      const result = await claimWeeklyReward(userId);
+      track(userId, 'weekly_reward_claimed', { coins: result.coinsAwarded });
+      return reply.send(result);
+    } catch (err: unknown) {
+      const e = err as { code?: string; message: string };
+      if (e.code === 'GOAL_NOT_REACHED') return reply.code(409).send({ error: 'goal_not_reached' });
+      if (e.code === 'ALREADY_CLAIMED') return reply.code(409).send({ error: 'already_claimed' });
+      request.log.error(err, 'timer/challenge/claim failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }
