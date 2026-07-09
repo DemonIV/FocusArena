@@ -125,7 +125,12 @@
     "streak": "Passa",
     "sessionInProgress": "Trwa sesja — dotknij, aby otworzyć",
     "achievements": "Osiągnięcia ({{count}})",
-    "noBadges": "Ukończ pierwszą sesję, aby odblokować odznaki!"
+    "noBadges": "Ukończ pierwszą sesję, aby odblokować odznaki!",
+    "subjectSplit": "Podział na przedmioty",
+    "thisWeekShort": "Ten tydzień",
+    "lastWeekShort": "Zeszły tydzień",
+    "weeksAgo": "{{count}} tyg. temu",
+    "noStudyWeek": "Brak nauki w tym tygodniu"
   },
   "timer": {
     "title": "Stoper skupienia",

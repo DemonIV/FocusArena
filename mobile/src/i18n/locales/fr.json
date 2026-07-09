@@ -125,7 +125,12 @@
     "streak": "Série",
     "sessionInProgress": "Session en cours — appuie pour ouvrir",
     "achievements": "Succès ({{count}})",
-    "noBadges": "Termine ta première session pour débloquer des badges !"
+    "noBadges": "Termine ta première session pour débloquer des badges !",
+    "subjectSplit": "Répartition par matière",
+    "thisWeekShort": "Cette semaine",
+    "lastWeekShort": "Semaine dernière",
+    "weeksAgo": "il y a {{count}} semaines",
+    "noStudyWeek": "Pas d’étude cette semaine"
   },
   "timer": {
     "title": "Minuteur de focus",

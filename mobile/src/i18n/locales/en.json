@@ -125,7 +125,12 @@
     "streak": "Streak",
     "sessionInProgress": "Session in progress — tap to open",
     "achievements": "Achievements ({{count}})",
-    "noBadges": "Complete your first session to unlock badges!"
+    "noBadges": "Complete your first session to unlock badges!",
+    "subjectSplit": "Subject Split",
+    "thisWeekShort": "This week",
+    "lastWeekShort": "Last week",
+    "weeksAgo": "{{count}} weeks ago",
+    "noStudyWeek": "No study this week"
   },
   "timer": {
     "title": "Focus Timer",

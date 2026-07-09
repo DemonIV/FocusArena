@@ -125,7 +125,12 @@
     "streak": "Reeks",
     "sessionInProgress": "Sessie bezig — tik om te openen",
     "achievements": "Prestaties ({{count}})",
-    "noBadges": "Voltooi je eerste sessie om badges te ontgrendelen!"
+    "noBadges": "Voltooi je eerste sessie om badges te ontgrendelen!",
+    "subjectSplit": "Vakverdeling",
+    "thisWeekShort": "Deze week",
+    "lastWeekShort": "Vorige week",
+    "weeksAgo": "{{count}} weken geleden",
+    "noStudyWeek": "Deze week niet gestudeerd"
   },
   "timer": {
     "title": "Focustimer",

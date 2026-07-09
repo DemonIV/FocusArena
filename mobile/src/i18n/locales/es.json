@@ -125,7 +125,12 @@
     "streak": "Racha",
     "sessionInProgress": "Sesión en curso — toca para abrir",
     "achievements": "Logros ({{count}})",
-    "noBadges": "¡Completa tu primera sesión para desbloquear insignias!"
+    "noBadges": "¡Completa tu primera sesión para desbloquear insignias!",
+    "subjectSplit": "Distribución por materia",
+    "thisWeekShort": "Esta semana",
+    "lastWeekShort": "Semana pasada",
+    "weeksAgo": "hace {{count}} semanas",
+    "noStudyWeek": "Sin estudio esta semana"
   },
   "timer": {
     "title": "Temporizador de enfoque",

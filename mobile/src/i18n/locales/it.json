@@ -125,7 +125,12 @@
     "streak": "Serie",
     "sessionInProgress": "Sessione in corso — tocca per aprire",
     "achievements": "Obiettivi ({{count}})",
-    "noBadges": "Completa la tua prima sessione per sbloccare i distintivi!"
+    "noBadges": "Completa la tua prima sessione per sbloccare i distintivi!",
+    "subjectSplit": "Distribuzione materie",
+    "thisWeekShort": "Questa settimana",
+    "lastWeekShort": "Settimana scorsa",
+    "weeksAgo": "{{count}} settimane fa",
+    "noStudyWeek": "Nessuno studio questa settimana"
   },
   "timer": {
     "title": "Timer di focus",

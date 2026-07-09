@@ -125,7 +125,12 @@
     "streak": "Sequência",
     "sessionInProgress": "Sessão em andamento — toque para abrir",
     "achievements": "Conquistas ({{count}})",
-    "noBadges": "Complete sua primeira sessão para desbloquear distintivos!"
+    "noBadges": "Complete sua primeira sessão para desbloquear distintivos!",
+    "subjectSplit": "Distribuição por matéria",
+    "thisWeekShort": "Esta semana",
+    "lastWeekShort": "Semana passada",
+    "weeksAgo": "há {{count}} semanas",
+    "noStudyWeek": "Sem estudo esta semana"
   },
   "timer": {
     "title": "Cronômetro de foco",

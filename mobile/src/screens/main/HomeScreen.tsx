@@ -16,7 +16,7 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList, FriendEntry } from '../../types';
 import { useAuth } from '../../hooks';
 import { useTimerStore, useSocketStore, useBillingStore } from '../../stores';
-import { StatCard, PetCompanion, PetAdoptTeaser } from '../../components';
+import { StatCard, PetCompanion, PetAdoptTeaser, WeeklySubjectDonutCard } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { timerService, achievementsService, friendsService, cosmeticsService } from '../../services';
 import { formatDuration } from '../../utils/formatTime';
@@ -228,6 +228,10 @@ export function HomeScreen({ navigation }: Props) {
         totalLabel={t('home.weekTotal', { duration: formatDuration(stats?.week.totalMinutes ?? 0) })}
         weekdays={t('home.weekdaysShort')}
       />
+
+      {/* ── Weekly subject split (pick any week) ── */}
+      <Text style={styles.sectionTitle}>{t('home.subjectSplit')}</Text>
+      <WeeklySubjectDonutCard />
 
       {/* ── XP Progress ── */}
       <View style={styles.xpCard}>

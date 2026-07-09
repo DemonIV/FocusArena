@@ -19,7 +19,7 @@ import {
   FriendsScreen,
   ProfileScreen,
 } from '../screens';
-import { useFocusTracking } from '../hooks';
+import { useFocusTracking, useKeepAwakeDuringSession } from '../hooks';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -47,6 +47,10 @@ export function MainTabs() {
 
   // App-wide AppState tracking for the Focus Score (away time / app-switches).
   useFocusTracking();
+
+  // Hold the screen awake during an active session so auto-lock can't silently
+  // burn a Strict-Mode session or wreck the Focus Score (see the hook's note).
+  useKeepAwakeDuringSession();
 
   // Register this device for push notifications once the user is in the app.
   useEffect(() => {

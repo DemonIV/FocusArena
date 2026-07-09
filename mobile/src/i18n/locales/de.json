@@ -125,7 +125,12 @@
     "streak": "Serie",
     "sessionInProgress": "Sitzung läuft — zum Öffnen tippen",
     "achievements": "Erfolge ({{count}})",
-    "noBadges": "Schließe deine erste Sitzung ab, um Abzeichen freizuschalten!"
+    "noBadges": "Schließe deine erste Sitzung ab, um Abzeichen freizuschalten!",
+    "subjectSplit": "Fächerverteilung",
+    "thisWeekShort": "Diese Woche",
+    "lastWeekShort": "Letzte Woche",
+    "weeksAgo": "vor {{count}} Wochen",
+    "noStudyWeek": "Diese Woche kein Lernen"
   },
   "timer": {
     "title": "Fokus-Timer",

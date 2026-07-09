@@ -364,12 +364,6 @@ export function ProfileScreen() {
           </TouchableOpacity>
         )}
 
-        {/* ── Frame Shop ── */}
-        <FrameShopSection />
-
-        {/* ── Pet Shop ── */}
-        <PetShopSection />
-
         {/* ── Streak Heat Map (tap → full monthly view) ── */}
         {heatmapQ.data && heatmapQ.data.days.length > 0 && (
           <TouchableOpacity activeOpacity={0.85} onPress={() => setMonthlyVisible(true)}>
@@ -471,6 +465,12 @@ export function ProfileScreen() {
             ))}
           </View>
         )}
+
+        {/* ── Frame Shop ── */}
+        <FrameShopSection />
+
+        {/* ── Pet Shop ── */}
+        <PetShopSection />
 
         {/* ── Achievements ── */}
         <Text style={[styles.sectionLabel, { marginTop: 8 }]}>

@@ -125,7 +125,12 @@
     "streak": "Seri",
     "sessionInProgress": "Oturum devam ediyor — açmak için dokun",
     "achievements": "Başarımlar ({{count}})",
-    "noBadges": "Rozet kazanmak için ilk oturumunu tamamla!"
+    "noBadges": "Rozet kazanmak için ilk oturumunu tamamla!",
+    "subjectSplit": "Konu Dağılımı",
+    "thisWeekShort": "Bu hafta",
+    "lastWeekShort": "Geçen hafta",
+    "weeksAgo": "{{count}} hafta önce",
+    "noStudyWeek": "Bu hafta çalışma yok"
   },
   "timer": {
     "title": "Odak Zamanlayıcı",

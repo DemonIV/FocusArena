@@ -6,6 +6,7 @@ export { LanguagePicker } from './LanguagePicker';
 export { StudyReceiptModal } from './StudyReceiptModal';
 export { StreakHeatmap } from './StreakHeatmap';
 export { SubjectDonutCard } from './SubjectDonutCard';
+export { WeeklySubjectDonutCard } from './WeeklySubjectDonutCard';
 export { ZenModeModal } from './ZenModeModal';
 export { PetCompanion, PetAdoptTeaser } from './PetCompanion';
 export { StrictModeFailModal } from './StrictModeFailModal';

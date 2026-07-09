@@ -198,6 +198,26 @@ export function TimerScreen() {
     return () => useTimerStore.getState().setOnComplete(null);
   }, [invalidateAfterStop, selectedSubject]);
 
+  // ── Recover from an orphaned pomodoro cycle ────────────────────────────────
+  // The pomodoro store is persisted. A mid-round "focus" phase means "a session
+  // is running" — but after an app reinstall (new build) or an expired session,
+  // syncWithServer finds nothing to restore, leaving phase='focus' with no
+  // active timer. That combination renders NONE of the screen sections except
+  // the empty 00:00 circle. Once we're confident no session exists, drop the
+  // orphaned cycle back to idle so the normal timer screen returns.
+  useEffect(() => {
+    if (!(inPomodoro && pomo.phase === 'focus' && !timer.isActive && !timer.isLoading)) return;
+    // Give any in-flight server sync (mount / foreground) time to restore a
+    // genuinely active session before we decide the cycle is orphaned.
+    const t = setTimeout(() => {
+      const stillGone = !useTimerStore.getState().isActive && !useTimerStore.getState().isLoading;
+      if (stillGone && usePomodoroStore.getState().phase === 'focus') {
+        usePomodoroStore.getState().abortCycle();
+      }
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [inPomodoro, pomo.phase, timer.isActive, timer.isLoading]);
+
   // ── Break countdown + "break over" local notification ──────────────────────
   useEffect(() => {
     if (pomo.phase !== 'break' || !pomo.breakEndsAt) return;
@@ -434,24 +454,14 @@ export function TimerScreen() {
               </View>
             </View>
           ) : inPomodoro && !timer.isActive && (pomo.phase === 'awaitNext' || pomo.phase === 'done') ? null : (
-            <>
-              <TimerCircle
-                progress={timer.progress}
-                remainingMs={timer.remainingMs}
-                isActive={timer.isActive}
-                isPaused={timer.isPaused}
-                frameId={selectedFrame}
-              />
-
-              {/* Duration badge when idle */}
-              {!timer.isActive && (
-                <View style={styles.durationBadge}>
-                  <Text style={styles.durationBadgeText}>
-                    {inPomodoro ? preset.focus : selectedDuration} {t('common.minShort')}
-                  </Text>
-                </View>
-              )}
-            </>
+            <TimerCircle
+              progress={timer.progress}
+              remainingMs={timer.remainingMs}
+              isActive={timer.isActive}
+              isPaused={timer.isPaused}
+              frameId={selectedFrame}
+              idleMs={(inPomodoro ? preset.focus : selectedDuration) * 60_000}
+            />
           )}
         </View>
 
@@ -1120,22 +1130,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 8,
   },
-  durationBadge: {
-    marginTop: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    backgroundColor: CARD,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
-  },
-  durationBadgeText: {
-    color: MUTED,
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-
   // Live motivation layer
   motivationWrap: {
     alignItems: 'center',

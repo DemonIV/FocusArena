@@ -31,9 +31,14 @@ interface Props {
   isPaused: boolean;
   /** Equipped cosmetic frame id (shop) — undefined/null = default look */
   frameId?: string | null;
+  /**
+   * When idle, preview this session length in the ring (ms) instead of a dead
+   * 00:00 — e.g. a 25-min selection reads "25:00", charged and ready to go.
+   */
+  idleMs?: number;
 }
 
-export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId }: Props) {
+export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId, idleMs }: Props) {
   const frame = getFrameVisual(frameId);
 
   // Pro frames: slow orbiting highlight on the outer ring.
@@ -87,11 +92,16 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId
   }, [isActive, isPaused]);
 
   // Frame overrides the focusing colors; paused stays amber for clarity.
+  const PAUSE_AMBER = '#f59e0b';
   const focusRing = frame?.ring ?? '#00d2ff';
   const focusGlow = frame?.glow ?? '#00d2ff';
-  const fillColor = !isActive ? '#4a4a6a' : isPaused ? '#f59e0b' : focusRing;
-  const glowColor = !isActive ? 'transparent' : isPaused ? '#f59e0b' : focusGlow;
+  // Idle is a charged, inviting state — show the brand accent, not a dead grey.
+  const fillColor = isPaused ? PAUSE_AMBER : focusRing;
+  const glowColor = isPaused ? PAUSE_AMBER : focusGlow;
   const statusLabel = !isActive ? 'READY' : isPaused ? 'PAUSED' : 'FOCUSING';
+
+  // Idle previews the chosen length (25:00), so the ring never looks empty.
+  const displayMs = !isActive && idleMs != null ? idleMs : remainingMs;
 
   const rightAnimStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rightRot.value}deg` }],
@@ -127,16 +137,22 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId
       )}
 
       {/* Glow ring behind the circle — breathes while focusing */}
-      {isActive && (
+      {isActive ? (
         <Animated.View style={[styles.glowRing, glowAnimStyle, {
           shadowColor: glowColor,
           borderColor: `${glowColor}22`,
         }]} />
+      ) : (
+        // Idle: a calm, static glow so the ring feels ready, not switched off.
+        <View style={[styles.glowRing, styles.idleGlow, {
+          shadowColor: focusGlow,
+          borderColor: `${focusRing}1a`,
+        }]} />
       )}
 
       <View style={styles.wrapper}>
-        {/* Track ring */}
-        <View style={styles.trackRing} />
+        {/* Track ring — charged accent tint when idle, faint when running */}
+        <View style={[styles.trackRing, !isActive && { borderColor: `${focusRing}26` }]} />
 
         {/* Right arc (0%–50%) */}
         <View style={[styles.clip, styles.rightClip]}>
@@ -158,7 +174,7 @@ export function TimerCircle({ progress, remainingMs, isActive, isPaused, frameId
         {/* Content */}
         <View style={styles.content}>
           <Text style={[styles.timeText, { color: fillColor }]}>
-            {msToDisplay(remainingMs)}
+            {msToDisplay(displayMs)}
           </Text>
           <View style={[styles.statusBadge, { backgroundColor: `${glowColor}18` }]}>
             <Text style={[styles.statusText, { color: fillColor }]}>
@@ -214,6 +230,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 24,
     elevation: 12,
+  },
+  idleGlow: {
+    opacity: 0.9,
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
   },
   wrapper: {
     width: SIZE,

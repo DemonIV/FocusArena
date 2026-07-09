@@ -173,6 +173,17 @@ Migration 014 (weekly_goal_claims) + 015 (users.selected_title) ✓ · backend+m
 - i18n: 10 dilde `challenge.*` (9 anahtar, `boss.*` yerine), `titles.*` (9), `profile.titles/titlesHint`, `onboarding.addAnotherSubject`.
 - **Doğrulama**: backend+mobil `tsc --noEmit` temiz; migration 014+015 pooler ile uygulandı + doğrulandı. **Backend Fly'a HENÜZ DEPLOY EDİLMEDİ + cihazda test EDİLMEDİ** — `/timer/boss` kaldırıldığı için deploy YENİ mobil build ile eşzamanlı olmalı (eski TestFlight build'i eski endpoint'i çağırır).
 
+### Faz 19 — Timer fix + UI polish + keep-awake (kritik) (9 Temmuz)
+Sadece mobil (backend değişmedi) · tsc temiz
+
+- **🔴 KRİTİK FIX — keep-awake**: Aktif seansta ekran artık uyanık tutuluyor (`expo-keep-awake`, YENİ native modül → build cache'siz). Neden kritik: telefon **auto-lock** olunca (ya da kullanıcı ekranı kilitleyince) `AppState 'background'` fırlar; bunu (a) **Sıkı Mod** "uygulamadan çıktı" sanıp seansı **yakıyordu**, (b) **Focus Score** exit+awayMs sayıp *presence/steadiness*'i çökertiyordu. Yani telefonu bırakıp çalışan (ideal) öğrenci cezalanıyordu. Root hook `useKeepAwakeDuringSession` (MainTabs'te mount; aktif&duraklamamışsa uyanık, duraklama/durdurma bırakır). **Not:** manuel kilit hâlâ background'tır — managed RN'de kilit vs uygulama-değişimi ayırt edilemiyor; auto-lock (asıl sessiz hata) çözüldü. Gerçek "ekran kapalı + sayaç görünür" çözümü = Live Activity (sonraki iş).
+- **Timer ekranı orphan-pomodoro fix**: Diskte takılı `mode:pomodoro`+`phase:focus` ama aktif olmayan timer, TimerScreen'de hiçbir bölümü render etmeyip **sadece boş 00:00 çemberi** bırakıyordu (yeni build/expired session sonrası). Sunucu sync'ine 2.5 sn şans verip hâlâ oturum yoksa `abortCycle()` → idle. Kullanıcının "sadece 00:00 çerçevesi" şikayeti buydu.
+- **Timer çember polish** (`TimerCircle`): idle artık `00:00` yerine seçilen süreyi önizliyor (`25:00`), ölü gri yerine marka accent'i, "şarjlı" halka + yumuşak statik idle glow. Gereksiz süre rozeti kaldırıldı.
+- **Profil sıralaması**: Çerçeve + Pet mağazası artık **Konularım ile Rozetler arasında** (eskiden Pro kartının altındaydı) — kullanıcı isteği.
+- **Ana sayfa — haftalık konu donut'u** (`WeeklySubjectDonutCard`): "Bu Hafta" bar grafiğinin altında ‹ hafta › gezginli, o haftanın konu bazlı odak dağılımı (donut + ortada toplam + lejant). **Backend değişikliği YOK** — zaten canlı `getMonthly` endpoint'inden seçilen haftanın 7 günü (gerekirse 2 ay) toplanıyor, React Query ay bazında cache'liyor. i18n 5 anahtar × 10 dil.
+- **⚠️ Bulunan açık bug (henüz düzeltilmedi)**: Gün sınırı UTC — streak/günlük hedef Türkiye'de saat 03:00'te resetleniyor; gece çalışması yanlış güne düşüyor. Kullanıcı bazlı timezone offset gerek.
+- **SONRAKİ İŞ (kullanıcı seçti)**: 🔒 **Live Activity / kilit ekranı sayacı** — native iOS ActivityKit + SwiftUI Widget Extension (Expo config plugin, ör. `@bacons/apple-targets`) + JS köprü; iOS 16.1+. Ayrı native build + cihaz doğrulaması gerektirir (mevcut TestFlight pipeline'ını riske atmamak için kendi başına yapılacak). Android'de karşılığı ongoing chronometer notification.
+
 ### 📝 Oturum Özeti — 2026-07-09 (Faz 18: Challenge + Ünvanlar + Çoklu Konu)
 
 Kullanıcı 3 karar verdi, hepsi uygulandı — commit `7717003`, main'de:
@@ -292,3 +303,4 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 - Commit'ler kullanıcının kendi adına — **Co-Authored-By trailer'ı yok**.
 - Branch/PR yok — **direkt main'e commit + push** (push reddedilirse fetch + rebase).
 - Hedef: **hem Google Play hem App Store**.
+
