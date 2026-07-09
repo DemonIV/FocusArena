@@ -173,6 +173,17 @@ Migration 014 (weekly_goal_claims) + 015 (users.selected_title) ✓ · backend+m
 - i18n: 10 dilde `challenge.*` (9 anahtar, `boss.*` yerine), `titles.*` (9), `profile.titles/titlesHint`, `onboarding.addAnotherSubject`.
 - **Doğrulama**: backend+mobil `tsc --noEmit` temiz; migration 014+015 pooler ile uygulandı + doğrulandı. **Backend Fly'a HENÜZ DEPLOY EDİLMEDİ + cihazda test EDİLMEDİ** — `/timer/boss` kaldırıldığı için deploy YENİ mobil build ile eşzamanlı olmalı (eski TestFlight build'i eski endpoint'i çağırır).
 
+### 📝 Oturum Özeti — 2026-07-09 (Faz 18: Challenge + Ünvanlar + Çoklu Konu)
+
+Kullanıcı 3 karar verdi, hepsi uygulandı — commit `7717003`, main'de:
+1. **Boss Battle → Haftalık Challenge** (kişisel hedef + 300🪙 ödül + arkadaş sıralaması). Global hedef kaldırıldı.
+2. **Ünvan sistemi kuruldu** (yoktu — kullanıcı doğru hatırlamış): rozete bağlı 9 seçilebilir ünvan, profilde gösterim + seçim.
+3. **Çoklu konu**: ücretsiz limit 3→8 + onboarding'de birden fazla konu ekleme.
+
+- **Doğrulama**: backend+mobil `tsc` temiz; migration 014+015 pooler ile canlı DB'ye uygulandı + doğrulandı (`weekly_goal_claims` tablosu + `users.selected_title` kolonu).
+- **YAPILMADI (bilinçli)**: Fly deploy + cihaz testi. `/timer/boss` silindiği için deploy YENİ mobil build ile eşzamanlı olmalı. Kullanıcı deploy/build kararını sonraya bıraktı.
+- **SONRAKİ OTURUMUN İLK İŞİ**: Backend'i Fly'a deploy et (`--depot=false`) + yeni preview build başlat → cihazda Faz 18'i (challenge kartı + ödül claim + ünvan seçimi + onboarding çoklu konu) test et. Ayrıca bekleyen Faz 14/15/16 cihaz testleri de bu build'e dahil.
+
 ### 📝 Oturum Özeti — 2026-07-08/09 (Focus Score + iOS/TestFlight + App Icon)
 
 Yoğun oturum, 3 büyük iş bitti — hepsi main'de:
@@ -245,7 +256,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Marka | **StudySquad** · Android paketi `com.studysquad.app` · **iOS bundle `com.studysquadhq.app`** (com.studysquad.app başka hesapta kayıtlı) · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
-| Migration'lar | 002–013 hepsi uygulandı ✓ (013 = focus_score) |
+| Migration'lar | 002–015 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title) |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
@@ -258,7 +269,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 ## 🔜 Sıradaki Adımlar
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. **YENİ PREVIEW BUILD** (kullanıcı erteledi — kuyruktaki 3 build iptal edildi): `cd mobile && npx eas-cli build --platform android --profile preview --non-interactive --no-wait`. İçereceği YENİ ve CİHAZDA HİÇ TEST EDİLMEMİŞ özellikler: **aylık takvim modalı (Faz 14) + donut grafik + pomodoro döngüsü (Faz 15)**. react-native-svg native modülü eklendiği için build cache'siz/uzun olacak. Bitince emülatöre kur (`adb install -r`) ve bu üç özelliği + mola bildirimini (kanal fix'i sonrası artık emülatörde de görünmeli) test et.
+1. **BACKEND FLY DEPLOY + YENİ PREVIEW BUILD birlikte** (Faz 18 `/timer/boss`'u sildi → deploy ile build eşzamanlı olmalı). Önce `--depot=false` ile Fly deploy, sonra `cd mobile && npx eas-cli build --platform android --profile preview --non-interactive --no-wait`. İçereceği CİHAZDA HİÇ TEST EDİLMEMİŞ özellikler: **Haftalık Challenge + ödül claim + Ünvanlar + onboarding çoklu konu (Faz 18)**, ayrıca hâlâ bekleyen **aylık takvim (Faz 14) + donut + pomodoro (Faz 15) + Focus Score (Faz 16)**. react-native-svg native modülü nedeniyle build cache'siz/uzun. Bitince kur ve test et.
 2. ✅ **Focus Score V1** — Faz 16'da yapıldı + deploy edildi (cihazda test bekliyor).
 3. Kalan küçük bug: onboarding **Skip butonu çalışmıyor**.
 4. Aynı env'leri **production** ortamına da ekle → production AAB build.
