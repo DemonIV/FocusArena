@@ -26,3 +26,8 @@ ios/
 *.mobileprovision
 *.orig.*
 yarn-error.*
+
+# Local Expo modules keep hand-written native code in ios/ android/ (the
+# unanchored ignores above are for the root prebuild output, not these).
+!mobile/modules/*/android/
+!mobile/modules/*/ios/
