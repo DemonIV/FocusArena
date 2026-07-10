@@ -9,5 +9,4 @@ export { SubjectDonutCard } from './SubjectDonutCard';
 export { WeeklySubjectDonutCard } from './WeeklySubjectDonutCard';
 export { ZenModeModal } from './ZenModeModal';
 export { PetCompanion, PetAdoptTeaser } from './PetCompanion';
-export { StrictModeFailModal } from './StrictModeFailModal';
 export { MonthlyStatsModal } from './MonthlyStatsModal';

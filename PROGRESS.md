@@ -201,6 +201,14 @@ Sadece mobil · iOS-only · tsc temiz · **CİHAZDA TEST EDİLMEDİ (iOS build g
 - **Gerçekler/limitler**: iOS 16.2+; Windows'ta test edilemez → **cihazda kullanıcı test eder, 1-2 tur iterasyon beklenir**. Bilinen minör: app mid-session öldürülürse yetim activity kalır (end date'te iOS otomatik kapatır); relaunch'ta ikinci başlayabilir. Görsel/App Groups yok (sade başlık+altbaşlık+timer).
 - **SONRAKİ ADIM**: iOS **production** build + TestFlight submit (autoIncrement buildNumber'ı yönetir) → iPhone'da kilit ekranı/Dynamic Island countdown'u test et. Komut: `cd mobile && npx eas-cli build --platform ios --profile production --non-interactive --auto-submit`.
 
+### Faz 22 — Sıkı Mod kaldırıldı (kilitleme cezası şikayeti) (10 Temmuz)
+Sadece mobil · tsc temiz
+
+- **Neden**: Kullanıcı cihazda pomodoro başlatıp telefonu **elle kilitledi** → "seansın tehlikede" bildirimi geldi (başka uygulamaya geçmemişti). keep-awake auto-lock'u önlüyor ama manuel kilit yine `background` fırlatıyor; managed RN'de **ekran kilidi ≠ uygulama değişimi** ayırt edilemiyor. Kullanıcı ceza mantığını beğenmedi.
+- **Yapılan**: **Sıkı Mod tamamen kaldırıldı** — toggle (settingsStore.strictMode + TimerScreen Switch UI + hint), `useStrictMode` hook'u, `StrictModeFailModal`, rescue/forfeit akışı silindi. Artık hiçbir arka plan olayı (kilit dahil) seansı yakmıyor/uyarmıyor. Backend `/timer/rescue` endpoint'i + `timer.strict*` i18n anahtarları kullanılmıyor ama duruyor (zararsız, deploy gerekmez).
+- **AÇIK/İSTENEN (native gerekli)**: Kullanıcı "sadece **başka uygulamaya geçince** uyarı olsun, kilitlemede olmasın, toggle'sız uygulama kendi yapsın" istiyor. Bu ayrım native ekran-kilidi algılama gerektiriyor (iOS `protectedDataWillBecomeUnavailable`, Android `ACTION_SCREEN_OFF`); hazır Expo-uyumlu kütüphane yok (`react-native-lock-detection` npm'de değil). → Ayrı native iş olarak, fail-safe (belirsiz=iyi huylu, asla yanlış yakma) tasarımla, cihazda test edilerek yapılacak. Kullanıcı onayı bekliyor.
+- Not: Focus Score'un *presence* bileşeni hâlâ arka planı sayıyor (yıkıcı değil, sadece kalite metriği); keep-awake auto-lock'u azaltıyor.
+
 ### 📝 Oturum Özeti — 2026-07-09 (Faz 18: Challenge + Ünvanlar + Çoklu Konu)
 
 Kullanıcı 3 karar verdi, hepsi uygulandı — commit `7717003`, main'de:
