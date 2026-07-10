@@ -220,6 +220,33 @@ Sadece mobil · tsc temiz · **CİHAZDA TEST EDİLMEDİ** (v1, empirik)
 - **Bilinen/empirik**: iOS best-effort — cihazda kilitleyip test et: hatırlatma çıkarsa (yanlış pozitif) v2'de Darwin sinyali eklenebilir; hiç çıkmıyorsa uygulama-değişiminde çıkıyor mu bak. Android'de güvenilir olmalı.
 - **SONRAKİ ADIM**: iOS build (buildNumber 6) + Android build → cihazda test: (1) kilitle → hatırlatma YOK olmalı, (2) başka uygulamaya 15sn+ geç, dön → nazik hatırlatma çıkmalı.
 
+### 📝 Oturum Özeti — 2026-07-10 (Faz 19–23: UX geri bildirim turu) ⭐ EN GÜNCEL
+
+Kullanıcı cihazda test edip geri bildirim verdi; sırayla Faz 19–23 yapıldı. **Hepsi main'de** (HEAD `c65ca89`).
+
+**Yapılanlar:**
+- **Faz 19** — Timer fix (yetim pomodoro → boş 00:00 çemberi) + idle çember polish (25:00 önizleme) + **keep-awake** (auto-lock artık seansı yakmıyor) + Ana sayfa **haftalık konu donut'u** (hafta seçmeli) + Profil mağaza sırası (çerçeve+pet → Konularım↔Rozetler arası).
+- **Faz 20** — **UTC gün sınırı fix** (migration 016 ✓ uygulandı + **Fly deploy ✓**). Streak/hedef/hafta artık kullanıcı yerel saatine göre; client `PUT /timer/timezone` ile offset raporluyor.
+- **Faz 21** — **iOS Live Activity** (kilit ekranı countdown, `expo-live-activity`).
+- **Faz 22** — **Sıkı Mod tamamen kaldırıldı** (kilitleme cezası şikayeti üzerine).
+- **Faz 23** — **Native `screen-lock` modülü** (yeni local Expo modülü, autolinking ✓) + "başka uygulamaya geçince nazik hatırlatma, kilitte hiçbir şey" (dönüşte karar, yıkıcı değil, fail-safe).
+
+**🚨 BUILD/DEPLOY DURUMU (sonraki oturumun kritik başlangıç noktası):**
+- **Backend**: Faz 20 UTC fix Fly'a **deploy edildi ✓** (`/health` 200, `/timer/timezone` 401). Migration 016 uygulandı. Backend güncel, ekstra deploy gerekmez.
+- **Android build `107f4c1a`** (bu oturumun başında atıldı): SADECE Faz 19 timer-fix/donut/keep-awake + Faz 20 client içeriyordu. **BAYAT** — Faz 21/22/23 (Live Activity, Sıkı Mod kaldırma, screen-lock) o build'den SONRA commit'lendi. Yani **hiçbir mevcut build en güncel kodu içermiyor.**
+- **iOS**: Live Activity + screen-lock native modülleri içeren **HİÇ build alınmadı**. `app.json` iOS `buildNumber = 6`.
+- **SONUÇ**: Sonraki oturumda **TAZE iOS + Android build** gerekli (hepsini içeren). Native modüller (expo-live-activity, screen-lock, react-native-svg, expo-keep-awake) → build cache'siz/uzun.
+
+**Cihazda test bekleyen HER ŞEY (tek build'de):** keep-awake, timer idle çember + orphan fix, haftalık donut, profil sırası, UTC gün sınırı, **Live Activity** (iOS, buildNumber 6), **screen-lock hatırlatması** (kilitle→yok / app-switch→var), artı hâlâ bekleyen Faz 14/15/16/18 (aylık takvim, pomodoro, Focus Score, Challenge/ünvanlar/çoklu konu).
+
+**Açık/empirik notlar:**
+- **Live Activity**: iOS build gerekli; kaprisli olabilir, 1-2 tur iterasyon beklenir.
+- **screen-lock iOS**: best-effort (public `protectedData`, Darwin/private yok). Test: kilitte yanlış hatırlatma çıkarsa v2'de Darwin sinyali; app-switch'te hiç çıkmıyorsa bak. Android güvenilir olmalı.
+- **UTC gün sınırı**: sabit offset (IANA değil); DST'de bir sonraki açılışta düzelir; TR zaten sabit +3.
+- Kullanılmayan ama duran: backend `/timer/rescue`, `timer.strict*` i18n (zararsız).
+
+---
+
 ### 📝 Oturum Özeti — 2026-07-09 (Faz 18: Challenge + Ünvanlar + Çoklu Konu)
 
 Kullanıcı 3 karar verdi, hepsi uygulandı — commit `7717003`, main'de:
@@ -308,18 +335,22 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; **App Store Connect uygulaması oluşturuldu** (`com.studysquadhq.app`, TestFlight grubu + `alperentorun334@icloud.com` test erişimi). İlk build .ipa ✓ (ikon reddi düzeltildi). ⏳ yeni ikonlu build + auto-submit çalıştırılıyor. ASC API key (APP_MANAGER) EAS'te saklı |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). buildNumber 4 TestFlight'ta çalıştı. **app.json buildNumber = 6.** ⏳ Live Activity (`expo-live-activity`) + native `screen-lock` modülü içeren TAZE iOS build **henüz alınmadı** (sonraki oturum). ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` eklendi |
+| Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
 
 ---
 
 ## 🔜 Sıradaki Adımlar
 
-**Sonraki oturumun ilk işleri (Claude):**
-1. **BACKEND FLY DEPLOY + YENİ PREVIEW BUILD birlikte** (Faz 18 `/timer/boss`'u sildi → deploy ile build eşzamanlı olmalı). Önce `--depot=false` ile Fly deploy, sonra `cd mobile && npx eas-cli build --platform android --profile preview --non-interactive --no-wait`. İçereceği CİHAZDA HİÇ TEST EDİLMEMİŞ özellikler: **Haftalık Challenge + ödül claim + Ünvanlar + onboarding çoklu konu (Faz 18)**, ayrıca hâlâ bekleyen **aylık takvim (Faz 14) + donut + pomodoro (Faz 15) + Focus Score (Faz 16)**. react-native-svg native modülü nedeniyle build cache'siz/uzun. Bitince kur ve test et.
-2. ✅ **Focus Score V1** — Faz 16'da yapıldı + deploy edildi (cihazda test bekliyor).
+**Sonraki oturumun ilk işleri (Claude):** — bkz ⭐ "Oturum Özeti 2026-07-10" (BUILD DURUMU)
+1. **TAZE iOS + Android build al** (mevcut build'lerin hiçbiri güncel değil; backend zaten deploy'lu, ekstra deploy YOK).
+   - Android (kullanıcı test ediyor): `cd mobile && npx eas-cli build --platform android --profile preview --non-interactive --no-wait`
+   - iOS (Live Activity + screen-lock burada test edilir; TestFlight, 2FA gerekebilir → kullanıcı çalıştırsın): `cd mobile && npx eas-cli build --platform ios --profile production --auto-submit`
+   - Native modüller (expo-live-activity, screen-lock, react-native-svg, keep-awake) → cache'siz/uzun build.
+2. **Cihaz test geri bildirimlerini topla** → iterasyon: özellikle **Live Activity** (iOS, kaprisli olabilir) + **screen-lock hatırlatması** (iOS best-effort; kilitte yanlış tetik olursa v2 Darwin sinyali; Android güvenilir mi). Ayrıca Faz 14/15/16/18 UI'ları ilk kez cihazda.
 3. Kalan küçük bug: onboarding **Skip butonu çalışmıyor**.
-4. Aynı env'leri **production** ortamına da ekle → production AAB build.
+4. Aynı env'leri **production** ortamına da ekle → production AAB build (Play için).
 5. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil). Push teslimatı gerçek cihaz + muhtemel FCM kurulumu gerektiriyor.
 
 **Kullanıcı tarafında bekleyenler:**
