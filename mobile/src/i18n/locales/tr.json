@@ -518,5 +518,9 @@
     "subtitle": "Böyle devam et",
     "pausedTitle": "⏸ Duraklatıldı",
     "done": "✅ Tamamlandı"
+  },
+  "focusReminder": {
+    "title": "Odağa geri dön",
+    "body": "Başka bir uygulamaya daldın — hadi çalışmaya dönelim 🔥"
   }
 }

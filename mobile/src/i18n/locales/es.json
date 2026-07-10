@@ -518,5 +518,9 @@
     "subtitle": "Sigue así",
     "pausedTitle": "⏸ En pausa",
     "done": "✅ Completado"
+  },
+  "focusReminder": {
+    "title": "Vuelve a concentrarte",
+    "body": "Te fuiste a otra app — ¡volvamos a ello! 🔥"
   }
 }

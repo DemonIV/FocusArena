@@ -518,5 +518,9 @@
     "subtitle": "Ga zo door",
     "pausedTitle": "⏸ Gepauzeerd",
     "done": "✅ Klaar"
+  },
+  "focusReminder": {
+    "title": "Terug naar je focus",
+    "body": "Je zit in een andere app — kom, we gaan door 🔥"
   }
 }

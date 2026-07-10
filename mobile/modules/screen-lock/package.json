@@ -1,0 +1,6 @@
+{
+  "name": "screen-lock",
+  "version": "0.1.0",
+  "description": "Screen-lock detection so focus reminders only fire on app-switch, not when the phone is locked.",
+  "main": "index.ts"
+}

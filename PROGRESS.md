@@ -209,6 +209,17 @@ Sadece mobil · tsc temiz
 - **AÇIK/İSTENEN (native gerekli)**: Kullanıcı "sadece **başka uygulamaya geçince** uyarı olsun, kilitlemede olmasın, toggle'sız uygulama kendi yapsın" istiyor. Bu ayrım native ekran-kilidi algılama gerektiriyor (iOS `protectedDataWillBecomeUnavailable`, Android `ACTION_SCREEN_OFF`); hazır Expo-uyumlu kütüphane yok (`react-native-lock-detection` npm'de değil). → Ayrı native iş olarak, fail-safe (belirsiz=iyi huylu, asla yanlış yakma) tasarımla, cihazda test edilerek yapılacak. Kullanıcı onayı bekliyor.
 - Not: Focus Score'un *presence* bileşeni hâlâ arka planı sayıyor (yıkıcı değil, sadece kalite metriği); keep-awake auto-lock'u azaltıyor.
 
+### Faz 23 — Native ekran-kilidi algılama + "geri dön" hatırlatması (10 Temmuz)
+Sadece mobil · tsc temiz · **CİHAZDA TEST EDİLMEDİ** (v1, empirik)
+
+- **Amaç** (Faz 22'nin devamı): kilitleme hiçbir şey yapmasın, **sadece başka uygulamaya geçince** nazik hatırlatma. Bu ayrım native gerektiriyor.
+- **Yeni LOCAL Expo modülü** `mobile/modules/screen-lock` (Name `ScreenLock`) — el yazımı, expo-keep-awake şablonuyla, SDK 54. **Autolinking her iki platformda da doğrulandı** (`expo-modules-autolinking resolve` iOS podName `ScreenLock` + Android `expo.modules.screenlock.ScreenLockModule`). API: `reset()` + `consumeLocked()` (bir absence sırasında kilit oldu mu, read-and-clear).
+  - **iOS** (Swift): public `protectedDataWillBecomeUnavailableNotification` gözlemcisi → bayrak. **Best-effort** — public API'de prompt/güvenilir kilit sinyali yok, JS askısı + gecikme nedeniyle bazı kilitleri kaçırabilir. Darwin/private trick KULLANILMADI (mağaza güvenliği + derleme riski). 
+  - **Android** (Kotlin): `ACTION_SCREEN_OFF` receiver (dinamik kayıt, API 34+ RECEIVER_NOT_EXPORTED) → bayrak. **Güvenilir** (ekran-durumu net).
+- **JS**: `services/screenLock.ts` (fail-safe: modül yok/hata → "kilitli" say → asla hatırlatma). `hooks/useAwayReminder.ts` MainTabs'te mount: arka plana geçince `leftAt`+`reset()`; **dönünce** 15sn+ uzaktaysan **ve** `consumeLocked()` false ise (kilit olmadıysa) → nazik **uygulama-içi Alert** (`focusReminder.*`, 10 dil). iOS JS askısı yüzünden "yokken bildirim" yerine **dönüşte** karar veriliyor (güvenilir). Yıkıcı değil.
+- **Bilinen/empirik**: iOS best-effort — cihazda kilitleyip test et: hatırlatma çıkarsa (yanlış pozitif) v2'de Darwin sinyali eklenebilir; hiç çıkmıyorsa uygulama-değişiminde çıkıyor mu bak. Android'de güvenilir olmalı.
+- **SONRAKİ ADIM**: iOS build (buildNumber 6) + Android build → cihazda test: (1) kilitle → hatırlatma YOK olmalı, (2) başka uygulamaya 15sn+ geç, dön → nazik hatırlatma çıkmalı.
+
 ### 📝 Oturum Özeti — 2026-07-09 (Faz 18: Challenge + Ünvanlar + Çoklu Konu)
 
 Kullanıcı 3 karar verdi, hepsi uygulandı — commit `7717003`, main'de:

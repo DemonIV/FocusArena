@@ -20,7 +20,7 @@ import {
   FriendsScreen,
   ProfileScreen,
 } from '../screens';
-import { useFocusTracking, useKeepAwakeDuringSession, useFocusLiveActivity } from '../hooks';
+import { useFocusTracking, useKeepAwakeDuringSession, useFocusLiveActivity, useAwayReminder } from '../hooks';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -55,6 +55,9 @@ export function MainTabs() {
 
   // iOS lock-screen / Dynamic Island countdown for the running session.
   useFocusLiveActivity();
+
+  // Gentle "come back" nudge when leaving to another app (not on screen lock).
+  useAwayReminder();
 
   // Register this device for push notifications once the user is in the app.
   useEffect(() => {
