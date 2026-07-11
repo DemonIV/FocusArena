@@ -245,7 +245,12 @@ Sadece mobil · tsc temiz · commit `e492456`
   - **iOS production**: build `50f40c6d` (buildNumber 6→**7** otomatik) — https://expo.dev/accounts/software66/projects/focusarena/builds/50f40c6d-f574-4457-bae4-762f2cb85cae — credentials `com.studysquadhq.app.LiveActivity` target'ını içeriyor ✓ (expo-live-activity plugin widget'ı üretmiş).
   - ✅ **iOS TestFlight'a GÖNDERİLDİ** (11 Tem 04:49, EAS workflow "Submit app to TestFlight" otomatik halletti — dünkü "zincirlenemedi" endişesi yersizmiş). Gün içindeki elle `submit --latest` denemesi "buildNumber 7 zaten kullanıldı" hatası verdi = zararsız duplicate. **`ascAppId: 6788842347` eas.json'a yazıldı** → artık non-interactive submit çalışır. Not: submission durumu expo.dev/…/submissions sayfasından okunabilir (eas-cli 20'de submit:list yok).
 - **Cihazda test bekleyen her şey bu build'lerde**: keep-awake, timer idle çember + orphan fix, haftalık donut, UTC gün sınırı, Live Activity (iOS), screen-lock hatırlatması, pomodoro auto-start+titreşim, profil sırası, artı Faz 14/15/16/18 UI'ları (aylık takvim, pomodoro, Focus Score, Challenge/ünvanlar/çoklu konu).
-- **Gün içi devam**: kullanıcı build'i test etti → pomodoro geri bildirimleri geldi → **Faz 25 düzeltmeleri yapıldı** (`e492456`, yukarıda). ⚠️ Faz 25 mevcut build'lerde YOK — bir sonraki build'e girer; kilitli-telefon bildirim testi o build'de yapılmalı.
+- **Gün içi devam**: kullanıcı build'i test etti → pomodoro geri bildirimleri geldi → **Faz 25 düzeltmeleri yapıldı** (`e492456`, yukarıda).
+- **🚀 FAZ 25'Lİ YENİ BUILD'LER ATILDI ve BİTTİ** (JS-only değişiklik, hızlı bitti):
+  - **iOS production `b7ecffa9`** (buildNumber **8**) — FINISHED ✓, **auto-submit bu kez zincirlendi** (eas.json'a yazılan `ascAppId: 6788842347` sayesinde; submission `7be25e84` build bitince otomatik koştu). https://expo.dev/accounts/software66/projects/focusarena/builds/b7ecffa9-1f2c-4783-9ded-5bd27eb758ac
+  - **Android preview APK `85229865`** — FINISHED ✓. https://expo.dev/accounts/software66/projects/focusarena/builds/85229865-b19d-421a-8958-41ad66db399c
+  - Not: dünkü build 7 (`50f40c6d`) zaten 11 Tem 04:49'da TestFlight'a başarıyla gitmişti; gün içindeki elle submit "buildNumber 7 zaten kullanıldı" hatası zararsız duplicate'ti.
+- **SIRADAKİ TEST (build 8 / yeni APK ile, pomodoro)**: (1) tur çalışırken telefonu kilitle → tur-sonu bildirimi kilit ekranına titreşimle düşmeli; (2) molada bekle → "Dokun, X. tura başla" bildirimine dokun → network error GÖRMEDEN sonraki tur başlamalı; (3) ekran açıkken auto-start açıksa mola bitince tur kendiliğinden başlamalı. Artı önceki listedeki tüm Faz 19–24 testleri geçerli.
 
 ### 📝 Oturum Özeti — 2026-07-10 (Faz 19–23: UX geri bildirim turu)
 
