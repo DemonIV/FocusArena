@@ -38,6 +38,7 @@ import {
   maybeRequestReview,
   scheduleLocalNotification,
   cancelScheduledNotification,
+  dismissPomodoroNotifications,
 } from '../../services';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
@@ -292,6 +293,7 @@ export function TimerScreen() {
   }, [pomo.phase, pomo.breakEndsAt]);
 
   const handleStartCycle = useCallback(async () => {
+    void dismissPomodoroNotifications();
     pomo.beginCycle();
     try {
       await timer.start(preset.focus, selectedSubjectId);
@@ -311,6 +313,7 @@ export function TimerScreen() {
   }, [pomo, preset.focus, selectedSubjectId, timer, t, scheduleRoundEnd]);
 
   const startNextRound = useCallback(async () => {
+    void dismissPomodoroNotifications();
     await timer.start(preset.focus, selectedSubjectId);
     usePomodoroStore.getState().startedNextRound();
     void scheduleRoundEnd(preset.focus * 60_000);
@@ -326,10 +329,12 @@ export function TimerScreen() {
 
   const handleSkipBreak = useCallback(() => {
     void cancelScheduledNotification(usePomodoroStore.getState().breakNotifId);
+    void dismissPomodoroNotifications();
     usePomodoroStore.getState().skipBreak();
   }, []);
 
   const handleStartBreak = useCallback(() => {
+    void dismissPomodoroNotifications();
     usePomodoroStore.getState().startBreak();
   }, []);
 
@@ -396,6 +401,7 @@ export function TimerScreen() {
 
 
   const handleStart = useCallback(async () => {
+    void dismissPomodoroNotifications();
     try {
       await timer.start(selectedDuration, selectedSubjectId);
     } catch (err: any) {

@@ -104,7 +104,9 @@ export async function scheduleLocalNotification(
   try {
     await ensureNotificationChannel();
     return await Notifications.scheduleNotificationAsync({
-      content: { title, body, sound: true },
+      // data.pomodoro lets dismissPomodoroNotifications clear these from the
+      // tray without touching server pushes (friend requests, streak warnings).
+      content: { title, body, sound: true, data: { pomodoro: true } },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: Math.max(1, Math.round(seconds)),
@@ -125,7 +127,7 @@ export async function notifyNow(title: string, body: string): Promise<void> {
   try {
     await ensureNotificationChannel();
     await Notifications.scheduleNotificationAsync({
-      content: { title, body, sound: true },
+      content: { title, body, sound: true, data: { pomodoro: true } },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: 1,
@@ -142,6 +144,26 @@ export async function cancelScheduledNotification(id: string | null): Promise<vo
   if (!id) return;
   try {
     await Notifications.cancelScheduledNotificationAsync(id);
+  } catch {
+    /* best-effort */
+  }
+}
+
+/**
+ * Remove already-delivered pomodoro notifications from the notification tray.
+ * A "round over" / "break over" alert that fired while the phone was locked
+ * would otherwise sit in the tray after the user is back in the app — called
+ * on every user-driven phase transition (start session/round/break, skip).
+ * Only touches notifications tagged data.pomodoro; server pushes stay.
+ */
+export async function dismissPomodoroNotifications(): Promise<void> {
+  try {
+    const presented = await Notifications.getPresentedNotificationsAsync();
+    await Promise.all(
+      presented
+        .filter((n) => n.request.content.data?.pomodoro === true)
+        .map((n) => Notifications.dismissNotificationAsync(n.request.identifier)),
+    );
   } catch {
     /* best-effort */
   }

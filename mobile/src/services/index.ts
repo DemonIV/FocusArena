@@ -17,4 +17,5 @@ export {
   scheduleLocalNotification,
   notifyNow,
   cancelScheduledNotification,
+  dismissPomodoroNotifications,
 } from './notifications';
