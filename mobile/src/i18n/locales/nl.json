@@ -210,7 +210,7 @@
     "exitCycleTitle": "Cyclus verlaten?",
     "exitCycleMsg": "Je rondevoortgang wordt gereset. Verdiende XP en munten blijven van jou.",
     "breakOverTitle": "Pauze voorbij!",
-    "breakOverBody": "Ronde {{round}} wacht op je 🔥",
+    "breakOverBody": "Tik om ronde {{round}} te starten 🔥",
     "cycleDoneTitle": "Cyclus voltooid! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} min focus · gedisciplineerde pauzes",
     "cycleShare": "Bon delen",

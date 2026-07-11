@@ -210,7 +210,7 @@
     "exitCycleTitle": "Sair do ciclo?",
     "exitCycleMsg": "Seu progresso de rodadas será zerado. XP e moedas ganhos continuam seus.",
     "breakOverTitle": "Fim da pausa!",
-    "breakOverBody": "A rodada {{round}} está esperando você 🔥",
+    "breakOverBody": "Toque para começar a rodada {{round}} 🔥",
     "cycleDoneTitle": "Ciclo completo! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} min de foco · pausas disciplinadas",
     "cycleShare": "Compartilhar recibo",

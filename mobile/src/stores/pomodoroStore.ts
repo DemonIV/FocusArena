@@ -50,6 +50,13 @@ interface PomodoroState {
    */
   breakNotifId: string | null;
   setBreakNotifId: (id: string | null) => void;
+  /**
+   * Id of the scheduled "round over / cycle done" local notification, set when
+   * a focus round starts (so it fires even if the phone is locked at round
+   * end). Persisted for the same relaunch-dedup reason as breakNotifId.
+   */
+  roundNotifId: string | null;
+  setRoundNotifId: (id: string | null) => void;
 
   // Cycle totals for the end-of-cycle summary (and, later, Focus Score data)
   totalMinutes: number;
@@ -91,6 +98,7 @@ const CYCLE_RESET = {
   round: 1,
   breakEndsAt: null,
   breakNotifId: null,
+  roundNotifId: null,
   totalMinutes: 0,
   totalXp: 0,
   totalCoins: 0,
@@ -108,6 +116,7 @@ export const usePomodoroStore = create<PomodoroState>()(
       setMode: (mode) => set({ mode }),
       setPresetId: (presetId) => set({ presetId }),
       setBreakNotifId: (breakNotifId) => set({ breakNotifId }),
+      setRoundNotifId: (roundNotifId) => set({ roundNotifId }),
 
       beginCycle: () => set({ ...CYCLE_RESET, phase: 'focus' }),
 
@@ -119,13 +128,14 @@ export const usePomodoroStore = create<PomodoroState>()(
           totalCoins: s.totalCoins + r.coinsEarned,
           lastStreak: r.newStreak,
         };
+        // The round-end notification has just fired (or is firing) — its id is stale.
         if (s.round >= ROUNDS_PER_CYCLE) {
-          set({ ...totals, phase: 'done', breakEndsAt: null });
+          set({ ...totals, phase: 'done', breakEndsAt: null, roundNotifId: null });
         } else if (autoStartBreak) {
           const brkMs = POMODORO_PRESETS[s.presetId].brk * 60_000;
-          set({ ...totals, phase: 'break', breakEndsAt: Date.now() + brkMs, breakNotifId: null });
+          set({ ...totals, phase: 'break', breakEndsAt: Date.now() + brkMs, breakNotifId: null, roundNotifId: null });
         } else {
-          set({ ...totals, phase: 'awaitBreak', breakEndsAt: null, breakNotifId: null });
+          set({ ...totals, phase: 'awaitBreak', breakEndsAt: null, breakNotifId: null, roundNotifId: null });
         }
       },
 

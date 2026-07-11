@@ -90,10 +90,13 @@ export async function registerForPushNotifications(): Promise<string | null> {
 }
 
 /**
- * Schedule the local "break is over" notification for the Pomodoro cycle.
- * Returns the notification id so the caller can cancel it (skip / foreground).
+ * Schedule a local notification `seconds` from now (Pomodoro "break over" /
+ * "round over" transitions). Scheduled ahead of time so the OS delivers it even
+ * while the app is backgrounded or the phone is locked — JS timers are suspended
+ * there, so firing at the moment of transition would silently do nothing.
+ * Returns the notification id so the caller can cancel it (skip / pause / stop).
  */
-export async function scheduleBreakOverNotification(
+export async function scheduleLocalNotification(
   seconds: number,
   title: string,
   body: string,

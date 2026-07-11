@@ -14,7 +14,7 @@ export {
   setPushEnabled,
   subscribeNotificationTaps,
   ensureNotificationChannel,
-  scheduleBreakOverNotification,
+  scheduleLocalNotification,
   notifyNow,
   cancelScheduledNotification,
 } from './notifications';

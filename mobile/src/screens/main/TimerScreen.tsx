@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -36,8 +36,7 @@ import {
   timerService,
   cosmeticsService,
   maybeRequestReview,
-  scheduleBreakOverNotification,
-  notifyNow,
+  scheduleLocalNotification,
   cancelScheduledNotification,
 } from '../../services';
 import i18n from '../../i18n';
@@ -164,6 +163,38 @@ export function TimerScreen() {
     qc.invalidateQueries({ queryKey: ['pets'] });
   }, [qc]);
 
+  // Pre-schedule the "round over / cycle done" notification for the running
+  // focus round. JS timers are suspended while the phone is locked, so firing
+  // at the moment of completion (the old notifyNow path) silently did nothing
+  // there — a notification scheduled at round start is delivered by the OS
+  // regardless. Cancelled on pause/manual stop, rescheduled on resume.
+  const scheduleRoundEnd = useCallback(async (remainingMs: number) => {
+    const p = usePomodoroStore.getState();
+    if (p.mode !== 'pomodoro') return;
+    if (p.roundNotifId) {
+      await cancelScheduledNotification(p.roundNotifId);
+      p.setRoundNotifId(null);
+    }
+    if (remainingMs < 1500) return;
+    const last = p.round >= ROUNDS_PER_CYCLE;
+    const id = await scheduleLocalNotification(
+      remainingMs / 1000,
+      i18n.t(last ? 'timer.cycleDoneTitle' : 'timer.roundOverTitle'),
+      last
+        ? i18n.t('timer.cycleDoneBody')
+        : i18n.t('timer.roundOverBody', { min: POMODORO_PRESETS[p.presetId].brk }),
+    );
+    usePomodoroStore.getState().setRoundNotifId(id);
+  }, []);
+
+  // Cancel any pending pomodoro notifications (round-end + break-over) — used
+  // wherever the cycle is dropped, so no stale notification fires afterwards.
+  const cancelPomodoroNotifs = useCallback(() => {
+    const p = usePomodoroStore.getState();
+    void cancelScheduledNotification(p.breakNotifId);
+    void cancelScheduledNotification(p.roundNotifId);
+  }, []);
+
   // ── Natural session completion (countdown hit zero) ────────────────────────
   // In a pomodoro cycle: advance the round. In classic mode: celebrate with the
   // receipt (manual stops already do; natural completions used to end silently).
@@ -183,16 +214,13 @@ export function TimerScreen() {
             },
             useSettingsStore.getState().pomodoroAutoBreak,
           );
-          // Buzz + notify on the focus→break (or focus→cycle-done) transition.
+          // Foreground buzz; the round-end notification was scheduled at round
+          // start, so the OS delivers it on time even if the phone is locked.
           Vibration.vibrate(BUZZ_PATTERN);
-          const brk = POMODORO_PRESETS[usePomodoroStore.getState().presetId].brk;
-          if (usePomodoroStore.getState().phase === 'done') {
-            void notifyNow(i18n.t('timer.cycleDoneTitle'), i18n.t('timer.cycleDoneBody'));
-          } else {
-            void notifyNow(i18n.t('timer.roundOverTitle'), i18n.t('timer.roundOverBody', { min: brk }));
-          }
         } else {
-          p.abortCycle(); // session vanished server-side — nothing to continue
+          // Session vanished server-side — nothing to continue.
+          cancelPomodoroNotifs();
+          p.abortCycle();
         }
       } else if (result && result.xpEarned > 0) {
         setReceipt({
@@ -206,7 +234,7 @@ export function TimerScreen() {
       }
     });
     return () => useTimerStore.getState().setOnComplete(null);
-  }, [invalidateAfterStop, selectedSubject]);
+  }, [invalidateAfterStop, selectedSubject, cancelPomodoroNotifs]);
 
   // ── Recover from an orphaned pomodoro cycle ────────────────────────────────
   // The pomodoro store is persisted. A mid-round "focus" phase means "a session
@@ -222,11 +250,12 @@ export function TimerScreen() {
     const t = setTimeout(() => {
       const stillGone = !useTimerStore.getState().isActive && !useTimerStore.getState().isLoading;
       if (stillGone && usePomodoroStore.getState().phase === 'focus') {
+        cancelPomodoroNotifs();
         usePomodoroStore.getState().abortCycle();
       }
     }, 2500);
     return () => clearTimeout(t);
-  }, [inPomodoro, pomo.phase, timer.isActive, timer.isLoading]);
+  }, [inPomodoro, pomo.phase, timer.isActive, timer.isLoading, cancelPomodoroNotifs]);
 
   // ── Break countdown + "break over" local notification ──────────────────────
   useEffect(() => {
@@ -237,7 +266,7 @@ export function TimerScreen() {
     if (!pomo.breakNotifId) {
       const secs = (pomo.breakEndsAt - Date.now()) / 1000;
       if (secs > 1) {
-        void scheduleBreakOverNotification(
+        void scheduleLocalNotification(
           secs,
           t('timer.breakOverTitle'),
           t('timer.breakOverBody', { round: pomo.round + 1 }),
@@ -266,6 +295,7 @@ export function TimerScreen() {
     pomo.beginCycle();
     try {
       await timer.start(preset.focus, selectedSubjectId);
+      void scheduleRoundEnd(preset.focus * 60_000);
     } catch (err: any) {
       usePomodoroStore.getState().abortCycle();
       if (err?.statusCode === 409) {
@@ -278,16 +308,21 @@ export function TimerScreen() {
         Alert.alert(t('common.error'), err?.message ?? t('timer.startFailed'));
       }
     }
-  }, [pomo, preset.focus, selectedSubjectId, timer, t]);
+  }, [pomo, preset.focus, selectedSubjectId, timer, t, scheduleRoundEnd]);
+
+  const startNextRound = useCallback(async () => {
+    await timer.start(preset.focus, selectedSubjectId);
+    usePomodoroStore.getState().startedNextRound();
+    void scheduleRoundEnd(preset.focus * 60_000);
+  }, [preset.focus, selectedSubjectId, timer, scheduleRoundEnd]);
 
   const handleStartNextRound = useCallback(async () => {
     try {
-      await timer.start(preset.focus, selectedSubjectId);
-      usePomodoroStore.getState().startedNextRound();
+      await startNextRound();
     } catch (err: any) {
       Alert.alert(t('common.error'), err?.message ?? t('timer.startFailed'));
     }
-  }, [preset.focus, selectedSubjectId, timer, t]);
+  }, [startNextRound, t]);
 
   const handleSkipBreak = useCallback(() => {
     void cancelScheduledNotification(usePomodoroStore.getState().breakNotifId);
@@ -299,12 +334,46 @@ export function TimerScreen() {
   }, []);
 
   // Auto-start the next focus round when the break ends, if the user opted in.
-  // Guarded so an in-flight start (isLoading) doesn't fire a second session.
+  // The first attempt often runs right after the app returns to the foreground
+  // (break-over notification tap) where the network isn't up yet — so failures
+  // retry silently before bothering the user with an alert. The busy ref keeps
+  // re-renders (isLoading toggles) from spawning a second attempt chain.
+  const autoStartBusy = useRef(false);
   useEffect(() => {
     if (!inPomodoro || pomo.phase !== 'awaitNext' || !autoFocus) return;
-    if (timer.isActive || timer.isLoading) return;
-    void handleStartNextRound();
-  }, [inPomodoro, pomo.phase, autoFocus, timer.isActive, timer.isLoading, handleStartNextRound]);
+    if (timer.isActive || timer.isLoading || autoStartBusy.current) return;
+    autoStartBusy.current = true;
+    const attempt = async (n: number): Promise<void> => {
+      // Re-check the world before each try — the user may have started the
+      // round manually, left the cycle, or turned auto-start off while we
+      // waited to retry.
+      const ts = useTimerStore.getState();
+      if (
+        usePomodoroStore.getState().phase !== 'awaitNext' ||
+        !useSettingsStore.getState().pomodoroAutoFocus ||
+        ts.isActive || ts.isLoading
+      ) {
+        autoStartBusy.current = false;
+        return;
+      }
+      try {
+        await startNextRound();
+        autoStartBusy.current = false;
+      } catch (err: any) {
+        if (err?.statusCode === 409) {
+          // A session already exists server-side — restore it instead of retrying.
+          autoStartBusy.current = false;
+          void timer.syncWithServer();
+        } else if (n < 3) {
+          setTimeout(() => void attempt(n + 1), 2000);
+        } else {
+          autoStartBusy.current = false;
+          Alert.alert(t('common.error'), err?.message ?? t('timer.startFailed'));
+        }
+      }
+    };
+    void attempt(1);
+  }, [inPomodoro, pomo.phase, autoFocus, timer.isActive, timer.isLoading, startNextRound, timer, t]);
 
   const handleExitCycle = useCallback(() => {
     Alert.alert(
@@ -316,14 +385,14 @@ export function TimerScreen() {
           text: t('timer.exitCycle'),
           style: 'destructive',
           onPress: () => {
-            void cancelScheduledNotification(usePomodoroStore.getState().breakNotifId);
+            cancelPomodoroNotifs();
             usePomodoroStore.getState().abortCycle();
             sendPresence('offline');
           },
         },
       ],
     );
-  }, [t, sendPresence]);
+  }, [t, sendPresence, cancelPomodoroNotifs]);
 
 
   const handleStart = useCallback(async () => {
@@ -344,18 +413,31 @@ export function TimerScreen() {
   }, [selectedDuration, selectedSubjectId, timer]);
 
   const handlePause = useCallback(async () => {
-    try { await timer.pause(); }
-    catch (err: any) {
+    try {
+      await timer.pause();
+      // A paused round no longer ends at the scheduled time — cancel the
+      // round-end notification; resume reschedules it with the new remaining.
+      const p = usePomodoroStore.getState();
+      if (p.mode === 'pomodoro' && p.phase === 'focus' && p.roundNotifId) {
+        void cancelScheduledNotification(p.roundNotifId);
+        p.setRoundNotifId(null);
+      }
+    } catch (err: any) {
       Alert.alert(t('timer.pauseError'), err?.message ?? t('timer.pauseErrorMsg'));
     }
   }, [timer]);
 
   const handleResume = useCallback(async () => {
-    try { await timer.resume(); }
-    catch (err: any) {
+    try {
+      await timer.resume();
+      const p = usePomodoroStore.getState();
+      if (p.mode === 'pomodoro' && p.phase === 'focus') {
+        void scheduleRoundEnd(useTimerStore.getState().remainingMs);
+      }
+    } catch (err: any) {
       Alert.alert(t('timer.resumeError'), err?.message ?? t('timer.resumeErrorMsg'));
     }
-  }, [timer]);
+  }, [timer, scheduleRoundEnd]);
 
   const handleZenPress = useCallback(() => {
     if (zenLocked) { setZenPaywallVisible(true); return; }
@@ -375,6 +457,7 @@ export function TimerScreen() {
             try {
               const result = await timer.stop();
               // A manual stop mid-cycle drops the pomodoro cycle
+              cancelPomodoroNotifs();
               usePomodoroStore.getState().abortCycle();
               setZenVisible(false);
               // Refresh anything that depends on the finished session
@@ -413,7 +496,7 @@ export function TimerScreen() {
         },
       ],
     );
-  }, [timer, selectedSubject, invalidateAfterStop]);
+  }, [timer, selectedSubject, invalidateAfterStop, cancelPomodoroNotifs]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 

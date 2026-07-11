@@ -210,7 +210,7 @@
     "exitCycleTitle": "Opuścić cykl?",
     "exitCycleMsg": "Postęp rund zostanie wyzerowany. Zdobyte XP i monety zostają.",
     "breakOverTitle": "Koniec przerwy!",
-    "breakOverBody": "Runda {{round}} czeka na ciebie 🔥",
+    "breakOverBody": "Stuknij, aby rozpocząć rundę {{round}} 🔥",
     "cycleDoneTitle": "Cykl ukończony! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} min skupienia · zdyscyplinowane przerwy",
     "cycleShare": "Udostępnij paragon",

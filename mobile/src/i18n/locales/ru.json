@@ -210,7 +210,7 @@
     "exitCycleTitle": "Выйти из цикла?",
     "exitCycleMsg": "Прогресс раундов сбросится. Заработанные XP и монеты останутся у вас.",
     "breakOverTitle": "Перерыв окончен!",
-    "breakOverBody": "Раунд {{round}} ждёт тебя 🔥",
+    "breakOverBody": "Нажми, чтобы начать раунд {{round}} 🔥",
     "cycleDoneTitle": "Цикл завершён! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} мин фокуса · дисциплинированные перерывы",
     "cycleShare": "Поделиться чеком",

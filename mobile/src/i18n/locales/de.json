@@ -210,7 +210,7 @@
     "exitCycleTitle": "Zyklus wirklich beenden?",
     "exitCycleMsg": "Dein Rundenfortschritt wird zurückgesetzt. Verdiente XP und Münzen bleiben dir.",
     "breakOverTitle": "Pause vorbei!",
-    "breakOverBody": "Runde {{round}} wartet auf dich 🔥",
+    "breakOverBody": "Tippe hier und starte Runde {{round}} 🔥",
     "cycleDoneTitle": "Zyklus geschafft! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} Min. Fokus · disziplinierte Pausen",
     "cycleShare": "Beleg teilen",

@@ -210,7 +210,7 @@
     "exitCycleTitle": "Quitter le cycle ?",
     "exitCycleMsg": "Ta progression de manches est réinitialisée. Les XP et pièces gagnés restent à toi.",
     "breakOverTitle": "Pause terminée !",
-    "breakOverBody": "La manche {{round}} t’attend 🔥",
+    "breakOverBody": "Touche pour lancer la manche {{round}} 🔥",
     "cycleDoneTitle": "Cycle terminé ! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} min de concentration · pauses disciplinées",
     "cycleShare": "Partager le reçu",

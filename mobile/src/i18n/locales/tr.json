@@ -210,7 +210,7 @@
     "exitCycleTitle": "Döngüden çıkılsın mı?",
     "exitCycleMsg": "Tur ilerlemen sıfırlanır. Kazandığın XP ve coinler sende kalır.",
     "breakOverTitle": "Mola bitti!",
-    "breakOverBody": "{{round}}. tur seni bekliyor 🔥",
+    "breakOverBody": "Dokun, {{round}}. tura başla 🔥",
     "cycleDoneTitle": "Döngü tamam! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} dk odak · disiplinli molalar",
     "cycleShare": "Fişi Paylaş",

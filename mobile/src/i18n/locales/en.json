@@ -210,7 +210,7 @@
     "exitCycleTitle": "Exit the cycle?",
     "exitCycleMsg": "Your round progress resets. XP and coins you earned are yours to keep.",
     "breakOverTitle": "Break's over!",
-    "breakOverBody": "Round {{round}} is waiting for you 🔥",
+    "breakOverBody": "Tap to start round {{round}} 🔥",
     "cycleDoneTitle": "Cycle complete! 🎉",
     "cycleDoneSub": "{{rounds}} × {{focus}} min of focus · disciplined breaks",
     "cycleShare": "Share Receipt",
