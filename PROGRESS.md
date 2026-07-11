@@ -253,6 +253,7 @@ Sadece mobil · tsc temiz · commit `e492456`
   - Not: dünkü build 7 (`50f40c6d`) zaten 11 Tem 04:49'da TestFlight'a başarıyla gitmişti; gün içindeki elle submit "buildNumber 7 zaten kullanıldı" hatası zararsız duplicate'ti.
 - **SIRADAKİ TEST (build 8 / yeni APK ile, pomodoro)**: (1) tur çalışırken telefonu kilitle → tur-sonu bildirimi kilit ekranına titreşimle düşmeli; (2) molada bekle → "Dokun, X. tura başla" bildirimine dokun → network error GÖRMEDEN sonraki tur başlamalı; (3) ekran açıkken auto-start açıksa mola bitince tur kendiliğinden başlamalı. Artı önceki listedeki tüm Faz 19–24 testleri geçerli.
 - **Gün içi devam 2**: kullanıcı bildirdi — eski bildirim yeni oturumda tepside kalıyor → **tepsi-temizleme fix'i yapıldı** (`dc1a41a`, Faz 25 "Ek düzeltme" maddesi). JS-only; build 8'de YOK, bir sonraki build'e girecek. ⚠️ Yeni build atılırken hatırla.
+- **Gün içi devam 3 — Pet mağazası vitrin yenilemesi** (`225cb7e`, kullanıcı "basit/statik duruyor" dedi): nadirlik katmanı (yaygın→mitik, renkli kart çerçeveleri + etiket), **PetDetailModal** (karta dokun → büyük animasyonlu sahne + kişilik metni + evrim yolculuğu 🥚→yavru→yetişkin + ilerleme), satın almada Alert yerine modal CTA + **yumurta kutlama ekranı** (titreşim + "1 saat odaklan çatlasın"), kartlarda evrim aşaması rozeti, analytics (`pet_detail_viewed`/`pet_adopted`), 10 dilde 16 yeni i18n anahtarı. `tsc` temiz. JS-only; **build 8'de YOK** — tepsi fix'iyle birlikte bir sonraki build'e girecek; cihazda test edilecek.
 
 ### 📝 Oturum Özeti — 2026-07-10 (Faz 19–23: UX geri bildirim turu)
 
