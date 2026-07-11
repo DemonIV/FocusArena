@@ -220,7 +220,25 @@ Sadece mobil · tsc temiz · **CİHAZDA TEST EDİLMEDİ** (v1, empirik)
 - **Bilinen/empirik**: iOS best-effort — cihazda kilitleyip test et: hatırlatma çıkarsa (yanlış pozitif) v2'de Darwin sinyali eklenebilir; hiç çıkmıyorsa uygulama-değişiminde çıkıyor mu bak. Android'de güvenilir olmalı.
 - **SONRAKİ ADIM**: iOS build (buildNumber 6) + Android build → cihazda test: (1) kilitle → hatırlatma YOK olmalı, (2) başka uygulamaya 15sn+ geç, dön → nazik hatırlatma çıkmalı.
 
-### 📝 Oturum Özeti — 2026-07-10 (Faz 19–23: UX geri bildirim turu) ⭐ EN GÜNCEL
+### Faz 24 — Pomodoro auto-start toggle'ları + titreşim/bildirim + profil sırası (11 Temmuz)
+Sadece mobil · tsc temiz · commit `c2131f0`
+
+- **Pomodoro auto-start, ikisi de ayarlanabilir** (kullanıcı istedi): Timer setup ekranında pomodoro seçiliyken 2 Switch — **"Molaları otomatik başlat"** (varsayılan AÇIK = eski davranış) + **"Çalışmayı otomatik başlat"** (varsayılan KAPALI = eski davranış). `settingsStore`'da persist (`pomodoroAutoBreak`/`pomodoroAutoFocus`). Dört kombinasyon da çalışır; ikisi açıkken tam otomatik 4 tur.
+- **Yeni `awaitBreak` fazı** (`pomodoroStore`): auto-break kapalıysa odak turu bitince "☕ Mola başlat" ekranı; `startBreak()` molayı elle başlatır. `completeRound(r, autoStartBreak)` imzası değişti. Auto-focus: mola bitince `awaitNext`'te effect sonraki turu tek-sefer başlatır (`isLoading` guard'ı çift seansı önler).
+- **Geçişlerde titreşim + bildirim** (kullanıcı istedi): odak turu bitince 📳 `Vibration.vibrate` + YENİ anlık bildirim ("Tur bitti! ☕ {{min}} dk mola" / son turda "Döngü tamamlandı 🎉") — `notifyNow()` (notifications.ts, push opt-out'tan bağımsız yerel bildirim). Mola bitince 📳 foreground titreşim eklendi (zamanlanmış "mola bitti" bildirimi zaten vardı; Android `default` kanalı `vibrationPattern` taşıdığı için arka planda da titrer). `VIBRATE` izni app.json'da zaten vardı.
+- **Profil sırası düzeltildi** (kullanıcı istedi; Faz 19'daki taşımanın revizyonu): … Konularım → Çerçeve/Pet Mağazası → **Odalarım → Ünvanlar → Rozetler** (rozetler en sona) → Ayarlar.
+- i18n: 10 dile 9 yeni `timer.*` anahtarı (autoStartBreaks/Focus+hint'ler, startBreak, roundDoneTitle, roundOverTitle/Body, cycleDoneBody).
+
+### 📝 Oturum Özeti — 2026-07-11 (Faz 24 + TAZE BUILD'LER) ⭐ EN GÜNCEL
+
+- **Faz 24 yapıldı** (yukarıda): pomodoro auto-start toggle'ları + tur/mola geçişlerinde titreşim+bildirim + profil bölüm sırası. Commit `c2131f0`, main'e push'landı.
+- **🚀 TAZE BUILD'LER ATILDI** (Faz 19–24'ün TAMAMINI içeren ilk build'ler; native modüller yüzünden cache'siz):
+  - **Android preview APK**: build `592d10f0` — https://expo.dev/accounts/software66/projects/focusarena/builds/592d10f0-e2be-4778-bf8c-e6b30d7e7996
+  - **iOS production**: build `50f40c6d` (buildNumber 6→**7** otomatik) — https://expo.dev/accounts/software66/projects/focusarena/builds/50f40c6d-f574-4457-bae4-762f2cb85cae — credentials `com.studysquadhq.app.LiveActivity` target'ını içeriyor ✓ (expo-live-activity plugin widget'ı üretmiş).
+  - ⚠️ **iOS auto-submit ZİNCİRLENEMEDİ** (`ascAppId` eas.json submit profilinde yok, non-interactive'de auto-detect yapamıyor). **Build bitince elle submit gerek**: `cd mobile && npx eas-cli submit -p ios --latest` (interaktif; ASC uygulamasını kendisi bulur, Apple 2FA isteyebilir). Kalıcı çözüm: ascAppId'yi eas.json'a yaz.
+- **Cihazda test bekleyen her şey bu build'lerde**: keep-awake, timer idle çember + orphan fix, haftalık donut, UTC gün sınırı, Live Activity (iOS), screen-lock hatırlatması, pomodoro auto-start+titreşim, profil sırası, artı Faz 14/15/16/18 UI'ları (aylık takvim, pomodoro, Focus Score, Challenge/ünvanlar/çoklu konu).
+
+### 📝 Oturum Özeti — 2026-07-10 (Faz 19–23: UX geri bildirim turu)
 
 Kullanıcı cihazda test edip geri bildirim verdi; sırayla Faz 19–23 yapıldı. **Hepsi main'de** (HEAD `c65ca89`).
 
@@ -335,7 +353,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). buildNumber 4 TestFlight'ta çalıştı. **app.json buildNumber = 6.** ⏳ Live Activity (`expo-live-activity`) + native `screen-lock` modülü içeren TAZE iOS build **henüz alınmadı** (sonraki oturum). ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` eklendi |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). buildNumber 4 TestFlight'ta çalıştı. 🔄 **TAZE build `50f40c6d` (buildNumber 7) derleniyor** — Live Activity + screen-lock dahil; bitince elle submit: `eas submit -p ios --latest` (ascAppId eas.json'da yok → auto-submit çalışmıyor). ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
 | Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
 
@@ -343,12 +361,9 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 ## 🔜 Sıradaki Adımlar
 
-**Sonraki oturumun ilk işleri (Claude):** — bkz ⭐ "Oturum Özeti 2026-07-10" (BUILD DURUMU)
-1. **TAZE iOS + Android build al** (mevcut build'lerin hiçbiri güncel değil; backend zaten deploy'lu, ekstra deploy YOK).
-   - Android (kullanıcı test ediyor): `cd mobile && npx eas-cli build --platform android --profile preview --non-interactive --no-wait`
-   - iOS (Live Activity + screen-lock burada test edilir; TestFlight, 2FA gerekebilir → kullanıcı çalıştırsın): `cd mobile && npx eas-cli build --platform ios --profile production --auto-submit`
-   - Native modüller (expo-live-activity, screen-lock, react-native-svg, keep-awake) → cache'siz/uzun build.
-2. **Cihaz test geri bildirimlerini topla** → iterasyon: özellikle **Live Activity** (iOS, kaprisli olabilir) + **screen-lock hatırlatması** (iOS best-effort; kilitte yanlış tetik olursa v2 Darwin sinyali; Android güvenilir mi). Ayrıca Faz 14/15/16/18 UI'ları ilk kez cihazda.
+**Sonraki oturumun ilk işleri (Claude):** — bkz ⭐ "Oturum Özeti 2026-07-11" (BUILD DURUMU)
+1. ✅ ~~TAZE iOS + Android build al~~ — atıldı (Android `592d10f0`, iOS `50f40c6d`). **Build sonuçlarını kontrol et**; iOS bittiyse **elle submit**: `cd mobile && npx eas-cli submit -p ios --latest` (interaktif, 2FA isteyebilir). Kalıcı fix: ascAppId'yi eas.json submit profiline yaz.
+2. **Cihaz test geri bildirimlerini topla** → iterasyon: özellikle **Live Activity** (iOS, kaprisli olabilir) + **screen-lock hatırlatması** (iOS best-effort; kilitte yanlış tetik olursa v2 Darwin sinyali; Android güvenilir mi) + **pomodoro auto-start/titreşim** (Faz 24). Ayrıca Faz 14/15/16/18 UI'ları ilk kez cihazda.
 3. Kalan küçük bug: onboarding **Skip butonu çalışmıyor**.
 4. Aynı env'leri **production** ortamına da ekle → production AAB build (Play için).
 5. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil). Push teslimatı gerçek cihaz + muhtemel FCM kurulumu gerektiriyor.
