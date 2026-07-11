@@ -486,7 +486,29 @@
       "owl": "Baykuş",
       "dragon": "Ejderha",
       "unicorn": "Tek Boynuz"
-    }
+    },
+    "rarity": {
+      "common": "Yaygın",
+      "rare": "Nadir",
+      "epic": "Epik",
+      "legendary": "Efsanevi",
+      "mythic": "Mitik"
+    },
+    "bios": {
+      "turtle": "Yavaş ama durdurulamaz. Kaplumbağa hiçbir çalışma gününü kaçırmaz — istikrar kazandırır.",
+      "panda": "Sakin ve sevimli. Panda en uzun seanslarda bile seni rahatlatır.",
+      "fox": "Zeki ve çevik. Tilki her kestirmeyi bilir — sınavlar hariç.",
+      "owl": "Bilge gece âlimi. Baykuş gece geç saat çalışmalarında sana göz kulak olur.",
+      "dragon": "Saf odaktan güç alan efsanevi bir yaratık. Onu ancak gerçek çalışkanlar büyütebilir.",
+      "unicorn": "Saf sihir, Pro üyelere özel. Her seansta ışıldar."
+    },
+    "evolutionTitle": "Evrim yolculuğu",
+    "adoptBtn": "Sahiplen",
+    "proCta": "Pro ile aç",
+    "congratsTitle": "{{name}} artık senin! 🎉",
+    "congratsMsg": "Yeni arkadaşın henüz yumurtasında — 1 saat odaklan, çatlasın!",
+    "congratsBtn": "Birlikte büyüyelim!",
+    "missingCoins": "{{coins}} coin daha gerekiyor"
   },
   "coinShop": {
     "title": "Coin Paketi",

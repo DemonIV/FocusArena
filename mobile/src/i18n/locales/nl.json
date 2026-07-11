@@ -486,7 +486,29 @@
       "owl": "Uil",
       "dragon": "Draak",
       "unicorn": "Eenhoorn"
-    }
+    },
+    "rarity": {
+      "common": "Gewoon",
+      "rare": "Zeldzaam",
+      "epic": "Episch",
+      "legendary": "Legendarisch",
+      "mythic": "Mythisch"
+    },
+    "bios": {
+      "turtle": "Langzaam maar niet te stoppen. De schildpad mist nooit een studiedag — gestaag wint.",
+      "panda": "Rustig en knuffelbaar. De panda houdt je ontspannen tijdens de langste sessies.",
+      "fox": "Slim en snel. De vos kent elke sluiproute — behalve bij tentamens.",
+      "owl": "De wijze nachtgeleerde. De uil waakt over je late studiesessies.",
+      "dragon": "Een legendarisch beest gevoed door pure focus. Alleen echte doorzetters kunnen hem grootbrengen.",
+      "unicorn": "Pure magie, exclusief voor Pro-leden. Schittert bij elke sessie."
+    },
+    "evolutionTitle": "Evolutiereis",
+    "adoptBtn": "Adopteren",
+    "proCta": "Ontgrendel met Pro",
+    "congratsTitle": "{{name}} is van jou! 🎉",
+    "congratsMsg": "Je nieuwe vriend zit nog in zijn ei — focus 1 uur en hij komt uit!",
+    "congratsBtn": "Samen groeien!",
+    "missingCoins": "Je hebt nog {{coins}} munten nodig"
   },
   "coinShop": {
     "title": "Muntenpakket",

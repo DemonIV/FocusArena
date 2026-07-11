@@ -486,7 +486,29 @@
       "owl": "Owl",
       "dragon": "Dragon",
       "unicorn": "Unicorn"
-    }
+    },
+    "rarity": {
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary",
+      "mythic": "Mythic"
+    },
+    "bios": {
+      "turtle": "Slow but unstoppable. Turtle never misses a study day — steady wins the race.",
+      "panda": "Calm and cuddly. Panda keeps you relaxed through the longest sessions.",
+      "fox": "Clever and quick. Fox knows every shortcut — except on exams.",
+      "owl": "The wise night scholar. Owl watches over your late-night study sessions.",
+      "dragon": "A legendary beast fueled by pure focus. Only true grinders can raise one.",
+      "unicorn": "Pure magic, reserved for Pro members. Sparkles with every session."
+    },
+    "evolutionTitle": "Evolution journey",
+    "adoptBtn": "Adopt",
+    "proCta": "Unlock with Pro",
+    "congratsTitle": "{{name}} is yours! 🎉",
+    "congratsMsg": "Your new friend is still in its egg — focus for 1 hour and it will hatch!",
+    "congratsBtn": "Let's grow together!",
+    "missingCoins": "You need {{coins}} more coins"
   },
   "coinShop": {
     "title": "Coin Pack",

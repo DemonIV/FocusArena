@@ -20,12 +20,14 @@ import { useAuth } from '../../hooks';
 import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { CoinShopModal } from '../../components/CoinShopModal';
+import { PetDetailModal } from '../../components/PetDetailModal';
+import { track } from '../../services/analytics';
 import { billingEnabled } from '../../services/billing';
 import { useBillingStore, useSettingsStore } from '../../stores';
 import { setPushEnabled as syncPushEnabled } from '../../services';
 import LottieView from 'lottie-react-native';
 import { timerService, achievementsService, roomsService, cosmeticsService } from '../../services';
-import { FRAMES, getFrameVisual, PETS, getPetVisual } from '../../constants';
+import { FRAMES, getFrameVisual, PETS, getPetVisual, PET_EGG_LOTTIE, PET_RARITY_COLORS } from '../../constants';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
 import type { SubjectStat, FrameEntry, PetEntry } from '../../types';
@@ -925,6 +927,9 @@ function PetShopSection() {
   const queryClient = useQueryClient();
   const [coinShopVisible, setCoinShopVisible] = useState(false);
   const [petPaywallVisible, setPetPaywallVisible] = useState(false);
+  // Showcase modal: which pet is open + whether we're in the post-purchase celebration
+  const [detailPetId, setDetailPetId] = useState<string | null>(null);
+  const [celebrating, setCelebrating] = useState(false);
 
   const petsQ = useQuery({
     queryKey: ['pets'],
@@ -965,9 +970,13 @@ function PetShopSection() {
       await cosmeticsService.buyPet(petId);
       await cosmeticsService.selectPet(petId);
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      track('pet_adopted', { petId: detailPetId });
+      setCelebrating(true); // flip the detail modal into the egg celebration
+    },
     onError: (e: any) => {
-      if (e?.statusCode === 402) { showNotEnough(); return; }
+      if (e?.statusCode === 402) { setDetailPetId(null); showNotEnough(); return; }
       if (e?.statusCode === 409) { invalidate(); return; } // already owned — refresh
       Alert.alert(t('common.error'), e?.message ?? t('shop.buyFailed'));
     },
@@ -975,38 +984,29 @@ function PetShopSection() {
 
   const selectMut = useMutation({
     mutationFn: (petId: string | null) => cosmeticsService.selectPet(petId),
-    onSuccess: invalidate,
+    onSuccess: () => { invalidate(); setDetailPetId(null); },
     onError: (e: any) => Alert.alert(t('common.error'), e?.message ?? t('shop.buyFailed')),
   });
 
   const isBusy = buyMut.isPending || selectMut.isPending;
 
-  const handlePress = useCallback((pet: PetEntry) => {
+  const detailPet = detailPetId ? shopList.find((p) => p.id === detailPetId) ?? null : null;
+
+  const closeDetail = useCallback(() => {
     if (isBusy) return;
-    if (selected === pet.id) return;
-    if (pet.owned) {
-      selectMut.mutate(pet.id);
-      return;
-    }
-    if (pet.pro) {
-      // Pro-exclusive — sell the subscription, not the pet.
-      setPetPaywallVisible(true);
-      return;
-    }
-    if (coins < pet.price) {
+    setDetailPetId(null);
+    setCelebrating(false);
+  }, [isBusy]);
+
+  const handleDetailBuy = useCallback(() => {
+    if (!detailPet || isBusy) return;
+    if (coins < detailPet.price) {
+      setDetailPetId(null);
       showNotEnough();
       return;
     }
-    const name = t(`pets.names.${pet.id}`);
-    Alert.alert(
-      t('shop.buyTitle'),
-      t('pets.buyMsg', { name, price: pet.price.toLocaleString() }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('shop.buy'), onPress: () => buyMut.mutate(pet.id) },
-      ],
-    );
-  }, [isBusy, selected, coins, t, showNotEnough]);
+    buyMut.mutate(detailPet.id);
+  }, [detailPet, isBusy, coins, showNotEnough]);
 
   return (
     <View style={shop.container}>
@@ -1035,22 +1035,39 @@ function PetShopSection() {
           const v = getPetVisual(entry.id);
           if (!v) return null; // unknown id from a newer backend — skip gracefully
           const isSel = selected === entry.id;
+          const rarityColor = PET_RARITY_COLORS[v.rarity];
+          const stage = entry.stage ?? 'egg';
           return (
             <Pressable
               key={entry.id}
               style={[
                 shop.card,
                 petShop.card,
+                { borderColor: `${rarityColor}55` },
                 isSel && shop.cardSelected,
                 !entry.owned && shop.cardLocked,
-                entry.pro && shop.cardPro,
+                entry.pro && !entry.owned && shop.cardPro,
               ]}
-              onPress={() => handlePress(entry)}
+              onPress={() => { if (!isBusy) { setCelebrating(false); setDetailPetId(entry.id); } }}
             >
+              {/* Owned pets show their evolution stage; unhatched ones stay an egg */}
+              {entry.owned && (
+                <Text style={petShop.stageBadge}>
+                  {stage === 'egg' ? '🥚' : stage === 'baby' ? '🐣' : '⭐'}
+                </Text>
+              )}
               <View style={petShop.lottieWrap}>
-                <LottieView source={v.lottie} autoPlay loop style={petShop.lottie} />
+                <LottieView
+                  source={entry.owned && stage === 'egg' ? PET_EGG_LOTTIE : v.lottie}
+                  autoPlay
+                  loop
+                  style={petShop.lottie}
+                />
               </View>
               <Text style={shop.name} numberOfLines={1}>{t(`pets.names.${entry.id}`)}</Text>
+              <Text style={[petShop.rarity, { color: rarityColor }]} numberOfLines={1}>
+                {t(`pets.rarity.${v.rarity}`)}
+              </Text>
               {isSel ? (
                 <Text style={[shop.state, { color: ACCENT }]}>✓ {t('shop.selected')}</Text>
               ) : entry.owned ? (
@@ -1070,6 +1087,18 @@ function PetShopSection() {
       <Text style={shop.hint}>{t('pets.shopHint')}</Text>
       {/* CC BY 4.0 attribution for the bundled Noto Animated Emoji lotties */}
       <Text style={petShop.attribution}>{t('pets.attribution')}</Text>
+
+      <PetDetailModal
+        pet={detailPet}
+        equipped={detailPet !== null && selected === detailPet.id}
+        coins={coins}
+        busy={isBusy}
+        celebrating={celebrating}
+        onClose={closeDetail}
+        onBuy={handleDetailBuy}
+        onSelect={() => { if (detailPet) selectMut.mutate(detailPet.id); }}
+        onProPress={() => { setDetailPetId(null); setPetPaywallVisible(true); }}
+      />
 
       <CoinShopModal
         visible={coinShopVisible}
@@ -1097,6 +1126,14 @@ const petShop = StyleSheet.create({
   },
   lottie: { width: 64, height: 64 },
   noneIcon: { fontSize: 30, opacity: 0.6 },
+  rarity: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  stageBadge: { position: 'absolute', top: 6, right: 8, fontSize: 12 },
   attribution: { color: 'rgba(100,116,139,0.6)', fontSize: 9, marginTop: 4 },
 });
 

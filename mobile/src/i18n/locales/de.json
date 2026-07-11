@@ -486,7 +486,29 @@
       "owl": "Eule",
       "dragon": "Drache",
       "unicorn": "Einhorn"
-    }
+    },
+    "rarity": {
+      "common": "Gewöhnlich",
+      "rare": "Selten",
+      "epic": "Episch",
+      "legendary": "Legendär",
+      "mythic": "Mythisch"
+    },
+    "bios": {
+      "turtle": "Langsam, aber unaufhaltsam. Die Schildkröte verpasst keinen Lerntag — Beständigkeit siegt.",
+      "panda": "Ruhig und knuddelig. Der Panda hält dich auch in den längsten Sessions entspannt.",
+      "fox": "Schlau und flink. Der Fuchs kennt jede Abkürzung — außer in Prüfungen.",
+      "owl": "Der weise Nachtgelehrte. Die Eule wacht über deine späten Lernsessions.",
+      "dragon": "Ein legendäres Wesen, das von purem Fokus lebt. Nur wahre Streber können ihn großziehen.",
+      "unicorn": "Pure Magie, exklusiv für Pro-Mitglieder. Funkelt bei jeder Session."
+    },
+    "evolutionTitle": "Entwicklungsreise",
+    "adoptBtn": "Adoptieren",
+    "proCta": "Mit Pro freischalten",
+    "congratsTitle": "{{name}} gehört jetzt dir! 🎉",
+    "congratsMsg": "Dein neuer Freund steckt noch im Ei — fokussiere dich 1 Stunde, dann schlüpft er!",
+    "congratsBtn": "Lasst uns zusammen wachsen!",
+    "missingCoins": "Dir fehlen noch {{coins}} Coins"
   },
   "coinShop": {
     "title": "Münzpaket",

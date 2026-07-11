@@ -23,5 +23,5 @@ export const BACKGROUND_TIMER_TASK = 'FOCUS_ARENA_TIMER_TASK';
 
 export { FRAMES, getFrameVisual } from './frames';
 export type { FrameVisual } from './frames';
-export { PETS, PET_EGG_LOTTIE, getPetVisual, getPetEmoji } from './pets';
-export type { PetVisual } from './pets';
+export { PETS, PET_EGG_LOTTIE, PET_RARITY_COLORS, getPetVisual, getPetEmoji } from './pets';
+export type { PetVisual, PetRarity } from './pets';

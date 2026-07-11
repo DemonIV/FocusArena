@@ -486,7 +486,29 @@
       "owl": "Gufo",
       "dragon": "Drago",
       "unicorn": "Unicorno"
-    }
+    },
+    "rarity": {
+      "common": "Comune",
+      "rare": "Raro",
+      "epic": "Epico",
+      "legendary": "Leggendario",
+      "mythic": "Mitico"
+    },
+    "bios": {
+      "turtle": "Lenta ma inarrestabile. La tartaruga non salta mai un giorno di studio — la costanza vince.",
+      "panda": "Calmo e coccoloso. Il panda ti tiene rilassato anche nelle sessioni più lunghe.",
+      "fox": "Furba e veloce. La volpe conosce ogni scorciatoia — tranne agli esami.",
+      "owl": "Il saggio studioso della notte. Il gufo veglia sulle tue sessioni notturne.",
+      "dragon": "Una bestia leggendaria alimentata da pura concentrazione. Solo i veri instancabili possono allevarla.",
+      "unicorn": "Pura magia, riservata ai membri Pro. Brilla ad ogni sessione."
+    },
+    "evolutionTitle": "Percorso di evoluzione",
+    "adoptBtn": "Adotta",
+    "proCta": "Sblocca con Pro",
+    "congratsTitle": "{{name}} è tuo! 🎉",
+    "congratsMsg": "Il tuo nuovo amico è ancora nell'uovo — concentrati per 1 ora e si schiuderà!",
+    "congratsBtn": "Cresciamo insieme!",
+    "missingCoins": "Ti mancano {{coins}} monete"
   },
   "coinShop": {
     "title": "Pacchetto monete",

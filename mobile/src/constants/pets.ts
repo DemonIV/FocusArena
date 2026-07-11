@@ -8,6 +8,18 @@
 
 import type { AnimationObject } from 'lottie-react-native';
 
+/** Display-only rarity tier — purely cosmetic, prices stay server-authoritative. */
+export type PetRarity = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic';
+
+/** Tier colour used for card borders, rarity chips and the detail-modal glow. */
+export const PET_RARITY_COLORS: Record<PetRarity, string> = {
+  common: '#94a3b8',
+  rare: '#3b82f6',
+  epic: '#a855f7',
+  legendary: '#f59e0b',
+  mythic: '#ec4899',
+};
+
 export interface PetVisual {
   id: string;
   price: number;      // display only — server resolves the real price
@@ -15,6 +27,7 @@ export interface PetVisual {
   lottie: AnimationObject;
   /** Emoji stand-in for compact rows (leaderboard, friends) */
   emoji: string;
+  rarity: PetRarity;
   /** Pro-exclusive — unlocked by the subscription, not coins */
   pro?: boolean;
 }
@@ -23,12 +36,12 @@ export interface PetVisual {
 export const PET_EGG_LOTTIE: AnimationObject = require('../../assets/pets/hatching_chick.json');
 
 export const PETS: readonly PetVisual[] = [
-  { id: 'unicorn', price: 0,     lottie: require('../../assets/pets/unicorn.json'), emoji: '🦄', pro: true },
-  { id: 'turtle',  price: 2000,  lottie: require('../../assets/pets/turtle.json'),  emoji: '🐢' },
-  { id: 'panda',   price: 8000,  lottie: require('../../assets/pets/panda.json'),   emoji: '🐼' },
-  { id: 'fox',     price: 15000, lottie: require('../../assets/pets/fox.json'),     emoji: '🦊' },
-  { id: 'owl',     price: 25000, lottie: require('../../assets/pets/owl.json'),     emoji: '🦉' },
-  { id: 'dragon',  price: 50000, lottie: require('../../assets/pets/dragon.json'),  emoji: '🐉' },
+  { id: 'unicorn', price: 0,     lottie: require('../../assets/pets/unicorn.json'), emoji: '🦄', rarity: 'mythic', pro: true },
+  { id: 'turtle',  price: 2000,  lottie: require('../../assets/pets/turtle.json'),  emoji: '🐢', rarity: 'common' },
+  { id: 'panda',   price: 8000,  lottie: require('../../assets/pets/panda.json'),   emoji: '🐼', rarity: 'rare' },
+  { id: 'fox',     price: 15000, lottie: require('../../assets/pets/fox.json'),     emoji: '🦊', rarity: 'rare' },
+  { id: 'owl',     price: 25000, lottie: require('../../assets/pets/owl.json'),     emoji: '🦉', rarity: 'epic' },
+  { id: 'dragon',  price: 50000, lottie: require('../../assets/pets/dragon.json'),  emoji: '🐉', rarity: 'legendary' },
 ] as const;
 
 export function getPetVisual(petId: string | null | undefined): PetVisual | undefined {

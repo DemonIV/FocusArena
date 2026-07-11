@@ -486,7 +486,29 @@
       "owl": "Búho",
       "dragon": "Dragón",
       "unicorn": "Unicornio"
-    }
+    },
+    "rarity": {
+      "common": "Común",
+      "rare": "Raro",
+      "epic": "Épico",
+      "legendary": "Legendario",
+      "mythic": "Mítico"
+    },
+    "bios": {
+      "turtle": "Lenta pero imparable. La tortuga nunca falta a un día de estudio — la constancia gana.",
+      "panda": "Tranquilo y adorable. El panda te mantiene relajado en las sesiones más largas.",
+      "fox": "Listo y veloz. El zorro conoce todos los atajos — excepto en los exámenes.",
+      "owl": "El sabio erudito nocturno. El búho vigila tus sesiones de estudio nocturnas.",
+      "dragon": "Una bestia legendaria alimentada por pura concentración. Solo los más constantes pueden criarla.",
+      "unicorn": "Magia pura, exclusiva para miembros Pro. Brilla en cada sesión."
+    },
+    "evolutionTitle": "Viaje evolutivo",
+    "adoptBtn": "Adoptar",
+    "proCta": "Desbloquear con Pro",
+    "congratsTitle": "¡{{name}} es tuyo! 🎉",
+    "congratsMsg": "Tu nuevo amigo aún está en su huevo — ¡concéntrate 1 hora y saldrá del cascarón!",
+    "congratsBtn": "¡A crecer juntos!",
+    "missingCoins": "Te faltan {{coins}} monedas"
   },
   "coinShop": {
     "title": "Pack de monedas",

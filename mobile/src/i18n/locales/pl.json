@@ -486,7 +486,29 @@
       "owl": "Sowa",
       "dragon": "Smok",
       "unicorn": "Jednorożec"
-    }
+    },
+    "rarity": {
+      "common": "Pospolity",
+      "rare": "Rzadki",
+      "epic": "Epicki",
+      "legendary": "Legendarny",
+      "mythic": "Mityczny"
+    },
+    "bios": {
+      "turtle": "Powolny, ale niepowstrzymany. Żółw nie opuszcza ani jednego dnia nauki — systematyczność wygrywa.",
+      "panda": "Spokojna i przytulna. Panda utrzymuje cię w relaksie podczas najdłuższych sesji.",
+      "fox": "Sprytny i szybki. Lis zna każdy skrót — poza egzaminami.",
+      "owl": "Mądra nocna uczona. Sowa czuwa nad twoimi nocnymi sesjami nauki.",
+      "dragon": "Legendarna bestia zasilana czystym skupieniem. Tylko prawdziwie wytrwali mogą ją wychować.",
+      "unicorn": "Czysta magia, tylko dla członków Pro. Błyszczy przy każdej sesji."
+    },
+    "evolutionTitle": "Droga ewolucji",
+    "adoptBtn": "Adoptuj",
+    "proCta": "Odblokuj z Pro",
+    "congratsTitle": "{{name}} jest twój! 🎉",
+    "congratsMsg": "Twój nowy przyjaciel wciąż jest w jajku — skup się przez 1 godzinę, a się wykluje!",
+    "congratsBtn": "Rośnijmy razem!",
+    "missingCoins": "Brakuje ci {{coins}} monet"
   },
   "coinShop": {
     "title": "Pakiet monet",

@@ -486,7 +486,29 @@
       "owl": "Coruja",
       "dragon": "Dragão",
       "unicorn": "Unicórnio"
-    }
+    },
+    "rarity": {
+      "common": "Comum",
+      "rare": "Raro",
+      "epic": "Épico",
+      "legendary": "Lendário",
+      "mythic": "Mítico"
+    },
+    "bios": {
+      "turtle": "Lenta mas imparável. A tartaruga nunca perde um dia de estudo — a constância vence.",
+      "panda": "Calmo e fofinho. O panda te mantém relaxado nas sessões mais longas.",
+      "fox": "Esperta e rápida. A raposa conhece todos os atalhos — menos nas provas.",
+      "owl": "A sábia estudiosa da noite. A coruja vela pelas suas sessões noturnas.",
+      "dragon": "Uma fera lendária movida a pura concentração. Só os verdadeiros dedicados conseguem criá-la.",
+      "unicorn": "Magia pura, exclusiva para membros Pro. Brilha a cada sessão."
+    },
+    "evolutionTitle": "Jornada de evolução",
+    "adoptBtn": "Adotar",
+    "proCta": "Desbloquear com Pro",
+    "congratsTitle": "{{name}} é seu! 🎉",
+    "congratsMsg": "Seu novo amigo ainda está no ovo — concentre-se por 1 hora e ele vai chocar!",
+    "congratsBtn": "Vamos crescer juntos!",
+    "missingCoins": "Faltam {{coins}} moedas"
   },
   "coinShop": {
     "title": "Pacote de moedas",

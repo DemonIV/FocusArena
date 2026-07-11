@@ -486,7 +486,29 @@
       "owl": "Hibou",
       "dragon": "Dragon",
       "unicorn": "Licorne"
-    }
+    },
+    "rarity": {
+      "common": "Commun",
+      "rare": "Rare",
+      "epic": "Épique",
+      "legendary": "Légendaire",
+      "mythic": "Mythique"
+    },
+    "bios": {
+      "turtle": "Lente mais inarrêtable. La tortue ne manque jamais un jour d'étude — la régularité paie.",
+      "panda": "Calme et câlin. Le panda te garde détendu pendant les sessions les plus longues.",
+      "fox": "Malin et rapide. Le renard connaît tous les raccourcis — sauf aux examens.",
+      "owl": "Le sage érudit de la nuit. Le hibou veille sur tes sessions nocturnes.",
+      "dragon": "Une bête légendaire nourrie de pure concentration. Seuls les vrais bosseurs peuvent l'élever.",
+      "unicorn": "Magie pure, réservée aux membres Pro. Scintille à chaque session."
+    },
+    "evolutionTitle": "Parcours d'évolution",
+    "adoptBtn": "Adopter",
+    "proCta": "Débloquer avec Pro",
+    "congratsTitle": "{{name}} est à toi ! 🎉",
+    "congratsMsg": "Ton nouvel ami est encore dans son œuf — concentre-toi 1 heure et il éclora !",
+    "congratsBtn": "Grandissons ensemble !",
+    "missingCoins": "Il te manque {{coins}} pièces"
   },
   "coinShop": {
     "title": "Pack de pièces",
