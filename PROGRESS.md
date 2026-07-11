@@ -229,6 +229,14 @@ Sadece mobil · tsc temiz · commit `c2131f0`
 - **Profil sırası düzeltildi** (kullanıcı istedi; Faz 19'daki taşımanın revizyonu): … Konularım → Çerçeve/Pet Mağazası → **Odalarım → Ünvanlar → Rozetler** (rozetler en sona) → Ayarlar.
 - i18n: 10 dile 9 yeni `timer.*` anahtarı (autoStartBreaks/Focus+hint'ler, startBreak, roundDoneTitle, roundOverTitle/Body, cycleDoneBody).
 
+### Faz 25 — Pomodoro bildirim/auto-start düzeltmeleri (cihaz geri bildirimi) (11 Temmuz)
+Sadece mobil · tsc temiz · commit `e492456`
+
+- **Kullanıcı taze build'i test etti, 2 sorun bildirdi** (ikisi de doğrulandı, kök neden aynı: telefon kilitliyken JS askıda):
+  1. "Tur bitti" bildirimi kilitliyken gelmiyordu — `notifyNow` tık anında atılıyordu, tick çalışmayınca hiç ateşlenmiyordu. **Fix**: tur-sonu bildirimi artık **tur başlarken zamanlanıyor** (mola bildirimi gibi; `roundNotifId` pomodoroStore'da persist → relaunch'ta duplicate yok). Pause iptal eder, resume kalan süreyle yeniden kurar; elle stop / döngüden çıkış / yetim döngü / server-side kaybolma iptal eder. Son turda metin "döngü tamamlandı". `scheduleBreakOverNotification` → genel `scheduleLocalNotification` olarak yeniden adlandırıldı.
+  2. Auto-focus mola bitiminde turu başlatmıyordu + bildirime dokununca "network error" flash'ı. **Gerçek**: arka planda tur başlatmak OS kısıtı gereği imkânsız (backend seansı = ağ çağrısı); bildirime dokununca ön plana gelişte ilk istek radyo uyanmadan düşüyordu. **Fix**: auto-start artık **3 denemeye kadar 2 sn arayla sessiz retry** (busy-ref guard'lı, her denemede phase/autoFocus/isActive yeniden kontrol; 409 → syncWithServer), Alert sadece son hatada. Ayrıca `breakOverBody` 10 dilde eyleme çağıran metne çevrildi ("Dokun, X. tura başla") — dokunuş turu fiilen başlatıyor.
+- **Bilinen sınır (mimari)**: uygulama mola bittiğinde arka plandaysa sonraki tur ancak kullanıcı uygulamayı açınca başlar — bildirim tap'i bunu tetikliyor, tasarım gereği böyle kalacak.
+
 ### 📝 Oturum Özeti — 2026-07-11 (Faz 24 + TAZE BUILD'LER) ⭐ EN GÜNCEL
 
 - **Faz 24 yapıldı** (yukarıda): pomodoro auto-start toggle'ları + tur/mola geçişlerinde titreşim+bildirim + profil bölüm sırası. Commit `c2131f0`, main'e push'landı.
@@ -237,6 +245,7 @@ Sadece mobil · tsc temiz · commit `c2131f0`
   - **iOS production**: build `50f40c6d` (buildNumber 6→**7** otomatik) — https://expo.dev/accounts/software66/projects/focusarena/builds/50f40c6d-f574-4457-bae4-762f2cb85cae — credentials `com.studysquadhq.app.LiveActivity` target'ını içeriyor ✓ (expo-live-activity plugin widget'ı üretmiş).
   - ⚠️ **iOS auto-submit ZİNCİRLENEMEDİ** (`ascAppId` eas.json submit profilinde yok, non-interactive'de auto-detect yapamıyor). **Build bitince elle submit gerek**: `cd mobile && npx eas-cli submit -p ios --latest` (interaktif; ASC uygulamasını kendisi bulur, Apple 2FA isteyebilir). Kalıcı çözüm: ascAppId'yi eas.json'a yaz.
 - **Cihazda test bekleyen her şey bu build'lerde**: keep-awake, timer idle çember + orphan fix, haftalık donut, UTC gün sınırı, Live Activity (iOS), screen-lock hatırlatması, pomodoro auto-start+titreşim, profil sırası, artı Faz 14/15/16/18 UI'ları (aylık takvim, pomodoro, Focus Score, Challenge/ünvanlar/çoklu konu).
+- **Gün içi devam**: kullanıcı build'i test etti → pomodoro geri bildirimleri geldi → **Faz 25 düzeltmeleri yapıldı** (`e492456`, yukarıda). ⚠️ Faz 25 mevcut build'lerde YOK — bir sonraki build'e girer; kilitli-telefon bildirim testi o build'de yapılmalı.
 
 ### 📝 Oturum Özeti — 2026-07-10 (Faz 19–23: UX geri bildirim turu)
 
