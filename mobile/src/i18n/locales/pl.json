@@ -216,7 +216,16 @@
     "cycleShare": "Udostępnij paragon",
     "newCycle": "Nowy cykl",
     "cycleStatFocus": "SKUPIENIE",
-    "strictPomodoroHint": "Wyjście w trakcie rundy skupienia ją spala — w przerwach masz wolność."
+    "strictPomodoroHint": "Wyjście w trakcie rundy skupienia ją spala — w przerwach masz wolność.",
+    "autoStartBreaks": "Automatyczne przerwy",
+    "autoStartBreaksHint": "Gdy runda skupienia się kończy, przerwa startuje sama",
+    "autoStartFocus": "Automatyczne rozpoczęcie skupienia",
+    "autoStartFocusHint": "Gdy przerwa się kończy, następna runda startuje sama",
+    "startBreak": "Rozpocznij przerwę {{min}} min",
+    "roundDoneTitle": "Runda {{round}} ukończona!",
+    "roundOverTitle": "Runda skupienia zakończona! ☕",
+    "roundOverBody": "Czas na {{min}} min przerwy",
+    "cycleDoneBody": "Wszystkie 4 rundy skupienia zakończone — świetna robota! 🎉"
   },
   "invite": {
     "shareMessage": "📚 Ucz się ze mną w StudySquad! Podczas rejestracji wpisz moją nazwę użytkownika {{username}} jako kod zaproszenia — oboje dostaniemy 500 monet! 🪙",

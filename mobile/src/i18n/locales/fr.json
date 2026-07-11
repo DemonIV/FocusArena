@@ -216,7 +216,16 @@
     "cycleShare": "Partager le reçu",
     "newCycle": "Nouveau cycle",
     "cycleStatFocus": "FOCUS",
-    "strictPomodoroHint": "Quitter pendant une manche de focus la brûle — les pauses sont libres."
+    "strictPomodoroHint": "Quitter pendant une manche de focus la brûle — les pauses sont libres.",
+    "autoStartBreaks": "Démarrer les pauses automatiquement",
+    "autoStartBreaksHint": "Quand une session de focus se termine, la pause démarre seule",
+    "autoStartFocus": "Démarrer le focus automatiquement",
+    "autoStartFocusHint": "Quand une pause se termine, la manche suivante démarre seule",
+    "startBreak": "Démarrer une pause de {{min}} min",
+    "roundDoneTitle": "Manche {{round}} terminée !",
+    "roundOverTitle": "Session de focus terminée ! ☕",
+    "roundOverBody": "C'est l'heure d'une pause de {{min}} min",
+    "cycleDoneBody": "Les 4 sessions de focus terminées — bravo ! 🎉"
   },
   "invite": {
     "shareMessage": "📚 Étudie avec moi sur StudySquad ! Entre mon nom d'utilisateur {{username}} comme code d'invitation à l'inscription — on gagne chacun 500 pièces ! 🪙",

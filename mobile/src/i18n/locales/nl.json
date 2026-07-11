@@ -216,7 +216,16 @@
     "cycleShare": "Bon delen",
     "newCycle": "Nieuwe cyclus starten",
     "cycleStatFocus": "FOCUS",
-    "strictPomodoroHint": "De app verlaten tijdens een focusronde verbrandt ’m — pauzes zijn vrij."
+    "strictPomodoroHint": "De app verlaten tijdens een focusronde verbrandt ’m — pauzes zijn vrij.",
+    "autoStartBreaks": "Pauzes automatisch starten",
+    "autoStartBreaksHint": "Als een focusronde eindigt, start de pauze vanzelf",
+    "autoStartFocus": "Focus automatisch starten",
+    "autoStartFocusHint": "Als een pauze eindigt, start de volgende ronde vanzelf",
+    "startBreak": "Pauze van {{min}} min starten",
+    "roundDoneTitle": "Ronde {{round}} klaar!",
+    "roundOverTitle": "Focusronde klaar! ☕",
+    "roundOverBody": "Tijd voor {{min}} min pauze",
+    "cycleDoneBody": "Alle 4 focusrondes klaar — goed gedaan! 🎉"
   },
   "invite": {
     "shareMessage": "📚 Studeer met mij op StudySquad! Voer mijn gebruikersnaam {{username}} in als uitnodigingscode bij het aanmelden — we krijgen allebei 500 munten! 🪙",

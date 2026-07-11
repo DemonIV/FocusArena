@@ -216,7 +216,16 @@
     "cycleShare": "Compartilhar recibo",
     "newCycle": "Iniciar novo ciclo",
     "cycleStatFocus": "FOCO",
-    "strictPomodoroHint": "Sair durante uma rodada de foco a queima — nas pausas você é livre."
+    "strictPomodoroHint": "Sair durante uma rodada de foco a queima — nas pausas você é livre.",
+    "autoStartBreaks": "Iniciar pausas automaticamente",
+    "autoStartBreaksHint": "Quando uma rodada de foco termina, a pausa começa sozinha",
+    "autoStartFocus": "Iniciar foco automaticamente",
+    "autoStartFocusHint": "Quando uma pausa termina, a próxima rodada começa sozinha",
+    "startBreak": "Iniciar pausa de {{min}} min",
+    "roundDoneTitle": "Rodada {{round}} concluída!",
+    "roundOverTitle": "Rodada de foco concluída! ☕",
+    "roundOverBody": "Hora de uma pausa de {{min}} min",
+    "cycleDoneBody": "Todas as 4 rodadas de foco concluídas — bom trabalho! 🎉"
   },
   "invite": {
     "shareMessage": "📚 Estude comigo no StudySquad! Digite meu nome de usuário {{username}} como código de convite ao se cadastrar — nós dois ganhamos 500 moedas! 🪙",

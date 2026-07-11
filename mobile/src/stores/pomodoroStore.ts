@@ -27,13 +27,14 @@ export const POMODORO_PRESETS: Record<PomodoroPresetId, PomodoroPreset> = {
 export const ROUNDS_PER_CYCLE = 4;
 
 /**
- * idle      — no cycle running (mode picker visible)
- * focus     — a round's session is running (timerStore owns the countdown)
- * break     — short break counting down (client-side, breakEndsAt)
- * awaitNext — break over (or skipped); waiting for the user to start the next round
- * done      — all rounds finished; summary visible
+ * idle       — no cycle running (mode picker visible)
+ * focus      — a round's session is running (timerStore owns the countdown)
+ * awaitBreak — focus round done; waiting for the user to start the break (auto-break off)
+ * break      — short break counting down (client-side, breakEndsAt)
+ * awaitNext  — break over (or skipped); waiting for the user to start the next round
+ * done       — all rounds finished; summary visible
  */
-export type PomodoroPhase = 'idle' | 'focus' | 'break' | 'awaitNext' | 'done';
+export type PomodoroPhase = 'idle' | 'focus' | 'awaitBreak' | 'break' | 'awaitNext' | 'done';
 
 interface PomodoroState {
   mode: TimerMode;
@@ -62,8 +63,17 @@ interface PomodoroState {
 
   /** Round 1 is starting — reset totals. */
   beginCycle: () => void;
-  /** A round's session finished naturally — accumulate & move to break/done. */
-  completeRound: (r: { durationMinutes: number; xpEarned: number; coinsEarned: number; newStreak: number }) => void;
+  /**
+   * A round's session finished naturally — accumulate & advance. With
+   * `autoStartBreak` the break countdown begins immediately; otherwise we park
+   * in `awaitBreak` until the user taps "start break".
+   */
+  completeRound: (
+    r: { durationMinutes: number; xpEarned: number; coinsEarned: number; newStreak: number },
+    autoStartBreak: boolean,
+  ) => void;
+  /** Start the short break (from `awaitBreak`, when auto-break is off). */
+  startBreak: () => void;
   /** User tapped "skip break" — logged for the future Focus Score. */
   skipBreak: () => void;
   /** Break countdown reached zero. */
@@ -101,7 +111,7 @@ export const usePomodoroStore = create<PomodoroState>()(
 
       beginCycle: () => set({ ...CYCLE_RESET, phase: 'focus' }),
 
-      completeRound: (r) => {
+      completeRound: (r, autoStartBreak) => {
         const s = get();
         const totals = {
           totalMinutes: s.totalMinutes + r.durationMinutes,
@@ -111,11 +121,20 @@ export const usePomodoroStore = create<PomodoroState>()(
         };
         if (s.round >= ROUNDS_PER_CYCLE) {
           set({ ...totals, phase: 'done', breakEndsAt: null });
-        } else {
+        } else if (autoStartBreak) {
           const brkMs = POMODORO_PRESETS[s.presetId].brk * 60_000;
-          set({ ...totals, phase: 'break', breakEndsAt: Date.now() + brkMs });
+          set({ ...totals, phase: 'break', breakEndsAt: Date.now() + brkMs, breakNotifId: null });
+        } else {
+          set({ ...totals, phase: 'awaitBreak', breakEndsAt: null, breakNotifId: null });
         }
       },
+
+      startBreak: () =>
+        set((s) => ({
+          phase: 'break',
+          breakEndsAt: Date.now() + POMODORO_PRESETS[s.presetId].brk * 60_000,
+          breakNotifId: null,
+        })),
 
       skipBreak: () =>
         set((s) => ({

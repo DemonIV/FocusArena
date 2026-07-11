@@ -14,6 +14,8 @@ import {
   TextInput,
   Keyboard,
   KeyboardAvoidingView,
+  Switch,
+  Vibration,
 } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +25,7 @@ import {
   useBillingStore,
   useTimerStore,
   usePomodoroStore,
+  useSettingsStore,
   POMODORO_PRESETS,
   ROUNDS_PER_CYCLE,
 } from '../../stores';
@@ -34,6 +37,7 @@ import {
   cosmeticsService,
   maybeRequestReview,
   scheduleBreakOverNotification,
+  notifyNow,
   cancelScheduledNotification,
 } from '../../services';
 import i18n from '../../i18n';
@@ -43,6 +47,9 @@ import type { FocusScoreBreakdown } from '../../types';
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const DURATIONS = [5, 15, 25, 45, 60, 90, 120];
+
+// Haptic buzz for pomodoro phase transitions (wait, buzz, pause, buzz).
+const BUZZ_PATTERN = [0, 300, 200, 300];
 
 // Backend accepts 1–180 minutes (see StartTimerSchema)
 const MIN_MIN = 1;
@@ -91,6 +98,12 @@ export function TimerScreen() {
   const inPomodoro = pomo.mode === 'pomodoro';
   const [breakRemainingMs, setBreakRemainingMs] = useState(0);
   const sendPresence = useSocketStore((s) => s.sendPresence);
+
+  // Pomodoro auto-advance preferences
+  const autoBreak = useSettingsStore((s) => s.pomodoroAutoBreak);
+  const setAutoBreak = useSettingsStore((s) => s.setPomodoroAutoBreak);
+  const autoFocus = useSettingsStore((s) => s.pomodoroAutoFocus);
+  const setAutoFocus = useSettingsStore((s) => s.setPomodoroAutoFocus);
 
   const isCustomDuration = !DURATIONS.includes(selectedDuration);
 
@@ -161,12 +174,23 @@ export function TimerScreen() {
       setZenVisible(false);
       if (p.mode === 'pomodoro' && p.phase === 'focus') {
         if (result) {
-          p.completeRound({
-            durationMinutes: result.durationMinutes,
-            xpEarned: result.xpEarned,
-            coinsEarned: result.coinsEarned ?? 0,
-            newStreak: result.newStreak,
-          });
+          p.completeRound(
+            {
+              durationMinutes: result.durationMinutes,
+              xpEarned: result.xpEarned,
+              coinsEarned: result.coinsEarned ?? 0,
+              newStreak: result.newStreak,
+            },
+            useSettingsStore.getState().pomodoroAutoBreak,
+          );
+          // Buzz + notify on the focus→break (or focus→cycle-done) transition.
+          Vibration.vibrate(BUZZ_PATTERN);
+          const brk = POMODORO_PRESETS[usePomodoroStore.getState().presetId].brk;
+          if (usePomodoroStore.getState().phase === 'done') {
+            void notifyNow(i18n.t('timer.cycleDoneTitle'), i18n.t('timer.cycleDoneBody'));
+          } else {
+            void notifyNow(i18n.t('timer.roundOverTitle'), i18n.t('timer.roundOverBody', { min: brk }));
+          }
         } else {
           p.abortCycle(); // session vanished server-side — nothing to continue
         }
@@ -227,6 +251,9 @@ export function TimerScreen() {
       const endsAt = usePomodoroStore.getState().breakEndsAt;
       const rem = (endsAt ?? 0) - Date.now();
       if (rem <= 0) {
+        // Foreground buzz; the scheduled "break over" notification (with its
+        // channel vibration) covers the backgrounded case.
+        Vibration.vibrate(BUZZ_PATTERN);
         usePomodoroStore.getState().breakOver();
       } else {
         setBreakRemainingMs(rem);
@@ -266,6 +293,18 @@ export function TimerScreen() {
     void cancelScheduledNotification(usePomodoroStore.getState().breakNotifId);
     usePomodoroStore.getState().skipBreak();
   }, []);
+
+  const handleStartBreak = useCallback(() => {
+    usePomodoroStore.getState().startBreak();
+  }, []);
+
+  // Auto-start the next focus round when the break ends, if the user opted in.
+  // Guarded so an in-flight start (isLoading) doesn't fire a second session.
+  useEffect(() => {
+    if (!inPomodoro || pomo.phase !== 'awaitNext' || !autoFocus) return;
+    if (timer.isActive || timer.isLoading) return;
+    void handleStartNextRound();
+  }, [inPomodoro, pomo.phase, autoFocus, timer.isActive, timer.isLoading, handleStartNextRound]);
 
   const handleExitCycle = useCallback(() => {
     Alert.alert(
@@ -489,6 +528,32 @@ export function TimerScreen() {
                 <Text style={styles.pomoInfo}>
                   {t('timer.pomodoroInfo', { rounds: ROUNDS_PER_CYCLE, brk: preset.brk, long: preset.longBrk })}
                 </Text>
+
+                {/* Auto-advance preferences */}
+                <View style={styles.autoToggle}>
+                  <View style={styles.autoToggleText}>
+                    <Text style={styles.autoToggleLabel}>{t('timer.autoStartBreaks')}</Text>
+                    <Text style={styles.autoToggleHint}>{t('timer.autoStartBreaksHint')}</Text>
+                  </View>
+                  <Switch
+                    value={autoBreak}
+                    onValueChange={setAutoBreak}
+                    trackColor={{ false: '#334155', true: `${BREAK_C}80` }}
+                    thumbColor={autoBreak ? BREAK_C : '#94a3b8'}
+                  />
+                </View>
+                <View style={styles.autoToggle}>
+                  <View style={styles.autoToggleText}>
+                    <Text style={styles.autoToggleLabel}>{t('timer.autoStartFocus')}</Text>
+                    <Text style={styles.autoToggleHint}>{t('timer.autoStartFocusHint')}</Text>
+                  </View>
+                  <Switch
+                    value={autoFocus}
+                    onValueChange={setAutoFocus}
+                    trackColor={{ false: '#334155', true: `${ACCENT}80` }}
+                    thumbColor={autoFocus ? ACCENT : '#94a3b8'}
+                  />
+                </View>
               </>
             )}
 
@@ -593,6 +658,30 @@ export function TimerScreen() {
                   </>
                 )
               }
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── POMODORO: FOCUS ROUND DONE — waiting to start the break ── */}
+        {!timer.isActive && inPomodoro && pomo.phase === 'awaitBreak' && (
+          <View style={styles.pomoSection}>
+            <Text style={styles.awaitEmoji}>✅</Text>
+            <Text style={styles.awaitTitle}>{t('timer.roundDoneTitle', { round: pomo.round })}</Text>
+            <RoundDots completed={pomo.round} active={pomo.round + 1} activeColor={BREAK_C} />
+            <View style={styles.breakCard}>
+              <Text style={styles.breakCardTitle}>{t('timer.breakCardTitle')}</Text>
+              <Text style={styles.breakCardBody}>{t('timer.breakCardBody')}</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.startBtn, { marginTop: 4 }]}
+              onPress={handleStartBreak}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.startBtnIcon}>☕</Text>
+              <Text style={styles.startBtnText}>{t('timer.startBreak', { min: preset.brk })}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleExitCycle} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Text style={styles.exitCycleText}>{t('timer.exitCycle')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -1215,6 +1304,23 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 4,
   },
+
+  autoToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: CARD,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginTop: 10,
+    gap: 12,
+  },
+  autoToggleText: { flex: 1 },
+  autoToggleLabel: { color: TEXT, fontSize: 14, fontWeight: '600' },
+  autoToggleHint: { color: MUTED, fontSize: 11, marginTop: 2, lineHeight: 15 },
 
   pomoSection: {
     paddingHorizontal: 24,

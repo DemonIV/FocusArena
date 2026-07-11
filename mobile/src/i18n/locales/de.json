@@ -216,7 +216,16 @@
     "cycleShare": "Beleg teilen",
     "newCycle": "Neuen Zyklus starten",
     "cycleStatFocus": "FOKUS",
-    "strictPomodoroHint": "Verlässt du die App in einer Fokusrunde, verbrennt sie — Pausen sind frei."
+    "strictPomodoroHint": "Verlässt du die App in einer Fokusrunde, verbrennt sie — Pausen sind frei.",
+    "autoStartBreaks": "Pausen automatisch starten",
+    "autoStartBreaksHint": "Wenn eine Fokusrunde endet, startet die Pause von selbst",
+    "autoStartFocus": "Fokus automatisch starten",
+    "autoStartFocusHint": "Wenn eine Pause endet, startet die nächste Runde von selbst",
+    "startBreak": "{{min}} Min. Pause starten",
+    "roundDoneTitle": "Runde {{round}} fertig!",
+    "roundOverTitle": "Fokusrunde fertig! ☕",
+    "roundOverBody": "Zeit für {{min}} Min. Pause",
+    "cycleDoneBody": "Alle 4 Fokusrunden fertig — super gemacht! 🎉"
   },
   "invite": {
     "shareMessage": "📚 Lern mit mir auf StudySquad! Gib bei der Registrierung meinen Benutzernamen {{username}} als Einladungscode ein — wir bekommen beide 500 Münzen! 🪙",

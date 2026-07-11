@@ -472,7 +472,63 @@ export function ProfileScreen() {
         {/* ── Pet Shop ── */}
         <PetShopSection />
 
-        {/* ── Achievements ── */}
+        {/* ── My Rooms / Invite Codes ── */}
+        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.myRooms')}</Text>
+        {ownedRooms.length > 0 ? (
+          ownedRooms.map((r) => (
+            <View key={r.id} style={styles.roomCodeRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.roomCodeName}>🔒 {r.name}</Text>
+                <Text style={styles.roomCodeMeta}>👥 {r.memberCount}/{r.maxMembers}</Text>
+              </View>
+              <View style={styles.roomCodeBox}>
+                <Text style={styles.roomCodeLabel}>{t('profile.inviteCode')}</Text>
+                <Text style={styles.roomCodeText}>{r.inviteCode ?? '—'}</Text>
+              </View>
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyIcon}>🚪</Text>
+            <Text style={styles.emptyTitle}>{t('profile.noOwnedRooms')}</Text>
+            <Text style={styles.emptyHint}>{t('profile.noOwnedRoomsHint')}</Text>
+          </View>
+        )}
+
+        {/* ── Titles (ünvanlar) ── */}
+        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.titles')}</Text>
+        <Text style={styles.titlesHint}>{t('profile.titlesHint')}</Text>
+        <View style={styles.titlesRow}>
+          {titles.map((tt) => {
+            const isSel = tt.id === selectedTitle;
+            return (
+              <Pressable
+                key={tt.id}
+                style={[
+                  styles.titleChip,
+                  isSel && styles.titleChipSel,
+                  !tt.unlocked && styles.titleChipLocked,
+                ]}
+                disabled={!tt.unlocked || titleMut.isPending}
+                onPress={() => titleMut.mutate(isSel ? null : tt.id)}
+              >
+                <Text style={styles.titleChipIcon}>{tt.unlocked ? tt.icon : '🔒'}</Text>
+                <Text
+                  style={[
+                    styles.titleChipLabel,
+                    isSel && { color: ACCENT },
+                    !tt.unlocked && { color: MUTED },
+                  ]}
+                >
+                  {t(`titles.${tt.id}`)}
+                </Text>
+                {isSel && <Text style={styles.titleChipCheck}>✓</Text>}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* ── Achievements (rozetler) ── */}
         <Text style={[styles.sectionLabel, { marginTop: 8 }]}>
           {t('profile.badges')} {earned.length > 0 ? `${earned.length}/${earned.length + locked.length}` : ''}
         </Text>
@@ -523,62 +579,6 @@ export function ProfileScreen() {
             <Text style={styles.emptyIcon}>🏆</Text>
             <Text style={styles.emptyTitle}>{t('profile.noBadges')}</Text>
             <Text style={styles.emptyHint}>{t('profile.noBadgesHint')}</Text>
-          </View>
-        )}
-
-        {/* ── Titles (ünvanlar) ── */}
-        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.titles')}</Text>
-        <Text style={styles.titlesHint}>{t('profile.titlesHint')}</Text>
-        <View style={styles.titlesRow}>
-          {titles.map((tt) => {
-            const isSel = tt.id === selectedTitle;
-            return (
-              <Pressable
-                key={tt.id}
-                style={[
-                  styles.titleChip,
-                  isSel && styles.titleChipSel,
-                  !tt.unlocked && styles.titleChipLocked,
-                ]}
-                disabled={!tt.unlocked || titleMut.isPending}
-                onPress={() => titleMut.mutate(isSel ? null : tt.id)}
-              >
-                <Text style={styles.titleChipIcon}>{tt.unlocked ? tt.icon : '🔒'}</Text>
-                <Text
-                  style={[
-                    styles.titleChipLabel,
-                    isSel && { color: ACCENT },
-                    !tt.unlocked && { color: MUTED },
-                  ]}
-                >
-                  {t(`titles.${tt.id}`)}
-                </Text>
-                {isSel && <Text style={styles.titleChipCheck}>✓</Text>}
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* ── My Rooms / Invite Codes ── */}
-        <Text style={[styles.sectionLabel, { marginTop: 8 }]}>{t('profile.myRooms')}</Text>
-        {ownedRooms.length > 0 ? (
-          ownedRooms.map((r) => (
-            <View key={r.id} style={styles.roomCodeRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.roomCodeName}>🔒 {r.name}</Text>
-                <Text style={styles.roomCodeMeta}>👥 {r.memberCount}/{r.maxMembers}</Text>
-              </View>
-              <View style={styles.roomCodeBox}>
-                <Text style={styles.roomCodeLabel}>{t('profile.inviteCode')}</Text>
-                <Text style={styles.roomCodeText}>{r.inviteCode ?? '—'}</Text>
-              </View>
-            </View>
-          ))
-        ) : (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyIcon}>🚪</Text>
-            <Text style={styles.emptyTitle}>{t('profile.noOwnedRooms')}</Text>
-            <Text style={styles.emptyHint}>{t('profile.noOwnedRoomsHint')}</Text>
           </View>
         )}
 

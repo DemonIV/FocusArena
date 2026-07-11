@@ -216,7 +216,16 @@
     "cycleShare": "Share Receipt",
     "newCycle": "Start New Cycle",
     "cycleStatFocus": "FOCUS",
-    "strictPomodoroHint": "Leaving during a focus round burns it — breaks are free."
+    "strictPomodoroHint": "Leaving during a focus round burns it — breaks are free.",
+    "autoStartBreaks": "Auto-start breaks",
+    "autoStartBreaksHint": "When a focus round ends, the break starts on its own",
+    "autoStartFocus": "Auto-start focus sessions",
+    "autoStartFocusHint": "When a break ends, the next round starts on its own",
+    "startBreak": "Start {{min}} min break",
+    "roundDoneTitle": "Round {{round}} done!",
+    "roundOverTitle": "Focus round done! ☕",
+    "roundOverBody": "Time for a {{min}} min break",
+    "cycleDoneBody": "All 4 focus rounds done — great work! 🎉"
   },
   "invite": {
     "shareMessage": "📚 Study with me on StudySquad! Enter my username {{username}} as the invite code when you sign up — we both earn 500 coins! 🪙",

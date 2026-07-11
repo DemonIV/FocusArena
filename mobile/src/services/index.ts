@@ -15,5 +15,6 @@ export {
   subscribeNotificationTaps,
   ensureNotificationChannel,
   scheduleBreakOverNotification,
+  notifyNow,
   cancelScheduledNotification,
 } from './notifications';

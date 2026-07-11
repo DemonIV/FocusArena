@@ -113,6 +113,27 @@ export async function scheduleBreakOverNotification(
   }
 }
 
+/**
+ * Present a local notification right now (Pomodoro focus→break / cycle-end
+ * transitions). Fires regardless of the push opt-out — it's a local timer alert,
+ * not a server push. The Android 'default' channel carries the vibration pattern.
+ */
+export async function notifyNow(title: string, body: string): Promise<void> {
+  try {
+    await ensureNotificationChannel();
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, sound: true },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 1,
+        channelId: 'default',
+      },
+    });
+  } catch {
+    /* best-effort — the in-app vibration/UI still fires */
+  }
+}
+
 /** Cancel a scheduled local notification (best-effort). */
 export async function cancelScheduledNotification(id: string | null): Promise<void> {
   if (!id) return;
