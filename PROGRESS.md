@@ -238,7 +238,16 @@ Sadece mobil · tsc temiz · commit `e492456`
 - **Bilinen sınır (mimari)**: uygulama mola bittiğinde arka plandaysa sonraki tur ancak kullanıcı uygulamayı açınca başlar — bildirim tap'i bunu tetikliyor, tasarım gereği böyle kalacak.
 - **Ek düzeltme (`dc1a41a`)**: kullanıcı bildirdi — eski "tur bitti / mola bitti" bildirimi, yeni oturum başlatınca bile telefonun bildirim tepsisinde kalıyordu (kod sadece *zamanlanmış* bildirimi iptal ediyordu, *gösterilmiş* olanı kaldırmıyordu). **Fix**: pomodoro yerel bildirimleri `data.pomodoro=true` ile etiketlendi + yeni `dismissPomodoroNotifications()` (getPresentedNotifications → sadece etiketlileri dismiss; arkadaş/streak push'ları tepside kalır). Çağrı noktaları: oturum başlat (klasik+pomodoro), sonraki tur (manuel+auto-start), mola başlat, mola atla. Not: bu build'den ÖNCE tepsiye düşmüş (etiketsiz) bildirimler bir kereliğine temizlenmez — elle kaydırılır.
 
-### 📝 Oturum Özeti — 2026-07-11 (Faz 24 + TAZE BUILD'LER) ⭐ EN GÜNCEL
+### Faz 26 — 🌌 "Nebula" TimerCircle (sanatsal animasyon yenilemesi) (12 Temmuz)
+Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA TEST EDİLMEDİ**
+
+- **Yarım-disk tekniği → SVG gradyan ark**: progress halkası artık `react-native-svg` ile, ring→glow renk gradyanı + yuvarlak uçlar; arkın ucunda **senkron kuyruklu yıldız başı** (beyaz çekirdek + renkli hale, `pAnim` tek shared value ile ark + rotasyon kilitli).
+- **Sahne katmanları**: (1) 60 tikli **saat çerçevesi** (odaklanırken 60sn/tur döner, idle'da ultra yavaş, pause'da donar); (2) **6 yörünge ateşböceği** (farklı yarıçap/hız/yön + twinkle; sadece aktif odakta, FadeIn/FadeOut ile); (3) **çift katman nefes alan aura** (faz farklı; **son 60 saniyede tempo 1800ms→800ms**); (4) **ateşleme**: seans başlarken spring scale + tek seferlik genişleyen şok dalgası halkası; (5) **idle parıltı süpürmesi** (şarjlı his).
+- Kozmetik çerçeveler otomatik gradyan alır (`ring → outer2 ?? glow`); default cyan→violet. Pause tümünü ambere çevirir + makineyi dondurur. `useReducedMotion` → tüm ambient döngüler kapalı, progress animasyonu kalır. Props API'si değişmedi (TimerScreen'e dokunulmadı); Pro frame orbit efekti korundu.
+- **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
+- JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
+
+### 📝 Oturum Özeti — 2026-07-11 (Faz 24 + TAZE BUILD'LER)
 
 - **Faz 24 yapıldı** (yukarıda): pomodoro auto-start toggle'ları + tur/mola geçişlerinde titreşim+bildirim + profil bölüm sırası. Commit `c2131f0`, main'e push'landı.
 - **🚀 TAZE BUILD'LER ATILDI** (Faz 19–24'ün TAMAMINI içeren ilk build'ler; native modüller yüzünden cache'siz):
