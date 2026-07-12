@@ -247,6 +247,17 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
+### Faz 27 — 🍎 App Store yayın hazırlığı (12 Temmuz) ⭐ EN GÜNCEL
+Commits: `3aad06f` (legal+metadata), `4c2a214` (buildNumber 10)
+
+- **Karar (LLM Council sentezi)**: önce mağaza lansmanı + aktivasyon hunisi; **iOS v1'de IAP YOK** (RC'de Apple app'i hiç kurulmadı → billing env-gate iOS'ta zaten kapalı; inceleme basitleşir, 3.1.2 riski yok). Play Console bilinçli ertelendi (kullanıcı kararı). IAP/trial → v1.1.
+- **KRİTİK KEŞİF**: EAS **production env BOŞTU** → TestFlight build 4-9'da Sentry/PostHog/RC anahtarı YOKTU (sıfır analytics/crash verisi). Fix: `eas env:create production` ile 4 değişken eklendi (POSTHOG_KEY/HOST, SENTRY_DSN, RC_ANDROID_KEY). Build 10 loglarında yüklendiği doğrulandı.
+- **Legal sayfalar** (`backend/src/modules/legal/`): `/legal/privacy` + `/legal/terms` + `/legal/support` — EN+TR statik HTML, gerçek veri pratikleri (hesap silme uygulama içinde zaten vardı: Profil + `DELETE /account`). ASC zorunlu URL'ler: privacy + support.
+- **ASC v1.0 metadata paketi**: `docs/app-store/metadata.md` — açıklama (EN+TR), subtitle, keywords, promo text, review notları + demo hesap (testalpha1), App Privacy anket cevapları, age rating cevapları, screenshot planı (5 kare), adım adım checklist.
+- ✅ **iOS build 10 (`ec3089a7`) FINISHED + App Store Connect'e yüklendi** (auto-submit, submission `bec577c6`). İçinde: Faz 26 Nebula timer + production analytics anahtarları. İlk deneme DNS hatasıyla düştü (ENOTFOUND storage.googleapis.com — ağ dalgalanması), retry başarılı.
+- ✅ **Fly deploy BAŞARILI (4. denemede)** — `/legal/privacy` + `/legal/terms` + `/legal/support` + `/health` hepsi 200 doğrulandı. Önceki 3 deneme ağ dalgalanmasına düştü (depot TLS "unknown authority", wireguard 403, `--depot=false`'ta npipe parse hatası — hepsi geçici; sonunda varsayılan depot çalıştı).
+- **SONRAKİ ADIMLAR**: (1) build 10 TestFlight'ta cihaz duman testi (Nebula + login + seans); (2) iPhone'dan 5 ekran görüntüsü (gerekirse 1290×2796'ya ölçekle); (3) ASC panelini `docs/app-store/metadata.md` ile doldur; (4) Submit for Review (Manually release).
+
 ### 📝 Oturum Özeti — 2026-07-11 (Faz 24 + TAZE BUILD'LER)
 
 - **Faz 24 yapıldı** (yukarıda): pomodoro auto-start toggle'ları + tur/mola geçişlerinde titreşim+bildirim + profil bölüm sırası. Commit `c2131f0`, main'e push'landı.
