@@ -255,8 +255,15 @@ Commits: `3aad06f` (legal+metadata), `4c2a214` (buildNumber 10)
 - **Legal sayfalar** (`backend/src/modules/legal/`): `/legal/privacy` + `/legal/terms` + `/legal/support` — EN+TR statik HTML, gerçek veri pratikleri (hesap silme uygulama içinde zaten vardı: Profil + `DELETE /account`). ASC zorunlu URL'ler: privacy + support.
 - **ASC v1.0 metadata paketi**: `docs/app-store/metadata.md` — açıklama (EN+TR), subtitle, keywords, promo text, review notları + demo hesap (testalpha1), App Privacy anket cevapları, age rating cevapları, screenshot planı (5 kare), adım adım checklist.
 - ✅ **iOS build 10 (`ec3089a7`) FINISHED + App Store Connect'e yüklendi** (auto-submit, submission `bec577c6`). İçinde: Faz 26 Nebula timer + production analytics anahtarları. İlk deneme DNS hatasıyla düştü (ENOTFOUND storage.googleapis.com — ağ dalgalanması), retry başarılı.
-- ✅ **Fly deploy BAŞARILI (4. denemede)** — `/legal/privacy` + `/legal/terms` + `/legal/support` + `/health` hepsi 200 doğrulandı. Önceki 3 deneme ağ dalgalanmasına düştü (depot TLS "unknown authority", wireguard 403, `--depot=false`'ta npipe parse hatası — hepsi geçici; sonunda varsayılan depot çalıştı).
-- **SONRAKİ ADIMLAR**: (1) build 10 TestFlight'ta cihaz duman testi (Nebula + login + seans); (2) iPhone'dan 5 ekran görüntüsü (gerekirse 1290×2796'ya ölçekle); (3) ASC panelini `docs/app-store/metadata.md` ile doldur; (4) Submit for Review (Manually release).
+- ✅ **Fly deploy BAŞARILI** — `/legal/privacy` + `/legal/terms` + `/legal/support` + `/health` hepsi 200 doğrulandı. ⚠️ **flyctl TUZAĞI**: CLI 4 denemede de exit 1 verdi (depot TLS "unknown authority", wireguard 403, npipe parse) ama `flyctl releases` v104–v107'nin **complete** olduğunu gösterdi — build/release sunucu tarafında BAŞARIYLA bitiyor, hata sadece CLI↔builder yerel bağlantısında. Ders: deploy "başarısız" görünürse önce `flyctl releases` + endpoint 200 kontrolü yap, körlemesine tekrar deploy etme.
+- ✅ **Build 10 kullanıcı tarafından TestFlight'tan kuruldu ve test edildi** (Nebula timer cihazda çalışıyor — duman testi geçti).
+- **📌 v1.1 KARARI — "Sınav Ligi"**: Kullanıcının "sınav tipine göre sınırsız kontenjanlı oda" fikri tartışıldı → oda DEĞİL, **leaderboard segmenti** olarak yapılacak (Country Wars mekaniğinin kopyası). Tasarım: `users.target_exam` (+`exam_year`) migration; onboarding'e atlanabilir sınav seçim adımı (TR: YKS/LGS/KPSS/ALES/Diğer, diğer ülkeler jenerik kovalar); Leaderboard'a "Sınavım" sekmesi (haftalık dakika ligi) + Home'da "#N'sin" kartı; kohort <10 kişiyse global'e düş; odalara DOKUNULMAYACAK. iOS IAP ile birlikte v1.1'e. Tahmin: backend ½ gün + mobil 1 gün + i18n.
+- **SONRAKİ OTURUMUN SIRASI (kullanıcıyla mutabık)**:
+  1. Kullanıcıdan 5 ekran görüntüsü al (Timer aktif / Home / Leaderboard / Profil / Study Receipt) → 1290×2796'ya ölçekle, tercihen pazarlama çerçevesi+başlık geçir (kullanıcı süslemeli/çıplak seçecek)
+  2. ASC panelini doldur: `docs/app-store/metadata.md`'deki hazır değerlerle (App Information, Pricing=Free, App Privacy anketi, Age Rating, Version 1.0 metinleri, demo hesap testalpha1)
+  3. Build 10'u (`ec3089a7`, ASC'de işlendi) versiyona bağla → **Submit for Review** ("Manually release" seçili)
+  4. İnceleme beklerken (24-48s): v1.1 işleri — Sınav Ligi + iOS IAP kurulumu (RC Apple app + `appl_` key + ASC subscription group + paywall'a Terms/Privacy linkleri)
+  5. Play Console en sona ertelendi (kullanıcı kararı)
 
 ### 📝 Oturum Özeti — 2026-07-11 (Faz 24 + TAZE BUILD'LER)
 
