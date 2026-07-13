@@ -146,21 +146,27 @@ Tüm şiddet/korku/cinsellik/madde soruları: **None**
 
 ## 7) Screenshots (zorunlu: 6.9" veya 6.7" iPhone seti, 3–10 adet)
 
-Önerilen 5 kare (build 10'dan, Nebula timer'lı):
-1. Timer — aktif seans, Nebula halkası + FOCUSING
-2. Home — günlük hedef halkası + haftalık grafik + challenge kartı
-3. Leaderboard — arkadaş sıralaması (test hesaplarıyla dolu görünüm)
-4. Profil — streak heatmap + konu donut'u + pet
-5. Study Receipt paylaşım kartı (veya Pet mağazası)
+Önerilen kareler (build 10'dan, Nebula timer'lı):
+1. Timer — aktif seans, Nebula halkası + FOCUSING ⏳ **EKSİK — kullanıcıdan bekleniyor**
+2. Home — günlük hedef + challenge kartı + pet ✅ `screenshots/tr/02-home.png`
+3. Leaderboard — küresel sıralama ✅ `screenshots/tr/03-leaderboard.png`
+4. Profil — konu donut'u + istatistikler ✅ `screenshots/tr/04-stats.png`
+5. Aylık takvim (konu kırılımlı) ✅ `screenshots/tr/05-calendar.png`
+6. Çerçeve + Pet mağazası ✅ `screenshots/tr/06-store.png`
+7. Study Receipt paylaşım kartı ⏳ **EKSİK — kullanıcıdan bekleniyor** (opsiyonel)
 
-Cihaz ekran görüntüsü boyutu 6.9/6.7 değilse `sharp` ile 1290×2796'ya ölçekle/pad'le (Claude yapar).
+Üretim: `docs/app-store/screenshots/tr/` altında **1290×2796 pazarlama çerçeveli** PNG'ler hazır
+(koyu gradyan + Türkçe başlık + telefon çerçevesi; 2026-07-13). Kaynak ham görüntüler `images/`
+klasöründe (WhatsApp 945×2048). Timer + Receipt görüntüleri gelince aynı boru hattıyla
+`01-timer.png` ve `07-receipt.png` üretilecek (script: scratchpad `compose.js` — sharp,
+`xml:space="preserve"` tspan hilesiyle; gerekirse yeniden kurulur).
 
 ## 8) Sıra (checklist)
 
 - [x] Privacy/Terms/Support sayfaları canlı (fly.dev/legal/*)
 - [x] EAS production env: PostHog+Sentry+RC-Android anahtarları eklendi
-- [ ] Build 10 (production, autoIncrement) → TestFlight → cihazda hızlı duman testi (Nebula timer + login + seans)
-- [ ] iPhone'dan 5 ekran görüntüsü → gerekirse ölçekle → ASC'ye yükle
+- [x] Build 10 (production, autoIncrement) → TestFlight → cihazda hızlı duman testi (Nebula timer + login + seans)
+- [ ] iPhone'dan ekran görüntüleri → 5/7 çerçevelendi (`screenshots/tr/`); Timer + Receipt bekleniyor → ASC'ye yükle
 - [ ] ASC: App Information + Pricing + Privacy + Age Rating doldur (bu doküman)
 - [ ] Version 1.0: metin/keywords/screenshots + build 10 seç + demo hesap + notlar
 - [ ] Release seçeneği: **Manually release** (onay sonrası elle yayınla) — ilk sürümde kontrol bizde
