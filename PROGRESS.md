@@ -247,7 +247,20 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 27 — 🍎 App Store yayın hazırlığı (12 Temmuz) ⭐ EN GÜNCEL
+### Faz 28 — 🖼️ Mağaza görselleri + ASC panel doldurma (13 Temmuz) ⭐ EN GÜNCEL
+Commits: `be65c9d`, `6ba0154`, `928637e`, `e0c858e` · ASC panel Claude-in-Chrome ile dolduruldu
+
+- **Ekran görüntüleri TAMAM (7 kare × 2 dil)**: kullanıcı iPhone'dan çekti (Timer+Receipt tam çözünürlük "belge" olarak geldi — WhatsApp normal gönderim 945px'e sıkıştırıyor, belge sıkıştırmıyor: DERS). "Nebula" pazarlama çerçevesi tasarlandı: koyu uzay gradyanı + yıldız alanı + kuyruklu yıldız/yörünge imzası + eyebrow pill + 2 satır gradyan manşet + −3° eğik telefon mockup'ı (alt kenardan taşan). Üretici: `docs/app-store/screenshots/compose.js` (sharp; **tspan boşlukları için `xml:space="preserve"` ŞART** — NBSP bile yutuluyor). Çıktılar: `tr/`+`en/` (1290×2796 master) ve `tr/6p5/`+`en/6p5/` (1284×2778 — ASC bu app'te 6.5" slot istiyor, 1290×2796 listede yok). 07-receipt kaynağındaki "◀ Instagram" durum çubuğu yazısı yamayla kapatıldı. 1. kare sosyal vaat: TR "Arkadaşlarınla ders çalış" / EN "Study with your friends" (kullanıcı vurgu istedi).
+- **🏷️ İSİM DEĞİŞTİ**: "StudySquad" App Store'da BAŞKASINDA (ASC "already being used" hatası; app'in `(bd0ba7)` ekiyle oluşmasının sebebi buymuş) → kullanıcı onayıyla **"StudySquad: Study With Friends"** (tam 30 kr). TR lokalizasyon adı planı: "StudySquad: Arkadaşınla Çalış".
+- **ASC panel dolduruldu (Claude tarayıcıyı kullandı)**: App Information (isim+subtitle "Focus timer with friends"+Education/Productivity+content rights) ✓ · **Age Ratings yeni 7 adımlı anket → 13+** (Contests=**Frequent** dürüst beyan — leaderboard/challenge çekirdek özellik; Afganistan+Fas'ta satılmıyor, önemsiz) ✓ · Pricing Free + 175 ülke availability ✓ · **App Privacy YAYINLANDI** (7 veri tipi: Email/UserID/Purchases/ProductInteraction/OtherUserContent=linked, Crash+Performance=not linked, tracking=NO; privacy URL) ✓ · Version 1.0: promo+description+keywords+support URL+copyright (EN) ✓, **build 10 bağlandı** ✓, review notları+demo kullanıcı adı+iletişim adı/e-postası ✓, **Manually release** seçili ✓.
+- **Tuzaklar**: Claude'un `file_upload` aracı disk yolu kabul etmiyor → görselleri KULLANICI sürükle-bırak yapacak. ASC custom checkbox'larda `form_input` çalışmıyor → ref ile `left_click`. Uzun metin type'ları CDP timeout veriyor ama arka planda tamamlanıyor (bekle + doğrula, tekrar yazma).
+- **SONRAKİ OTURUM (ASC'de kalınan yer — hepsi kayıtlı, devam edilebilir)**:
+  1. Kullanıcı: EN sayfasına `docs/app-store/screenshots/en/6p5/` 7 PNG sürükle-bırak; **Password** (demo: Passw0rd123) + **Phone number** doldur → Save
+  2. Claude: Turkish lokalizasyonu ekle (dil menüsü sağ üstte) → TR isim/subtitle/description/keywords/promo (metadata.md'de hazır) → kullanıcı `tr/6p5/` setini sürükler
+  3. **Add for Review → Submit** (24-48 saat inceleme)
+  4. İnceleme sürerken: v1.1 işleri (Sınav Ligi + iOS IAP: RC Apple app + `appl_` key + subscription group + paywall legal linkleri)
+
+### Faz 27 — 🍎 App Store yayın hazırlığı (12 Temmuz)
 Commits: `3aad06f` (legal+metadata), `4c2a214` (buildNumber 10)
 
 - **Karar (LLM Council sentezi)**: önce mağaza lansmanı + aktivasyon hunisi; **iOS v1'de IAP YOK** (RC'de Apple app'i hiç kurulmadı → billing env-gate iOS'ta zaten kapalı; inceleme basitleşir, 3.1.2 riski yok). Play Console bilinçli ertelendi (kullanıcı kararı). IAP/trial → v1.1.
