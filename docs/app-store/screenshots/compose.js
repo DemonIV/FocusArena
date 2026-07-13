@@ -5,10 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 const IMG = 'C:/Users/alper/Desktop/FocusArena/images';
-const OUT = 'C:/Users/alper/Desktop/FocusArena/docs/app-store/screenshots/tr';
-const OUT65 = path.join(OUT, '6p5');
-fs.mkdirSync(OUT, { recursive: true });
-fs.mkdirSync(OUT65, { recursive: true });
+const ROOT = 'C:/Users/alper/Desktop/FocusArena/docs/app-store/screenshots';
 
 const CW = 1290, CH = 2796;
 const SW = 1080, SH = Math.round(2048 / 945 * SW); // 2341 (tüm kaynaklar aynı oran)
@@ -98,50 +95,78 @@ function svgFrame(png64, f) {
 </svg>`;
 }
 
-const frames = [
-  { src: 'IMG_7201.PNG', out: '01-timer.png', eyebrow: 'ODAK SAYACI', eyeW: 420,
-    title: [[{ t: 'Arkadaşlarınla' }], [{ t: 'ders çalış', accent: true }]],
-    subtitle: 'Pomodoro döngüleri ve kilit ekranında canlı sayaç' },
+const shots = [
+  { src: 'IMG_7201.PNG', out: '01-timer.png',
+    tr: { eyebrow: 'ODAK SAYACI', eyeW: 420,
+      title: [[{ t: 'Arkadaşlarınla' }], [{ t: 'ders çalış', accent: true }]],
+      subtitle: 'Pomodoro döngüleri ve kilit ekranında canlı sayaç' },
+    en: { eyebrow: 'FOCUS TIMER', eyeW: 380,
+      title: [[{ t: 'Study with' }], [{ t: 'your friends', accent: true }]],
+      subtitle: 'Pomodoro cycles and a live lock-screen countdown' } },
   { src: 'WhatsApp Image 2026-07-13 at 19.45.06 (1).jpeg', out: '02-home.png',
-    eyebrow: 'GÜNLÜK HEDEF', eyeW: 440,
-    title: [[{ t: 'Hedef koy,' }], [{ t: 'serini yakala', accent: true }]],
-    subtitle: 'Günlük hedef, haftalık challenge ve evcil dostun' },
+    tr: { eyebrow: 'GÜNLÜK HEDEF', eyeW: 440,
+      title: [[{ t: 'Hedef koy,' }], [{ t: 'serini yakala', accent: true }]],
+      subtitle: 'Günlük hedef, haftalık challenge ve evcil dostun' },
+    en: { eyebrow: 'DAILY GOALS', eyeW: 380,
+      title: [[{ t: 'Set goals,' }], [{ t: 'keep your streak', accent: true }]],
+      subtitle: 'Daily goals, weekly challenges and your study pet' } },
   { src: 'WhatsApp Image 2026-07-13 at 19.45.05 (8).jpeg', out: '03-leaderboard.png',
-    eyebrow: 'SIRALAMA', eyeW: 340,
-    title: [[{ t: 'Sıralamada' }], [{ t: 'yüksel', accent: true }]],
-    subtitle: 'Küresel lig ve arkadaş yarışı — her dakika puan' },
+    tr: { eyebrow: 'SIRALAMA', eyeW: 340,
+      title: [[{ t: 'Sıralamada' }], [{ t: 'yüksel', accent: true }]],
+      subtitle: 'Küresel lig ve arkadaş yarışı — her dakika puan' },
+    en: { eyebrow: 'LEADERBOARDS', eyeW: 420,
+      title: [[{ t: 'Climb the' }], [{ t: 'rankings', accent: true }]],
+      subtitle: 'Global league and friend races — every minute scores' } },
   { src: 'WhatsApp Image 2026-07-13 at 19.45.05 (3).jpeg', out: '04-stats.png',
-    eyebrow: 'İSTATİSTİKLER', eyeW: 460,
-    title: [[{ t: 'Her dakikan' }], [{ t: 'kayıtta', accent: true }]],
-    subtitle: 'Konu bazlı dağılım ve seans istatistikleri' },
+    tr: { eyebrow: 'İSTATİSTİKLER', eyeW: 460,
+      title: [[{ t: 'Her dakikan' }], [{ t: 'kayıtta', accent: true }]],
+      subtitle: 'Konu bazlı dağılım ve seans istatistikleri' },
+    en: { eyebrow: 'STATISTICS', eyeW: 360,
+      title: [[{ t: 'Every minute' }], [{ t: 'counted', accent: true }]],
+      subtitle: 'Subject breakdown and session statistics' } },
   { src: 'WhatsApp Image 2026-07-13 at 19.45.05 (4).jpeg', out: '05-calendar.png',
-    eyebrow: 'AYLIK TAKVİM', eyeW: 440,
-    title: [[{ t: 'Ayını' }], [{ t: 'tek bakışta', accent: true }, { t: ' gör' }]],
-    subtitle: 'Gün gün odak takvimi ve konu kırılımı' },
+    tr: { eyebrow: 'AYLIK TAKVİM', eyeW: 440,
+      title: [[{ t: 'Ayını' }], [{ t: 'tek bakışta', accent: true }, { t: ' gör' }]],
+      subtitle: 'Gün gün odak takvimi ve konu kırılımı' },
+    en: { eyebrow: 'MONTHLY CALENDAR', eyeW: 520,
+      title: [[{ t: 'Your month' }], [{ t: 'at a glance', accent: true }]],
+      subtitle: 'Day-by-day focus calendar with subject breakdown' } },
   { src: 'WhatsApp Image 2026-07-13 at 19.45.05 (2).jpeg', out: '06-store.png',
-    eyebrow: 'ÖDÜLLER', eyeW: 320,
-    title: [[{ t: 'Coin kazan,' }], [{ t: 'dostunu büyüt', accent: true }]],
-    subtitle: 'Sayaç çerçeveleri ve evrilen evcil hayvanlar' },
-  { src: 'IMG_7203.PNG', out: '07-receipt.png', eyebrow: 'STUDY RECEIPT', eyeW: 460,
-    title: [[{ t: 'Bitir, puanla,' }], [{ t: 'paylaş', accent: true }]],
-    subtitle: 'Her seansa 0-100 Odak Skoru, XP ve coin',
-    patch: { left: 0, top: 86, width: 270, height: 60, color: '#050508' } },
+    tr: { eyebrow: 'ÖDÜLLER', eyeW: 320,
+      title: [[{ t: 'Coin kazan,' }], [{ t: 'dostunu büyüt', accent: true }]],
+      subtitle: 'Sayaç çerçeveleri ve evrilen evcil hayvanlar' },
+    en: { eyebrow: 'REWARDS', eyeW: 320,
+      title: [[{ t: 'Earn coins,' }], [{ t: 'grow your pet', accent: true }]],
+      subtitle: 'Timer frames and evolving study pets' } },
+  { src: 'IMG_7203.PNG', out: '07-receipt.png',
+    patch: { left: 0, top: 86, width: 270, height: 60, color: '#050508' },
+    tr: { eyebrow: 'STUDY RECEIPT', eyeW: 460,
+      title: [[{ t: 'Bitir, puanla,' }], [{ t: 'paylaş', accent: true }]],
+      subtitle: 'Her seansa 0-100 Odak Skoru, XP ve coin' },
+    en: { eyebrow: 'STUDY RECEIPT', eyeW: 460,
+      title: [[{ t: 'Finish, score,' }], [{ t: 'share', accent: true }]],
+      subtitle: 'Every session earns a 0-100 Focus Score, XP and coins' } },
 ];
 
 (async () => {
-  for (const f of frames) {
-    let base = sharp(path.join(IMG, f.src));
-    if (f.patch) {
-      const p = f.patch;
-      const rect = Buffer.from(`<svg width="${p.width}" height="${p.height}"
-        xmlns="http://www.w3.org/2000/svg"><rect width="${p.width}" height="${p.height}"
-        fill="${p.color}"/></svg>`);
-      base = sharp(await base.composite([{ input: rect, left: p.left, top: p.top }]).toBuffer());
+  for (const lang of ['tr', 'en']) {
+    const OUT = path.join(ROOT, lang), OUT65 = path.join(ROOT, lang, '6p5');
+    fs.mkdirSync(OUT, { recursive: true });
+    fs.mkdirSync(OUT65, { recursive: true });
+    for (const s of shots) {
+      let base = sharp(path.join(IMG, s.src));
+      if (s.patch) {
+        const p = s.patch;
+        const rect = Buffer.from(`<svg width="${p.width}" height="${p.height}"
+          xmlns="http://www.w3.org/2000/svg"><rect width="${p.width}" height="${p.height}"
+          fill="${p.color}"/></svg>`);
+        base = sharp(await base.composite([{ input: rect, left: p.left, top: p.top }]).toBuffer());
+      }
+      const png64 = (await base.resize(SW, SH, { fit: 'fill' }).png().toBuffer()).toString('base64');
+      const master = await sharp(Buffer.from(svgFrame(png64, s[lang]))).png().toBuffer();
+      fs.writeFileSync(path.join(OUT, s.out), master);
+      await sharp(master).resize(1284, 2778, { fit: 'fill' }).png().toFile(path.join(OUT65, s.out));
+      console.log('done', lang, s.out);
     }
-    const png64 = (await base.resize(SW, SH, { fit: 'fill' }).png().toBuffer()).toString('base64');
-    const master = await sharp(Buffer.from(svgFrame(png64, f))).png().toBuffer();
-    fs.writeFileSync(path.join(OUT, f.out), master);
-    await sharp(master).resize(1284, 2778, { fit: 'fill' }).png().toFile(path.join(OUT65, f.out));
-    console.log('done', f.out);
   }
 })();
