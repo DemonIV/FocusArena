@@ -147,26 +147,26 @@ Tüm şiddet/korku/cinsellik/madde soruları: **None**
 ## 7) Screenshots (zorunlu: 6.9" veya 6.7" iPhone seti, 3–10 adet)
 
 Önerilen kareler (build 10'dan, Nebula timer'lı):
-1. Timer — aktif seans, Nebula halkası + FOCUSING ⏳ **EKSİK — kullanıcıdan bekleniyor**
+1. Timer — aktif seans (Kraliyet çerçevesi) + FOCUSING ✅ `screenshots/tr/01-timer.png`
 2. Home — günlük hedef + challenge kartı + pet ✅ `screenshots/tr/02-home.png`
 3. Leaderboard — küresel sıralama ✅ `screenshots/tr/03-leaderboard.png`
 4. Profil — konu donut'u + istatistikler ✅ `screenshots/tr/04-stats.png`
 5. Aylık takvim (konu kırılımlı) ✅ `screenshots/tr/05-calendar.png`
 6. Çerçeve + Pet mağazası ✅ `screenshots/tr/06-store.png`
-7. Study Receipt paylaşım kartı ⏳ **EKSİK — kullanıcıdan bekleniyor** (opsiyonel)
+7. Study Receipt paylaşım kartı (Odak Skoru kırılımlı) ✅ `screenshots/tr/07-receipt.png`
 
-Üretim: `docs/app-store/screenshots/tr/` altında **1290×2796 pazarlama çerçeveli** PNG'ler hazır
-(koyu gradyan + Türkçe başlık + telefon çerçevesi; 2026-07-13). Kaynak ham görüntüler `images/`
-klasöründe (WhatsApp 945×2048). Timer + Receipt görüntüleri gelince aynı boru hattıyla
-`01-timer.png` ve `07-receipt.png` üretilecek (script: scratchpad `compose.js` — sharp,
-`xml:space="preserve"` tspan hilesiyle; gerekirse yeniden kurulur).
+✅ **7/7 TAMAM** — `docs/app-store/screenshots/tr/` altında **1290×2796 pazarlama çerçeveli**
+PNG'ler hazır (koyu gradyan + Türkçe başlık + telefon çerçevesi; 2026-07-13). Kaynak ham
+görüntüler `images/` klasöründe. Yeniden üretim: `compose.js` (sharp gerekir; tspan boşlukları
+için `xml:space="preserve"` şart). Not: 07-receipt kaynağındaki "< Instagram" durum çubuğu
+yazısı yamayla kapatıldı. ASC'ye 01→07 sırasıyla yükle (ilk 3 arama sonuçlarında görünür).
 
 ## 8) Sıra (checklist)
 
 - [x] Privacy/Terms/Support sayfaları canlı (fly.dev/legal/*)
 - [x] EAS production env: PostHog+Sentry+RC-Android anahtarları eklendi
 - [x] Build 10 (production, autoIncrement) → TestFlight → cihazda hızlı duman testi (Nebula timer + login + seans)
-- [ ] iPhone'dan ekran görüntüleri → 5/7 çerçevelendi (`screenshots/tr/`); Timer + Receipt bekleniyor → ASC'ye yükle
+- [x] iPhone'dan ekran görüntüleri → 7/7 çerçevelendi (`screenshots/tr/`) — ASC'ye yüklenecek
 - [ ] ASC: App Information + Pricing + Privacy + Age Rating doldur (bu doküman)
 - [ ] Version 1.0: metin/keywords/screenshots + build 10 seç + demo hesap + notlar
 - [ ] Release seçeneği: **Manually release** (onay sonrası elle yayınla) — ilk sürümde kontrol bizde

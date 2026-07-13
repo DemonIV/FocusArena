@@ -61,6 +61,18 @@ const maskSvg = Buffer.from(
 
 const jobs = [
   {
+    src: 'IMG_7201.PNG', out: '01-timer.png',
+    title: [{ t: 'Tek dokunuşla ' }, { t: 'derin odak', accent: true }],
+    subtitle: 'Pomodoro döngüleri, Zen Modu ve kilit ekranı sayacı',
+  },
+  {
+    src: 'IMG_7203.PNG', out: '07-receipt.png',
+    title: [{ t: 'Bitir, puanla, ' }, { t: 'paylaş', accent: true }],
+    subtitle: 'Her seansa 0-100 Odak Skoru + XP ve coin ödülleri',
+    // durum çubuğundaki "< Instagram" geri-dönüş yazısını kapat
+    patch: { left: 0, top: 86, width: 270, height: 60, color: '#050508' },
+  },
+  {
     src: 'WhatsApp Image 2026-07-13 at 19.45.06 (1).jpeg', out: '02-home.png',
     title: [{ t: 'Hedef koy, ' }, { t: 'serini yakala', accent: true }],
     subtitle: 'Günlük hedef, haftalık challenge ve evcil dostun',
@@ -89,7 +101,15 @@ const jobs = [
 
 (async () => {
   for (const j of jobs) {
-    const shot = await sharp(path.join(IMG, j.src))
+    let base = sharp(path.join(IMG, j.src));
+    if (j.patch) {
+      const p = j.patch;
+      const rect = Buffer.from(`<svg width="${p.width}" height="${p.height}"
+        xmlns="http://www.w3.org/2000/svg"><rect width="${p.width}" height="${p.height}"
+        fill="${p.color}"/></svg>`);
+      base = sharp(await base.composite([{ input: rect, left: p.left, top: p.top }]).toBuffer());
+    }
+    const shot = await base
       .resize(SW, SH, { fit: 'fill' })
       .composite([{ input: maskSvg, blend: 'dest-in' }])
       .png().toBuffer();
