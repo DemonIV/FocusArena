@@ -1,0 +1,89 @@
+<!-- @dsCard group="Shop" name="Coin paketi modalı (IAP)" -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: rgba(0,0,0,0.7);
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 40px 20px;
+    display: grid; place-items: end center;
+    min-height: 100vh;
+  }
+  .sheet {
+    width: 100%; max-width: 400px;
+    background: #131325;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px 28px 0 0;
+    padding: 24px;
+    color: #e2e8f0;
+  }
+  .handle { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.15); margin: 0 auto 20px; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+  .pack {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .pack.best { border-color: rgba(255,215,0,0.5); background: rgba(255,215,0,0.06); }
+  .badge {
+    position: absolute; top: -9px; right: 14px;
+    background: #ffd700; color: #131325;
+    font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    padding: 3px 10px; border-radius: 10px;
+  }
+  .ic { font-size: 30px; }
+  .amt { flex: 1; }
+  .coins { font-size: 17px; font-weight: 800; color: #ffd700; }
+  .bonus { font-size: 11px; color: #10b981; font-weight: 700; margin-top: 2px; }
+  .buy {
+    background: #00d2ff18; border: 1px solid #00d2ff55;
+    color: #00d2ff; font-size: 14px; font-weight: 800;
+    padding: 10px 16px; border-radius: 12px;
+  }
+  .pack.best .buy { background: #ffd70020; border-color: #ffd70066; color: #ffd700; }
+  .foot { color: #64748b; font-size: 11px; text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="handle"></div>
+  <h2>🪙 Coin Paketi</h2>
+  <div class="sub">Coin ile çerçeve ve kozmetik alabilirsin — XP'ne dokunulmaz</div>
+
+  <div class="pack">
+    <div class="ic">🪙</div>
+    <div class="amt"><div class="coins">1.000 Coin</div></div>
+    <div class="buy">₺29,99</div>
+  </div>
+
+  <div class="pack">
+    <div class="ic">💰</div>
+    <div class="amt">
+      <div class="coins">5.500 Coin</div>
+      <div class="bonus">+%10 bonus</div>
+    </div>
+    <div class="buy">₺129,99</div>
+  </div>
+
+  <div class="pack best">
+    <div class="badge">EN AVANTAJLI</div>
+    <div class="ic">🏆</div>
+    <div class="amt">
+      <div class="coins">12.000 Coin</div>
+      <div class="bonus">+%20 bonus</div>
+    </div>
+    <div class="buy">₺249,99</div>
+  </div>
+
+  <div class="foot">Odaklanarak da coin kazanabilirsin — her seans XP kadar coin verir</div>
+</div>
+</body>
+</html>

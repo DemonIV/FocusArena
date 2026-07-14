@@ -1,5 +1,8 @@
 // StudySquad App Store kareleri — "Nebula" pazarlama çerçevesi v2
 // Koyu uzay + yıldız alanı + yörünge/kuyruklu yıldız imzası + eğik telefon mockup'ı
+// ⚠️ EN seti için ÇALIŞTIRMA — en/ + en/6p5 artık compose-en.js ile üretiliyor
+//    (telefon içerikleri İngilizce HTML rebuild, 8 kare). Bu script'in 'en' çıktıları BAYAT.
+//    TR seti hâlâ buradan üretiliyor (kaynak: gerçek TR ekran görüntüleri, 7 kare).
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');

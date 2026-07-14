@@ -247,7 +247,16 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 28 — 🖼️ Mağaza görselleri + ASC panel doldurma (13 Temmuz) ⭐ EN GÜNCEL
+### Faz 29 — 🇬🇧 EN ekran görüntüleri v3: telefon içerikleri İngilizce + Oda karesi (14 Temmuz) ⭐ EN GÜNCEL
+
+- **EN set tamamen yeniden üretildi — artık 8 kare** (`en/` + `en/6p5/`; eski 7 kare silindi): telefon içerikleri de İngilizce (önceden çerçeve EN ama ekranlar TR'ydi). Kaynak gerçek ekran görüntüsü değil, **yüksek sadakatli HTML rebuild**: `docs/app-store/screenshots/screens-en/*.html` (360×780, `_base.css` ortak) → headless Chrome render (`render-en.ps1`, `--force-device-scale-factor=3` → 1080×2340) → `compose-en.js` (compose.js'in EN-only kopyası, aynı Nebula çerçevesi). Sahte ama inandırıcı pazarlama verisi: "Maya" personası, 12🔥 seri, global #3, Lv 12, yabancı isimler (Emma/Kenji/Sofia/Liam/Noah/Ava).
+- **YENİ 1. kare: Study Rooms** (kullanıcı istedi) — manşet **"Study together, online & offline"**; 6 üyeli "Finals Squad" odası (sen + 5 yabancı isim), focusing/online/offline karışık durumlar, davet kodu + kütüphane odağı; referans: kullanıcının attığı IMG_7204.PNG (Odalar ekranı).
+- Yeni sıra: 01-rooms · 02-timer · 03-home · 04-leaderboard · 05-stats · 06-calendar · 07-store · 08-receipt. Timer karesinin manşeti "Deep focus, beautifully timed" oldu (sosyal vaat artık rooms karesinde).
+- ⚠️ **compose.js EN için ARTIK ÇALIŞTIRILMAMALI** (eski TR-içerikli EN görsellerini geri yazar; script başına not eklendi). EN = `compose-en.js`. **TR seti hâlâ 7 kare/eski tasarım** — eşitlemek istenirse screens-en HTML'leri TR'ye çevirip aynı akıştan geçirmek yeterli.
+- HTML ekranlar **Claude Design'a yüklendi** ("Design System" projesi → `store-screens-en/`, 9 dosya, @dsCard'lı). Ayrıca aynı projedeki eski 5 kozmetik mockup repo'ya indirildi: `docs/design/frames|shop/`.
+- **ASC'ye sürüklenecek dosyalar artık**: `docs/app-store/screenshots/en/6p5/` — **8 PNG, 1284×2778** (doğrulandı).
+
+### Faz 28 — 🖼️ Mağaza görselleri + ASC panel doldurma (13 Temmuz)
 Commits: `be65c9d`, `6ba0154`, `928637e`, `e0c858e` · ASC panel Claude-in-Chrome ile dolduruldu
 
 - **Ekran görüntüleri TAMAM (7 kare × 2 dil)**: kullanıcı iPhone'dan çekti (Timer+Receipt tam çözünürlük "belge" olarak geldi — WhatsApp normal gönderim 945px'e sıkıştırıyor, belge sıkıştırmıyor: DERS). "Nebula" pazarlama çerçevesi tasarlandı: koyu uzay gradyanı + yıldız alanı + kuyruklu yıldız/yörünge imzası + eyebrow pill + 2 satır gradyan manşet + −3° eğik telefon mockup'ı (alt kenardan taşan). Üretici: `docs/app-store/screenshots/compose.js` (sharp; **tspan boşlukları için `xml:space="preserve"` ŞART** — NBSP bile yutuluyor). Çıktılar: `tr/`+`en/` (1290×2796 master) ve `tr/6p5/`+`en/6p5/` (1284×2778 — ASC bu app'te 6.5" slot istiyor, 1290×2796 listede yok). 07-receipt kaynağındaki "◀ Instagram" durum çubuğu yazısı yamayla kapatıldı. 1. kare sosyal vaat: TR "Arkadaşlarınla ders çalış" / EN "Study with your friends" (kullanıcı vurgu istedi).
@@ -255,7 +264,7 @@ Commits: `be65c9d`, `6ba0154`, `928637e`, `e0c858e` · ASC panel Claude-in-Chrom
 - **ASC panel dolduruldu (Claude tarayıcıyı kullandı)**: App Information (isim+subtitle "Focus timer with friends"+Education/Productivity+content rights) ✓ · **Age Ratings yeni 7 adımlı anket → 13+** (Contests=**Frequent** dürüst beyan — leaderboard/challenge çekirdek özellik; Afganistan+Fas'ta satılmıyor, önemsiz) ✓ · Pricing Free + 175 ülke availability ✓ · **App Privacy YAYINLANDI** (7 veri tipi: Email/UserID/Purchases/ProductInteraction/OtherUserContent=linked, Crash+Performance=not linked, tracking=NO; privacy URL) ✓ · Version 1.0: promo+description+keywords+support URL+copyright (EN) ✓, **build 10 bağlandı** ✓, review notları+demo kullanıcı adı+iletişim adı/e-postası ✓, **Manually release** seçili ✓.
 - **Tuzaklar**: Claude'un `file_upload` aracı disk yolu kabul etmiyor → görselleri KULLANICI sürükle-bırak yapacak. ASC custom checkbox'larda `form_input` çalışmıyor → ref ile `left_click`. Uzun metin type'ları CDP timeout veriyor ama arka planda tamamlanıyor (bekle + doğrula, tekrar yazma).
 - **SONRAKİ OTURUM (ASC'de kalınan yer — hepsi kayıtlı, devam edilebilir)**:
-  1. Kullanıcı: EN sayfasına `docs/app-store/screenshots/en/6p5/` 7 PNG sürükle-bırak; **Password** (demo: Passw0rd123) + **Phone number** doldur → Save
+  1. Kullanıcı: EN sayfasına `docs/app-store/screenshots/en/6p5/` **8 PNG** sürükle-bırak (Faz 29 v3 seti — içerikler İngilizce); **Password** (demo: Passw0rd123) + **Phone number** doldur → Save
   2. Claude: Turkish lokalizasyonu ekle (dil menüsü sağ üstte) → TR isim/subtitle/description/keywords/promo (metadata.md'de hazır) → kullanıcı `tr/6p5/` setini sürükler
   3. **Add for Review → Submit** (24-48 saat inceleme)
   4. İnceleme sürerken: v1.1 işleri (Sınav Ligi + iOS IAP: RC Apple app + `appl_` key + subscription group + paywall legal linkleri)

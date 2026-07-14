@@ -1,0 +1,166 @@
+﻿<!-- @dsCard group="Store Screens EN" name="01 - Rooms - study together" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .btnrow { display: flex; gap: 12px; }
+  .btn {
+    flex: 1; height: 52px; border-radius: 16px;
+    display: grid; place-items: center;
+    font-size: 15px; font-weight: 700;
+  }
+  .btn.create { background: #47182A; color: #FF7A8E; border: 1px solid #6B2038; }
+  .btn.join { background: #0D1524; color: #DCE6F5; border: 1px solid rgba(120,160,220,0.22); }
+  .roomcard { margin-top: 16px; padding: 18px; opacity: 0.5; }
+  .rc-top { display: flex; justify-content: space-between; align-items: center; }
+  .rc-name { font-size: 19px; font-weight: 700; }
+  .chip {
+    font-size: 12px; font-weight: 700; color: #FFD76A;
+    background: rgba(255,215,106,0.09); border: 1px solid rgba(255,215,106,0.25);
+    padding: 4px 10px; border-radius: 12px;
+  }
+  .rc-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .rc-sub { font-size: 13px; color: #7C879C; }
+  .del {
+    font-size: 13px; font-weight: 700; color: #FF6B7E;
+    border: 1px solid rgba(255,107,126,0.4); border-radius: 10px; padding: 6px 14px;
+  }
+  .dim { position: absolute; inset: 0; background: rgba(3,3,8,0.55); z-index: 20; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; top: 172px; z-index: 30;
+    background: #12132B;
+    border-radius: 26px 26px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.09);
+    padding: 18px 18px 0;
+  }
+  .sh-name { font-size: 21px; font-weight: 700; }
+  .sh-meta { font-size: 13px; color: #8B96AC; margin-top: 5px; }
+  .sh-meta b { color: #B9C4D8; font-weight: 600; }
+  .codebox {
+    margin-top: 12px; background: #0C1B31; border: 1px solid rgba(34,211,238,0.18);
+    border-radius: 14px; padding: 8px 0 10px; text-align: center;
+  }
+  .codelabel { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #6E86A8; }
+  .code { font-size: 26px; font-weight: 800; letter-spacing: 7px; color: #22D3EE; margin-top: 3px; }
+  .libchip {
+    margin-top: 9px; background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+    padding: 8px 14px; font-size: 13.5px; font-weight: 600; color: #D8E0EE;
+  }
+  .members { margin-top: 6px; }
+  .mrow {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.055);
+    border-radius: 13px; padding: 5.5px 12px; margin-bottom: 6px;
+  }
+  .mrow.me { border-color: rgba(34,211,238,0.35); background: rgba(34,211,238,0.06); }
+  .medal { width: 22px; font-size: 15px; text-align: center; }
+  .ranknum { font-size: 12.5px; font-weight: 800; color: #6C7890; }
+  .avwrap { position: relative; width: 38px; height: 38px; display: grid; place-items: center; }
+  .avring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid; }
+  .av {
+    width: 31px; height: 31px; border-radius: 50%;
+    background: rgba(34,211,238,0.12); color: #22D3EE;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700;
+  }
+  .minfo { flex: 1; min-width: 0; }
+  .mname { font-size: 14.5px; font-weight: 600; }
+  .mname .you { color: #22D3EE; font-weight: 700; }
+  .mstate { font-size: 11.5px; margin-top: 1px; font-weight: 600; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .focusing { color: #22D3EE; } .focusing .dot { background: #22D3EE; box-shadow: 0 0 6px #22D3EE; }
+  .online { color: #34D399; } .online .dot { background: #34D399; }
+  .offline { color: #6C7890; } .offline .dot { background: #4A5468; }
+  .mhours { font-size: 15px; font-weight: 800; color: #22D3EE; }
+  .mhours.dimh { color: #8B96AC; }
+</style>
+</head>
+<body>
+
+<div class="topzone">
+  <div class="status"><span class="st-time">21:15</span>
+    <span class="st-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+    </span>
+  </div>
+  <div class="hdr">Rooms</div>
+</div>
+
+<div class="content">
+  <div class="btnrow">
+    <div class="btn create">+ Create Room</div>
+    <div class="btn join">🔗 Join with Code</div>
+  </div>
+  <div class="card roomcard">
+    <div class="rc-top">
+      <span class="rc-name">Finals Squad</span>
+      <span class="chip">👑 Owner</span>
+    </div>
+    <div class="rc-meta">
+      <span class="rc-sub">👥 6/10 · Tap for details</span>
+      <span class="del">Delete</span>
+    </div>
+  </div>
+</div>
+
+<div class="dim"></div>
+
+<div class="sheet">
+  <div class="sh-name">Finals Squad</div>
+  <div class="sh-meta">🔒 Private · 👥 <b>6/10</b></div>
+
+  <div class="codebox">
+    <div class="codelabel">INVITE CODE</div>
+    <div class="code">SQD4F8B2</div>
+  </div>
+
+  <div class="libchip">📚 Library focus today: <b style="color:#22D3EE">14h 27m</b></div>
+
+  <div class="seclabel" style="margin-top:12px; margin-bottom:8px">MEMBERS</div>
+  <div class="members">
+    <div class="mrow me">
+      <span class="medal">🥇</span>
+      <span class="avwrap"><span class="avring" style="border-color:#FFD700; box-shadow:0 0 7px rgba(255,215,0,0.5)"></span><span class="av">M</span></span>
+      <span class="minfo"><div class="mname">Maya 🦄 <span class="you">(You)</span></div><div class="mstate focusing"><span class="dot"></span>focusing now</div></span>
+      <span class="mhours">4h 12m</span>
+    </div>
+    <div class="mrow">
+      <span class="medal">🥈</span>
+      <span class="avwrap"><span class="avring" style="border-color:#FF2EC4"></span><span class="av" style="color:#FF7ADB;background:rgba(255,46,196,0.12)">E</span></span>
+      <span class="minfo"><div class="mname">Emma</div><div class="mstate focusing"><span class="dot"></span>focusing now</div></span>
+      <span class="mhours">3h 45m</span>
+    </div>
+    <div class="mrow">
+      <span class="medal">🥉</span>
+      <span class="avwrap"><span class="avring" style="border-color:#A78BFA"></span><span class="av" style="color:#C4B5FD;background:rgba(167,139,250,0.12)">K</span></span>
+      <span class="minfo"><div class="mname">Kenji</div><div class="mstate online"><span class="dot"></span>online</div></span>
+      <span class="mhours">3h 08m</span>
+    </div>
+    <div class="mrow">
+      <span class="medal"><span class="ranknum">4</span></span>
+      <span class="avwrap"><span class="av" style="color:#FCA5A5;background:rgba(248,113,113,0.12)">S</span></span>
+      <span class="minfo"><div class="mname">Sofia</div><div class="mstate online"><span class="dot"></span>online</div></span>
+      <span class="mhours">2h 21m</span>
+    </div>
+    <div class="mrow">
+      <span class="medal"><span class="ranknum">5</span></span>
+      <span class="avwrap"><span class="av" style="color:#86EFAC;background:rgba(52,211,153,0.10)">L</span></span>
+      <span class="minfo"><div class="mname">Liam</div><div class="mstate offline"><span class="dot"></span>💤 offline</div></span>
+      <span class="mhours dimh">1h 34m</span>
+    </div>
+    <div class="mrow">
+      <span class="medal"><span class="ranknum">6</span></span>
+      <span class="avwrap"><span class="av" style="color:#FDE68A;background:rgba(253,230,138,0.10)">N</span></span>
+      <span class="minfo"><div class="mname">Noah</div><div class="mstate offline"><span class="dot"></span>💤 offline</div></span>
+      <span class="mhours dimh">47m</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

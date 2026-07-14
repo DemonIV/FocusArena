@@ -1,0 +1,98 @@
+<!-- @dsCard group="Frames" name="Timer çerçeveleri — 11 kademe" -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0d1a;
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 28px;
+    color: #e2e8f0;
+  }
+  h1 { font-size: 13px; letter-spacing: 3px; color: #64748b; font-weight: 700; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .card {
+    background: #131325;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px 12px 16px;
+    text-align: center;
+  }
+  .ringwrap { position: relative; width: 92px; height: 92px; margin: 0 auto 12px; }
+  .ring {
+    position: absolute; inset: 10px;
+    border-radius: 50%;
+    border: 5px solid;
+    background: rgba(255,255,255,0.03);
+  }
+  .ring2 { position: absolute; inset: 0; border-radius: 50%; border: 2px solid; }
+  .name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .price { font-size: 11px; font-weight: 800; color: #ffd700; }
+  .free .price { color: #64748b; }
+</style>
+</head>
+<body>
+<h1>ÇERÇEVE KATALOĞU — 🪙 COIN İLE</h1>
+<div class="grid">
+  <div class="card free">
+    <div class="ringwrap"><div class="ring" style="border-color:#00d2ff; box-shadow:0 0 14px #00d2ff66;"></div></div>
+    <div class="name">Varsayılan</div><div class="price">Ücretsiz</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#cd7f32; box-shadow:0 0 14px #cd7f3266;"></div></div>
+    <div class="name">Bronz</div><div class="price">🪙 100</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#c8d0dc; box-shadow:0 0 14px #c8d0dc66;"></div></div>
+    <div class="name">Gümüş</div><div class="price">🪙 1.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#ffd700; box-shadow:0 0 14px #ffd70066;"></div></div>
+    <div class="name">Altın</div><div class="price">🪙 2.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#10b981; box-shadow:0 0 16px #34d39977;"></div></div>
+    <div class="name">Zümrüt</div><div class="price">🪙 3.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#ef4444; box-shadow:0 0 16px #f8717177;"></div></div>
+    <div class="name">Yakut</div><div class="price">🪙 4.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#3b82f6; box-shadow:0 0 16px #60a5fa77;"></div></div>
+    <div class="name">Safir</div><div class="price">🪙 5.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#8b5cf6; box-shadow:0 0 16px #a78bfa77;"></div></div>
+    <div class="name">Ametist</div><div class="price">🪙 6.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap"><div class="ring" style="border-color:#ff2ec4; box-shadow:0 0 20px #ff5ed299;"></div></div>
+    <div class="name">Neon</div><div class="price">🪙 7.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap">
+      <div class="ring2" style="border-color:#a78bfa88;"></div>
+      <div class="ring" style="border-color:#7df9ff; box-shadow:0 0 20px #a78bfa99;"></div>
+    </div>
+    <div class="name">Aurora</div><div class="price">🪙 8.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap">
+      <div class="ring2" style="border-color:#ffb70388;"></div>
+      <div class="ring" style="border-color:#ff6b1a; box-shadow:0 0 20px #ffb70399;"></div>
+    </div>
+    <div class="name">Alev</div><div class="price">🪙 9.000</div>
+  </div>
+  <div class="card">
+    <div class="ringwrap">
+      <div class="ring2" style="border-color:#ff2ec488;"></div>
+      <div class="ring" style="border-color:#ffd700; box-shadow:0 0 24px #ff2ec499;"></div>
+    </div>
+    <div class="name">Efsane</div><div class="price">🪙 10.000</div>
+  </div>
+</div>
+</body>
+</html>

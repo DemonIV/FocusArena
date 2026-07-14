@@ -1,0 +1,112 @@
+﻿<!-- @dsCard group="Store Screens EN" name="06 - Monthly calendar" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .mhead { display: flex; justify-content: space-between; align-items: center; margin: 4px 2px 2px; }
+  .mtitle { font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
+  .x { font-size: 20px; color: #8B96AC; }
+  .nav { display: flex; justify-content: space-between; align-items: center; margin: 12px 26px 14px; }
+  .arrow { font-size: 20px; font-weight: 700; color: #22D3EE; }
+  .arrow.dim2 { color: #55617A; }
+  .month { font-size: 19px; font-weight: 700; }
+  .calcard { padding: 14px 12px 4px; }
+  .wk { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-bottom: 8px; }
+  .wd { text-align: center; font-size: 11.5px; font-weight: 700; color: #6C7890; }
+  .cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+  .day {
+    aspect-ratio: 1/1.02; border-radius: 10px; background: #171930;
+    display: grid; place-items: center;
+    font-size: 13.5px; font-weight: 700; color: #C6CFDF;
+  }
+  .day.blank { background: transparent; }
+  .a1 { background: #0E4A5E; }
+  .a2 { background: #0E7490; }
+  .a3 { background: #22D3EE; color: #06222B; }
+  .day.sel { background: #22D3EE; color: #06222B; outline: 2.5px solid #EDF1F7; outline-offset: 1px; }
+  .day.today { outline: 2px solid #FFB020; outline-offset: -2px; }
+  .dayline {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 12px 4px 0; padding: 12px 4px 10px;
+  }
+  .dltitle { font-size: 15px; font-weight: 700; }
+  .dltitle b { color: #22D3EE; }
+  .dlrow { display: flex; align-items: center; gap: 9px; margin-top: 9px; font-size: 14px; }
+  .dot2 { width: 9px; height: 9px; border-radius: 50%; }
+  .dlrow .t { margin-left: auto; font-weight: 800; color: #22D3EE; font-size: 14px; }
+  .sumrow { display: flex; gap: 10px; margin-top: 14px; }
+  .sum { flex: 1; padding: 14px 6px; text-align: center; }
+  .sumnum { font-size: 17px; font-weight: 800; color: #22D3EE; }
+  .sumname { font-size: 11px; color: #8B96AC; margin-top: 4px; }
+  .subj { padding: 12px 14px; margin-bottom: 9px; }
+  .srow { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 600; }
+  .srow .t { margin-left: auto; font-weight: 800; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="topzone">
+  <div class="status"><span class="st-time">21:15</span>
+    <span class="st-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+    </span>
+  </div>
+</div>
+
+<div class="content" style="padding-top:10px">
+  <div class="mhead">
+    <span class="mtitle">📅 Maya</span>
+    <span class="x">✕</span>
+  </div>
+  <div class="nav">
+    <span class="arrow">‹</span>
+    <span class="month">July 2026</span>
+    <span class="arrow dim2">›</span>
+  </div>
+
+  <div class="card calcard">
+    <div class="wk"><span class="wd">Mo</span><span class="wd">Tu</span><span class="wd">We</span><span class="wd">Th</span><span class="wd">Fr</span><span class="wd">Sa</span><span class="wd">Su</span></div>
+    <div class="cal">
+      <span class="day blank"></span><span class="day blank"></span>
+      <span class="day a1">1</span><span class="day">2</span><span class="day a2">3</span><span class="day a1">4</span><span class="day">5</span>
+      <span class="day a2">6</span><span class="day">7</span><span class="day a1">8</span><span class="day a3">9</span><span class="day a2">10</span><span class="day a3">11</span><span class="day sel">12</span>
+      <span class="day today">13</span><span class="day">14</span><span class="day">15</span><span class="day">16</span><span class="day">17</span><span class="day">18</span><span class="day">19</span>
+      <span class="day">20</span><span class="day">21</span><span class="day">22</span><span class="day">23</span><span class="day">24</span><span class="day">25</span><span class="day">26</span>
+      <span class="day">27</span><span class="day">28</span><span class="day">29</span><span class="day">30</span><span class="day">31</span><span class="day blank"></span><span class="day blank"></span>
+    </div>
+
+    <div class="dayline">
+      <div class="dltitle">July 12, 2026 · <b>4h 32m</b></div>
+      <div class="dlrow"><span class="dot2" style="background:#FF4D5E"></span>📚 Math <span class="t">2h 10m</span></div>
+      <div class="dlrow"><span class="dot2" style="background:#22D3EE"></span>📚 Physics <span class="t">1h 22m</span></div>
+      <div class="dlrow"><span class="dot2" style="background:#A78BFA"></span>📚 Biology <span class="t">1h 00m</span></div>
+    </div>
+  </div>
+
+  <div class="sumrow">
+    <div class="card sum"><div class="sumnum">62h 40m</div><div class="sumname">Total focus</div></div>
+    <div class="card sum"><div class="sumnum">18</div><div class="sumname">Active days</div></div>
+    <div class="card sum"><div class="sumnum">6h 12m</div><div class="sumname">Best day</div></div>
+  </div>
+
+  <div class="seclabel">SUBJECTS</div>
+  <div class="card subj">
+    <div class="srow"><span class="dot2" style="background:#FF4D5E"></span>📚 Math <span class="t">24h 06m</span></div>
+    <div class="bar" style="margin-top:9px"><i style="width:92%; background:#FF4D5E"></i></div>
+  </div>
+  <div class="card subj">
+    <div class="srow"><span class="dot2" style="background:#22D3EE"></span>📚 Physics <span class="t">21h 40m</span></div>
+    <div class="bar" style="margin-top:9px"><i style="width:82%; background:#22D3EE"></i></div>
+  </div>
+  <div class="card subj">
+    <div class="srow"><span class="dot2" style="background:#A78BFA"></span>📚 Biology <span class="t">16h 54m</span></div>
+    <div class="bar" style="margin-top:9px"><i style="width:64%; background:#A78BFA"></i></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+﻿<!-- @dsCard group="Store Screens EN" name="03 - Home - goals + streak" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .welcome { display: flex; align-items: center; gap: 12px; margin: 4px 2px 14px; }
+  .wav {
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 2px solid #22D3EE; background: rgba(34,211,238,0.10);
+    display: grid; place-items: center; font-size: 19px; font-weight: 700; color: #22D3EE;
+  }
+  .winfo { flex: 1; }
+  .whi { font-size: 12.5px; color: #8B96AC; }
+  .wname { font-size: 21px; font-weight: 700; margin-top: 1px; }
+  .lv {
+    font-size: 13px; font-weight: 700; color: #22D3EE;
+    border: 1.5px solid rgba(34,211,238,0.5); border-radius: 16px; padding: 6px 13px;
+  }
+  .petcard { display: flex; align-items: center; gap: 14px; padding: 16px; }
+  .pet { font-size: 44px; line-height: 1; }
+  .petinfo { flex: 1; }
+  .petrow { display: flex; align-items: center; gap: 8px; }
+  .petname { font-size: 17px; font-weight: 700; }
+  .stage {
+    font-size: 11px; font-weight: 700; color: #22D3EE;
+    background: rgba(34,211,238,0.10); border: 1px solid rgba(34,211,238,0.35);
+    padding: 3px 9px; border-radius: 10px;
+  }
+  .petbar { margin: 8px 0 6px; }
+  .pethint { font-size: 12px; color: #8B96AC; }
+  .chall {
+    margin-top: 12px; padding: 15px 16px;
+    border-color: rgba(255,77,103,0.35); background: rgba(255,77,103,0.045);
+  }
+  .chrow { display: flex; justify-content: space-between; align-items: center; }
+  .chtitle { font-size: 15.5px; font-weight: 700; color: #FF5D75; }
+  .chleft { font-size: 12px; color: #8B96AC; }
+  .chnum { margin-top: 9px; font-size: 21px; font-weight: 800; }
+  .chnum small { font-size: 14px; font-weight: 600; color: #8B96AC; }
+  .chbar { margin: 9px 0 8px; }
+  .chhint { font-size: 12px; color: #9AA5BA; }
+  .goal { margin-top: 12px; padding: 15px 16px; }
+  .glabel { font-size: 11px; font-weight: 700; letter-spacing: 2.5px; color: #6C7890; }
+  .grow { display: flex; justify-content: space-between; align-items: center; }
+  .gnum { font-size: 21px; font-weight: 800; margin-top: 6px; }
+  .gnum small { font-size: 14px; font-weight: 600; color: #8B96AC; }
+  .gpct { font-size: 21px; font-weight: 800; color: #22D3EE; }
+  .statrow { display: flex; gap: 10px; }
+  .scard { flex: 1; padding: 14px 4px; text-align: center; }
+  .snum { font-size: 20px; font-weight: 800; }
+  .sname { font-size: 9.5px; font-weight: 700; letter-spacing: 1.8px; color: #6C7890; margin-top: 4px; }
+  .shield {
+    margin-top: 12px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,176,32,0.07); border: 1px solid rgba(255,176,32,0.35);
+    border-radius: 14px; padding: 12px 15px;
+    font-size: 13.5px; font-weight: 700; color: #FFB020;
+  }
+</style>
+</head>
+<body>
+
+<div class="topzone">
+  <div class="status"><span class="st-time">21:15</span>
+    <span class="st-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+    </span>
+  </div>
+  <div class="hdr">StudySquad</div>
+</div>
+
+<div class="content">
+  <div class="welcome">
+    <div class="wav">M</div>
+    <div class="winfo">
+      <div class="whi">Welcome back,</div>
+      <div class="wname">Maya</div>
+    </div>
+    <div class="lv">Lv 12</div>
+  </div>
+
+  <div class="card petcard">
+    <div class="pet">🦄</div>
+    <div class="petinfo">
+      <div class="petrow"><span class="petname">Sparkle</span><span class="stage">Baby</span></div>
+      <div class="bar petbar"><i style="width:72%; background:#22D3EE; box-shadow:0 0 8px rgba(34,211,238,0.6)"></i></div>
+      <div class="pethint">1h 20m of focus until it evolves</div>
+    </div>
+  </div>
+
+  <div class="card chall">
+    <div class="chrow">
+      <span class="chtitle">⚔️ Weekly Challenge</span>
+      <span class="chleft">6d 4h left</span>
+    </div>
+    <div class="chnum">1,240 <small>/ 2,100 min</small></div>
+    <div class="bar chbar"><i style="width:59%; background:#FF5D75"></i></div>
+    <div class="chhint">🪙 Complete the weekly goal → +300</div>
+  </div>
+
+  <div class="card goal">
+    <div class="grow">
+      <div>
+        <div class="glabel">DAILY GOAL</div>
+        <div class="gnum">3h 24m <small>/ 5h</small></div>
+      </div>
+      <div class="gpct">68%</div>
+    </div>
+    <div class="bar" style="margin-top:9px"><i style="width:68%; background:#22D3EE; box-shadow:0 0 8px rgba(34,211,238,0.6)"></i></div>
+  </div>
+
+  <div class="seclabel">TODAY'S STATS</div>
+  <div class="statrow">
+    <div class="card scard"><div class="snum" style="color:#22D3EE">4</div><div class="sname">SESSIONS</div></div>
+    <div class="card scard"><div class="snum" style="color:#FF5D75">3h 24m</div><div class="sname">FOCUS TIME</div></div>
+    <div class="card scard"><div class="snum" style="color:#FFB020">12 🔥</div><div class="sname">STREAK</div></div>
+  </div>
+
+  <div class="shield"><span>🛡️ Protect your 12-day streak</span><span>›</span></div>
+</div>
+
+<div class="tabbar">
+  <div class="tab on"><span class="ic">🏠</span>Home</div>
+  <div class="tab"><span class="ic">⏱️</span>Timer</div>
+  <div class="tab"><span class="ic">🏆</span>Ranks</div>
+  <div class="tab"><span class="ic">🚪</span>Rooms</div>
+  <div class="tab"><span class="ic">👥</span>Friends</div>
+  <div class="tab"><span class="ic">👤</span>Profile</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+﻿<!-- @dsCard group="Store Screens EN" name="07 - Frame + Pet shop" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .subjcard { display: flex; align-items: center; gap: 12px; padding: 13px 14px; margin-bottom: 11px; }
+  .sic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; }
+  .sinfo { flex: 1; }
+  .sname2 { font-size: 16px; font-weight: 700; }
+  .smeta { font-size: 12.5px; color: #8B96AC; margin-top: 2px; }
+  .sacts { display: grid; gap: 7px; font-size: 14px; text-align: center; }
+  .shophead { display: flex; justify-content: space-between; align-items: center; margin: 16px 2px 10px; }
+  .shophead .seclabel { margin: 0; }
+  .coinpill {
+    font-size: 14px; font-weight: 800; color: #FFD76A;
+    background: rgba(255,215,106,0.08); border: 1px solid rgba(255,215,106,0.4);
+    padding: 6px 14px; border-radius: 18px;
+  }
+  .framerow { display: flex; gap: 10px; overflow: hidden; }
+  .fcard {
+    min-width: 101px; width: 101px; padding: 13px 6px 11px;
+    text-align: center; border-radius: 15px;
+    background: #12142A; border: 1.5px solid rgba(255,255,255,0.08);
+  }
+  .fcard.sel { border-color: rgba(255,215,0,0.55); background: rgba(255,215,0,0.04); }
+  .fring { position: relative; width: 50px; height: 50px; margin: 0 auto 9px; display: grid; place-items: center; }
+  .fr1 { width: 40px; height: 40px; border-radius: 50%; border: 3.5px solid; }
+  .fr2 { position: absolute; inset: 0; border-radius: 50%; border: 2px solid; }
+  .fname { font-size: 12.5px; font-weight: 700; }
+  .fst { font-size: 11.5px; font-weight: 600; color: #8B96AC; margin-top: 3px; }
+  .fst.on { color: #22D3EE; font-weight: 700; }
+  .fpr { font-size: 11.5px; font-weight: 800; color: #FFD76A; margin-top: 3px; }
+  .hint { font-size: 11.5px; color: #6C7890; margin: 10px 2px 0; }
+  .petrow { display: flex; gap: 10px; }
+  .pcard {
+    flex: 1; text-align: center; padding: 16px 6px 13px;
+    border-radius: 16px; background: #12142A;
+  }
+  .pemoji { font-size: 42px; line-height: 1; }
+  .pname { font-size: 14.5px; font-weight: 700; margin-top: 9px; }
+  .prarity { font-size: 10px; font-weight: 800; letter-spacing: 2px; margin-top: 4px; }
+  .ppr { font-size: 12.5px; font-weight: 800; color: #FFD76A; margin-top: 5px; }
+  .foot { font-size: 11px; color: #6C7890; margin: 12px 2px 0; line-height: 1.45; }
+  .credit { font-size: 9.5px; color: #4E5870; margin: 6px 2px 0; }
+</style>
+</head>
+<body>
+
+<div class="topzone">
+  <div class="status"><span class="st-time">21:15</span>
+    <span class="st-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+    </span>
+  </div>
+  <div class="hdr">Profile</div>
+</div>
+
+<div class="content">
+  <div class="card subjcard" style="border-left: 4px solid #FF4D5E">
+    <div class="sic" style="background:rgba(255,77,94,0.10)">📚</div>
+    <div class="sinfo">
+      <div class="sname2">Math</div>
+      <div class="smeta"><b style="color:#FF5D6E">4h 13m</b> · 12 sessions</div>
+      <div class="bar" style="margin-top:7px"><i style="width:82%; background:#FF4D5E"></i></div>
+    </div>
+    <div class="sacts"><span>✏️</span><span>🗑️</span></div>
+  </div>
+  <div class="card subjcard" style="border-left: 4px solid #22D3EE">
+    <div class="sic" style="background:rgba(34,211,238,0.10)">📚</div>
+    <div class="sinfo">
+      <div class="sname2">Physics</div>
+      <div class="smeta"><b style="color:#22D3EE">3h 19m</b> · 9 sessions</div>
+      <div class="bar" style="margin-top:7px"><i style="width:64%; background:#22D3EE"></i></div>
+    </div>
+    <div class="sacts"><span>✏️</span><span>🗑️</span></div>
+  </div>
+
+  <div class="shophead">
+    <div class="seclabel">FRAME SHOP</div>
+    <div class="coinpill">🪙 12,450</div>
+  </div>
+  <div class="framerow">
+    <div class="fcard">
+      <div class="fring"><span class="fr1" style="border-color:#22D3EE"></span></div>
+      <div class="fname">Default</div><div class="fst">Select</div>
+    </div>
+    <div class="fcard">
+      <div class="fring"><span class="fr2" style="border-color:rgba(255,46,196,0.7)"></span><span class="fr1" style="border-color:#22D3EE"></span></div>
+      <div class="fname">Prism</div><div class="fst">Select</div>
+    </div>
+    <div class="fcard sel">
+      <div class="fring"><span class="fr1" style="border-color:#FFD700; box-shadow:0 0 10px rgba(255,215,0,0.5)"></span></div>
+      <div class="fname">Royal</div><div class="fst on">✓ Selected</div>
+    </div>
+    <div class="fcard">
+      <div class="fring"><span class="fr2" style="border-color:rgba(167,139,250,0.6)"></span><span class="fr1" style="border-color:#7DF9FF"></span></div>
+      <div class="fname">Aurora</div><div class="fpr">🪙 8,000</div>
+    </div>
+  </div>
+  <div class="hint">🪙 Every completed session earns coins equal to your XP</div>
+
+  <div class="seclabel" style="margin-top:18px">PET SHOP</div>
+  <div class="petrow">
+    <div class="pcard" style="border:1.5px solid rgba(96,165,250,0.45)">
+      <div class="pemoji">🦊</div>
+      <div class="pname">Fox</div>
+      <div class="prarity" style="color:#60A5FA">RARE</div>
+      <div class="ppr">🪙 15,000</div>
+    </div>
+    <div class="pcard" style="border:1.5px solid rgba(167,139,250,0.5)">
+      <div class="pemoji">🦉</div>
+      <div class="pname">Owl</div>
+      <div class="prarity" style="color:#A78BFA">EPIC</div>
+      <div class="ppr">🪙 25,000</div>
+    </div>
+    <div class="pcard" style="border:1.5px solid rgba(255,197,61,0.5)">
+      <div class="pemoji">🐉</div>
+      <div class="pname">Dragon</div>
+      <div class="prarity" style="color:#FFC53D">LEGENDARY</div>
+      <div class="ppr">🪙 50,000</div>
+    </div>
+  </div>
+  <div class="foot">🐾 Your pet lives on your Home screen and appears next to your name on leaderboards</div>
+  <div class="credit">Animations: Google Noto Animated Emoji (CC BY 4.0)</div>
+</div>
+
+<div class="tabbar">
+  <div class="tab"><span class="ic">🏠</span>Home</div>
+  <div class="tab"><span class="ic">⏱️</span>Timer</div>
+  <div class="tab"><span class="ic">🏆</span>Ranks</div>
+  <div class="tab"><span class="ic">🚪</span>Rooms</div>
+  <div class="tab"><span class="ic">👥</span>Friends</div>
+  <div class="tab on"><span class="ic">👤</span>Profile</div>
+</div>
+
+</body>
+</html>

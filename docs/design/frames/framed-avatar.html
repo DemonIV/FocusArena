@@ -1,0 +1,90 @@
+<!-- @dsCard group="Social" name="Leaderboard avatar çerçeveleri" -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0d1a;
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 28px;
+    color: #e2e8f0;
+    max-width: 420px;
+  }
+  h1 { font-size: 13px; letter-spacing: 3px; color: #64748b; font-weight: 700; margin-bottom: 18px; }
+  .row {
+    display: flex; align-items: center; gap: 14px;
+    background: #131325;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+  }
+  .row.me { border-color: #00d2ff55; background: #00d2ff0d; }
+  .rank { width: 28px; font-size: 16px; text-align: center; }
+  .ranknum { color: #64748b; font-weight: 800; font-size: 14px; }
+  .avwrap { position: relative; width: 48px; height: 48px; display: grid; place-items: center; }
+  .av {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #00d2ff18; color: #00d2ff;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 16px; z-index: 2;
+  }
+  .avring { position: absolute; width: 45px; height: 45px; border-radius: 50%; border: 2px solid; }
+  .avring2 { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid; }
+  .info { flex: 1; }
+  .uname { font-size: 15px; font-weight: 600; }
+  .score { font-size: 12px; color: #64748b; margin-top: 2px; }
+</style>
+</head>
+<body>
+<h1>LEADERBOARD — ÇERÇEVELER GÖRÜNÜR</h1>
+
+<div class="row">
+  <div class="rank">🥇</div>
+  <div class="avwrap">
+    <div class="avring2" style="border-color:#ff2ec488;"></div>
+    <div class="avring" style="border-color:#ffd700; box-shadow:0 0 8px #ff2ec4aa;"></div>
+    <div class="av">E</div>
+  </div>
+  <div class="info"><div class="uname">efsane_hoca</div><div class="score">12.450 XP</div></div>
+</div>
+
+<div class="row">
+  <div class="rank">🥈</div>
+  <div class="avwrap">
+    <div class="avring" style="border-color:#ff2ec4; box-shadow:0 0 8px #ff5ed2aa;"></div>
+    <div class="av">N</div>
+  </div>
+  <div class="info"><div class="uname">neon_ninja</div><div class="score">9.870 XP</div></div>
+</div>
+
+<div class="row me">
+  <div class="rank">🥉</div>
+  <div class="avwrap">
+    <div class="avring" style="border-color:#ffd700; box-shadow:0 0 8px #ffd700aa;"></div>
+    <div class="av">S</div>
+  </div>
+  <div class="info"><div class="uname">sen (altın)</div><div class="score">7.640 XP</div></div>
+</div>
+
+<div class="row">
+  <div class="rank"><span class="ranknum">4</span></div>
+  <div class="avwrap">
+    <div class="avring" style="border-color:#cd7f32; box-shadow:0 0 8px #cd7f32aa;"></div>
+    <div class="av">B</div>
+  </div>
+  <div class="info"><div class="uname">bronz_baslangic</div><div class="score">5.120 XP</div></div>
+</div>
+
+<div class="row">
+  <div class="rank"><span class="ranknum">5</span></div>
+  <div class="avwrap">
+    <div class="av">Ç</div>
+  </div>
+  <div class="info"><div class="uname">cercevesiz_calisan</div><div class="score">4.980 XP</div></div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+﻿<!-- @dsCard group="Store Screens EN" name="02 - Focus Timer" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .h1row { display: flex; justify-content: space-between; align-items: center; margin: 6px 2px 0; }
+  .h1 { font-size: 23px; font-weight: 700; }
+  .subj {
+    display: flex; align-items: center; gap: 7px;
+    background: #14152C; border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px; padding: 7px 14px;
+    font-size: 14px; font-weight: 600;
+  }
+  .subj .d { width: 9px; height: 9px; border-radius: 50%; background: #FF4D5E; }
+  .circwrap { display: grid; place-items: center; margin: 18px 0 10px; }
+  .center {
+    position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  }
+  .time { font-size: 46px; font-weight: 800; color: #FFC53D; letter-spacing: 1px; text-shadow: 0 0 24px rgba(255,197,61,0.35); }
+  .fbadge {
+    display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; letter-spacing: 3.5px;
+    color: #FFC53D; background: rgba(255,197,61,0.10); padding: 5px 14px; border-radius: 14px;
+  }
+  .zen {
+    margin: 6px 0 14px; height: 52px; border-radius: 16px;
+    background: rgba(139,92,246,0.10); border: 1px solid rgba(139,92,246,0.45);
+    display: grid; place-items: center;
+    font-size: 16px; font-weight: 700; color: #B9A0FA;
+  }
+  .stats { display: flex; padding: 15px 0; text-align: center; }
+  .stat { flex: 1; }
+  .stat + .stat { border-left: 1px solid rgba(255,255,255,0.07); }
+  .stlabel { font-size: 10.5px; font-weight: 700; letter-spacing: 2.5px; color: #6C7890; }
+  .stval { font-size: 19px; font-weight: 700; margin-top: 4px; }
+  .btns { display: flex; gap: 12px; margin-top: 14px; }
+  .cbtn {
+    flex: 1; height: 54px; border-radius: 16px;
+    display: grid; place-items: center; font-size: 17px; font-weight: 700;
+  }
+  .pause { background: rgba(255,197,61,0.07); border: 1px solid rgba(255,197,61,0.4); color: #FFB020; }
+  .finish { background: rgba(255,77,94,0.06); border: 1px solid rgba(255,77,94,0.4); color: #FF5D6E; }
+</style>
+</head>
+<body>
+
+<div class="topzone">
+  <div class="status"><span class="st-time">21:15</span>
+    <span class="st-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+    </span>
+  </div>
+  <div class="hdr">Timer</div>
+</div>
+
+<div class="content">
+  <div class="h1row">
+    <span class="h1">Focus Timer</span>
+    <span class="subj"><span class="d"></span>Math</span>
+  </div>
+
+  <div class="circwrap">
+    <div style="position:relative; width:280px; height:280px;">
+      <svg width="280" height="280" viewBox="0 0 280 280">
+        <defs>
+          <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FFC53D"/><stop offset="1" stop-color="#FFB020"/>
+          </linearGradient>
+          <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0.55" stop-color="#FFC53D" stop-opacity="0"/>
+            <stop offset="0.8" stop-color="#FFC53D" stop-opacity="0.07"/>
+            <stop offset="1" stop-color="#FFC53D" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="140" cy="140" r="140" fill="url(#halo)"/>
+        <!-- outer violet orbit -->
+        <circle cx="140" cy="140" r="132" fill="none" stroke="#8B5CF6" stroke-opacity="0.55" stroke-width="2.5"
+                stroke-dasharray="540 290" stroke-linecap="round" transform="rotate(-64 140 140)"/>
+        <circle cx="52" cy="52" r="4" fill="#A78BFA" opacity="0.8"/>
+        <circle cx="236" cy="196" r="3.4" fill="#A78BFA" opacity="0.55"/>
+        <!-- tick dial -->
+        <g stroke="#39415A" stroke-width="2.4" stroke-linecap="round" opacity="0.85">
+          <line x1="140" y1="30" x2="140" y2="42"/><line x1="195" y1="44.7" x2="189" y2="55.1"/>
+          <line x1="235.3" y1="85" x2="224.9" y2="91"/><line x1="250" y1="140" x2="238" y2="140"/>
+          <line x1="235.3" y1="195" x2="224.9" y2="189"/><line x1="195" y1="235.3" x2="189" y2="224.9"/>
+          <line x1="140" y1="250" x2="140" y2="238"/><line x1="85" y1="235.3" x2="91" y2="224.9"/>
+          <line x1="44.7" y1="195" x2="55.1" y2="189"/><line x1="30" y1="140" x2="42" y2="140"/>
+          <line x1="44.7" y1="85" x2="55.1" y2="91"/><line x1="85" y1="44.7" x2="91" y2="55.1"/>
+        </g>
+        <g stroke="#FFC53D" stroke-width="2.4" stroke-linecap="round" opacity="0.9">
+          <line x1="140" y1="30" x2="140" y2="42"/><line x1="85" y1="44.7" x2="91" y2="55.1"/>
+          <line x1="44.7" y1="85" x2="55.1" y2="91"/><line x1="30" y1="140" x2="42" y2="140"/>
+          <line x1="44.7" y1="195" x2="55.1" y2="189"/>
+        </g>
+        <!-- track -->
+        <circle cx="140" cy="140" r="110" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+        <!-- progress arc ~52% -->
+        <circle cx="140" cy="140" r="110" fill="none" stroke="url(#pg)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="359 332" transform="rotate(-90 140 140)"
+                style="filter: drop-shadow(0 0 8px rgba(255,197,61,0.5))"/>
+        <!-- comet head at arc end (52% => 97.2deg from top) -->
+        <g transform="rotate(97.2 140 140)">
+          <circle cx="140" cy="30" r="11" fill="#FFC53D" opacity="0.25"/>
+          <circle cx="140" cy="30" r="6.5" fill="#FFC53D" opacity="0.7"/>
+          <circle cx="140" cy="30" r="3.2" fill="#FFFFFF"/>
+        </g>
+      </svg>
+      <div class="center">
+        <div>
+          <div class="time">21:37</div>
+          <span class="fbadge">FOCUSING</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="zen">🧘 Zen Mode</div>
+
+  <div class="card stats">
+    <div class="stat"><div class="stlabel">DURATION</div><div class="stval">45m</div></div>
+    <div class="stat"><div class="stlabel">ELAPSED</div><div class="stval">23m</div></div>
+    <div class="stat"><div class="stlabel">LEFT</div><div class="stval" style="color:#22D3EE">22m</div></div>
+  </div>
+
+  <div class="btns">
+    <div class="cbtn pause">⏸️ Pause</div>
+    <div class="cbtn finish">⏹️ Finish</div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <div class="tab"><span class="ic">🏠</span>Home</div>
+  <div class="tab on"><span class="ic">⏱️</span>Timer</div>
+  <div class="tab"><span class="ic">🏆</span>Ranks</div>
+  <div class="tab"><span class="ic">🚪</span>Rooms</div>
+  <div class="tab"><span class="ic">👥</span>Friends</div>
+  <div class="tab"><span class="ic">👤</span>Profile</div>
+</div>
+
+</body>
+</html>
