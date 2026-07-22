@@ -257,6 +257,22 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
   - Tuzaklar: ASC ekran görüntüsü yüklemesi **otomatik kaydolur** (Save gri kalır, panik yok). `form_input` uzun textarea'da sessizce başarısız → **tıkla + ctrl+a + type** kullan; uzun type CDP timeout verir ama ~60 sn'de tamamlanır (bekle, tekrar yazma). **Sürükleyerek yeniden sıralama sentetik fare olaylarıyla ÇALIŞMIYOR** → sırayı kullanıcı elle düzeltir (ya da Delete All + sırayla tek tek sürükleme).
   - ⏸️ **"Add for Review" AKTİF ama BASILMADI** — kullanıcı önce **oda karesini yeniden tasarlamak** istedi (referans görsel bekleniyor). Görsel gelince: `screens-tr/01-rooms.html` güncelle → render+compose → TR (ve gerekiyorsa EN) kareyi ASC'de değiştir → Submit.
 
+### 📋 SIRADAKİ PLAN — 🏠 Oda ekranı "canlı varlık" yenilemesi (Faz 31 olacak, HENÜZ BAŞLANMADI)
+
+> Kullanıcı isteği (22 Temmuz): uygulamanın **gerçek Oda detay ekranı** mağaza karesindeki gibi görünsün + üyelerin **online/offline durumu**, offline'lar için **"3 saat önce"** (son timer başlangıcına göre) ve **yanlarında çalıştıkları süre**. Referans: `docs/app-store/screenshots/en/6p5/01-rooms.png`.
+
+**Mevcut durum (kod okundu):** `getRoomMembers` (backend/src/modules/rooms/rooms.service.ts:103) üyeleri + Redis presence (`studying|break|offline`, TTL 5 dk) + `room_member_minutes.total_minutes` (oda-kümülatif) döndürüyor. Mobilde `RoomsScreen.tsx:274-345` detay modalı bunları listeliyor (dakikaya göre sıralı, durum renkli). **Eksik:** son görülme zamanı ve günlük dakika.
+
+**Adımlar:**
+1. **Backend — `lastSessionAt`**: `getRoomMembers`'a üye id'leri için `sessions` tablosundan **en son `started_at`** (kullanıcı başına 1 satır) eklenir. Redis presence TTL'i dolunca bilgi kaybolduğu için kaynak DB olmalı; kullanıcı da açıkça "timerı en son başlattığı zaman" dedi. Ek migration YOK (gerekirse `sessions(user_id, started_at desc)` indeksi).
+2. **Backend — `todayMinutes`**: üye başına **bugünün** odak dakikası (mevcut `localDayStart` + `utc_offset_minutes` yardımcılarıyla, Faz 20). Oda başlığındaki "bugünkü odak" = bu değerlerin toplamı. `totalMinutes` (oda-kümülatif) korunur, ikincil bilgi olarak kalır.
+   - **KARAR GEREKLİ**: sıralama ve satırdaki büyük rakam **bugün** mü **oda-kümülatif** mi olsun? Öneri: **bugün** (canlı yarış hissi), kümülatif küçük alt metin.
+3. **Durum merdiveni** (mağaza karesindeki dil): `studying` → "şu an odakta" (cyan) · `break` → "çevrimiçi" (mint) · `offline` + son seans <12sa → **"3 saat önce"** (ember) · daha eski/hiç → "dün / X gün önce" (slate). Göreli zaman biçimlendirme mobilde (`utils/`), i18n'e `relative.*` anahtarları (az önce / X dk önce / X saat önce / dün / X gün önce) **10 dilde**.
+4. **Mobil UI** (`RoomsScreen.tsx` detay modalı): satırlar mağaza karesindeki gibi — duruma göre renkli avatar halkası, isim + durum satırı, sağda süre (tabular rakam, birimler küçük), ilk 3'te madalya, "(Sen)" vurgusu. Başlıkta oda adı + 🔒 + üye sayısı, davet kodu kutusu, **"odanın bugünkü odağı"** + üye renkleriyle yığılmış pay çubuğu (TR mağaza karesindeki tasarım).
+5. **Doğrulama**: backend+mobil `tsc`; Fly deploy; cihazda 2 test hesabıyla (biri odakta, biri offline) kontrol.
+
+**Notlar:** gizlilik açısından bu veri zaten yalnız oda üyelerine görünür (oda-kapsamlı endpoint) — ek koruma gerekmez. Tahmini efor: backend ~½ gün, mobil ~½ gün + i18n.
+
 ### Faz 29 — 🇬🇧 EN ekran görüntüleri v3: telefon içerikleri İngilizce + Oda karesi (14 Temmuz)
 
 - **EN set tamamen yeniden üretildi — artık 8 kare** (`en/` + `en/6p5/`; eski 7 kare silindi): telefon içerikleri de İngilizce (önceden çerçeve EN ama ekranlar TR'ydi). Kaynak gerçek ekran görüntüsü değil, **yüksek sadakatli HTML rebuild**: `docs/app-store/screenshots/screens-en/*.html` (360×780, `_base.css` ortak) → headless Chrome render (`render-en.ps1`, `--force-device-scale-factor=3` → 1080×2340) → `compose-en.js` (compose.js'in EN-only kopyası, aynı Nebula çerçevesi). Sahte ama inandırıcı pazarlama verisi: "Maya" personası, 12🔥 seri, global #3, Lv 12, yabancı isimler (Emma/Kenji/Sofia/Liam/Noah/Ava).
