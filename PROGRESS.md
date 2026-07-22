@@ -266,7 +266,7 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 **Adımlar:**
 1. **Backend — `lastSessionAt`**: `getRoomMembers`'a üye id'leri için `sessions` tablosundan **en son `started_at`** (kullanıcı başına 1 satır) eklenir. Redis presence TTL'i dolunca bilgi kaybolduğu için kaynak DB olmalı; kullanıcı da açıkça "timerı en son başlattığı zaman" dedi. Ek migration YOK (gerekirse `sessions(user_id, started_at desc)` indeksi).
 2. **Backend — `todayMinutes`**: üye başına **bugünün** odak dakikası (mevcut `localDayStart` + `utc_offset_minutes` yardımcılarıyla, Faz 20). Oda başlığındaki "bugünkü odak" = bu değerlerin toplamı. `totalMinutes` (oda-kümülatif) korunur, ikincil bilgi olarak kalır.
-   - **KARAR GEREKLİ**: sıralama ve satırdaki büyük rakam **bugün** mü **oda-kümülatif** mi olsun? Öneri: **bugün** (canlı yarış hissi), kümülatif küçük alt metin.
+   - ✅ **KARAR VERİLDİ (kullanıcı, 22 Temmuz)**: satırdaki büyük rakam ve **sıralama = BUGÜNÜN dakikası**. Oda-kümülatif (`totalMinutes`) küçük ikincil metin olarak kalır. Madalyalar da günlük sıralamaya göre → her gün yarış sıfırlanır.
 3. **Durum merdiveni** (mağaza karesindeki dil): `studying` → "şu an odakta" (cyan) · `break` → "çevrimiçi" (mint) · `offline` + son seans <12sa → **"3 saat önce"** (ember) · daha eski/hiç → "dün / X gün önce" (slate). Göreli zaman biçimlendirme mobilde (`utils/`), i18n'e `relative.*` anahtarları (az önce / X dk önce / X saat önce / dün / X gün önce) **10 dilde**.
 4. **Mobil UI** (`RoomsScreen.tsx` detay modalı): satırlar mağaza karesindeki gibi — duruma göre renkli avatar halkası, isim + durum satırı, sağda süre (tabular rakam, birimler küçük), ilk 3'te madalya, "(Sen)" vurgusu. Başlıkta oda adı + 🔒 + üye sayısı, davet kodu kutusu, **"odanın bugünkü odağı"** + üye renkleriyle yığılmış pay çubuğu (TR mağaza karesindeki tasarım).
 5. **Doğrulama**: backend+mobil `tsc`; Fly deploy; cihazda 2 test hesabıyla (biri odakta, biri offline) kontrol.
@@ -312,6 +312,19 @@ Commits: `3aad06f` (legal+metadata), `4c2a214` (buildNumber 10)
   3. Build 10'u (`ec3089a7`, ASC'de işlendi) versiyona bağla → **Submit for Review** ("Manually release" seçili)
   4. İnceleme beklerken (24-48s): v1.1 işleri — Sınav Ligi + iOS IAP kurulumu (RC Apple app + `appl_` key + ASC subscription group + paywall'a Terms/Privacy linkleri)
   5. Play Console en sona ertelendi (kullanıcı kararı)
+
+### 📝 Oturum Özeti — 2026-07-22 (TR mağaza seti + ASC Türkçe lokalizasyon)
+
+**Yapılanlar (hepsi main'de, push'landı):**
+1. **Faz 30 — TR ekran görüntüleri v3** (`9e21fa8`): EN ile eşitlendi, 8 kare (`tr/` + `tr/6p5/` 1284×2778). Boru hattı `translate-tr.js → render-tr.ps1 → compose-tr.js`. **01-rooms TR elle tasarlandı** (4 üye, varlık merdiveni, yığılmış pay çubuğu). 4 bug düzeltildi (rgba bozan regex, pet dipnotu taşması, "Tüm Zamanlar"→"Tümü", "FOCUSING"→"ODAKTA").
+2. **ASC v1.0 sayfası tamamlandı** (`0f1f035`): Türkçe lokalizasyon (Version 1.0 metinleri + App Information adı/altyazısı), kullanıcı 16 görseli sürükledi (EN 8 + TR 8, doğru sırada), Sign-In şifresi + telefon dolduruldu. Yayın şekli **Automatically release** (kullanıcı kararı, eski plan manuel'di).
+3. **Sıradaki plan yazıldı** (`d008c64` + bu commit): Oda ekranı canlı varlık yenilemesi ↑ (Faz 31 olacak). Kullanıcı kararı: **satır rakamı + sıralama = bugünün dakikası**.
+
+**⏸️ KALDIĞIMIZ YER — SONRAKİ OTURUMUN İLK İŞİ:**
+- ASC'de **"Add for Review" AKTİF ama BASILMADI**. Her şey hazır (build 10 bağlı, metadata + görseller + demo hesap tam). Kullanıcı önce Oda ekranı yenilemesini görmek istedi. **Submit kararı kullanıcının** — mağaza görselleri uygulamadaki değişiklikten etkilenmiyor, istenirse hemen gönderilebilir.
+- Sonra: Faz 31 (Oda ekranı) → ardından v1.1 işleri (Sınav Ligi + iOS IAP).
+
+**Öğrenilen ASC tuzakları** (bir sonraki tarayıcı oturumunda hatırla): ekran görüntüsü yüklemesi otomatik kaydolur (Save gri kalır — hata değil); `form_input` uzun textarea'da sessizce başarısız olur → tıkla+ctrl+a+type; uzun type CDP timeout verir ama ~60 sn içinde tamamlanır (bekle, tekrar yazma); **sürükleyerek yeniden sıralama sentetik fare olaylarıyla çalışmıyor** → kullanıcı elle sıralar.
 
 ### 📝 Oturum Özeti — 2026-07-11 (Faz 24 + TAZE BUILD'LER)
 
