@@ -1,0 +1,104 @@
+﻿<!-- @dsCard group="Store Screens TR" name="08 - Study Receipt" -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  body { background: #040409; }
+  .ghost { position: absolute; inset: 0; opacity: 0.25; }
+  .ghost .hdr { color: #8B96AC; }
+  .rcard {
+    position: relative; z-index: 10;
+    margin: 66px 22px 0;
+    background: #0D0F20;
+    border: 1.5px solid #22D3EE;
+    border-radius: 24px;
+    padding: 24px 20px 20px;
+    box-shadow: 0 0 44px rgba(34,211,238,0.16);
+    overflow: hidden;
+  }
+  .glow {
+    position: absolute; top: -130px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(15,68,88,0.75) 0%, rgba(15,68,88,0) 68%);
+  }
+  .brand { position: relative; text-align: center; font-size: 20px; font-weight: 800; color: #22D3EE; }
+  .divider { width: 56px; height: 3px; background: #16697F; border-radius: 2px; margin: 13px auto; }
+  .big { position: relative; text-align: center; font-size: 52px; font-weight: 800; letter-spacing: 0.5px; }
+  .bigsub { text-align: center; font-size: 13px; letter-spacing: 3.5px; color: #8B96AC; margin-top: 2px; }
+  .rewards { display: flex; justify-content: center; gap: 13px; margin-top: 17px; font-size: 14.5px; font-weight: 800; white-space: nowrap; }
+  .score {
+    margin-top: 18px; background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 14px 15px;
+  }
+  .scrow { display: flex; justify-content: space-between; align-items: baseline; }
+  .sctitle { font-size: 15.5px; font-weight: 700; }
+  .scval { font-size: 24px; font-weight: 800; color: #34D399; }
+  .scval small { font-size: 13px; font-weight: 600; color: #8B96AC; }
+  .comp { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .cname { width: 84px; font-size: 12.5px; color: #9AA5BA; }
+  .cbar { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .cbar i { display: block; height: 100%; border-radius: 3px; }
+  .cval { width: 28px; text-align: right; font-size: 13px; font-weight: 700; }
+  .rank { text-align: center; font-size: 15.5px; font-weight: 700; margin-top: 16px; }
+  .url { text-align: center; font-size: 12.5px; color: #6C7890; margin-top: 12px; letter-spacing: 1px; }
+  .share {
+    position: relative; z-index: 10;
+    margin: 20px 22px 0; height: 56px; border-radius: 18px;
+    background: #22D3EE;
+    display: grid; place-items: center;
+    font-size: 17.5px; font-weight: 800; color: #05222B;
+    box-shadow: 0 0 34px rgba(34,211,238,0.45);
+  }
+  .close { position: relative; z-index: 10; text-align: center; font-size: 15px; font-weight: 600; color: #9AA5BA; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="ghost">
+  <div class="topzone" style="background:transparent;border:none">
+    <div class="status"><span class="st-time">21:15</span>
+      <span class="st-icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+      </span>
+    </div>
+    <div class="hdr">Zamanlayıcı</div>
+  </div>
+  <div style="position:absolute; bottom:118px; left:16px; right:16px; height:56px; border-radius:16px; background:rgba(255,255,255,0.05)"></div>
+  <div style="position:absolute; bottom:44px; left:16px; right:16px; height:56px; border-radius:16px; background:rgba(255,255,255,0.045); display:grid; place-items:center; font-size:15px; color:#9AA5BA">📚 Konu Seç (isteğe bağlı)</div>
+</div>
+
+<div class="rcard">
+  <div class="glow"></div>
+  <div class="brand">⚡ StudySquad</div>
+  <div class="divider"></div>
+  <div class="big">1sa 45dk</div>
+  <div class="bigsub">ODAKLANILDI</div>
+  <div class="rewards">
+    <span style="color:#22D3EE">+1.050 XP</span>
+    <span style="color:#FFD76A">🪙 +1.050</span>
+    <span style="color:#FF5D75">🔥 12. gün</span>
+  </div>
+
+  <div class="score">
+    <div class="scrow">
+      <span class="sctitle">🎯 Odak Skoru</span>
+      <span class="scval">92<small>/100</small></span>
+    </div>
+    <div class="comp"><span class="cname">Tamamlama</span><span class="cbar"><i style="width:100%; background:#34D399"></i></span><span class="cval">100</span></div>
+    <div class="comp"><span class="cname">Varlık</span><span class="cbar"><i style="width:95%; background:#34D399"></i></span><span class="cval">95</span></div>
+    <div class="comp"><span class="cname">İstikrar</span><span class="cbar"><i style="width:84%; background:#FFC53D"></i></span><span class="cval">84</span></div>
+  </div>
+
+  <div class="rank">Küresel Sıra: #3</div>
+  <div class="url">studysquad.app</div>
+</div>
+
+<div class="share">📤 Paylaş</div>
+<div class="close">Kapat</div>
+
+</body>
+</html>

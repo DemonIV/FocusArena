@@ -247,7 +247,14 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 29 — 🇬🇧 EN ekran görüntüleri v3: telefon içerikleri İngilizce + Oda karesi (14 Temmuz) ⭐ EN GÜNCEL
+### Faz 30 — 🇹🇷 TR ekran görüntüleri v3 + yeni Oda karesi tasarımı (22 Temmuz) ⭐ EN GÜNCEL
+
+- **TR set EN ile eşitlendi — artık 8 kare** (`tr/` + `tr/6p5/`; eski 7 kare/eski tasarım silindi). Boru hattı: `translate-tr.js` (screens-en → screens-tr) → `render-tr.ps1` (headless Chrome, 360×780 @3x → 1080×2340) → `compose-tr.js` (Nebula çerçevesi, TR manşetler). **ASC'ye sürüklenecek: `docs/app-store/screenshots/tr/6p5/` — 8 PNG, 1284×2778 (doğrulandı).**
+- **🆕 01-rooms TR ELLE TASARLANDI** (EN'deki 6 üyeli listenin çevirisi değil): 4 üyeli "YKS Ekibi" — **varlık merdiveni** tasarım fikri: odakta (cyan) → çevrimiçi (mint) → 4 saat önce (ember) → dün (slate); aynı renkler hem avatar halkasında hem de "odanın bugünkü odağı 9sa 25dk" altındaki tek yığılmış pay çubuğunda → liste ile çubuk tek sistem. Üye satırlarında bugün çalışılan süre (tabular-nums, birimler küçük). `translate-tr.js`'te `HANDMADE` seti var → **01-rooms.html çeviriden geçmez, üzerine yazılmaz.**
+- **🐛 translate-tr.js bug'ı düzeltildi**: binlik ayracı regex'i (`1,240→1.240`) CSS'teki `rgba(255,215,106,…)` değerlerini `rgba(255.215,…)` yapıp renkleri bozuyordu (hem `<style>` hem inline `style=`). Fix: lookbehind ile serbest sayı şartı (`(?<![\d.,(])`). Ayrıca TR metin taşmaları düzeltildi: pet dipnotu tek satıra kısaldı, "Tüm Zamanlar"→"Tümü", timer rozeti "FOCUSING"→"ODAKTA".
+- ⚠️ `compose.js` artık **ne EN ne TR** için çalıştırılmamalı (arşiv); EN=`compose-en.js`, TR=`compose-tr.js`. `sharp` repoda bağımlılık değil — scratchpad'e `npm i sharp` + `NODE_PATH` ile çalıştırılıyor.
+
+### Faz 29 — 🇬🇧 EN ekran görüntüleri v3: telefon içerikleri İngilizce + Oda karesi (14 Temmuz)
 
 - **EN set tamamen yeniden üretildi — artık 8 kare** (`en/` + `en/6p5/`; eski 7 kare silindi): telefon içerikleri de İngilizce (önceden çerçeve EN ama ekranlar TR'ydi). Kaynak gerçek ekran görüntüsü değil, **yüksek sadakatli HTML rebuild**: `docs/app-store/screenshots/screens-en/*.html` (360×780, `_base.css` ortak) → headless Chrome render (`render-en.ps1`, `--force-device-scale-factor=3` → 1080×2340) → `compose-en.js` (compose.js'in EN-only kopyası, aynı Nebula çerçevesi). Sahte ama inandırıcı pazarlama verisi: "Maya" personası, 12🔥 seri, global #3, Lv 12, yabancı isimler (Emma/Kenji/Sofia/Liam/Noah/Ava).
 - **YENİ 1. kare: Study Rooms** (kullanıcı istedi) — manşet **"Study together, online & offline"**; 6 üyeli "Finals Squad" odası (sen + 5 yabancı isim), focusing/online/offline karışık durumlar, davet kodu + kütüphane odağı; referans: kullanıcının attığı IMG_7204.PNG (Odalar ekranı).

@@ -2,7 +2,9 @@
 // Koyu uzay + yıldız alanı + yörünge/kuyruklu yıldız imzası + eğik telefon mockup'ı
 // ⚠️ EN seti için ÇALIŞTIRMA — en/ + en/6p5 artık compose-en.js ile üretiliyor
 //    (telefon içerikleri İngilizce HTML rebuild, 8 kare). Bu script'in 'en' çıktıları BAYAT.
-//    TR seti hâlâ buradan üretiliyor (kaynak: gerçek TR ekran görüntüleri, 7 kare).
+// ⚠️ TR seti için de ÇALIŞTIRMA — tr/ + tr/6p5 artık compose-tr.js ile üretiliyor
+//    (translate-tr.js -> screens-tr -> render-tr.ps1 -> compose-tr.js, 8 kare).
+//    Bu dosya yalnızca arşiv/referans: eski 7 kare gerçek ekran görüntülerinden üretiliyordu.
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');

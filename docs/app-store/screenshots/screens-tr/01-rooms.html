@@ -1,0 +1,246 @@
+<!-- @dsCard group="Store Screens TR" name="01 - Odalar - birlikte calis" -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* ——— arka plan: Odalar listesi ——— */
+  .btnrow { display: flex; gap: 12px; }
+  .btn {
+    flex: 1; height: 52px; border-radius: 16px;
+    display: grid; place-items: center;
+    font-size: 15px; font-weight: 700;
+  }
+  .btn.create { background: #47182A; color: #FF7A8E; border: 1px solid #6B2038; }
+  .btn.join { background: #0D1524; color: #DCE6F5; border: 1px solid rgba(120,160,220,0.22); }
+  .roomcard { margin-top: 16px; padding: 18px; opacity: 0.5; }
+  .rc-top { display: flex; justify-content: space-between; align-items: center; }
+  .rc-name { font-size: 19px; font-weight: 700; }
+  .chip {
+    font-size: 12px; font-weight: 700; color: #FFD76A;
+    background: rgba(255,215,106,0.09); border: 1px solid rgba(255,215,106,0.25);
+    padding: 4px 10px; border-radius: 12px;
+  }
+  .rc-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .rc-sub { font-size: 13px; color: #7C879C; }
+  .del {
+    font-size: 13px; font-weight: 700; color: #FF6B7E;
+    border: 1px solid rgba(255,107,126,0.4); border-radius: 10px; padding: 6px 14px;
+  }
+  .dim { position: absolute; inset: 0; background: rgba(3,3,8,0.62); z-index: 20; }
+
+  /* ——— oda detay sayfası ——— */
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; top: 150px; z-index: 30;
+    background: linear-gradient(178deg, #141733 0%, #0E1026 46%, #0B0D1E 100%);
+    border-radius: 28px 28px 0 0;
+    border-top: 1px solid rgba(160,190,255,0.14);
+    box-shadow: 0 -22px 60px rgba(0,0,0,0.55);
+    padding: 12px 20px 0;
+    overflow: hidden;
+  }
+  .sheet::before { /* üstte ince cyan ışık */
+    content: ''; position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+    width: 420px; height: 240px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(34,211,238,0.20), rgba(34,211,238,0));
+  }
+  .grab { width: 42px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.16); margin: 0 auto 16px; }
+
+  .titlerow { display: flex; align-items: center; gap: 9px; }
+  .sh-name { font-size: 23px; font-weight: 800; letter-spacing: -0.3px; }
+  .pill {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.4px; color: #93A2BC;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px; padding: 3.5px 9px;
+  }
+  .codeline { margin-top: 7px; font-size: 12.5px; color: #75839C; font-weight: 600; }
+  .codeline b {
+    color: #22D3EE; font-weight: 800; letter-spacing: 2.4px; margin-left: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* hero: günün toplamı + varlık çubuğu */
+  .hero { margin-top: 20px; }
+  .eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: 2.6px; color: #64748B; }
+  .herorow { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 7px; }
+  .total {
+    font-size: 44px; font-weight: 800; letter-spacing: -1.6px; line-height: 1;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(96deg, #E8F6FF 12%, #7DD3FC 92%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .total small { font-size: 19px; font-weight: 700; letter-spacing: 0; margin: 0 8px 0 2px; }
+  .total small:last-child { margin-right: 0; }
+  .livenow { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #22D3EE; padding-bottom: 5px; }
+  .livedot {
+    width: 8px; height: 8px; border-radius: 50%; background: #22D3EE;
+    box-shadow: 0 0 0 4px rgba(34,211,238,0.16), 0 0 10px rgba(34,211,238,0.9);
+  }
+
+  .share { display: flex; gap: 3px; margin-top: 14px; height: 8px; }
+  .share > i { display: block; height: 100%; border-radius: 4px; }
+  .sharenote { margin-top: 9px; font-size: 11.5px; color: #6B7891; }
+
+  /* üyeler */
+  .seclabel2 {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10.5px; font-weight: 800; letter-spacing: 2.6px; color: #64748B;
+    margin: 24px 0 10px;
+  }
+  .seclabel2 span { letter-spacing: 0.2px; font-weight: 600; color: #55617A; font-size: 11px; }
+
+  .mrow {
+    display: flex; align-items: center; gap: 13px;
+    padding: 11px 13px; margin-bottom: 8px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .mrow.me {
+    background: linear-gradient(90deg, rgba(34,211,238,0.11), rgba(34,211,238,0.03));
+    border-color: rgba(34,211,238,0.30);
+  }
+  .avwrap { position: relative; width: 42px; height: 42px; display: grid; place-items: center; flex: none; }
+  .avring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid transparent; }
+  .av {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 14px; font-weight: 800;
+  }
+  .minfo { flex: 1; min-width: 0; }
+  .mname { font-size: 15px; font-weight: 700; letter-spacing: -0.1px; }
+  .mname .you { color: #22D3EE; font-weight: 800; font-size: 13px; }
+  .mstate { font-size: 11.5px; margin-top: 2px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6.5px; height: 6.5px; border-radius: 50%; flex: none; }
+  .mhours {
+    font-size: 16.5px; font-weight: 800; color: #E6EDF8; letter-spacing: -0.4px;
+    font-variant-numeric: tabular-nums; text-align: right;
+  }
+  .mhours small { font-size: 11.5px; font-weight: 700; color: #7C879C; margin-left: 1.5px; }
+  .mhours.away { color: #96A2B8; }
+  .mhours.away small { color: #616D85; }
+
+  /* varlık merdiveni renkleri */
+  .s-focus { color: #22D3EE; } .s-focus .dot { background: #22D3EE; box-shadow: 0 0 8px #22D3EE; }
+  .s-online { color: #34D399; } .s-online .dot { background: #34D399; box-shadow: 0 0 7px rgba(52,211,153,0.75); }
+  .s-recent { color: #E0A458; } .s-recent .dot { background: #E0A458; }
+  .s-far { color: #64708A; } .s-far .dot { background: #47526B; }
+
+  .footnote {
+    position: absolute; left: 20px; right: 20px; bottom: 20px;
+    text-align: center; font-size: 12px; color: #5D6A83; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="topzone">
+  <div class="status"><span class="st-time">21:15</span>
+    <span class="st-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+    </span>
+  </div>
+  <div class="hdr">Odalar</div>
+</div>
+
+<div class="content">
+  <div class="btnrow">
+    <div class="btn create">+ Oda Kur</div>
+    <div class="btn join">🔗 Kodla Katıl</div>
+  </div>
+  <div class="card roomcard">
+    <div class="rc-top">
+      <span class="rc-name">YKS Ekibi</span>
+      <span class="chip">👑 Sahip</span>
+    </div>
+    <div class="rc-meta">
+      <span class="rc-sub">👥 4/10 · Detay için dokun</span>
+      <span class="del">Sil</span>
+    </div>
+  </div>
+</div>
+
+<div class="dim"></div>
+
+<div class="sheet">
+  <div class="grab"></div>
+
+  <div class="titlerow">
+    <span class="sh-name">YKS Ekibi</span>
+    <span class="pill">🔒 Gizli</span>
+    <span class="pill">👥 4/10</span>
+  </div>
+  <div class="codeline">Davet kodu<b>SQD4F8B2</b></div>
+
+  <div class="hero">
+    <div class="eyebrow">ODANIN BUGÜNKÜ ODAĞI</div>
+    <div class="herorow">
+      <div class="total">9<small>sa</small>25<small>dk</small></div>
+      <div class="livenow"><span class="livedot"></span>2 kişi şu an burada</div>
+    </div>
+    <div class="share">
+      <i style="flex:200; background:linear-gradient(90deg,#22D3EE,#38E0F5)"></i>
+      <i style="flex:168; background:linear-gradient(90deg,#E0A458,#EFBF7E)"></i>
+      <i style="flex:125; background:linear-gradient(90deg,#34D399,#5FE3B4)"></i>
+      <i style="flex:72;  background:#3A4560"></i>
+    </div>
+    <div class="sharenote">Her dakika odanın toplamına ekleniyor</div>
+  </div>
+
+  <div class="seclabel2">ÜYELER <span>bugün çalışılan süre</span></div>
+
+  <div class="mrow me">
+    <span class="avwrap">
+      <span class="avring" style="border-color:#22D3EE; box-shadow:0 0 12px rgba(34,211,238,0.55)"></span>
+      <span class="av" style="color:#22D3EE; background:rgba(34,211,238,0.14)">M</span>
+    </span>
+    <span class="minfo">
+      <div class="mname">Melis <span class="you">(Sen)</span></div>
+      <div class="mstate s-focus"><span class="dot"></span>Şu an odakta · 42dk</div>
+    </span>
+    <span class="mhours">3<small>sa</small> 20<small>dk</small></span>
+  </div>
+
+  <div class="mrow">
+    <span class="avwrap">
+      <span class="avring" style="border-color:rgba(224,164,88,0.55)"></span>
+      <span class="av" style="color:#EFC38E; background:rgba(224,164,88,0.13)">K</span>
+    </span>
+    <span class="minfo">
+      <div class="mname">Kerem</div>
+      <div class="mstate s-recent"><span class="dot"></span>4 saat önce çevrimiçiydi</div>
+    </span>
+    <span class="mhours away">2<small>sa</small> 48<small>dk</small></span>
+  </div>
+
+  <div class="mrow">
+    <span class="avwrap">
+      <span class="avring" style="border-color:#34D399; box-shadow:0 0 10px rgba(52,211,153,0.40)"></span>
+      <span class="av" style="color:#6EE7B7; background:rgba(52,211,153,0.13)">E</span>
+    </span>
+    <span class="minfo">
+      <div class="mname">Elif</div>
+      <div class="mstate s-online"><span class="dot"></span>Çevrimiçi · molada</div>
+    </span>
+    <span class="mhours">2<small>sa</small> 05<small>dk</small></span>
+  </div>
+
+  <div class="mrow">
+    <span class="avwrap">
+      <span class="avring" style="border-color:rgba(255,255,255,0.10)"></span>
+      <span class="av" style="color:#9AA6BE; background:rgba(255,255,255,0.06)">S</span>
+    </span>
+    <span class="minfo">
+      <div class="mname">Selin</div>
+      <div class="mstate s-far"><span class="dot"></span>Dün çevrimiçiydi</div>
+    </span>
+    <span class="mhours away">1<small>sa</small> 12<small>dk</small></span>
+  </div>
+
+  <div class="footnote">Sessiz oda, canlı takip — kütüphanedeki masa gibi.</div>
+</div>
+
+</body>
+</html>

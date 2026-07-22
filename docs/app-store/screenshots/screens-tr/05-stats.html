@@ -1,0 +1,122 @@
+﻿<!-- @dsCard group="Store Screens TR" name="05 - Profile stats + donut" -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .monthly { text-align: center; font-size: 14px; font-weight: 600; color: #22D3EE; margin: 2px 0 4px; }
+  .donutcard { padding: 14px; }
+  .donutwrap { display: grid; place-items: center; }
+  .donut {
+    position: relative; width: 156px; height: 156px; border-radius: 50%;
+    background: conic-gradient(#FF4D5E 0 44%, #22D3EE 44% 79%, #A78BFA 79% 100%);
+  }
+  .donut::after {
+    content: ''; position: absolute; inset: 22px; border-radius: 50%; background: #12142A;
+  }
+  .dcenter {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    text-align: center; z-index: 2;
+  }
+  .dtot { font-size: 21px; font-weight: 800; }
+  .dsub { font-size: 11.5px; color: #8B96AC; margin-top: 2px; }
+  .legend { margin-top: 12px; }
+  .lg { display: flex; align-items: center; gap: 10px; padding: 4px 2px; }
+  .lgdot { width: 10px; height: 10px; border-radius: 50%; }
+  .lgname { flex: 1; font-size: 15.5px; font-weight: 600; }
+  .lgtime { font-size: 15px; font-weight: 800; color: #22D3EE; }
+  .lgpct { width: 42px; text-align: right; font-size: 13px; color: #8B96AC; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+  .stc { padding: 13px 8px; text-align: center; }
+  .stnum { font-size: 21px; font-weight: 800; }
+  .stname { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #6C7890; margin-top: 4px; }
+  .content .seclabel { margin-top: 13px; margin-bottom: 8px; }
+  .subjhead { display: flex; justify-content: space-between; align-items: center; margin: 18px 2px 10px; }
+  .subjhead .seclabel { margin: 0; }
+  .add {
+    font-size: 13.5px; font-weight: 700; color: #22D3EE;
+    background: rgba(34,211,238,0.10); border: 1px solid rgba(34,211,238,0.4);
+    padding: 7px 16px; border-radius: 16px;
+  }
+  .subjcard { display: flex; align-items: center; gap: 12px; padding: 14px; border-left: 4px solid #FF4D5E; }
+  .sic {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(255,77,94,0.10); display: grid; place-items: center; font-size: 21px;
+  }
+  .sinfo { flex: 1; }
+  .sname2 { font-size: 16.5px; font-weight: 700; }
+  .smeta { font-size: 13px; color: #8B96AC; margin-top: 2px; }
+  .smeta b { color: #FF5D6E; font-weight: 700; }
+  .sacts { display: grid; gap: 8px; font-size: 15px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="topzone">
+  <div class="status"><span class="st-time">21:15</span>
+    <span class="st-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1" opacity=".35"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 12 12 8.2a5 5 0 0 0-7 0Z"/><path d="M8.5 5.6c1.9 0 3.7.75 5 2l2.2-2.3A10.4 10.4 0 0 0 8.5 2.4c-2.8 0-5.4 1.1-7.2 2.9L3.5 7.6a7.3 7.3 0 0 1 5-2Z" opacity=".95"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#fff"/><path d="M23 4v4a2.2 2.2 0 0 0 0-4Z" fill="#fff" fill-opacity=".4"/></svg>
+    </span>
+  </div>
+  <div class="hdr">Profil</div>
+</div>
+
+<div class="content">
+  <div class="monthly">📅 Aylık istatistikler ve konular</div>
+
+  <div class="seclabel">ÇALIŞMA DAĞILIMI</div>
+  <div class="card donutcard">
+    <div class="donutwrap">
+      <div class="donut">
+        <div class="dcenter">
+          <div>
+            <div class="dtot">9sa 32dk</div>
+            <div class="dsub">Toplam odak</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="lg"><span class="lgdot" style="background:#FF4D5E"></span><span class="lgname">📚 Matematik</span><span class="lgtime">4sa 13dk</span><span class="lgpct">44%</span></div>
+      <div class="lg"><span class="lgdot" style="background:#22D3EE"></span><span class="lgname">📚 Fizik</span><span class="lgtime">3sa 19dk</span><span class="lgpct">35%</span></div>
+      <div class="lg"><span class="lgdot" style="background:#A78BFA"></span><span class="lgname">📚 Biyoloji</span><span class="lgtime">2sa 00dk</span><span class="lgpct">21%</span></div>
+    </div>
+  </div>
+
+  <div class="seclabel">İSTATİSTİKLER</div>
+  <div class="grid2">
+    <div class="card stc"><div class="stnum" style="color:#22D3EE">48</div><div class="stname">TOPLAM OTURUM</div></div>
+    <div class="card stc"><div class="stnum" style="color:#FF5D75">87sa 20dk</div><div class="stname">ODAK SÜRESİ</div></div>
+    <div class="card stc"><div class="stnum" style="color:#34D399">41</div><div class="stname">TAMAMLANAN</div></div>
+    <div class="card stc"><div class="stnum" style="color:#A78BFA">1sa 49dk</div><div class="stname">ORT. SÜRE</div></div>
+  </div>
+
+  <div class="subjhead">
+    <div class="seclabel">KONULARIM</div>
+    <div class="add">+ Ekle</div>
+  </div>
+  <div class="card subjcard">
+    <div class="sic">📚</div>
+    <div class="sinfo">
+      <div class="sname2">Matematik</div>
+      <div class="smeta"><b>4sa 13dk</b> · 12 oturum</div>
+      <div class="bar" style="margin-top:8px"><i style="width:82%; background:#FF4D5E"></i></div>
+    </div>
+    <div class="sacts"><span>✏️</span><span>🗑️</span></div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <div class="tab"><span class="ic">🏠</span>Ana Sayfa</div>
+  <div class="tab"><span class="ic">⏱️</span>Zamanlayıcı</div>
+  <div class="tab"><span class="ic">🏆</span>Sıralama</div>
+  <div class="tab"><span class="ic">🚪</span>Odalar</div>
+  <div class="tab"><span class="ic">👥</span>Arkadaşlar</div>
+  <div class="tab on"><span class="ic">👤</span>Profil</div>
+</div>
+
+</body>
+</html>
