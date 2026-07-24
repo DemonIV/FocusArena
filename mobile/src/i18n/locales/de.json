@@ -225,7 +225,9 @@
     "roundDoneTitle": "Runde {{round}} fertig!",
     "roundOverTitle": "Fokusrunde fertig! ☕",
     "roundOverBody": "Zeit für {{min}} Min. Pause",
-    "cycleDoneBody": "Alle 4 Fokusrunden fertig — super gemacht! 🎉"
+    "cycleDoneBody": "Alle 4 Fokusrunden fertig — super gemacht! 🎉",
+    "sessionDoneTitle": "⏰ Zeit ist um!",
+    "sessionDoneBody": "Du hast deine {{min}}-minütige Fokussitzung beendet 🎉"
   },
   "invite": {
     "shareMessage": "📚 Lern mit mir auf StudySquad! Gib bei der Registrierung meinen Benutzernamen {{username}} als Einladungscode ein — wir bekommen beide 500 Münzen! 🪙",

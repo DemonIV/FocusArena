@@ -196,6 +196,32 @@ export function TimerScreen() {
     void cancelScheduledNotification(p.roundNotifId);
   }, []);
 
+  // Classic-mode "time's up" notification — same rationale as scheduleRoundEnd:
+  // JS timers are suspended while the phone is locked, so the in-app auto-stop
+  // can't fire there. Scheduling at start means the OS alerts the user the
+  // moment their set duration elapses, even locked. Cancelled on pause/stop/
+  // complete; rescheduled with the remaining time on resume.
+  const classicNotifId = useRef<string | null>(null);
+  const scheduleClassicEnd = useCallback(async (remainingMs: number) => {
+    if (usePomodoroStore.getState().mode !== 'classic') return;
+    if (classicNotifId.current) {
+      await cancelScheduledNotification(classicNotifId.current);
+      classicNotifId.current = null;
+    }
+    if (remainingMs < 1500) return;
+    classicNotifId.current = await scheduleLocalNotification(
+      remainingMs / 1000,
+      i18n.t('timer.sessionDoneTitle'),
+      i18n.t('timer.sessionDoneBody', { min: useTimerStore.getState().duration }),
+    );
+  }, []);
+  const cancelClassicEnd = useCallback(() => {
+    if (classicNotifId.current) {
+      void cancelScheduledNotification(classicNotifId.current);
+      classicNotifId.current = null;
+    }
+  }, []);
+
   // ── Natural session completion (countdown hit zero) ────────────────────────
   // In a pomodoro cycle: advance the round. In classic mode: celebrate with the
   // receipt (manual stops already do; natural completions used to end silently).
@@ -204,6 +230,7 @@ export function TimerScreen() {
       const p = usePomodoroStore.getState();
       invalidateAfterStop();
       setZenVisible(false);
+      cancelClassicEnd(); // completed in-app → drop the pending "time's up" alert
       if (p.mode === 'pomodoro' && p.phase === 'focus') {
         if (result) {
           p.completeRound(
@@ -224,6 +251,7 @@ export function TimerScreen() {
           p.abortCycle();
         }
       } else if (result && result.xpEarned > 0) {
+        Vibration.vibrate(BUZZ_PATTERN); // classic session hit its set time
         setReceipt({
           subjectName: selectedSubject?.name,
           durationMinutes: result.durationMinutes,
@@ -235,7 +263,7 @@ export function TimerScreen() {
       }
     });
     return () => useTimerStore.getState().setOnComplete(null);
-  }, [invalidateAfterStop, selectedSubject, cancelPomodoroNotifs]);
+  }, [invalidateAfterStop, selectedSubject, cancelPomodoroNotifs, cancelClassicEnd]);
 
   // ── Recover from an orphaned pomodoro cycle ────────────────────────────────
   // The pomodoro store is persisted. A mid-round "focus" phase means "a session
@@ -404,6 +432,7 @@ export function TimerScreen() {
     void dismissPomodoroNotifications();
     try {
       await timer.start(selectedDuration, selectedSubjectId);
+      void scheduleClassicEnd(selectedDuration * 60_000);
     } catch (err: any) {
       if (err?.statusCode === 409) {
         // Server has an active session — sync to restore it, then user can stop it
@@ -416,7 +445,7 @@ export function TimerScreen() {
         Alert.alert(t('common.error'), err?.message ?? t('timer.startFailed'));
       }
     }
-  }, [selectedDuration, selectedSubjectId, timer]);
+  }, [selectedDuration, selectedSubjectId, timer, scheduleClassicEnd]);
 
   const handlePause = useCallback(async () => {
     try {
@@ -427,11 +456,13 @@ export function TimerScreen() {
       if (p.mode === 'pomodoro' && p.phase === 'focus' && p.roundNotifId) {
         void cancelScheduledNotification(p.roundNotifId);
         p.setRoundNotifId(null);
+      } else if (p.mode === 'classic') {
+        cancelClassicEnd();
       }
     } catch (err: any) {
       Alert.alert(t('timer.pauseError'), err?.message ?? t('timer.pauseErrorMsg'));
     }
-  }, [timer]);
+  }, [timer, cancelClassicEnd]);
 
   const handleResume = useCallback(async () => {
     try {
@@ -439,11 +470,13 @@ export function TimerScreen() {
       const p = usePomodoroStore.getState();
       if (p.mode === 'pomodoro' && p.phase === 'focus') {
         void scheduleRoundEnd(useTimerStore.getState().remainingMs);
+      } else if (p.mode === 'classic') {
+        void scheduleClassicEnd(useTimerStore.getState().remainingMs);
       }
     } catch (err: any) {
       Alert.alert(t('timer.resumeError'), err?.message ?? t('timer.resumeErrorMsg'));
     }
-  }, [timer, scheduleRoundEnd]);
+  }, [timer, scheduleRoundEnd, scheduleClassicEnd]);
 
   const handleZenPress = useCallback(() => {
     if (zenLocked) { setZenPaywallVisible(true); return; }
@@ -462,6 +495,8 @@ export function TimerScreen() {
           onPress: async () => {
             try {
               const result = await timer.stop();
+              // A manual stop drops any pending completion notification
+              cancelClassicEnd();
               // A manual stop mid-cycle drops the pomodoro cycle
               cancelPomodoroNotifs();
               usePomodoroStore.getState().abortCycle();
@@ -502,7 +537,7 @@ export function TimerScreen() {
         },
       ],
     );
-  }, [timer, selectedSubject, invalidateAfterStop, cancelPomodoroNotifs]);
+  }, [timer, selectedSubject, invalidateAfterStop, cancelPomodoroNotifs, cancelClassicEnd]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 

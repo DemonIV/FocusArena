@@ -285,9 +285,14 @@ export async function stopTimer(
   const state = await readState(userId);
   if (!state) throw Object.assign(new Error('No active session'), { code: 'NO_TIMER' });
 
-  const elapsedMs = computeElapsedMs(state);
-  const durationMinutes = Math.max(0, Math.floor(elapsedMs / 60_000));
-  const wasCompleted = elapsedMs >= state.duration * 60_000 * COMPLETION_THRESHOLD;
+  // A countdown session can never bank more than its set duration. If the app
+  // was backgrounded/locked past the end (the JS ticker is suspended there, so
+  // it can't auto-stop), the raw wall-clock elapsed balloons — cap it so a
+  // 25-min timer never records hours. Completion still uses the raw elapsed.
+  const rawElapsedMs = computeElapsedMs(state);
+  const cappedMs = Math.min(rawElapsedMs, state.duration * 60_000);
+  const durationMinutes = Math.max(0, Math.floor(cappedMs / 60_000));
+  const wasCompleted = rawElapsedMs >= state.duration * 60_000 * COMPLETION_THRESHOLD;
   const focus = computeFocusScore(durationMinutes, state.duration, telemetry);
 
   // 🔑 Clear Redis FIRST — even if the DB update below fails, the user won't be
@@ -373,8 +378,10 @@ export async function getTimerStatus(userId: string): Promise<TimerStatusRespons
   const state = await readState(userId);
   if (!state) return { active: false };
 
-  const elapsedMs = computeElapsedMs(state);
-  const remainingMs = Math.max(0, state.duration * 60_000 - elapsedMs);
+  const totalMs = state.duration * 60_000;
+  const rawElapsedMs = computeElapsedMs(state);
+  const elapsedMs = Math.min(rawElapsedMs, totalMs); // never report past the set duration
+  const remainingMs = Math.max(0, totalMs - rawElapsedMs);
 
   return {
     active: true,

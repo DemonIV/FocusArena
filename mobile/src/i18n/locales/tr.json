@@ -225,7 +225,9 @@
     "roundDoneTitle": "{{round}}. tur bitti!",
     "roundOverTitle": "Tur bitti! ☕",
     "roundOverBody": "{{min}} dk mola zamanı",
-    "cycleDoneBody": "4 turun hepsi bitti — harika iş! 🎉"
+    "cycleDoneBody": "4 turun hepsi bitti — harika iş! 🎉",
+    "sessionDoneTitle": "⏰ Süren doldu!",
+    "sessionDoneBody": "{{min}} dakikalık odak seansını tamamladın 🎉"
   },
   "invite": {
     "shareMessage": "📚 StudySquad'da benimle çalış! Kayıt olurken davet kodu olarak {{username}} kullanıcı adımı gir — ikimiz de 500 coin kazanalım! 🪙",

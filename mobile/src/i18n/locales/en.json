@@ -225,7 +225,9 @@
     "roundDoneTitle": "Round {{round}} done!",
     "roundOverTitle": "Focus round done! ☕",
     "roundOverBody": "Time for a {{min}} min break",
-    "cycleDoneBody": "All 4 focus rounds done — great work! 🎉"
+    "cycleDoneBody": "All 4 focus rounds done — great work! 🎉",
+    "sessionDoneTitle": "⏰ Time's up!",
+    "sessionDoneBody": "You finished your {{min}}-minute focus session 🎉"
   },
   "invite": {
     "shareMessage": "📚 Study with me on StudySquad! Enter my username {{username}} as the invite code when you sign up — we both earn 500 coins! 🪙",
