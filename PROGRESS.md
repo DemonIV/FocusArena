@@ -257,7 +257,13 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
   - Tuzaklar: ASC ekran görüntüsü yüklemesi **otomatik kaydolur** (Save gri kalır, panik yok). `form_input` uzun textarea'da sessizce başarısız → **tıkla + ctrl+a + type** kullan; uzun type CDP timeout verir ama ~60 sn'de tamamlanır (bekle, tekrar yazma). **Sürükleyerek yeniden sıralama sentetik fare olaylarıyla ÇALIŞMIYOR** → sırayı kullanıcı elle düzeltir (ya da Delete All + sırayla tek tek sürükleme).
   - ⏸️ **"Add for Review" AKTİF ama BASILMADI** — kullanıcı önce **oda karesini yeniden tasarlamak** istedi (referans görsel bekleniyor). Görsel gelince: `screens-tr/01-rooms.html` güncelle → render+compose → TR (ve gerekiyorsa EN) kareyi ASC'de değiştir → Submit.
 
-### Faz 32 — ⏱️ Timer süre cap fix (35 saat bug'ı) + klasik "süren doldu" bildirimi (24 Temmuz) ⭐ EN GÜNCEL
+### Faz 33 — ⌨️ Oda modallarında klavye fix + build 12 (24 Temmuz) ⭐ EN GÜNCEL
+`e013069` · mobil tsc temiz
+
+- **🐛 Kullanıcı bildirdi**: "Kodla Katıl" (ve "Oda Kur") modalında klavye açılınca input'un üzerine biniyordu → yazarken görünmüyordu. Sebep: alta yaslı bottom-sheet modallar (`overlay` = `justifyContent:flex-end`) klavyeyle örtüşüyordu. **Fix**: iki modal da `KeyboardAvoidingView` (iOS `behavior:padding`) ile sarıldı → sheet klavyenin üstüne itiliyor. (Android windowSoftInputMode zaten hallediyor → behavior undefined.)
+- **🔄 iOS build 12 BAŞLATILDI** (Faz 31+32+33 birlikte, JS-only, auto-submit).
+
+### Faz 32 — ⏱️ Timer süre cap fix (35 saat bug'ı) + klasik "süren doldu" bildirimi (24 Temmuz)
 `6391959` · backend+mobil tsc temiz · ⏳ backend Fly deploy (kullanıcı) + yeni build bekliyor
 
 - **🔴 BUG (kullanıcı bildirdi: "günde 35 saat çalışmış gözüküyor, set edilenin üstünü sayıyor")**: `computeElapsedMs` cap'siz (`accumulatedMs + now−startTime`). Uygulama **arka planda/kilitliyken JS `setInterval` OS'ta donuyor** → süre dolunca client'in otomatik-durdurması (tick) çalışmıyor; saatler sonra açılınca elapsed devasa oluyor ve **sunucu bu cap'siz duvar-saati süresini kaydediyordu**. Birkaç kez olunca günlük toplam 35 saate çıkıyor.
