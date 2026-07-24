@@ -258,14 +258,15 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
   - ⏸️ **"Add for Review" AKTİF ama BASILMADI** — kullanıcı önce **oda karesini yeniden tasarlamak** istedi (referans görsel bekleniyor). Görsel gelince: `screens-tr/01-rooms.html` güncelle → render+compose → TR (ve gerekiyorsa EN) kareyi ASC'de değiştir → Submit.
 
 ### Faz 31 — 🏠 Oda ekranı "canlı varlık" yenilemesi + üye konu kırılımı (24 Temmuz) ⭐ EN GÜNCEL
-`f066b0e` · backend+mobil tsc temiz · ⏳ Fly deploy (kullanıcı çalıştıracak) + cihaz testi bekliyor
+`f066b0e` · backend+mobil tsc temiz · **Fly deploy ✓** (`/health` 200, `/rooms` 401 canlı) · ⏳ cihaz testi bekliyor
 
 - **Backend (`getRoomMembers`)**: üye başına 3 yeni alan — `today_minutes` (caller'ın **yerel gününe** göre, `localDayStart` + `utc_offset_minutes` yerel yardımcılarıyla; timer↔rooms döngüsel importunu önlemek için helper'lar rooms.service'e kopyalandı), `last_session_at` (45 gün lookback, newest-first tek sorgu → ilk-görülen = son seans), `today_subjects` (bugünkü **konu kırılımı**; silinen konu → null → "Konusuz"). **Migration YOK** — bugünkü-seans sorgusuna `subject_id` eklenip tek response'a bindi. Caller offset `getRoomById`/`createRoom`'da threadlendi (websocket/broadcast default offset 0 = zararsız).
 - **Mobil (`RoomsScreen` detay modalı)**: mağaza karesindeki tasarım birebir uygulandı — **bugünkü odak hero'su** (dev toplam + "X kişi şu an burada" nabız + **varlık merdiveni yığılmış çubuk**), üyeler **bugünün dakikasına** göre sıralı (madalyalar günlük → yarış her gün sıfırlanır), **varlık merdiveni renk sistemi** tek yerden (`deriveTier`: studying=focus/cyan · break=online/mint · offline+<12sa=recent/ember · daha eski/null=far/slate) hem satır hem çubuk hem halka. Satırda günün dakikası büyük + "tümü Xsa" küçük ikincil. `relTime` helper (az önce/X dk/X sa/dün/X gün önce).
 - **🆕 Üye → konu detay alt-sayfası** (kullanıcı istedi): üye satırına dokun (›) → sheet o üyenin **bugün hangi konulara** çalıştığını gösteriyor (konu renkli yığılmış çubuk + ikon/isim/günün payı %/dakika, konu bazlı `RichMinutes`). Bugün çalışmamış üye → nazik boş durum ("🌙"). "‹ Odaya dön" ile geri. Gizlilik: oda-kapsamlı, arkadaşlık gerekmez.
 - **Onaylı mockup** (Claude Design, iki senaryo interaktif): https://claude.ai/code/artifact/2c02391d-8ce6-4af4-b4e1-abc3857b36b6
 - i18n: 10 dilde `rooms.*` (14 yeni anahtar) + top-level `relative.*` (5). "Konusuz" için mevcut `monthly.noSubject` yeniden kullanıldı.
-- **⏳ SONRAKİ ADIM**: (1) **Backend Fly deploy** — `flyctl deploy --depot=false` (Claude'un çalıştırması oto-mod sınıflandırıcıca engellendi; kullanıcı `! flyctl deploy --depot=false` ile çalıştırmalı). Değişiklik additive/geri-uyumlu (eski istemciler yeni alanları yoksayar). (2) Yeni mobil build + cihazda 2 hesapla test (biri odakta biri offline; konu alt-sayfası).
+- **✅ Fly deploy YAPILDI** (24 Tem, `flyctl deploy --depot=false` kullanıcı çalıştırdı; bu sefer depot TLS hatası VERMEDİ, temiz geçti — machine good state, `/health` 200, `/rooms` 401). Değişiklik additive/geri-uyumlu.
+- **⏳ SONRAKİ ADIM**: Yeni mobil build + cihazda 2 hesapla test (biri odakta biri offline; varlık merdiveni + son görülme + konu alt-sayfası). Mobil değişiklik JS-only (yeni native modül yok) → hızlı build.
 
 ### 📋 (TAMAMLANDI ↑ Faz 31) — 🏠 Oda ekranı "canlı varlık" yenilemesi — orijinal plan
 
