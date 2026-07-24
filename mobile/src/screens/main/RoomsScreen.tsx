@@ -11,6 +11,8 @@ import {
   TextInput,
   RefreshControl,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -223,7 +225,7 @@ export function RoomsScreen() {
 
       {/* Create Room Modal */}
       <Modal visible={createVisible} animationType="slide" transparent onRequestClose={() => setCreateVisible(false)}>
-        <View style={styles.overlay}>
+        <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.sheet}>
             <Text style={styles.sheetTitle}>{t('rooms.createTitle')}</Text>
             <Text style={styles.detailSub}>{t('rooms.createSub')}</Text>
@@ -253,12 +255,12 @@ export function RoomsScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Join by Invite Modal */}
       <Modal visible={inviteVisible} animationType="slide" transparent onRequestClose={() => setInviteVisible(false)}>
-        <View style={styles.overlay}>
+        <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.sheet}>
             <Text style={styles.sheetTitle}>{t('rooms.joinTitle')}</Text>
             <TextInput
@@ -286,7 +288,7 @@ export function RoomsScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Room Detail Modal — live presence + today's focus + per-member subjects */}
