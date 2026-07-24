@@ -344,7 +344,21 @@
     "leaveRoom": "Odadan Ayrıl",
     "deleteRoomMsg": "Bu odanın sahibisin. Ayrılırsan oda başka bir üyeye devredilir; kimse yoksa silinir.",
     "leaveRoomMsg": "Bu odadan ayrılmak istiyor musun?",
-    "transferDelete": "Devret/Sil"
+    "transferDelete": "Devret/Sil",
+    "todayFocus": "ODANIN BUGÜNKÜ ODAĞI",
+    "liveHere": "{{count}} kişi şu an burada",
+    "noneFocusing": "kimse odakta değil",
+    "everyMinuteNote": "✦ Her odak dakikası odanın toplamına ekleniyor",
+    "todayStudied": "bugün çalışılan süre",
+    "focusingNow": "Şu an odakta",
+    "onBreakNow": "Çevrimiçi · molada",
+    "wasOnline": "{{time}} çevrimiçiydi",
+    "allTimeShort": "tümü {{hours}}sa",
+    "tapMemberHint": "Bir üyeye dokun → bugün hangi konulara çalıştığını gör.",
+    "backToRoom": "Odaya dön",
+    "noSubjectsToday": "Bugün henüz odaklanmadı.\nİlk seansıyla konular burada görünür.",
+    "todayLabel": "bugün",
+    "dayShare": "%{{pct}} · günün payı"
   },
   "leaderboard": {
     "today": "Bugün",
@@ -553,5 +567,12 @@
   "focusReminder": {
     "title": "Odağa geri dön",
     "body": "Başka bir uygulamaya daldın — hadi çalışmaya dönelim 🔥"
+  },
+  "relative": {
+    "justNow": "az önce",
+    "minutesAgo": "{{count}} dk önce",
+    "hoursAgo": "{{count}} sa önce",
+    "yesterday": "dün",
+    "daysAgo": "{{count}} gün önce"
   }
 }

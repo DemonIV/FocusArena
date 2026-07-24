@@ -322,8 +322,23 @@ export interface RoomMember {
   pet?: string | null;
   joinedAt: string;
   status: 'studying' | 'break' | 'offline';
-  /** Total minutes studied while in this room */
+  /** Total minutes studied while in this room (all-time) */
   totalMinutes: number;
+  /** Focus minutes today (viewer's local day) */
+  todayMinutes: number;
+  /** Per-subject breakdown of today's focus minutes (desc) */
+  todaySubjects: MemberSubjectToday[];
+  /** ISO timestamp of the member's most recent session start, or null */
+  lastSessionAt: string | null;
+}
+
+/** One subject a member focused on today (name/icon/color null = deleted subject) */
+export interface MemberSubjectToday {
+  id: string | null;
+  name: string | null;
+  icon: string | null;
+  color: string | null;
+  minutes: number;
 }
 
 export interface RoomDetail extends Room {

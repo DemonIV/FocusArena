@@ -344,7 +344,21 @@
     "leaveRoom": "Kamer verlaten",
     "deleteRoomMsg": "Je bent de eigenaar van deze kamer. Als je vertrekt, wordt deze overgedragen aan een ander lid; als er niemand overblijft, wordt deze verwijderd.",
     "leaveRoomMsg": "Wil je deze kamer verlaten?",
-    "transferDelete": "Overdragen/Verwijderen"
+    "transferDelete": "Overdragen/Verwijderen",
+    "todayFocus": "FOCUS VAN DE KAMER VANDAAG",
+    "liveHere": "{{count}} nu hier",
+    "noneFocusing": "niemand gefocust",
+    "everyMinuteNote": "✦ Elke focusminuut telt mee voor het kamertotaal",
+    "todayStudied": "vandaag gestudeerd",
+    "focusingNow": "Nu gefocust",
+    "onBreakNow": "Online · pauze",
+    "wasOnline": "hier {{time}}",
+    "allTimeShort": "totaal {{hours}} u",
+    "tapMemberHint": "Tik op een lid → zie wat het vandaag studeerde.",
+    "backToRoom": "Terug naar kamer",
+    "noSubjectsToday": "Vandaag nog niet gefocust.\nVakken verschijnen na de eerste sessie.",
+    "todayLabel": "vandaag",
+    "dayShare": "{{pct}} % · van vandaag"
   },
   "leaderboard": {
     "today": "Vandaag",
@@ -553,5 +567,12 @@
   "focusReminder": {
     "title": "Terug naar je focus",
     "body": "Je zit in een andere app — kom, we gaan door 🔥"
+  },
+  "relative": {
+    "justNow": "zojuist",
+    "minutesAgo": "{{count}} min geleden",
+    "hoursAgo": "{{count}} u geleden",
+    "yesterday": "gisteren",
+    "daysAgo": "{{count}} d geleden"
   }
 }

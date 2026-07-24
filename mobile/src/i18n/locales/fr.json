@@ -344,7 +344,21 @@
     "leaveRoom": "Quitter la salle",
     "deleteRoomMsg": "Tu es le propriétaire de cette salle. Si tu pars, elle sera transférée à un autre membre ; s'il ne reste personne, elle sera supprimée.",
     "leaveRoomMsg": "Veux-tu quitter cette salle ?",
-    "transferDelete": "Transférer/Supprimer"
+    "transferDelete": "Transférer/Supprimer",
+    "todayFocus": "FOCUS DU SALON AUJOURD'HUI",
+    "liveHere": "{{count}} ici en ce moment",
+    "noneFocusing": "personne concentré",
+    "everyMinuteNote": "✦ Chaque minute de focus compte pour le salon",
+    "todayStudied": "étudié aujourd'hui",
+    "focusingNow": "Concentré maintenant",
+    "onBreakNow": "En ligne · en pause",
+    "wasOnline": "ici {{time}}",
+    "allTimeShort": "total {{hours}} h",
+    "tapMemberHint": "Touche un membre → vois ce qu'il a étudié aujourd'hui.",
+    "backToRoom": "Retour au salon",
+    "noSubjectsToday": "Pas encore concentré aujourd'hui.\nLes matières apparaissent après la première session.",
+    "todayLabel": "aujourd'hui",
+    "dayShare": "{{pct}} % · de la journée"
   },
   "leaderboard": {
     "today": "Aujourd'hui",
@@ -553,5 +567,12 @@
   "focusReminder": {
     "title": "Reviens te concentrer",
     "body": "Tu es parti sur une autre app — on s’y remet 🔥"
+  },
+  "relative": {
+    "justNow": "à l'instant",
+    "minutesAgo": "il y a {{count}} min",
+    "hoursAgo": "il y a {{count}} h",
+    "yesterday": "hier",
+    "daysAgo": "il y a {{count}} j"
   }
 }

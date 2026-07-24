@@ -40,6 +40,15 @@ export type ListRoomsQuery = z.infer<typeof ListRoomsQuerySchema>;
 
 export type MemberStatus = 'studying' | 'break' | 'offline';
 
+/** One subject a member focused on today (name/icon/color null = deleted subject) */
+export interface MemberSubjectToday {
+  id: string | null;
+  name: string | null;
+  icon: string | null;
+  color: string | null;
+  minutes: number;
+}
+
 export interface RoomMemberWithPresence {
   user_id: string;
   username: string;
@@ -50,8 +59,14 @@ export interface RoomMemberWithPresence {
   pet: string | null;
   joined_at: string;
   status: MemberStatus;
-  /** Total minutes this member has studied while in this room */
+  /** Total minutes this member has studied while in this room (all-time) */
   total_minutes: number;
+  /** Focus minutes today, in the viewer's local day window */
+  today_minutes: number;
+  /** Per-subject breakdown of today's focus minutes (desc), for the tap-through page */
+  today_subjects: MemberSubjectToday[];
+  /** ISO timestamp of the member's most recent session start (any room), or null */
+  last_session_at: string | null;
 }
 
 export interface RoomDetail {

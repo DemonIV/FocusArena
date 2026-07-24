@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { Room, RoomDetail, RoomMember } from '../types';
+import type { Room, RoomDetail, RoomMember, MemberSubjectToday } from '../types';
 
 // ── Raw API shapes (backend returns snake_case + is_private) ──────
 
@@ -23,6 +23,9 @@ interface RawMember {
   joined_at: string;
   status: 'studying' | 'break' | 'offline';
   total_minutes: number;
+  today_minutes?: number;
+  today_subjects?: MemberSubjectToday[];
+  last_session_at?: string | null;
 }
 
 interface RawRoomDetail extends Omit<RawRoom, 'member_count'> {
@@ -54,6 +57,9 @@ function mapMember(m: RawMember): RoomMember {
     joinedAt: m.joined_at,
     status: m.status,
     totalMinutes: m.total_minutes ?? 0,
+    todayMinutes: m.today_minutes ?? 0,
+    todaySubjects: m.today_subjects ?? [],
+    lastSessionAt: m.last_session_at ?? null,
   };
 }
 

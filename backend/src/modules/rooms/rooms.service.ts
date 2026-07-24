@@ -54,6 +54,29 @@ async function deleteInviteCodes(roomId: string): Promise<void> {
   await redis.del(...keys);
 }
 
+// ─── Local-day Helpers (mirror of timer.service; kept local to avoid a
+//     circular import — timer.service already imports from this module) ──────
+
+const DAY_MS = 86_400_000;
+const clampOffset = (m: number) => Math.max(-840, Math.min(840, Math.round(m || 0)));
+
+/** UTC instant of local midnight for the day containing `ref`, at `offsetMin`. */
+function localDayStart(offsetMin: number, ref: Date = new Date()): Date {
+  const shifted = new Date(ref.getTime() + offsetMin * 60_000);
+  shifted.setUTCHours(0, 0, 0, 0);
+  return new Date(shifted.getTime() - offsetMin * 60_000);
+}
+
+/** The user's stored UTC offset in minutes (0 = UTC, the safe default). */
+async function getUserOffset(userId: string): Promise<number> {
+  const { data } = await supabase
+    .from('users')
+    .select('utc_offset_minutes')
+    .eq('id', userId)
+    .single();
+  return clampOffset((data?.utc_offset_minutes as number | null) ?? 0);
+}
+
 // ─── Presence Helpers ─────────────────────────────────────────
 
 export async function setPresence(
@@ -100,7 +123,13 @@ async function batchMemberCounts(roomIds: string[]): Promise<Map<string, number>
 
 // ─── Room Member List (DB + Presence) ────────────────────────
 
-export async function getRoomMembers(roomId: string): Promise<RoomMemberWithPresence[]> {
+/** How far back to look for a member's most-recent session (bounds the query). */
+const LAST_SEEN_LOOKBACK_DAYS = 45;
+
+export async function getRoomMembers(
+  roomId: string,
+  offsetMin = 0,
+): Promise<RoomMemberWithPresence[]> {
   const { data, error } = await supabase
     .from('room_members')
     .select('user_id, joined_at, users!inner(username, avatar_url, selected_frame, selected_pet)')
@@ -110,17 +139,92 @@ export async function getRoomMembers(roomId: string): Promise<RoomMemberWithPres
 
   if (error) throw new Error(error.message);
 
-  // Per-member study minutes for this room (single query)
-  const { data: minutesRows } = await supabase
+  const rows = data ?? [];
+  const ids = rows.map((r) => r.user_id as string);
+
+  // Per-member all-time minutes for this room
+  const minutesP = supabase
     .from('room_member_minutes')
     .select('user_id, total_minutes')
     .eq('room_id', roomId);
 
+  // Per-member focus minutes today (viewer's local day) — across all rooms,
+  // with subject breakdown for the tap-through page
+  const todayStart = localDayStart(offsetMin);
+  const tomorrowStart = new Date(todayStart.getTime() + DAY_MS);
+  const todayP = ids.length
+    ? supabase
+        .from('sessions')
+        .select('user_id, duration_minutes, subject_id')
+        .in('user_id', ids)
+        .gte('started_at', todayStart.toISOString())
+        .lt('started_at', tomorrowStart.toISOString())
+    : Promise.resolve({ data: [] as { user_id: string; duration_minutes: number; subject_id: string | null }[] });
+
+  // Most-recent session start per member (bounded lookback, newest first)
+  const lastSeenP = ids.length
+    ? supabase
+        .from('sessions')
+        .select('user_id, started_at')
+        .in('user_id', ids)
+        .gte('started_at', new Date(Date.now() - LAST_SEEN_LOOKBACK_DAYS * DAY_MS).toISOString())
+        .order('started_at', { ascending: false })
+    : Promise.resolve({ data: [] as { user_id: string; started_at: string }[] });
+
+  const [minutesRes, todayRes, lastSeenRes] = await Promise.all([minutesP, todayP, lastSeenP]);
+
   const minutesMap = new Map<string, number>();
-  for (const m of minutesRows ?? []) minutesMap.set(m.user_id, m.total_minutes);
+  for (const m of minutesRes.data ?? []) minutesMap.set(m.user_id, m.total_minutes);
+
+  // Today totals + per-user per-subject minutes ('' = no/deleted subject)
+  const todayMap = new Map<string, number>();
+  const subjMinutes = new Map<string, Map<string, number>>(); // userId → (subjectId → min)
+  for (const s of todayRes.data ?? []) {
+    const mins = s.duration_minutes ?? 0;
+    if (mins <= 0) continue;
+    todayMap.set(s.user_id, (todayMap.get(s.user_id) ?? 0) + mins);
+    const sid = (s.subject_id as string | null) ?? '';
+    let perUser = subjMinutes.get(s.user_id);
+    if (!perUser) subjMinutes.set(s.user_id, (perUser = new Map()));
+    perUser.set(sid, (perUser.get(sid) ?? 0) + mins);
+  }
+
+  // Resolve subject names/colors (include deleted ones so history stays labelled)
+  const allSubjectIds = new Set<string>();
+  for (const perUser of subjMinutes.values())
+    for (const sid of perUser.keys()) if (sid) allSubjectIds.add(sid);
+  const subjectRows = allSubjectIds.size
+    ? (await supabase
+        .from('subjects')
+        .select('id, name, icon, color')
+        .in('id', [...allSubjectIds])).data ?? []
+    : [];
+  const subjectInfo = new Map(subjectRows.map((s) => [s.id as string, s]));
+
+  const subjectsFor = (userId: string): RoomMemberWithPresence['today_subjects'] => {
+    const perUser = subjMinutes.get(userId);
+    if (!perUser) return [];
+    return [...perUser.entries()]
+      .map(([sid, minutes]) => {
+        const info = sid ? subjectInfo.get(sid) : undefined;
+        return {
+          id: sid || null,
+          name: (info?.name as string | undefined) ?? null,
+          icon: (info?.icon as string | undefined) ?? null,
+          color: (info?.color as string | undefined) ?? null,
+          minutes,
+        };
+      })
+      .sort((a, b) => b.minutes - a.minutes);
+  };
+
+  // Rows are ordered newest-first → first occurrence per user is their last session
+  const lastSeenMap = new Map<string, string>();
+  for (const s of lastSeenRes.data ?? [])
+    if (!lastSeenMap.has(s.user_id)) lastSeenMap.set(s.user_id, s.started_at);
 
   const members = await Promise.all(
-    (data ?? []).map(async (row) => {
+    rows.map(async (row) => {
       const u = row.users as unknown as { username: string; avatar_url: string | null; selected_frame: string | null; selected_pet: string | null };
       const status = await getPresence(roomId, row.user_id);
       return {
@@ -132,6 +236,9 @@ export async function getRoomMembers(roomId: string): Promise<RoomMemberWithPres
         joined_at: row.joined_at as string,
         status,
         total_minutes: minutesMap.get(row.user_id) ?? 0,
+        today_minutes: todayMap.get(row.user_id) ?? 0,
+        today_subjects: subjectsFor(row.user_id),
+        last_session_at: lastSeenMap.get(row.user_id) ?? null,
       } satisfies RoomMemberWithPresence;
     }),
   );
@@ -260,7 +367,7 @@ export async function getRoomById(userId: string, roomId: string): Promise<RoomD
     }
   }
 
-  const members = await getRoomMembers(roomId);
+  const members = await getRoomMembers(roomId, await getUserOffset(userId));
   const detail: RoomDetail = {
     id: room.id,
     name: room.name,
@@ -325,7 +432,7 @@ export async function createRoom(userId: string, body: CreateRoomBody): Promise<
   detail.invite_code = await generateInviteCode(room.id);
 
   // Fetch full member list after creation
-  detail.members = await getRoomMembers(room.id);
+  detail.members = await getRoomMembers(room.id, await getUserOffset(userId));
 
   // Award room_host badge (fire-and-forget)
   void checkAndAward(userId, { isRoomHost: true });

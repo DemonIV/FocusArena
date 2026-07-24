@@ -344,7 +344,21 @@
     "leaveRoom": "Esci dalla stanza",
     "deleteRoomMsg": "Sei il proprietario di questa stanza. Se esci, verrà trasferita a un altro membro; se non resta nessuno, verrà eliminata.",
     "leaveRoomMsg": "Vuoi uscire da questa stanza?",
-    "transferDelete": "Trasferisci/Elimina"
+    "transferDelete": "Trasferisci/Elimina",
+    "todayFocus": "FOCUS DI OGGI DELLA STANZA",
+    "liveHere": "{{count}} qui adesso",
+    "noneFocusing": "nessuno concentrato",
+    "everyMinuteNote": "✦ Ogni minuto di focus si somma al totale della stanza",
+    "todayStudied": "studiato oggi",
+    "focusingNow": "Concentrato ora",
+    "onBreakNow": "Online · in pausa",
+    "wasOnline": "qui {{time}}",
+    "allTimeShort": "totale {{hours}} h",
+    "tapMemberHint": "Tocca un membro → vedi cosa ha studiato oggi.",
+    "backToRoom": "Torna alla stanza",
+    "noSubjectsToday": "Non si è ancora concentrato oggi.\nLe materie compaiono dopo la prima sessione.",
+    "todayLabel": "oggi",
+    "dayShare": "{{pct}} % · della giornata"
   },
   "leaderboard": {
     "today": "Oggi",
@@ -553,5 +567,12 @@
   "focusReminder": {
     "title": "Torna a concentrarti",
     "body": "Sei passato a un’altra app — rimettiamoci sotto 🔥"
+  },
+  "relative": {
+    "justNow": "proprio ora",
+    "minutesAgo": "{{count}} min fa",
+    "hoursAgo": "{{count}} h fa",
+    "yesterday": "ieri",
+    "daysAgo": "{{count}} g fa"
   }
 }

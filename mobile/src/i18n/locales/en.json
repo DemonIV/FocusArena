@@ -344,7 +344,21 @@
     "leaveRoom": "Leave Room",
     "deleteRoomMsg": "You're the owner of this room. If you leave, it will be transferred to another member; if no one is left, it will be deleted.",
     "leaveRoomMsg": "Do you want to leave this room?",
-    "transferDelete": "Transfer/Delete"
+    "transferDelete": "Transfer/Delete",
+    "todayFocus": "THE ROOM'S FOCUS TODAY",
+    "liveHere": "{{count}} here right now",
+    "noneFocusing": "nobody focusing",
+    "everyMinuteNote": "✦ Every focus minute adds to the room's total",
+    "todayStudied": "studied today",
+    "focusingNow": "Focusing now",
+    "onBreakNow": "Online · on a break",
+    "wasOnline": "last here {{time}}",
+    "allTimeShort": "all-time {{hours}}h",
+    "tapMemberHint": "Tap a member → see what they studied today.",
+    "backToRoom": "Back to room",
+    "noSubjectsToday": "Hasn't focused yet today.\nSubjects appear after the first session.",
+    "todayLabel": "today",
+    "dayShare": "{{pct}}% · of today"
   },
   "leaderboard": {
     "today": "Today",
@@ -553,5 +567,12 @@
   "focusReminder": {
     "title": "Come back to focus",
     "body": "You slipped into another app — let’s get back to it 🔥"
+  },
+  "relative": {
+    "justNow": "just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}}h ago",
+    "yesterday": "yesterday",
+    "daysAgo": "{{count}}d ago"
   }
 }
