@@ -16,7 +16,8 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList, FriendEntry } from '../../types';
 import { useAuth } from '../../hooks';
 import { useTimerStore, useSocketStore, useBillingStore } from '../../stores';
-import { StatCard, PetCompanion, PetAdoptTeaser, WeeklySubjectDonutCard } from '../../components';
+import { StatCard, PetCompanion, PetAdoptTeaser, WeeklySubjectDonutCard, AvatarArt } from '../../components';
+import { isAvatarId } from '../../constants/avatars';
 import { PaywallModal } from '../../components/PaywallModal';
 import { timerService, achievementsService, friendsService, cosmeticsService } from '../../services';
 import { formatDuration } from '../../utils/formatTime';
@@ -82,6 +83,8 @@ export function HomeScreen({ navigation }: Props) {
 
   const stats = statsQ.data;
   const badges = achievQ.data?.earned ?? [];
+  // Equipped collectible avatar — same cache the Profile picker writes to
+  const selectedAvatar = achievQ.data?.selectedAvatar ?? null;
 
   // Live values from stats.allTime (authStore `user` goes stale after earning XP)
   const at = stats?.allTime;
@@ -118,10 +121,14 @@ export function HomeScreen({ navigation }: Props) {
     >
       {/* ── Hero Header ── */}
       <View style={styles.header}>
-        <View style={styles.avatarRing}>
-          <Text style={styles.avatarLetter}>
-            {user?.username?.charAt(0).toUpperCase() ?? '?'}
-          </Text>
+        <View style={[styles.avatarRing, isAvatarId(selectedAvatar) && styles.avatarRingArt]}>
+          {isAvatarId(selectedAvatar) ? (
+            <AvatarArt id={selectedAvatar} size={48} />
+          ) : (
+            <Text style={styles.avatarLetter}>
+              {user?.username?.charAt(0).toUpperCase() ?? '?'}
+            </Text>
+          )}
         </View>
         <View style={styles.headerInfo}>
           <Text style={styles.greeting}>{t('home.welcomeBack')}</Text>
@@ -492,6 +499,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarLetter: { color: ACCENT, fontSize: 22, fontWeight: '800' },
+  // Collectible avatar fills the ring edge-to-edge (art carries its own backdrop)
+  avatarRingArt: { backgroundColor: 'transparent', overflow: 'hidden' },
   headerInfo: { flex: 1 },
   greeting: { color: MUTED, fontSize: 13 },
   username: { color: TEXT, fontSize: 22, fontWeight: '700', marginTop: 2 },

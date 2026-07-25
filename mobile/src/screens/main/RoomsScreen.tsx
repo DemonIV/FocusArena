@@ -17,7 +17,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { roomsService } from '../../services';
-import { FramedAvatar } from '../../components';
+import { FramedAvatar, AvatarArt } from '../../components';
+import { isAvatarId } from '../../constants/avatars';
 import { getPetEmoji } from '../../constants';
 import { useSocketStore, useAuthStore } from '../../stores';
 import i18n from '../../i18n';
@@ -453,8 +454,18 @@ function MemberRow({ member, index, isMe, onPress }: {
       {member.frame ? (
         <FramedAvatar username={member.username} avatarUrl={member.avatarUrl} frameId={member.frame} avatarId={member.avatarId} size={36} />
       ) : (
-        <View style={[styles.memberAvatar, { borderColor: color }]}>
-          <Text style={[styles.memberLetter, { color }]}>{member.username.charAt(0).toUpperCase()}</Text>
+        // No frame: the presence-tier ring stays, the collectible avatar (if
+        // any) replaces the letter inside it
+        <View style={[
+          styles.memberAvatar,
+          { borderColor: color },
+          isAvatarId(member.avatarId) && styles.avatarArtFill,
+        ]}>
+          {isAvatarId(member.avatarId) ? (
+            <AvatarArt id={member.avatarId} size={36} />
+          ) : (
+            <Text style={[styles.memberLetter, { color }]}>{member.username.charAt(0).toUpperCase()}</Text>
+          )}
         </View>
       )}
       <View style={{ flex: 1, minWidth: 0 }}>
@@ -501,8 +512,16 @@ function MemberSubjectsView({ member, isMe, onBack }: {
         {member.frame ? (
           <FramedAvatar username={member.username} avatarUrl={member.avatarUrl} frameId={member.frame} avatarId={member.avatarId} size={46} />
         ) : (
-          <View style={[styles.subAvatar, { borderColor: color }]}>
-            <Text style={[styles.subAvatarLetter, { color }]}>{member.username.charAt(0).toUpperCase()}</Text>
+          <View style={[
+            styles.subAvatar,
+            { borderColor: color },
+            isAvatarId(member.avatarId) && styles.avatarArtFill,
+          ]}>
+            {isAvatarId(member.avatarId) ? (
+              <AvatarArt id={member.avatarId} size={42} />
+            ) : (
+              <Text style={[styles.subAvatarLetter, { color }]}>{member.username.charAt(0).toUpperCase()}</Text>
+            )}
           </View>
         )}
         <View style={{ flex: 1, minWidth: 0 }}>
@@ -734,6 +753,8 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: BORDER,
   },
   memberLetter: { fontSize: 15, fontWeight: '800' },
+  // Collectible avatar fills the tier ring (art carries its own backdrop)
+  avatarArtFill: { backgroundColor: 'transparent', overflow: 'hidden' },
   memberName: { color: TEXT, fontSize: 15, fontWeight: '700' },
   stateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2.5 },
   stateDot: { width: 6.5, height: 6.5, borderRadius: 3.5 },

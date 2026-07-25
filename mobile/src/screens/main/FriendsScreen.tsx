@@ -13,7 +13,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { friendsService } from '../../services';
-import { FramedAvatar, MonthlyStatsModal } from '../../components';
+import { FramedAvatar, MonthlyStatsModal, AvatarArt } from '../../components';
+import { isAvatarId } from '../../constants/avatars';
 import { getPetEmoji } from '../../constants';
 import { useSocketStore, useAuthStore } from '../../stores';
 import { useInviteShare } from '../../hooks';
@@ -158,8 +159,18 @@ export function FriendsScreen() {
           // Frame trumps the status border — status stays visible in the text line
           <FramedAvatar username={item.username} avatarUrl={item.avatarUrl} frameId={item.frame} avatarId={item.avatarId} size={40} />
         ) : (
-          <View style={[styles.avatarCircle, { borderColor: STATUS_COLOR[status] ?? '#3a3a5a' }]}>
-            <Text style={styles.avatarLetter}>{item.username.charAt(0).toUpperCase()}</Text>
+          // No frame: keep the status-coloured ring, but show the collectible
+          // avatar inside it when there is one (letter is only the last resort)
+          <View style={[
+            styles.avatarCircle,
+            { borderColor: STATUS_COLOR[status] ?? '#3a3a5a' },
+            isAvatarId(item.avatarId) && styles.avatarCircleArt,
+          ]}>
+            {isAvatarId(item.avatarId) ? (
+              <AvatarArt id={item.avatarId} size={40} />
+            ) : (
+              <Text style={styles.avatarLetter}>{item.username.charAt(0).toUpperCase()}</Text>
+            )}
           </View>
         )}
         <TouchableOpacity
@@ -504,6 +515,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: BORDER,
   },
+  // Collectible avatar fills the ring (art carries its own backdrop)
+  avatarCircleArt: { backgroundColor: 'transparent', overflow: 'hidden' },
   avatarCircle: {
     width: 44,
     height: 44,
