@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { AchievementEntry, LockedAchievement, TitleEntry } from '../types';
+import type { AchievementEntry, LockedAchievement, TitleEntry, AvatarEntry } from '../types';
 
 interface RawEarned {
   id: string;
@@ -18,6 +18,8 @@ interface AchievementsResponse {
   locked: LockedAchievement[];
   titles: TitleEntry[];
   selectedTitle: string | null;
+  avatars: AvatarEntry[];
+  selectedAvatar: string | null;
 }
 
 export const achievementsService = {
@@ -27,6 +29,8 @@ export const achievementsService = {
       locked: RawLocked[];
       titles?: TitleEntry[];
       selectedTitle?: string | null;
+      avatars?: AvatarEntry[];
+      selectedAvatar?: string | null;
     }>('/achievements');
     return {
       earned: data.earned.map((e) => ({
@@ -45,12 +49,18 @@ export const achievementsService = {
       })),
       titles: data.titles ?? [],
       selectedTitle: data.selectedTitle ?? null,
+      avatars: data.avatars ?? [],
+      selectedAvatar: data.selectedAvatar ?? null,
     };
   },
 
   /** Set (or clear with null) the caller's selected profile title. */
   setTitle: (title: string | null) =>
     api.put<{ selectedTitle: string | null }>('/achievements/title', { title }),
+
+  /** Set (or clear with null) the caller's selected collectible avatar. */
+  setAvatar: (avatar: string | null) =>
+    api.put<{ selectedAvatar: string | null }>('/achievements/avatar', { avatar }),
 
   forUser: (userId: string) =>
     api.get<{ earned: RawEarned[] }>(`/achievements/${userId}`),

@@ -312,7 +312,9 @@
     "focusScoreWeek": "Qualité de concentration cette semaine",
     "focusScoreHint": "Score moyen de vos sessions",
     "titles": "Titres",
-    "titlesHint": "Choisis un titre gagné à afficher sur ton profil."
+    "titlesHint": "Choisis un titre gagné à afficher sur ton profil.",
+    "avatars": "Avatars",
+    "avatarsHint": "Les avatars que tu as gagnés. Touche pour en porter un — tes amis, les salles et les classements le verront."
   },
   "rooms": {
     "createRoom": "+ Créer une salle",
@@ -576,5 +578,39 @@
     "hoursAgo": "il y a {{count}} h",
     "yesterday": "hier",
     "daysAgo": "il y a {{count}} j"
+  },
+  "avatars": {
+    "names": {
+      "spark": "Étincelle",
+      "comet": "Comète",
+      "crescent": "Croissant",
+      "owl": "Chouette",
+      "fox": "Renard",
+      "deer": "Cerf",
+      "nebula": "Nébuleuse",
+      "whale": "Baleine stellaire",
+      "cat": "Chat cosmique",
+      "phoenix": "Phénix",
+      "dragon": "Dragon",
+      "nova": "Nova",
+      "blackhole": "Trou noir"
+    },
+    "unlock": {
+      "sessions": "Termine {{n}} sessions",
+      "nightSessions": "{{n}} sessions entre 00h00 et 06h00",
+      "streak": "Atteins une série de {{n}} jours",
+      "hours": "Concentre-toi {{n}} heures au total",
+      "level": "Atteins le niveau {{n}}",
+      "focus": "{{n}} sessions avec un score de concentration de {{min}}+",
+      "pro": "Abonnement Pro",
+      "seasonal": "Récompense d’événement saisonnier"
+    }
+  },
+  "avatarRarity": {
+    "common": "Commun",
+    "rare": "Rare",
+    "epic": "Épique",
+    "legend": "Légendaire",
+    "mythic": "Mythique"
   }
 }

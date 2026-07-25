@@ -174,3 +174,59 @@ export interface TitleEntry {
   requires: BadgeType | null;
   unlocked: boolean;
 }
+
+// ─── Avatars (koleksiyonluk avatarlar) ────────────────────────
+// Selectable cosmetic avatars shown inside the frame ring everywhere the user
+// appears. Mostly earned by studying (streak / hours / sessions / mastery),
+// a couple premium (Pro / seasonal). The backend owns the unlock rule + rarity;
+// names/art/descriptions are localized on the client via `avatars.<id>` keys.
+
+export const AVATAR_IDS = [
+  'spark', 'comet', 'crescent',            // common
+  'owl', 'fox', 'deer',                    // rare
+  'nebula', 'whale', 'cat',                // epic
+  'phoenix', 'dragon',                     // legend
+  'nova', 'blackhole',                     // mythic
+] as const;
+
+export type AvatarId = (typeof AVATAR_IDS)[number];
+export type AvatarRarity = 'common' | 'rare' | 'epic' | 'legend' | 'mythic';
+
+/** How an avatar is unlocked — evaluated live against the user's aggregates. */
+export type AvatarUnlock =
+  | { kind: 'sessions'; n: number }              // total sessions (>0 min)
+  | { kind: 'nightSessions'; n: number }         // sessions started 00:00–06:00 local
+  | { kind: 'streak'; n: number }                // longest streak in days
+  | { kind: 'hours'; n: number }                 // total focused hours
+  | { kind: 'level'; n: number }                 // account level
+  | { kind: 'focus'; n: number; min: number }    // n sessions with focus_score ≥ min
+  | { kind: 'pro' }                              // has the pro_member badge
+  | { kind: 'seasonal' };                        // Arena Pass / event grant (not yet obtainable)
+
+export interface AvatarMeta {
+  rarity: AvatarRarity;
+  unlock: AvatarUnlock;
+}
+
+export const AVATAR_META: Record<AvatarId, AvatarMeta> = {
+  spark:     { rarity: 'common', unlock: { kind: 'sessions', n: 1 } },
+  comet:     { rarity: 'common', unlock: { kind: 'sessions', n: 5 } },
+  crescent:  { rarity: 'common', unlock: { kind: 'streak', n: 3 } },
+  owl:       { rarity: 'rare',   unlock: { kind: 'nightSessions', n: 10 } },
+  fox:       { rarity: 'rare',   unlock: { kind: 'streak', n: 7 } },
+  deer:      { rarity: 'rare',   unlock: { kind: 'hours', n: 25 } },
+  nebula:    { rarity: 'epic',   unlock: { kind: 'hours', n: 100 } },
+  whale:     { rarity: 'epic',   unlock: { kind: 'level', n: 10 } },
+  cat:       { rarity: 'epic',   unlock: { kind: 'focus', n: 50, min: 85 } },
+  phoenix:   { rarity: 'legend', unlock: { kind: 'streak', n: 100 } },
+  dragon:    { rarity: 'legend', unlock: { kind: 'hours', n: 500 } },
+  nova:      { rarity: 'mythic', unlock: { kind: 'pro' } },
+  blackhole: { rarity: 'mythic', unlock: { kind: 'seasonal' } },
+};
+
+export interface AvatarEntry {
+  id: AvatarId;
+  rarity: AvatarRarity;
+  unlock: AvatarUnlock;
+  unlocked: boolean;
+}

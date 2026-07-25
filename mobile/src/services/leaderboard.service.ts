@@ -9,6 +9,7 @@ interface RawEntry {
   avatar_url: string | null;
   frame?: string | null;
   pet?: string | null;
+  avatar?: string | null;
   score: number;
   isMe?: boolean;
 }
@@ -29,6 +30,7 @@ function mapEntry(e: RawEntry, period: LeaderboardPeriod): LeaderboardEntry {
     avatarUrl: e.avatar_url,
     frame: e.frame ?? null,
     pet: e.pet ?? null,
+    avatarId: e.avatar ?? null,
     value: e.score,
     unit: period === 'alltime' ? 'XP' : 'min',
     isMe: e.isMe,
@@ -69,6 +71,7 @@ export const leaderboardService = {
         avatar_url: string | null;
         frame?: string | null;
         pet?: string | null;
+        avatar?: string | null;
         score: number;
         isMe: boolean;
       }[];
@@ -92,6 +95,7 @@ export const leaderboardService = {
         avatarUrl: n.avatar_url,
         frame: n.frame ?? null,
         pet: n.pet ?? null,
+        avatarId: n.avatar ?? null,
         value: n.score,
         unit,
         isMe: n.isMe,

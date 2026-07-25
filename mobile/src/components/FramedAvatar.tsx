@@ -6,6 +6,8 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { getFrameVisual } from '../constants/frames';
+import { isAvatarId } from '../constants/avatars';
+import { AvatarArt } from './AvatarArt';
 
 const ACCENT = '#00d2ff';
 
@@ -13,15 +15,19 @@ interface Props {
   username: string;
   avatarUrl?: string | null;
   frameId?: string | null;
+  /** Equipped collectible avatar id — rendered inside the ring if set/valid */
+  avatarId?: string | null;
   /** Avatar diameter (excluding frame ring), default 40 */
   size?: number;
 }
 
-export function FramedAvatar({ username, avatarUrl, frameId, size = 40 }: Props) {
+export function FramedAvatar({ username, avatarUrl, frameId, avatarId, size = 40 }: Props) {
   const frame = getFrameVisual(frameId);
   const radius = size / 2;
 
-  const avatar = avatarUrl ? (
+  const avatar = isAvatarId(avatarId) ? (
+    <AvatarArt id={avatarId} size={size} />
+  ) : avatarUrl ? (
     <Image source={{ uri: avatarUrl }} style={{ width: size, height: size, borderRadius: radius }} />
   ) : (
     <View style={[styles.fallback, { width: size, height: size, borderRadius: radius }]}>

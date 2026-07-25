@@ -312,7 +312,9 @@
     "focusScoreWeek": "Focuskwaliteit deze week",
     "focusScoreHint": "Gem. score over je sessies",
     "titles": "Titels",
-    "titlesHint": "Kies een verdiende titel om op je profiel te tonen."
+    "titlesHint": "Kies een verdiende titel om op je profiel te tonen.",
+    "avatars": "Avatars",
+    "avatarsHint": "Avatars die je hebt verdiend. Tik om er een te dragen — vrienden, kamers en ranglijsten zien hem."
   },
   "rooms": {
     "createRoom": "+ Kamer maken",
@@ -576,5 +578,39 @@
     "hoursAgo": "{{count}} u geleden",
     "yesterday": "gisteren",
     "daysAgo": "{{count}} d geleden"
+  },
+  "avatars": {
+    "names": {
+      "spark": "Vonk",
+      "comet": "Komeet",
+      "crescent": "Maansikkel",
+      "owl": "Nachtuil",
+      "fox": "Vos",
+      "deer": "Hert",
+      "nebula": "Nevel",
+      "whale": "Sterrenwalvis",
+      "cat": "Kosmische kat",
+      "phoenix": "Feniks",
+      "dragon": "Draak",
+      "nova": "Nova",
+      "blackhole": "Zwart gat"
+    },
+    "unlock": {
+      "sessions": "Voltooi {{n}} sessies",
+      "nightSessions": "{{n}} sessies tussen 00:00 en 06:00",
+      "streak": "Haal een reeks van {{n}} dagen",
+      "hours": "Focus in totaal {{n}} uur",
+      "level": "Bereik level {{n}}",
+      "focus": "{{n}} sessies met focusscore {{min}}+",
+      "pro": "Pro-lidmaatschap",
+      "seasonal": "Beloning van seizoensevenement"
+    }
+  },
+  "avatarRarity": {
+    "common": "Gewoon",
+    "rare": "Zeldzaam",
+    "epic": "Episch",
+    "legend": "Legendarisch",
+    "mythic": "Mythisch"
   }
 }

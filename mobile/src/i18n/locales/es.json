@@ -312,7 +312,9 @@
     "focusScoreWeek": "Calidad de enfoque esta semana",
     "focusScoreHint": "Puntuación media de tus sesiones",
     "titles": "Títulos",
-    "titlesHint": "Elige un título que hayas ganado para mostrarlo en tu perfil."
+    "titlesHint": "Elige un título que hayas ganado para mostrarlo en tu perfil.",
+    "avatars": "Avatares",
+    "avatarsHint": "Avatares que has conseguido estudiando. Toca uno para llevarlo: lo verán tus amigos, las salas y las clasificaciones."
   },
   "rooms": {
     "createRoom": "+ Crear sala",
@@ -576,5 +578,39 @@
     "hoursAgo": "hace {{count}} h",
     "yesterday": "ayer",
     "daysAgo": "hace {{count}} d"
+  },
+  "avatars": {
+    "names": {
+      "spark": "Chispa",
+      "comet": "Cometa",
+      "crescent": "Luna creciente",
+      "owl": "Búho nocturno",
+      "fox": "Zorro",
+      "deer": "Ciervo",
+      "nebula": "Nebulosa",
+      "whale": "Ballena estelar",
+      "cat": "Gato cósmico",
+      "phoenix": "Fénix",
+      "dragon": "Dragón",
+      "nova": "Nova",
+      "blackhole": "Agujero negro"
+    },
+    "unlock": {
+      "sessions": "Completa {{n}} sesiones",
+      "nightSessions": "{{n}} sesiones entre las 00:00 y las 06:00",
+      "streak": "Consigue una racha de {{n}} días",
+      "hours": "Concéntrate {{n}} horas en total",
+      "level": "Alcanza el nivel {{n}}",
+      "focus": "{{n}} sesiones con puntuación de enfoque {{min}}+",
+      "pro": "Suscripción Pro",
+      "seasonal": "Recompensa de evento de temporada"
+    }
+  },
+  "avatarRarity": {
+    "common": "Común",
+    "rare": "Raro",
+    "epic": "Épico",
+    "legend": "Legendario",
+    "mythic": "Mítico"
   }
 }

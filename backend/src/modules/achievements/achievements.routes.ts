@@ -2,8 +2,8 @@ import type { FastifyPluginAsync } from 'fastify';
 import { authGuard } from '../auth';
 import type { JwtPayload } from '../auth/auth.schema';
 import { captureException } from '../../shared/observability';
-import { getAchievementsWithProgress, getUserAchievements, setSelectedTitle } from './achievements.service';
-import { TITLE_IDS, type TitleId } from './achievements.schema';
+import { getAchievementsWithProgress, getUserAchievements, setSelectedTitle, setSelectedAvatar } from './achievements.service';
+import { TITLE_IDS, AVATAR_IDS, type TitleId, type AvatarId } from './achievements.schema';
 
 export const achievementsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.addHook('preHandler', authGuard);
@@ -42,6 +42,31 @@ export const achievementsRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.code(409).send({ error: e.code === 'BAD_TITLE' ? 'bad_title' : 'title_locked' });
       }
       request.log.error(err, 'achievements PUT /title failed');
+      captureException(err, { method: request.method, url: request.url });
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // ── PUT /achievements/avatar ──────────────────────────────
+  // Set (or clear with null) the caller's selected collectible avatar.
+  fastify.put('/avatar', async (request, reply) => {
+    const { sub: userId } = request.user as JwtPayload;
+    const body = (request.body ?? {}) as { avatar?: unknown };
+    const raw = body.avatar;
+
+    if (raw !== null && (typeof raw !== 'string' || !AVATAR_IDS.includes(raw as AvatarId))) {
+      return reply.code(400).send({ error: 'Validation error', message: 'Invalid avatar' });
+    }
+
+    try {
+      const selectedAvatar = await setSelectedAvatar(userId, (raw ?? null) as AvatarId | null);
+      return reply.send({ selectedAvatar });
+    } catch (err: unknown) {
+      const e = err as { code?: string; message: string };
+      if (e.code === 'AVATAR_LOCKED' || e.code === 'BAD_AVATAR') {
+        return reply.code(409).send({ error: e.code === 'BAD_AVATAR' ? 'bad_avatar' : 'avatar_locked' });
+      }
+      request.log.error(err, 'achievements PUT /avatar failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
     }

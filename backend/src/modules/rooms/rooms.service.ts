@@ -132,7 +132,7 @@ export async function getRoomMembers(
 ): Promise<RoomMemberWithPresence[]> {
   const { data, error } = await supabase
     .from('room_members')
-    .select('user_id, joined_at, users!inner(username, avatar_url, selected_frame, selected_pet)')
+    .select('user_id, joined_at, users!inner(username, avatar_url, selected_frame, selected_pet, selected_avatar)')
     .eq('room_id', roomId)
     .eq('is_active', true)
     .order('joined_at', { ascending: true });
@@ -225,7 +225,7 @@ export async function getRoomMembers(
 
   const members = await Promise.all(
     rows.map(async (row) => {
-      const u = row.users as unknown as { username: string; avatar_url: string | null; selected_frame: string | null; selected_pet: string | null };
+      const u = row.users as unknown as { username: string; avatar_url: string | null; selected_frame: string | null; selected_pet: string | null; selected_avatar: string | null };
       const status = await getPresence(roomId, row.user_id);
       return {
         user_id: row.user_id as string,
@@ -233,6 +233,7 @@ export async function getRoomMembers(
         avatar_url: u.avatar_url,
         frame: u.selected_frame,
         pet: u.selected_pet,
+        avatar: u.selected_avatar,
         joined_at: row.joined_at as string,
         status,
         total_minutes: minutesMap.get(row.user_id) ?? 0,

@@ -312,7 +312,9 @@
     "focusScoreWeek": "Fokusqualität diese Woche",
     "focusScoreHint": "Durchschnitt deiner Sitzungen",
     "titles": "Titel",
-    "titlesHint": "Wähle einen verdienten Titel für dein Profil."
+    "titlesHint": "Wähle einen verdienten Titel für dein Profil.",
+    "avatars": "Avatare",
+    "avatarsHint": "Avatare, die du dir erarbeitet hast. Tippe, um einen zu tragen — Freunde, Räume und Ranglisten sehen ihn."
   },
   "rooms": {
     "createRoom": "+ Raum erstellen",
@@ -576,5 +578,39 @@
     "hoursAgo": "vor {{count}} Std.",
     "yesterday": "gestern",
     "daysAgo": "vor {{count}} T."
+  },
+  "avatars": {
+    "names": {
+      "spark": "Funke",
+      "comet": "Komet",
+      "crescent": "Mondsichel",
+      "owl": "Nachteule",
+      "fox": "Fuchs",
+      "deer": "Hirsch",
+      "nebula": "Nebel",
+      "whale": "Sternenwal",
+      "cat": "Kosmische Katze",
+      "phoenix": "Phönix",
+      "dragon": "Drache",
+      "nova": "Nova",
+      "blackhole": "Schwarzes Loch"
+    },
+    "unlock": {
+      "sessions": "Schließe {{n}} Sitzungen ab",
+      "nightSessions": "{{n}} Sitzungen zwischen 00:00–06:00",
+      "streak": "Erreiche eine Serie von {{n}} Tagen",
+      "hours": "Fokussiere dich insgesamt {{n}} Stunden",
+      "level": "Erreiche Level {{n}}",
+      "focus": "{{n}} Sitzungen mit Fokus-Score {{min}}+",
+      "pro": "Pro-Mitgliedschaft",
+      "seasonal": "Saisonale Event-Belohnung"
+    }
+  },
+  "avatarRarity": {
+    "common": "Gewöhnlich",
+    "rare": "Selten",
+    "epic": "Episch",
+    "legend": "Legendär",
+    "mythic": "Mythisch"
   }
 }

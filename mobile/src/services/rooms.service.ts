@@ -20,6 +20,7 @@ interface RawMember {
   avatar_url: string | null;
   frame?: string | null;
   pet?: string | null;
+  avatar?: string | null;
   joined_at: string;
   status: 'studying' | 'break' | 'offline';
   total_minutes: number;
@@ -54,6 +55,7 @@ function mapMember(m: RawMember): RoomMember {
     avatarUrl: m.avatar_url,
     frame: m.frame ?? null,
     pet: m.pet ?? null,
+    avatarId: m.avatar ?? null,
     joinedAt: m.joined_at,
     status: m.status,
     totalMinutes: m.total_minutes ?? 0,

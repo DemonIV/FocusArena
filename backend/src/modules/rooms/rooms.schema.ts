@@ -57,6 +57,8 @@ export interface RoomMemberWithPresence {
   frame: string | null;
   /** Equipped pet id (shop) — social display */
   pet: string | null;
+  /** Equipped collectible avatar id — social display */
+  avatar: string | null;
   joined_at: string;
   status: MemberStatus;
   /** Total minutes this member has studied while in this room (all-time) */

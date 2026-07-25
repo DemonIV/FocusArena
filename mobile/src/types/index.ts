@@ -275,6 +275,8 @@ export interface LeaderboardEntry {
   frame?: string | null;
   /** Equipped pet id — social display */
   pet?: string | null;
+  /** Equipped collectible avatar id — social display */
+  avatarId?: string | null;
   /** Numeric score for the given period */
   value: number;
   /** 'min' | 'XP' etc. */
@@ -320,6 +322,8 @@ export interface RoomMember {
   frame?: string | null;
   /** Equipped pet id — social display */
   pet?: string | null;
+  /** Equipped collectible avatar id — social display */
+  avatarId?: string | null;
   joinedAt: string;
   status: 'studying' | 'break' | 'offline';
   /** Total minutes studied while in this room (all-time) */
@@ -354,6 +358,8 @@ export interface FriendEntry {
   frame?: string | null;
   /** Equipped pet id — social display */
   pet?: string | null;
+  /** Equipped collectible avatar id — social display */
+  avatarId?: string | null;
   level: number;
   status: 'studying' | 'break' | 'offline';
   friendsSince: string;
@@ -404,6 +410,25 @@ export interface TitleEntry {
   id: string;
   icon: string;
   requires: string | null;
+  unlocked: boolean;
+}
+
+/** How a collectible avatar is unlocked (mirrors the backend AvatarUnlock). */
+export type AvatarUnlock =
+  | { kind: 'sessions'; n: number }
+  | { kind: 'nightSessions'; n: number }
+  | { kind: 'streak'; n: number }
+  | { kind: 'hours'; n: number }
+  | { kind: 'level'; n: number }
+  | { kind: 'focus'; n: number; min: number }
+  | { kind: 'pro' }
+  | { kind: 'seasonal' };
+
+/** A collectible avatar with its unlock rule + whether the user has it. */
+export interface AvatarEntry {
+  id: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legend' | 'mythic';
+  unlock: AvatarUnlock;
   unlocked: boolean;
 }
 

@@ -25,3 +25,5 @@ export { FRAMES, getFrameVisual } from './frames';
 export type { FrameVisual } from './frames';
 export { PETS, PET_EGG_LOTTIE, PET_RARITY_COLORS, getPetVisual, getPetEmoji } from './pets';
 export type { PetVisual, PetRarity } from './pets';
+export { AVATAR_ORDER, AVATAR_VISUAL, RARITY_COLOR, RARITY_PARTICLES, isAvatarId } from './avatars';
+export type { AvatarId, AvatarVisual, AvatarRarity } from './avatars';

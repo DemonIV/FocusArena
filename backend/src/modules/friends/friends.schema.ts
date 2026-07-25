@@ -43,6 +43,8 @@ export interface FriendEntry {
   frame: string | null;
   /** Equipped pet id (shop) — social display */
   pet: string | null;
+  /** Equipped collectible avatar id — social display */
+  avatar: string | null;
   level: number;
   friends_since: string;
   online_status: OnlineStatus;

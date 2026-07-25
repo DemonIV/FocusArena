@@ -36,6 +36,8 @@ export interface LeaderboardEntry {
   frame?: string | null;
   /** Equipped pet id (shop) — social display */
   pet?: string | null;
+  /** Equipped collectible avatar id — social display */
+  avatar?: string | null;
   /** Minutes (period) or XP (alltime) */
   score: number;
 }
@@ -64,6 +66,7 @@ export interface MyRankNeighbor {
   avatar_url: string | null;
   frame?: string | null;
   pet?: string | null;
+  avatar?: string | null;
   score: number;
   isMe: boolean;
 }

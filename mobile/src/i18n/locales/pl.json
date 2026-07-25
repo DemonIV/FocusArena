@@ -312,7 +312,9 @@
     "focusScoreWeek": "Jakość skupienia w tym tygodniu",
     "focusScoreHint": "Średni wynik z twoich sesji",
     "titles": "Tytuły",
-    "titlesHint": "Wybierz zdobyty tytuł, który pokażesz w profilu."
+    "titlesHint": "Wybierz zdobyty tytuł, który pokażesz w profilu.",
+    "avatars": "Awatary",
+    "avatarsHint": "Awatary zdobyte podczas nauki. Dotknij, aby założyć — zobaczą go znajomi, pokoje i rankingi."
   },
   "rooms": {
     "createRoom": "+ Utwórz pokój",
@@ -576,5 +578,39 @@
     "hoursAgo": "{{count}} godz. temu",
     "yesterday": "wczoraj",
     "daysAgo": "{{count}} dni temu"
+  },
+  "avatars": {
+    "names": {
+      "spark": "Iskra",
+      "comet": "Kometa",
+      "crescent": "Półksiężyc",
+      "owl": "Nocna sowa",
+      "fox": "Lis",
+      "deer": "Jeleń",
+      "nebula": "Mgławica",
+      "whale": "Gwiezdny wieloryb",
+      "cat": "Kosmiczny kot",
+      "phoenix": "Feniks",
+      "dragon": "Smok",
+      "nova": "Nowa",
+      "blackhole": "Czarna dziura"
+    },
+    "unlock": {
+      "sessions": "Ukończ {{n}} sesji",
+      "nightSessions": "{{n}} sesji między 00:00 a 06:00",
+      "streak": "Osiągnij serię {{n}} dni",
+      "hours": "Skup się łącznie przez {{n}} godzin",
+      "level": "Osiągnij poziom {{n}}",
+      "focus": "{{n}} sesji z wynikiem skupienia {{min}}+",
+      "pro": "Subskrypcja Pro",
+      "seasonal": "Nagroda z wydarzenia sezonowego"
+    }
+  },
+  "avatarRarity": {
+    "common": "Zwykły",
+    "rare": "Rzadki",
+    "epic": "Epicki",
+    "legend": "Legendarny",
+    "mythic": "Mityczny"
   }
 }

@@ -17,7 +17,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
-import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal } from '../../components';
+import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal, AvatarArt } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { CoinShopModal } from '../../components/CoinShopModal';
 import { PetDetailModal } from '../../components/PetDetailModal';
@@ -28,9 +28,10 @@ import { setPushEnabled as syncPushEnabled } from '../../services';
 import LottieView from 'lottie-react-native';
 import { timerService, achievementsService, roomsService, cosmeticsService } from '../../services';
 import { FRAMES, getFrameVisual, PETS, getPetVisual, PET_EGG_LOTTIE, PET_RARITY_COLORS } from '../../constants';
+import { RARITY_COLOR as AVATAR_RARITY_COLOR, isAvatarId } from '../../constants/avatars';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
-import type { SubjectStat, FrameEntry, PetEntry } from '../../types';
+import type { SubjectStat, FrameEntry, PetEntry, AvatarEntry, AvatarUnlock } from '../../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -114,12 +115,31 @@ export function ProfileScreen() {
   const titles   = achievQ.data?.titles  ?? [];
   const selectedTitle = achievQ.data?.selectedTitle ?? null;
   const activeTitle = titles.find((tt) => tt.id === selectedTitle) ?? null;
+  const avatars  = achievQ.data?.avatars ?? [];
+  const selectedAvatar = achievQ.data?.selectedAvatar ?? null;
   const subjects: SubjectStat[] = subjectStatsQ.data?.subjects ?? [];
 
   // Selecting a title (or clearing it by tapping the active one again).
   const titleMut = useMutation({
     mutationFn: (id: string | null) => achievementsService.setTitle(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['achievements'] }),
+    onError:   (e: any) => Alert.alert(t('common.error'), e?.message ?? t('common.error')),
+  });
+
+  // Equipping a collectible avatar (tapping the equipped one clears it).
+  // Everywhere the user appears (friends, rooms, leaderboard) reads it, so the
+  // whole social surface is refetched on success.
+  const avatarMut = useMutation({
+    mutationFn: (id: string | null) => achievementsService.setAvatar(id),
+    onSuccess: (_res, id) => {
+      queryClient.invalidateQueries({ queryKey: ['achievements'] });
+      queryClient.invalidateQueries({ queryKey: ['friends'] });
+      queryClient.invalidateQueries({ queryKey: ['lb-global'] });
+      queryClient.invalidateQueries({ queryKey: ['lb-friends'] });
+      queryClient.invalidateQueries({ queryKey: ['lb-me'] });
+      queryClient.invalidateQueries({ queryKey: ['room'] });
+      track('avatar_equipped', { avatar: id ?? 'none' });
+    },
     onError:   (e: any) => Alert.alert(t('common.error'), e?.message ?? t('common.error')),
   });
 
@@ -308,10 +328,14 @@ export function ProfileScreen() {
 
         {/* ── Profile Card ── */}
         <View style={styles.profileCard}>
-          <View style={styles.avatarRing}>
-            <Text style={styles.avatarLetter}>
-              {user?.username.charAt(0).toUpperCase() ?? '?'}
-            </Text>
+          <View style={[styles.avatarRing, isAvatarId(selectedAvatar) && styles.avatarRingArt]}>
+            {isAvatarId(selectedAvatar) ? (
+              <AvatarArt id={selectedAvatar} size={56} />
+            ) : (
+              <Text style={styles.avatarLetter}>
+                {user?.username.charAt(0).toUpperCase() ?? '?'}
+              </Text>
+            )}
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.username}>{user?.username ?? '—'}</Text>
@@ -495,6 +519,57 @@ export function ProfileScreen() {
             <Text style={styles.emptyTitle}>{t('profile.noOwnedRooms')}</Text>
             <Text style={styles.emptyHint}>{t('profile.noOwnedRoomsHint')}</Text>
           </View>
+        )}
+
+        {/* ── Avatar collection (earned, not bought) ── */}
+        {avatars.length > 0 && (
+          <>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionLabel}>{t('profile.avatars')}</Text>
+              <Text style={styles.avatarCount}>
+                {avatars.filter((a) => a.unlocked).length}/{avatars.length}
+              </Text>
+            </View>
+            <Text style={styles.titlesHint}>{t('profile.avatarsHint')}</Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={shop.row}
+            >
+              {/* Default — the plain letter avatar */}
+              <Pressable
+                style={[shop.card, selectedAvatar === null && shop.cardSelected]}
+                onPress={() => {
+                  if (!avatarMut.isPending && selectedAvatar !== null) avatarMut.mutate(null);
+                }}
+              >
+                <View style={av.artWrap}>
+                  <View style={av.defaultArt}>
+                    <Text style={av.defaultLetter}>
+                      {user?.username.charAt(0).toUpperCase() ?? '?'}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={shop.name} numberOfLines={1}>{t('shop.default')}</Text>
+                <Text style={[shop.state, selectedAvatar === null && { color: ACCENT }]}>
+                  {selectedAvatar === null ? `✓ ${t('shop.selected')}` : t('shop.select')}
+                </Text>
+              </Pressable>
+
+              {avatars.map((a) => (
+                <AvatarCard
+                  key={a.id}
+                  entry={a}
+                  selected={a.id === selectedAvatar}
+                  disabled={avatarMut.isPending}
+                  onPress={() =>
+                    avatarMut.mutate(a.id === selectedAvatar ? null : a.id)
+                  }
+                />
+              ))}
+            </ScrollView>
+          </>
         )}
 
         {/* ── Titles (ünvanlar) ── */}
@@ -726,6 +801,93 @@ export function ProfileScreen() {
 // ─── FrameShopSection ─────────────────────────────────────────────────────────
 // Coin balance + horizontal frame shop. Frames are bought with coins
 // (earned 1:1 with XP) and equip onto the focus timer ring.
+
+// ─── Avatar collection card ───────────────────────────────────────────────────
+
+/**
+ * Human-readable unlock requirement. Uses plain `n`/`min` placeholders (not
+ * i18next's `count`) so the 10 locale files stay single-form.
+ */
+function avatarUnlockText(t: (k: string, o?: any) => string, u: AvatarUnlock): string {
+  switch (u.kind) {
+    case 'sessions':      return t('avatars.unlock.sessions', { n: u.n });
+    case 'nightSessions': return t('avatars.unlock.nightSessions', { n: u.n });
+    case 'streak':        return t('avatars.unlock.streak', { n: u.n });
+    case 'hours':         return t('avatars.unlock.hours', { n: u.n });
+    case 'level':         return t('avatars.unlock.level', { n: u.n });
+    case 'focus':         return t('avatars.unlock.focus', { n: u.n, min: u.min });
+    case 'pro':           return t('avatars.unlock.pro');
+    case 'seasonal':      return t('avatars.unlock.seasonal');
+    default:              return '';
+  }
+}
+
+function AvatarCard({
+  entry, selected, disabled, onPress,
+}: {
+  entry: AvatarEntry;
+  selected: boolean;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const { t } = useTranslation();
+  // Unknown id from a newer backend — skip instead of crashing the section.
+  if (!isAvatarId(entry.id)) return null;
+  const rarityColor = AVATAR_RARITY_COLOR[entry.rarity];
+
+  return (
+    <Pressable
+      style={[
+        shop.card,
+        { borderColor: entry.unlocked ? `${rarityColor}88` : BORDER },
+        selected && shop.cardSelected,
+        !entry.unlocked && av.cardLocked,
+      ]}
+      disabled={!entry.unlocked || disabled}
+      onPress={onPress}
+    >
+      <View style={av.artWrap}>
+        <View style={!entry.unlocked && av.artLocked}>
+          <AvatarArt id={entry.id} size={52} />
+        </View>
+        {!entry.unlocked && (
+          <View style={av.lockBadge}><Text style={av.lockIcon}>🔒</Text></View>
+        )}
+      </View>
+
+      <Text style={shop.name} numberOfLines={1}>{t(`avatars.names.${entry.id}`)}</Text>
+      <Text style={[av.rarity, { color: rarityColor }]} numberOfLines={1}>
+        {t(`avatarRarity.${entry.rarity}`)}
+      </Text>
+
+      {selected ? (
+        <Text style={[shop.state, { color: ACCENT }]}>✓ {t('shop.selected')}</Text>
+      ) : entry.unlocked ? (
+        <Text style={shop.state}>{t('shop.select')}</Text>
+      ) : (
+        <Text style={av.unlockHint} numberOfLines={2}>
+          {avatarUnlockText(t, entry.unlock)}
+        </Text>
+      )}
+    </Pressable>
+  );
+}
+
+const av = StyleSheet.create({
+  artWrap: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  artLocked: { opacity: 0.25 },
+  lockBadge: { position: 'absolute' },
+  lockIcon: { fontSize: 20 },
+  cardLocked: { opacity: 0.9 },
+  rarity: { fontSize: 10, fontWeight: '800', letterSpacing: 0.4, marginBottom: 3, textTransform: 'uppercase' },
+  unlockHint: { color: MUTED, fontSize: 10, fontWeight: '600', textAlign: 'center', lineHeight: 13 },
+  defaultArt: {
+    width: 52, height: 52, borderRadius: 26,
+    backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  defaultLetter: { color: ACCENT, fontSize: 20, fontWeight: '800' },
+});
 
 function FrameShopSection() {
   const { t } = useTranslation();
@@ -1252,6 +1414,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarLetter: { color: ACCENT, fontSize: 24, fontWeight: '800' },
+  // Collectible avatar fills the ring edge-to-edge (art carries its own backdrop)
+  avatarRingArt: { backgroundColor: 'transparent', overflow: 'hidden' },
   profileInfo: { flex: 1 },
   username: { color: TEXT, fontSize: 18, fontWeight: '700' },
   email: { color: MUTED, fontSize: 12, marginTop: 2 },
@@ -1452,6 +1616,7 @@ const styles = StyleSheet.create({
 
   // Titles (ünvanlar)
   titlesHint: { color: MUTED, fontSize: 12, marginTop: -6, marginBottom: 12, lineHeight: 17 },
+  avatarCount: { color: MUTED2, fontSize: 12, fontWeight: '700' },
   titlesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   titleChip: {
     flexDirection: 'row',

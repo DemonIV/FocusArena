@@ -156,7 +156,7 @@ export function FriendsScreen() {
       <View style={styles.row}>
         {item.frame ? (
           // Frame trumps the status border — status stays visible in the text line
-          <FramedAvatar username={item.username} avatarUrl={item.avatarUrl} frameId={item.frame} size={40} />
+          <FramedAvatar username={item.username} avatarUrl={item.avatarUrl} frameId={item.frame} avatarId={item.avatarId} size={40} />
         ) : (
           <View style={[styles.avatarCircle, { borderColor: STATUS_COLOR[status] ?? '#3a3a5a' }]}>
             <Text style={styles.avatarLetter}>{item.username.charAt(0).toUpperCase()}</Text>

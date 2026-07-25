@@ -1,5 +1,6 @@
 export { TimerCircle } from './TimerCircle';
 export { FramedAvatar } from './FramedAvatar';
+export { AvatarArt } from './AvatarArt';
 export { CoinShopModal } from './CoinShopModal';
 export { StatCard } from './StatCard';
 export { LanguagePicker } from './LanguagePicker';

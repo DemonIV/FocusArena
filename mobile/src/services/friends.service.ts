@@ -9,6 +9,7 @@ interface RawFriend {
   avatar_url: string | null;
   frame?: string | null;
   pet?: string | null;
+  avatar?: string | null;
   level: number;
   online_status: 'studying' | 'break' | 'offline';
   friends_since: string;
@@ -53,6 +54,7 @@ export const friendsService = {
       avatarUrl: f.avatar_url,
       frame: f.frame ?? null,
       pet: f.pet ?? null,
+      avatarId: f.avatar ?? null,
       level: f.level,
       status: f.online_status,
       friendsSince: f.friends_since,

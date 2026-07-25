@@ -312,7 +312,9 @@
     "focusScoreWeek": "This week's focus quality",
     "focusScoreHint": "Avg score across your sessions",
     "titles": "Titles",
-    "titlesHint": "Pick a title you've earned to show on your profile."
+    "titlesHint": "Pick a title you've earned to show on your profile.",
+    "avatars": "Avatars",
+    "avatarsHint": "Avatars you've earned by studying. Tap one to wear it — friends, rooms and leaderboards will see it."
   },
   "rooms": {
     "createRoom": "+ Create Room",
@@ -576,5 +578,39 @@
     "hoursAgo": "{{count}}h ago",
     "yesterday": "yesterday",
     "daysAgo": "{{count}}d ago"
+  },
+  "avatars": {
+    "names": {
+      "spark": "Spark",
+      "comet": "Comet",
+      "crescent": "Crescent",
+      "owl": "Night Owl",
+      "fox": "Fox",
+      "deer": "Stag",
+      "nebula": "Nebula",
+      "whale": "Star Whale",
+      "cat": "Cosmic Cat",
+      "phoenix": "Phoenix",
+      "dragon": "Dragon",
+      "nova": "Nova",
+      "blackhole": "Black Hole"
+    },
+    "unlock": {
+      "sessions": "Finish {{n}} sessions",
+      "nightSessions": "{{n}} sessions between 00:00–06:00",
+      "streak": "Reach a {{n}}-day streak",
+      "hours": "Focus for {{n}} hours in total",
+      "level": "Reach level {{n}}",
+      "focus": "{{n}} sessions with a focus score of {{min}}+",
+      "pro": "Pro membership",
+      "seasonal": "Seasonal event reward"
+    }
+  },
+  "avatarRarity": {
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legend": "Legendary",
+    "mythic": "Mythic"
   }
 }

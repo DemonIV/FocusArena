@@ -451,7 +451,7 @@ function MemberRow({ member, index, isMe, onPress }: {
         {medal ? <Text style={styles.rankMedal}>{medal}</Text> : <Text style={styles.rankNum}>{index + 1}</Text>}
       </View>
       {member.frame ? (
-        <FramedAvatar username={member.username} avatarUrl={member.avatarUrl} frameId={member.frame} size={36} />
+        <FramedAvatar username={member.username} avatarUrl={member.avatarUrl} frameId={member.frame} avatarId={member.avatarId} size={36} />
       ) : (
         <View style={[styles.memberAvatar, { borderColor: color }]}>
           <Text style={[styles.memberLetter, { color }]}>{member.username.charAt(0).toUpperCase()}</Text>
@@ -499,7 +499,7 @@ function MemberSubjectsView({ member, isMe, onBack }: {
 
       <View style={styles.subHead}>
         {member.frame ? (
-          <FramedAvatar username={member.username} avatarUrl={member.avatarUrl} frameId={member.frame} size={46} />
+          <FramedAvatar username={member.username} avatarUrl={member.avatarUrl} frameId={member.frame} avatarId={member.avatarId} size={46} />
         ) : (
           <View style={[styles.subAvatar, { borderColor: color }]}>
             <Text style={[styles.subAvatarLetter, { color }]}>{member.username.charAt(0).toUpperCase()}</Text>

@@ -312,7 +312,9 @@
     "focusScoreWeek": "Bu haftaki odak kalitesi",
     "focusScoreHint": "Seanslarının ortalama skoru",
     "titles": "Ünvanlar",
-    "titlesHint": "Rozetlerinden kazandığın bir ünvanı seçip profilinde göster."
+    "titlesHint": "Rozetlerinden kazandığın bir ünvanı seçip profilinde göster.",
+    "avatars": "Avatarlar",
+    "avatarsHint": "Çalışarak kazandığın avatarlar. Birine dokunup tak — arkadaşların, odalar ve sıralamalar görür."
   },
   "rooms": {
     "createRoom": "+ Oda Kur",
@@ -576,5 +578,39 @@
     "hoursAgo": "{{count}} sa önce",
     "yesterday": "dün",
     "daysAgo": "{{count}} gün önce"
+  },
+  "avatars": {
+    "names": {
+      "spark": "Kıvılcım",
+      "comet": "Kuyruklu Yıldız",
+      "crescent": "Hilal",
+      "owl": "Gece Baykuşu",
+      "fox": "Tilki",
+      "deer": "Geyik",
+      "nebula": "Bulutsu",
+      "whale": "Yıldız Balinası",
+      "cat": "Kozmik Kedi",
+      "phoenix": "Anka",
+      "dragon": "Ejderha",
+      "nova": "Nova",
+      "blackhole": "Kara Delik"
+    },
+    "unlock": {
+      "sessions": "{{n}} seans tamamla",
+      "nightSessions": "00:00–06:00 arası {{n}} seans yap",
+      "streak": "{{n}} günlük seri yakala",
+      "hours": "Toplam {{n}} saat odaklan",
+      "level": "{{n}}. seviyeye ulaş",
+      "focus": "Odak skoru {{min}}+ olan {{n}} seans",
+      "pro": "Pro üyelik",
+      "seasonal": "Sezonluk etkinlik ödülü"
+    }
+  },
+  "avatarRarity": {
+    "common": "Yaygın",
+    "rare": "Nadir",
+    "epic": "Epik",
+    "legend": "Efsanevi",
+    "mythic": "Mitik"
   }
 }

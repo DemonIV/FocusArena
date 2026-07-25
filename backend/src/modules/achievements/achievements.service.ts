@@ -5,9 +5,14 @@ import {
   BADGE_META,
   TITLE_IDS,
   TITLE_META,
+  AVATAR_IDS,
+  AVATAR_META,
   type BadgeType,
   type TitleId,
   type TitleEntry,
+  type AvatarId,
+  type AvatarUnlock,
+  type AvatarEntry,
   type AchievementContext,
   type AchievementEntry,
 } from './achievements.schema';
@@ -130,6 +135,8 @@ export async function getAchievementsWithProgress(userId: string): Promise<{
   locked: { badge_type: BadgeType; meta: (typeof BADGE_META)[BadgeType] }[];
   titles: TitleEntry[];
   selectedTitle: TitleId | null;
+  avatars: AvatarEntry[];
+  selectedAvatar: AvatarId | null;
 }> {
   const earned = await getUserAchievements(userId);
   const earnedSet = new Set(earned.map((e) => e.badge_type));
@@ -158,7 +165,130 @@ export async function getAchievementsWithProgress(userId: string): Promise<{
   const raw = (userRow?.selected_title as TitleId | null) ?? null;
   const selectedTitle = raw && titles.find((t) => t.id === raw)?.unlocked ? raw : null;
 
-  return { earned, locked, titles, selectedTitle };
+  const { avatars, selectedAvatar } = await computeAvatarsForUser(userId);
+
+  return { earned, locked, titles, selectedTitle, avatars, selectedAvatar };
+}
+
+// ─── Avatars ──────────────────────────────────────────────────
+
+interface AvatarStats {
+  sessions: number;
+  nightSessions: number;
+  streak: number;      // longest streak (days)
+  hours: number;
+  level: number;
+  focusHigh: number;   // sessions with focus_score ≥ 85
+  isPro: boolean;
+}
+
+const HIGH_FOCUS = 85;
+
+function avatarUnlocked(u: AvatarUnlock, s: AvatarStats): boolean {
+  switch (u.kind) {
+    case 'sessions':      return s.sessions >= u.n;
+    case 'nightSessions': return s.nightSessions >= u.n;
+    case 'streak':        return s.streak >= u.n;
+    case 'hours':         return s.hours >= u.n;
+    case 'level':         return s.level >= u.n;
+    case 'focus':         return s.focusHigh >= u.n;
+    case 'pro':           return s.isPro;
+    case 'seasonal':      return false; // Arena Pass / event grant — not yet obtainable
+  }
+}
+
+/**
+ * Compute every avatar's unlock status from the user's live aggregates, plus
+ * their currently selected avatar (cleared if it points to a locked one).
+ * Self-contained (own queries) so it can be called from the profile read and
+ * from the selection setter alike.
+ */
+async function computeAvatarsForUser(userId: string): Promise<{
+  avatars: AvatarEntry[];
+  selectedAvatar: AvatarId | null;
+}> {
+  const [userRes, badgeRes, sessRes] = await Promise.all([
+    supabase
+      .from('users')
+      .select('level, longest_streak, utc_offset_minutes, selected_avatar')
+      .eq('id', userId)
+      .maybeSingle(),
+    supabase
+      .from('achievements')
+      .select('badge_type')
+      .eq('user_id', userId)
+      .eq('badge_type', 'pro_member')
+      .maybeSingle(),
+    supabase
+      .from('sessions')
+      .select('duration_minutes, started_at, focus_score')
+      .eq('user_id', userId)
+      .limit(20_000), // explicit cap (same shape as getStudyDNA); aggregate in JS
+  ]);
+
+  // A failed sessions read must NOT silently compute "zero of everything" —
+  // that would show every avatar as locked and reject a legitimate selection.
+  if (sessRes.error) throw new Error(sessRes.error.message);
+
+  const u = userRes.data;
+  const offsetMin = Math.round((u?.utc_offset_minutes as number | null) ?? 0);
+
+  let sessions = 0, nightSessions = 0, totalMin = 0, focusHigh = 0;
+  for (const r of sessRes.data ?? []) {
+    const min = (r.duration_minutes as number | null) ?? 0;
+    if (min <= 0) continue;
+    sessions += 1;
+    totalMin += min;
+    if (((r.focus_score as number | null) ?? 0) >= HIGH_FOCUS) focusHigh += 1;
+    const localHour = new Date(new Date(r.started_at as string).getTime() + offsetMin * 60_000).getUTCHours();
+    if (localHour < 6) nightSessions += 1; // 00:00–06:00 local = "night"
+  }
+
+  const stats: AvatarStats = {
+    sessions,
+    nightSessions,
+    streak: (u?.longest_streak as number | null) ?? 0,
+    hours: totalMin / 60,
+    level: (u?.level as number | null) ?? 0,
+    focusHigh,
+    isPro: !!badgeRes.data,
+  };
+
+  const avatars: AvatarEntry[] = AVATAR_IDS.map((id) => {
+    const m = AVATAR_META[id];
+    return { id, rarity: m.rarity, unlock: m.unlock, unlocked: avatarUnlocked(m.unlock, stats) };
+  });
+
+  const raw = (u?.selected_avatar as AvatarId | null) ?? null;
+  const selectedAvatar = raw && avatars.find((a) => a.id === raw)?.unlocked ? raw : null;
+  return { avatars, selectedAvatar };
+}
+
+/**
+ * Set (or clear, with null) the caller's selected avatar. Rejects one the user
+ * hasn't unlocked. Returns the value that was persisted.
+ */
+export async function setSelectedAvatar(
+  userId: string,
+  avatar: AvatarId | null,
+): Promise<AvatarId | null> {
+  if (avatar !== null) {
+    if (!AVATAR_IDS.includes(avatar)) {
+      throw Object.assign(new Error('Unknown avatar'), { code: 'BAD_AVATAR' });
+    }
+    const { avatars } = await computeAvatarsForUser(userId);
+    if (!avatars.find((a) => a.id === avatar)?.unlocked) {
+      throw Object.assign(new Error('Avatar locked'), { code: 'AVATAR_LOCKED' });
+    }
+  }
+
+  const { error } = await supabase
+    .from('users')
+    .update({ selected_avatar: avatar })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+
+  return avatar;
 }
 
 /**

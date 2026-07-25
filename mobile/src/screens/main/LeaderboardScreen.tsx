@@ -66,6 +66,7 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
         username={entry.username}
         avatarUrl={entry.avatarUrl}
         frameId={entry.frame}
+        avatarId={entry.avatarId}
         size={40}
       />
 
