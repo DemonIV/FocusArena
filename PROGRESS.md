@@ -247,7 +247,20 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 30 — 🇹🇷 TR ekran görüntüleri v3 + yeni Oda karesi tasarımı (22 Temmuz) ⭐ EN GÜNCEL
+### Faz 34 — 🪐 Koleksiyonluk Avatarlar (25 Temmuz) ⭐ EN GÜNCEL
+`835e065` · Migration 017 ✓ · backend+mobil tsc temiz · ⏳ **Fly deploy BEKLİYOR** (kullanıcı çalıştıracak)
+
+- **13 avatarlık "Takımyıldızı" seti, 5 nadirlik** (yaygın→mitik). **Satın alınmaz, çalışarak kazanılır** — çerçeve/pet mağazasından bilinçli olarak ayrı: mağaza = coin, koleksiyon = emek. Kilit kuralları sunucuda canlı aggregate'lerden hesaplanıyor (`AVATAR_META`, achievements.schema.ts): seans sayısı (spark 1, comet 5), gece seansı 00:00–06:00 yerel (owl 10), seri (crescent 3, fox 7, phoenix 100), toplam saat (deer 25, nebula 100, dragon 500), seviye (whale 10), odak skoru ≥85 olan seans (cat 50), Pro rozeti (nova), sezonluk/etkinlik (blackhole — **henüz elde edilemez**, Arena Pass için ayrıldı).
+- **Backend**: migration 017 `users.selected_avatar text` (nullable = eski harf/foto davranışı). `GET /achievements` → `avatars[]` + `selectedAvatar`; `PUT /achievements/avatar` (kilitliyse 409, `null` = çıkar). Seçili avatar kilitliyse okuma yolunda otomatik "yok" sayılıyor (Pro düşerse nova sessizce düşer). `friends` / `leaderboard` (global+friends+me komşuları) / `rooms` yanıtlarına `avatar` alanı eklendi — **migration dışında yeni sorgu yok**, mevcut select'lere kolon eklendi.
+- **Mobil sanat (`AvatarArt.tsx`)**: her avatar kendi SVG sahnesi — nebula zemini + yıldız alanı + özneye özel yol çizimi + nadirlik halkası ve yörünge parçacıkları (yaygın 0 → mitik 7). Statik (liste performansı için animasyon yok), `react-native-svg` zaten native'de vardı → **JS-only, yeni native modül YOK**.
+  - 🐛 **Tuzak kapatıldı**: gradyan id'leri sabit (`g1`/`core`/`halo`) idi; react-native-svg `url(#…)` referanslarını **ortak bir kayıttan** çözüyor → 13 avatarın yan yana dizildiği seçim ızgarasında hepsi ilk kartın gradyanıyla boyanırdı. Tüm def id'leri avatar id'siyle prefixlendi.
+- **Nerede görünüyor**: `FramedAvatar` artık `avatarId` alıyor → arkadaş listesi, oda üye satırları + oda detay modalı, leaderboard satırları ve "senin konumun" komşu penceresi; profil kartındaki halka da seçili avatarı basıyor. Avatar yoksa eski harf/foto fallback'i aynen duruyor.
+- **Profil → Avatarlar bölümü** (Odalarım ile Ünvanlar arasında): yatay kart şeridi, nadirlik renkli kenarlık + etiket, kilitlilerde sanat soluk + 🔒 + **nasıl açılacağı yazılı** (ilerleme değil, hedef metni). Dokun = tak, tekrar dokun = çıkar; "Varsayılan" kartı harf avatarına döndürür. Takınca sosyal sorgular (`friends`, `lb-*`, `room`) invalidate ediliyor. Analytics: `avatar_equipped`.
+- **İki sağlamlık düzeltmesi (backend)**: (1) sessions sorgusundaki `error` artık fırlatılıyor — yutulduğunda "sıfır aggregate" hesaplanıp **her avatar kilitli** görünüyor ve meşru seçim 409 yiyordu (Faz 14'teki dersin aynısı); (2) tam-geçmiş taramasına açık `.limit(20_000)` eklendi (`getStudyDNA` konvansiyonu). Ayrıca `getMyRank` komşu penceresinde **eskiden beri eksik olan `pet`** alanı da eklendi (şemada vardı, serviste yoktu → komşularda pet hiç görünmüyordu).
+- i18n: 10 dilde `avatars.names.*` (13) + `avatars.unlock.*` (8) + `avatarRarity.*` (5) + `profile.avatars/avatarsHint` = **28 anahtar × 10 dil**. Çoğul karmaşasından kaçınmak için i18next `count` yerine düz `{{n}}`/`{{min}}` kullanıldı.
+- **⏳ SONRAKİ ADIM**: (1) **backend Fly deploy** — `flyctl deploy --depot=false` (değişiklik additive/geri-uyumlu, eski build'ler etkilenmez, migration zaten uygulandı); (2) yeni mobil build → cihazda test: avatar ızgarası doğru gradyanlarla mı çiziliyor, kilitli/açık ayrımı, takma sonrası arkadaş/oda/leaderboard'da görünme.
+
+### Faz 30 — 🇹🇷 TR ekran görüntüleri v3 + yeni Oda karesi tasarımı (22 Temmuz)
 
 - **TR set EN ile eşitlendi — artık 8 kare** (`tr/` + `tr/6p5/`; eski 7 kare/eski tasarım silindi). Boru hattı: `translate-tr.js` (screens-en → screens-tr) → `render-tr.ps1` (headless Chrome, 360×780 @3x → 1080×2340) → `compose-tr.js` (Nebula çerçevesi, TR manşetler). **ASC'ye sürüklenecek: `docs/app-store/screenshots/tr/6p5/` — 8 PNG, 1284×2778 (doğrulandı).**
 - **🆕 01-rooms TR ELLE TASARLANDI** (EN'deki 6 üyeli listenin çevirisi değil): 4 üyeli "YKS Ekibi" — **varlık merdiveni** tasarım fikri: odakta (cyan) → çevrimiçi (mint) → 4 saat önce (ember) → dün (slate); aynı renkler hem avatar halkasında hem de "odanın bugünkü odağı 9sa 25dk" altındaki tek yığılmış pay çubuğunda → liste ile çubuk tek sistem. Üye satırlarında bugün çalışılan süre (tabular-nums, birimler küçük). `translate-tr.js`'te `HANDMADE` seti var → **01-rooms.html çeviriden geçmez, üzerine yazılmaz.**
@@ -257,7 +270,7 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
   - Tuzaklar: ASC ekran görüntüsü yüklemesi **otomatik kaydolur** (Save gri kalır, panik yok). `form_input` uzun textarea'da sessizce başarısız → **tıkla + ctrl+a + type** kullan; uzun type CDP timeout verir ama ~60 sn'de tamamlanır (bekle, tekrar yazma). **Sürükleyerek yeniden sıralama sentetik fare olaylarıyla ÇALIŞMIYOR** → sırayı kullanıcı elle düzeltir (ya da Delete All + sırayla tek tek sürükleme).
   - ⏸️ **"Add for Review" AKTİF ama BASILMADI** — kullanıcı önce **oda karesini yeniden tasarlamak** istedi (referans görsel bekleniyor). Görsel gelince: `screens-tr/01-rooms.html` güncelle → render+compose → TR (ve gerekiyorsa EN) kareyi ASC'de değiştir → Submit.
 
-### Faz 33 — ⌨️ Oda modallarında klavye fix + build 12 (24 Temmuz) ⭐ EN GÜNCEL
+### Faz 33 — ⌨️ Oda modallarında klavye fix + build 12 (24 Temmuz)
 `e013069` · mobil tsc temiz
 
 - **🐛 Kullanıcı bildirdi**: "Kodla Katıl" (ve "Oda Kur") modalında klavye açılınca input'un üzerine biniyordu → yazarken görünmüyordu. Sebep: alta yaslı bottom-sheet modallar (`overlay` = `justifyContent:flex-end`) klavyeyle örtüşüyordu. **Fix**: iki modal da `KeyboardAvoidingView` (iOS `behavior:padding`) ile sarıldı → sheet klavyenin üstüne itiliyor. (Android windowSoftInputMode zaten hallediyor → behavior undefined.)
@@ -481,7 +494,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Marka | **StudySquad** · Android paketi `com.studysquad.app` · **iOS bundle `com.studysquadhq.app`** (com.studysquad.app başka hesapta kayıtlı) · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
-| Migration'lar | 002–016 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title, 016 = users.utc_offset_minutes) |
+| Migration'lar | 002–017 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title, 016 = users.utc_offset_minutes, 017 = users.selected_avatar) |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
