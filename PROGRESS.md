@@ -247,7 +247,23 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 38 — 🧊 Sızan ticker'lar: "sayaç ilerlemiyor, uygulama donuyor" (6 Ağustos) ⭐ EN GÜNCEL
+### Faz 39 — 🔍 iOS donma avı v2: SVG + ölçüm altyapısı (7 Ağustos) ⭐ EN GÜNCEL
+`447778a` (kill-switch + watchdog) · `cc18911` (svg 15.15.5) · `1309b42` (Sentry dev susturma) · **build 18 bekliyor**
+
+- **Faz 38'in ticker düzeltmesi yetmedi** — kullanıcı build 15/16'da aynı donmayı bildirdi. Tahmin yürütmeyi bırakıp ölçüme geçildi.
+- **🧪 Emülatör reprodüksiyonu kuruldu** (bundan sonraki her hata avı için hazır zemin): `npx expo run:android` ile dev client + Metro, canlı backend'e bağlı. Sonuç: **Android'de sorun YOK** — sayaç 8. sn 24:52 → 20. sn 24:40 (tam 12 sn), tüm ekranlar yükleniyor. Yani ticker düzeltmesi çalışıyor ve kalan sorun **iOS'a özel**.
+  - Tuzak: emülatörde eski EAS APK'sı varsa `INSTALL_FAILED_UPDATE_INCOMPATIBLE` (imza farkı) → önce `adb uninstall com.studysquad.app`.
+- **📌 KRİTİK KORELASYON**: build 12 (25 Tem) eski Xcode ile derlendi ve sorunsuzdu. **Build 14/15/16/17, iOS 26 SDK ile derlenen ilk build'ler** (13 zaten o SDK'da patlamıştı) — donma ve avatar kaybı tam onlarla başladı. Yani şüpheli kod değil **toolchain**; MMKV `memset_s` olayının (Faz 35) aynı sınıfı.
+- **🐛 KULLANICI BULGUSU (teşhisi taşıyan)**: "avatarlar Android'de görünüyor, iOS'ta görünmüyor; **build 12'de iOS'ta görünüyordu**". Avatarlar `react-native-svg` ile çiziliyor → aynı sürüm (15.12.1), farklı SDK, farklı sonuç. **Zamanlayıcının ilerleme arkı da SVG** — yani aynı arıza donmayı da açıklayabilir.
+  - **FIX**: `react-native-svg` **15.12.1 → 15.15.5**. Aradaki iOS düzeltmeleri: 15.15.3 `RCTImage` **use-after-free crash**, 15.14.0 bellek sızıntıları, 15.15.5 Apple'da opacity. Android'de dev client yeniden derlenip doğrulandı: avatar ızgarası + timer halkası + tüm ekranlar sorunsuz, **regresyon yok**.
+- **🩺 Ölçüm altyapısı (build 17+'da canlı)**:
+  - `useJsThreadWatchdog` — 1 sn'lik nabzın gecikmesini ölçer, 4 sn+ sapmayı Sentry'ye **`js-thread-stall`** olarak yollar (arka plan geçişleri hariç). **Neden gerekliydi**: Sentry/iOS'un "App Hanging" tespiti **ana (UI) thread**'i izler; bizim vakada UI thread sağlam (animasyonlar akıyor), tıkanan **JS thread** → iOS'un dedektörü hiç tetiklenmiyor, proje bomboş görünüyor.
+  - `trace()` breadcrumb'ları senkron native çağrıların çevresinde (Live Activity, screen-lock) → stall raporunda son breadcrumb neyin çalıştığını söyler.
+  - **Live Activity kill-switch** (`liveActivity.ts` `ENABLED=false`): iOS-only + senkron native çağrı + kütüphane Haziran 2026'da **arşivlendi** → en güçlü ikinci şüpheli. Kilit ekranı sayacı geçici kapalı.
+- **❌ Elenen teoriler**: (1) *backend/taşıma* — kullanıcının bahsettiği tüm ekranların uçları canlıda **200 + gerçek veri**; (2) *EAS env eksik* — build'ler `resolvedEnvironment: production`, DSN gerçekten gömülü; (3) *iOS'ta çift RNSVG paketi* — build 17 Xcode log'unda tek pod, tek node_modules kopyası, lockfile'da tek girdi; (4) *Sentry'deki `RNSVG "two views" fatal`'leri* — **kullanıcı doğruladı: hepsi Android/dev**, yani Claude'un emülatör oturumundan. Bunun üzerine `sentryEnabled` artık `__DEV__`'de kapalı (`1309b42`) — dev gürültüsü bir daha gerçek cihaz hatası gibi görünmesin.
+- **⏭️ SIRADAKİ — build 18 (kullanıcı kendi terminalinden alacak)**: içinde svg 15.15.5 + watchdog + Live Activity kapalı. Cihazda bakılacak: (1) **avatarlar geri geldi mi**, (2) **timer ilerleme arkı çiziliyor mu** (kıvılcımlar/tik çerçevesi View, ark SVG — ayrım tanı verir), (3) **donma bitti mi**. Donma sürerse Sentry'de artık `os:iOS` + `js-thread-stall` olayı olmalı; son breadcrumb suçluyu söyleyecek. O da yetmezse plan B: SVG'yi kritik yerlerden (timer halkası, avatarlar) çıkarıp saf View çizimine geçmek.
+
+### Faz 38 — 🧊 Sızan ticker'lar: "sayaç ilerlemiyor, uygulama donuyor" (6 Ağustos)
 `d519c12` · sadece mobil · tsc temiz · **build 15 bekliyor**
 
 - **Teşhisi veren ayrım (kullanıcıdan)**: "animasyonlar oynuyor ama rakam donuk". Reanimated animasyonları **UI thread**'de, React state güncellemeleri **JS thread**'de → tıkanan JS thread. Ağ değil. (Faz 36/37'deki gecikme işi belirtiyi hafifletti ama sebebi değildi.)
