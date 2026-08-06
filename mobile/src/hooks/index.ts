@@ -5,3 +5,4 @@ export { useFocusTracking } from './useFocusTracking';
 export { useKeepAwakeDuringSession } from './useKeepAwakeDuringSession';
 export { useFocusLiveActivity } from './useFocusLiveActivity';
 export { useAwayReminder } from './useAwayReminder';
+export { useJsThreadWatchdog } from './useJsThreadWatchdog';

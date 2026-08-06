@@ -1,4 +1,5 @@
 import { requireOptionalNativeModule } from 'expo-modules-core';
+import { trace } from './analytics';
 
 /**
  * Thin wrapper over the native ScreenLock module. Everything fails safe: when
@@ -22,5 +23,8 @@ export function resetLockFlag(): void {
  */
 export function consumeScreenLocked(): boolean {
   if (!native) return true;
-  try { return Boolean(native.consumeLocked()); } catch { return true; }
+  try {
+    trace('screenLock.consumeLocked'); // synchronous native call — see watchdog
+    return Boolean(native.consumeLocked());
+  } catch { return true; }
 }

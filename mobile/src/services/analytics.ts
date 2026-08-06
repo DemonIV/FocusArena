@@ -33,6 +33,25 @@ export function track(event: string, properties?: Props): void {
   posthog?.capture(event, properties);
 }
 
+/**
+ * Marker for work that could block the JS thread — native module calls above
+ * all. Cheap (in-memory) and it rides along on any Sentry event, so when the
+ * watchdog reports a stall the last marker names what was running.
+ */
+export function trace(step: string, data?: Props): void {
+  if (!sentryEnabled) return;
+  Sentry.addBreadcrumb({ category: 'jsblock', message: step, level: 'info', data: data ?? undefined });
+}
+
+/** Report a JS-thread stall with the drift that was measured. */
+export function reportStall(driftMs: number, context: Props): void {
+  if (!sentryEnabled) return;
+  Sentry.captureMessage(`js-thread-stall ${Math.round(driftMs / 1000)}s`, {
+    level: 'warning',
+    extra: { driftMs, ...context },
+  });
+}
+
 /** Tie subsequent events to a user (call on login / auth restore). */
 export function identifyUser(id: string, properties?: Props): void {
   posthog?.identify(id, properties);

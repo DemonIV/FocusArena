@@ -20,7 +20,7 @@ import {
   FriendsScreen,
   ProfileScreen,
 } from '../screens';
-import { useFocusTracking, useKeepAwakeDuringSession, useFocusLiveActivity, useAwayReminder } from '../hooks';
+import { useFocusTracking, useKeepAwakeDuringSession, useFocusLiveActivity, useAwayReminder, useJsThreadWatchdog } from '../hooks';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -45,6 +45,11 @@ const NAV_KEY: Record<string, string> = {
 export function MainTabs() {
   const { t } = useTranslation();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  // Measures 1-second heartbeat drift and reports stalls to Sentry — the app
+  // freezing while animations keep playing means the JS thread went away, and
+  // the attached breadcrumb names what was running.
+  useJsThreadWatchdog();
 
   // App-wide AppState tracking for the Focus Score (away time / app-switches).
   useFocusTracking();

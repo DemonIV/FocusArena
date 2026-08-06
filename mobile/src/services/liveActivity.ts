@@ -9,6 +9,20 @@
  */
 import { Platform } from 'react-native';
 import * as LiveActivity from 'expo-live-activity';
+import { trace } from './analytics';
+
+/**
+ * KILL SWITCH — off while we chase a JS-thread freeze that only appears on iOS
+ * builds compiled against the iOS 26 SDK (builds 14+; build 12 on the older SDK
+ * was fine). These are SYNCHRONOUS native calls, so if ActivityKit blocks, the
+ * JS thread blocks with it: the clock stops while UI-thread animations keep
+ * playing — the exact symptom. `expo-live-activity` was archived in June 2026,
+ * so it has had no iOS 26 fixes.
+ *
+ * Turn back on once the freeze is understood; a lock-screen countdown is not
+ * worth a frozen timer. Breadcrumbs stay either way.
+ */
+const ENABLED = false;
 
 const BG = '#0d0d1a';
 const TEXT = '#e2e8f0';
@@ -16,7 +30,7 @@ const MUTED = '#94a3b8';
 const ACCENT = '#00d2ff';
 const PAUSE = '#f59e0b';
 
-const isIOS = Platform.OS === 'ios';
+const isIOS = Platform.OS === 'ios' && ENABLED;
 
 // One session → one activity. Kept module-local so start/update/end line up.
 let activeId: string | undefined;
@@ -33,6 +47,7 @@ export function startFocusActivity({ title, subtitle, endDate }: StartOpts): voi
   // Replace any stale activity first so we never leak one.
   endFocusActivity();
   try {
+    trace('liveActivity.start');
     const id = LiveActivity.startActivity(
       { title, subtitle, progressBar: { date: endDate } },
       {
