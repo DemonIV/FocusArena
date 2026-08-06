@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.studysquadhq.app",
-      "buildNumber": "12",
+      "buildNumber": "13",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSSupportsLiveActivities": true
@@ -44,7 +44,8 @@
         }
       ],
       "@sentry/react-native",
-      "expo-live-activity"
+      "expo-live-activity",
+      "./plugins/withPinnedMmkv"
     ],
     "extra": {
       "eas": {
