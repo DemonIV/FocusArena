@@ -7,7 +7,11 @@ const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN?.trim();
 const POSTHOG_KEY = process.env.EXPO_PUBLIC_POSTHOG_KEY?.trim();
 const POSTHOG_HOST = process.env.EXPO_PUBLIC_POSTHOG_HOST?.trim() || 'https://us.i.posthog.com';
 
-export const sentryEnabled = Boolean(SENTRY_DSN);
+// Dev runs (emulator, Metro, hot reload) produce noise that looks like real
+// device problems — a stale native module after an upgrade reports the same
+// "registered two views" fatal a broken release would. Keep the project clean:
+// only real builds report.
+export const sentryEnabled = Boolean(SENTRY_DSN) && !__DEV__;
 
 /** JSON-serialisable analytics property bag (matches PostHog's accepted values). */
 type Props = Record<string, string | number | boolean | null>;
@@ -16,10 +20,10 @@ let posthog: PostHog | null = null;
 
 /** Initialise Sentry + PostHog. Call once, as early as possible (App module load). */
 export function initAnalytics(): void {
-  if (SENTRY_DSN) {
+  if (sentryEnabled) {
     Sentry.init({
       dsn: SENTRY_DSN,
-      environment: __DEV__ ? 'development' : 'production',
+      environment: 'production',
       tracesSampleRate: 0.1,
     });
   }
