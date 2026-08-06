@@ -247,7 +247,25 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 34 — 🪐 Koleksiyonluk Avatarlar (25 Temmuz) ⭐ EN GÜNCEL
+### Faz 35 — 🔧 iOS build fix: MMKV 2.4.1 pin'lendi (6 Ağustos) ⭐ EN GÜNCEL
+`513d415` · sadece iOS derleme zinciri (uygulama kodu değişmedi) · **iOS build 14 FINISHED ✓**
+
+- **🔴 Build 13 patladı, kodda hiçbir değişiklik yokken**: `Pods/MMKVCore/Core/aes/AESCrypt.cpp:83: use of undeclared identifier 'memset_s'` (iPhoneOS **26.0** SDK).
+- **Kök neden — bağımlılık kayması (dependency drift)**: `react-native-mmkv` podspec'i sadece `MMKV >= 1.3.3` diyor → **managed workflow'da Podfile.lock repo'da yok**, her build CocoaPods'un en yeni sürümünü çeker. **MMKVCore 2.4.1 (30 Tem 2026)** `secure_wipe()` ekledi, o da `memset_s` çağırıyor; pod'un prefix header'ı `<string.h>`'ı `__STDC_WANT_LIB_EXT1__` tanımlanmadan önce çektiği için iOS 26 SDK bu sembolü görmüyor. Upstream **açık**: Tencent/MMKV#1675. Build 12 (25 Tem) → 2.4.0 ✅ · build 13 (6 Ağu, **aynı kod**) → 2.4.1 ❌.
+- **Fix**: yerel config plugin `mobile/plugins/withPinnedMmkv.js` — üretilen Podfile'ın app target'ına `pod 'MMKV', '2.4.0'` + `pod 'MMKVCore', '2.4.0'` ekliyor. **MMKVCore'u ayrıca pin'lemek şart** (MMKV 2.4.0 → MMKVCore bağımlılığı `~>` olduğu için tek başına MMKV pin'i 2.4.1'i yine çekebilirdi). Idempotent; anchor (`use_expo_modules!` → fallback `target ... do`) bulunamazsa **prebuild'de yüksek sesle hata** verir (20 dk derleyip patlamak yerine). Upstream düzeltince plugin **silinecek**.
+- **Ders (genel)**: managed/CNG workflow'da native bağımlılıklar kilitli DEĞİL — "dün derlenen kod bugün derlenmiyorsa" önce pod/dependency sürüm kaymasına bak, kendi koduna değil. Doğrulama yolu: EAS build:view JSON → `artifacts.xcodeBuildLogsUrl` (gzip'li, gunzip gerekir) içinde gerçek clang hatası.
+- **Not**: ASC'deki "Automatically release this version" **build tetiklemez** (sadece review onayından sonra otomatik yayın). Build'i kullanıcının `--auto-submit`'li komutu başlattı.
+- ✅ **iOS build 14 (buildNumber 14) FINISHED** — kullanıcı kendi terminalinden aldı; Faz 34 avatarları + görünürlük fix'i (`f9b2ed2`) ilk kez bu build'de.
+
+**⏸️ SIRADAKİ — cihaz test listesi (build 14 TestFlight'a düşünce):**
+1. Ana sayfa hero'sunda seçili avatar çıkıyor mu.
+2. Profildeki ızgarada 13 avatar **farklı** renklerde mi (hepsi aynı gradyansa SVG id çakışması geri gelmiş demektir).
+3. Kilitli avatarlarda "nasıl açılır" metni doğru mu.
+4. Avatarı takınca **kozmetik çerçeven YOKKEN** arkadaşlar/odalar/leaderboard'da görünüyor mu (`f9b2ed2`'nin düzelttiği senaryo).
+5. Hâlâ bekleyen Faz 31/32/33 testleri: oda varlık merdiveni, timer cap fix (35 saat bug'ı), klasik "süren doldu" bildirimi, oda modallarında klavye fix.
+6. **ASC**: "Add for Review" hâlâ **BASILMADI** (Faz 30'dan beri hazır bekliyor). Submit kararı kullanıcının.
+
+### Faz 34 — 🪐 Koleksiyonluk Avatarlar (25 Temmuz)
 `835e065` + fix `f9b2ed2` · Migration 017 ✓ · backend+mobil tsc temiz · **Fly deploy ✓ DOĞRULANDI** · ⏳ yeni mobil build bekliyor
 
 - **13 avatarlık "Takımyıldızı" seti, 5 nadirlik** (yaygın→mitik). **Satın alınmaz, çalışarak kazanılır** — çerçeve/pet mağazasından bilinçli olarak ayrı: mağaza = coin, koleksiyon = emek. Kilit kuralları sunucuda canlı aggregate'lerden hesaplanıyor (`AVATAR_META`, achievements.schema.ts): seans sayısı (spark 1, comet 5), gece seansı 00:00–06:00 yerel (owl 10), seri (crescent 3, fox 7, phoenix 100), toplam saat (deer 25, nebula 100, dragon 500), seviye (whale 10), odak skoru ≥85 olan seans (cat 50), Pro rozeti (nova), sezonluk/etkinlik (blackhole — **henüz elde edilemez**, Arena Pass için ayrıldı).
@@ -261,11 +279,8 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **🐛 CİHAZ GERİ BİLDİRİMİ → görünürlük fix'i** (`f9b2ed2`, aynı gün): kullanıcı "seçtiğim avatar ana sayfada gözükmüyor" dedi. Aynı kök neden **4 yerde** vardı: (1) `HomeScreen` hero başlığı hep harf halkası basıyordu (fix: aynı `['achievements']` cache'inden seçili avatar — ek istek yok); (2–4) **Friends satırı + oda üye satırı + oda üye alt-sayfası** `FramedAvatar`'ı **yalnızca `member.frame` varsa** render ediyordu → **kozmetik çerçevesi olmayan herkeste avatar görünmüyordu** (çerçeve satın almamış kullanıcı = çoğunluk). Fix: durum/varlık-merdiveni halkası korunuyor, içindeki **harfin yerine** avatar sanatı basılıyor; harf artık yalnızca avatar da yoksa. Ders: yeni kozmetik eklerken "çerçeve varsa zengin, yoksa harf" dallanmasının **her iki** kolunu da güncelle.
 - **✅ Fly deploy YAPILDI ve DOĞRULANDI** (25 Tem, kullanıcı VS Code terminalinden çalıştırdı): `/health` **200**, `PUT /achievements/avatar` **401** (route canlı), kontrol grubu `PUT /achievements/zzzz` **404**. Kullanıcının log'da gördüğü `GET /` ve `/favicon.ico` 404'leri **normal** — API'nin kök route'u yok, tarayıcıda açınca hep öyle görünür.
 
-**⏸️ KALDIĞIMIZ YER — SONRAKİ OTURUMUN İLK İŞİ:**
-- **Yeni iOS build gerekli.** `mobile/app.json` `buildNumber` autoIncrement ile **12** oldu ama **build 12 görünürlük fix'ini (`f9b2ed2`) İÇERMİYOR** — fix build başlatıldıktan sonra commit'lendi. Komut: `cd mobile && npx eas-cli build --platform ios --profile production --auto-submit` (kendi terminalinde interaktif; 2FA sorabilir). "buildNumber 13 zaten kullanıldı" derse app.json'daki numarayı elle bir artır.
-- **Cihaz test listesi** (build gelince): (1) ana sayfa hero'sunda avatar çıkıyor mu; (2) profildeki ızgarada 13 avatar **farklı** renklerde mi — hepsi aynı gradyansa SVG id çakışması geri gelmiş demektir; (3) kilitlilerde "nasıl açılır" metni doğru mu; (4) takınca **kozmetik çerçeven YOKKEN** arkadaşlar/odalar/leaderboard'da görünüyor mu (bu tam da `f9b2ed2`'nin düzelttiği senaryo); (5) hâlâ bekleyen Faz 31/32/33 testleri (oda varlık merdiveni, timer cap fix, "süren doldu" bildirimi, klavye fix).
+**Durum**: build 12 bu fix'i içermiyordu; **build 13 MMKV yüzünden patladı** (Faz 35), **build 14 ✓** ile cihaza gidiyor. Cihaz test listesi Faz 35'e taşındı ↑.
 - **Açık karar**: `blackhole` (mitik) bilerek elde edilemez — `seasonal` kuralı hep `false`, Arena Pass/etkinlik için ayrıldı. Kullanıcı onu hep kilitli görecek; istenirse gerçek bir kural verilebilir.
-- **ASC**: "Add for Review" hâlâ **BASILMADI** (Faz 30'dan beri bekliyor, her şey hazır). Submit kararı kullanıcının.
 
 ### Faz 30 — 🇹🇷 TR ekran görüntüleri v3 + yeni Oda karesi tasarımı (22 Temmuz)
 
@@ -506,8 +521,9 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). buildNumber 4 TestFlight'ta çalıştı. 🔄 **TAZE build `50f40c6d` (buildNumber 7) derleniyor** — Live Activity + screen-lock dahil; bitince elle submit: `eas submit -p ios --latest` (ascAppId eas.json'da yok → auto-submit çalışmıyor). ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). ✅ **En güncel: buildNumber 14 (6 Ağu, commit `513d415`) FINISHED** — Faz 34 avatarları + MMKV pin dahil. `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
 | Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
+| Pod pin'leri | `plugins/withPinnedMmkv.js` → MMKV + MMKVCore **2.4.0** (2.4.1 iOS 26 SDK'da derlenmiyor, Tencent/MMKV#1675). Upstream düzelince plugin silinecek |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
 
 ---
