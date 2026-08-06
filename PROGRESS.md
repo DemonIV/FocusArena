@@ -247,7 +247,31 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 35 — 🔧 iOS build fix: MMKV 2.4.1 pin'lendi (6 Ağustos) ⭐ EN GÜNCEL
+### Faz 36 — 🐌→⚡ Gecikme avı: "uygulama donuyor" şikayeti (6 Ağustos) ⭐ EN GÜNCEL
+`b19b7ac` + `a7420b6` · sadece backend · tsc temiz · **Fly deploy ✓ (2 tur)**
+
+- **Şikayet**: build 14 sonrası "çok donuyor, çoğu yer loading'de takılı". Ölçümle bakıldı, uygulama kodunda değil **topolojide** çıktı.
+- **📍 TOPOLOJİ (ölçüldü)**: kullanıcı İstanbul → Fly anycast trafiği **gru (São Paulo)** edge'ine sürüyor (IPv4/IPv6 fark etmiyor; Cloudflare `colo=IST` → ağ normal, sapma Fly'ın BGP'sinde) → makine **ams** → DB **Supabase Sydney**. Sonuç: **DB sorgu aşaması başına ~0.5 sn**; maliyet satır sayısı değil **ardışık gidiş-dönüş sayısı**.
+- **Elenen hipotezler**: (1) *soğuk başlangıç* — 7 dk boşluktan sonra `/health` 1.39 sn (warm 1.51), Bull cron'ları makineyi ayakta tutuyor; (2) *Redis yavaşlığı* — `/timer/status` (yalnız Redis) = `/health` tabanı, yani **Redis pratikte bedava**, cache serbestçe kullanılabilir; (3) *avatar SVG jank'i* — sanat statik ve avatar başına ~10 eleman.
+- **Yapılanlar (backend)**:
+  - `getAchievementsWithProgress`: 3 ardışık aşama → **tek `Promise.all`**; mükerrer `users` ve `achievements` sorguları silindi (Pro bayrağı zaten çekilen rozetlerden türetiliyor); `computeAvatarsForUser` saf `deriveAvatars()`'a bölündü.
+  - `getUserOffset`: 6 endpoint her istekte tek satırlık bu sorgu için tam bir gidiş-dönüş ödüyordu → **Redis** (`tz:{userId}`, 1 gün TTL, `setUserTimezone` write-through).
+  - `getWeeklyChallenge`: **5 ardışık aşama → 2** (goals + friendIds + claim paralel; sonra sessions + users paralel).
+  - `listFriends`: **N+1 kaldırıldı** (arkadaş başına ayrı `users` sorgusu → tek `.in()`); mute listesi paralele alındı. Online durumu Redis'ten geldiği için arkadaş başına kalması sorun değil.
+- **Ölçüm (curl, TLS dahil; ağ tabanı `/health` = 1.13 sn)**:
+
+  | Endpoint | Önce | Sonra |
+  |---|---|---|
+  | `/timer/stats` | 2.93 | **1.37–2.00** |
+  | `/achievements` | 2.53–2.93 | **1.48–2.23** |
+  | `/friends` | 2.03–2.57 | **1.53–2.08** |
+  | `/timer/challenge` | 2.58–3.34 | **2.05–2.56** |
+
+- **⏭️ KALAN İŞ (kullanıcı seçti)**: **Supabase'i Frankfurt'a (`eu-central-1`) taşı** — sorgu aşaması 0.5 sn → ~0.02 sn; endpoint'ler ağ tabanına iner. Storage kullanılmıyor (`avatar_url` sadece kolon), yani taşınacak tek şey Postgres; `pg_dump 17.6` makinede var. **Kullanıcının adımı**: Frankfurt'ta yeni proje aç, değerleri `backend/.env` içine `NEW_SUPABASE_URL` / `NEW_SUPABASE_SERVICE_KEY` / `NEW_DB_PASSWORD` olarak yaz (repo'ya girmez). Sonra Claude: dump (public tam + `auth.users`/`auth.identities` veri) → restore → satır sayısı karşılaştırması → `fly secrets set` → doğrulama. ~10–20 dk kesinti; Sydney projesi geri dönüş için silinmeyecek.
+- **İkinci kaldıraç (seçilmedi, duruyor)**: `studysquad.app` alınıp Cloudflare proxy'sinden Fly'a bağlanırsa Brezilya sapması biter (istek başına ~0.35 sn daha).
+- **🧰 Ortam tuzağı**: `flyctl deploy`'un verdiği `npipe:////./pipe/docker_engine: missing hostname` hatası Docker'la ilgili DEĞİL — **yanlış çalışma dizini** demek (araç kabuğunun cwd'si çağrılar arasında kalıcı, önceki bir `cd` yüzünden `backend/src/modules`'dan çalışıyordu). Repo köküne `Set-Location` + `--depot=false` ile ilk denemede geçti. Token login olmayan kabukta: `FLY_API_TOKEN`'ı `~/.fly/config.yml`'den oku.
+
+### Faz 35 — 🔧 iOS build fix: MMKV 2.4.1 pin'lendi (6 Ağustos)
 `513d415` · sadece iOS derleme zinciri (uygulama kodu değişmedi) · **iOS build 14 FINISHED ✓**
 
 - **🔴 Build 13 patladı, kodda hiçbir değişiklik yokken**: `Pods/MMKVCore/Core/aes/AESCrypt.cpp:83: use of undeclared identifier 'memset_s'` (iPhoneOS **26.0** SDK).
