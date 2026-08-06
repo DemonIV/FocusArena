@@ -221,22 +221,30 @@ export async function removeFriend(callerId: string, targetId: string): Promise<
 // ─── Read Queries ─────────────────────────────────────────────
 
 export async function listFriends(callerId: string): Promise<FriendEntry[]> {
-  const rows = await allRowsFor(callerId);
+  // The mute list doesn't depend on the friendship rows, so both go out at once.
+  const [rows, mutesRes] = await Promise.all([
+    allRowsFor(callerId),
+    supabase.from('friend_push_mutes').select('friend_id').eq('user_id', callerId),
+  ]);
   const accepted = rows.filter((r) => r.status === 'accepted');
+  const mutedSet = new Set((mutesRes.data ?? []).map((m) => m.friend_id as string));
 
-  // Which friends has the caller muted "started studying" pushes for?
-  const { data: mutes } = await supabase
-    .from('friend_push_mutes')
-    .select('friend_id')
-    .eq('user_id', callerId);
-  const mutedSet = new Set((mutes ?? []).map((m) => m.friend_id as string));
+  // One query for every friend's profile — this used to be one query per friend.
+  const friendIds = accepted.map((r) =>
+    r.requester_id === callerId ? r.addressee_id : r.requester_id,
+  );
+  const { data: userRows } = await supabase
+    .from('users')
+    .select('id, username, avatar_url, level, selected_frame, selected_pet, selected_avatar')
+    .in('id', friendIds);
+  const userById = new Map((userRows ?? []).map((u) => [u.id as string, u]));
 
   const entries = await Promise.all(
     accepted.map(async (row) => {
       const friendId = row.requester_id === callerId ? row.addressee_id : row.requester_id;
-      const user = await getUser(friendId);
+      const user = userById.get(friendId);
       if (!user) return null;
-      const online_status = await getUserStatus(friendId);
+      const online_status = await getUserStatus(friendId); // Redis, effectively free
       return {
         user_id: user.id,
         username: user.username,

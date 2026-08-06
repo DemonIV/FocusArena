@@ -983,41 +983,55 @@ export async function getWeeklyChallenge(userId: string): Promise<WeeklyChalleng
   const offset = await getUserOffset(userId);
   const { weekStart, weekEnd } = currentWeekWindow(offset);
 
-  // Personal weekly goal = sum of active subject daily goals × 7.
-  const { data: goalRows } = await supabase
-    .from('subjects')
-    .select('daily_goal_minutes')
-    .eq('user_id', userId)
-    .eq('is_active', true);
-  const dailyGoalSum = (goalRows ?? []).reduce((s, r) => s + (r.daily_goal_minutes ?? 0), 0);
+  // Two stages, not five: the goal, the cohort and the claim don't depend on
+  // each other, and only the per-user minutes/usernames need the friend list.
+  // Every stage saved is a full round trip to a database on another continent.
+  const weekStartDate = weekStart.toISOString().slice(0, 10);
+  const [goalRes, friendIds, claimRes] = await Promise.all([
+    supabase
+      .from('subjects')
+      .select('daily_goal_minutes')
+      .eq('user_id', userId)
+      .eq('is_active', true),
+    acceptedFriendIds(userId),
+    supabase
+      .from('weekly_goal_claims')
+      .select('user_id')
+      .eq('user_id', userId)
+      .eq('week_start', weekStartDate)
+      .maybeSingle(),
+  ]);
+
+  const dailyGoalSum = (goalRes.data ?? []).reduce((s, r) => s + (r.daily_goal_minutes ?? 0), 0);
   const goalMinutes = dailyGoalSum > 0 ? dailyGoalSum * 7 : WEEKLY_GOAL_FALLBACK;
 
   // Everyone in the ranking: caller + accepted friends.
-  const friendIds = await acceptedFriendIds(userId);
   const everyoneIds = [userId, ...friendIds];
 
-  // This week's minutes per user (single query over the whole cohort).
-  const { data: sessionRows, error: sErr } = await supabase
-    .from('sessions')
-    .select('user_id, duration_minutes')
-    .in('user_id', everyoneIds)
-    .gte('started_at', weekStart.toISOString())
-    .lt('started_at', weekEnd.toISOString())
-    .limit(50_000);
-  if (sErr) throw new Error(sErr.message);
+  const [sessionRes, userRes] = await Promise.all([
+    // This week's minutes per user (single query over the whole cohort).
+    supabase
+      .from('sessions')
+      .select('user_id, duration_minutes')
+      .in('user_id', everyoneIds)
+      .gte('started_at', weekStart.toISOString())
+      .lt('started_at', weekEnd.toISOString())
+      .limit(50_000),
+    // Usernames for the ranking rows.
+    supabase
+      .from('users')
+      .select('id, username')
+      .in('id', everyoneIds),
+  ]);
+  if (sessionRes.error) throw new Error(sessionRes.error.message);
 
   const minutesByUser = new Map<string, number>();
   for (const id of everyoneIds) minutesByUser.set(id, 0);
-  for (const row of sessionRows ?? []) {
+  for (const row of sessionRes.data ?? []) {
     minutesByUser.set(row.user_id, (minutesByUser.get(row.user_id) ?? 0) + row.duration_minutes);
   }
 
-  // Usernames for the ranking rows.
-  const { data: userRows } = await supabase
-    .from('users')
-    .select('id, username')
-    .in('id', everyoneIds);
-  const usernameById = new Map((userRows ?? []).map((u) => [u.id as string, u.username as string]));
+  const usernameById = new Map((userRes.data ?? []).map((u) => [u.id as string, u.username as string]));
 
   const friends: WeeklyChallengeRanked[] = everyoneIds
     .map((id) => ({
@@ -1032,15 +1046,6 @@ export async function getWeeklyChallenge(userId: string): Promise<WeeklyChalleng
   const myMinutes = minutesByUser.get(userId) ?? 0;
   const reached = myMinutes >= goalMinutes;
 
-  // Already claimed this week?
-  const weekStartDate = weekStart.toISOString().slice(0, 10);
-  const { data: claimRow } = await supabase
-    .from('weekly_goal_claims')
-    .select('user_id')
-    .eq('user_id', userId)
-    .eq('week_start', weekStartDate)
-    .maybeSingle();
-
   return {
     weekStartsAt: weekStart.toISOString(),
     weekEndsAt: weekEnd.toISOString(),
@@ -1049,7 +1054,7 @@ export async function getWeeklyChallenge(userId: string): Promise<WeeklyChalleng
       minutes: myMinutes,
       reward: WEEKLY_REWARD_COINS,
       reached,
-      claimed: Boolean(claimRow),
+      claimed: Boolean(claimRes.data),
     },
     friends,
     myRank,
