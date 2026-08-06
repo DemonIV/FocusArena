@@ -247,7 +247,18 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 37 — 🇩🇪 Supabase Sydney → Frankfurt taşındı (6 Ağustos) ⭐ EN GÜNCEL
+### Faz 38 — 🧊 Sızan ticker'lar: "sayaç ilerlemiyor, uygulama donuyor" (6 Ağustos) ⭐ EN GÜNCEL
+`d519c12` · sadece mobil · tsc temiz · **build 15 bekliyor**
+
+- **Teşhisi veren ayrım (kullanıcıdan)**: "animasyonlar oynuyor ama rakam donuk". Reanimated animasyonları **UI thread**'de, React state güncellemeleri **JS thread**'de → tıkanan JS thread. Ağ değil. (Faz 36/37'deki gecikme işi belirtiyi hafifletti ama sebebi değildi.)
+- **KÖK NEDEN**: `syncWithServer`, `_interval`'i **await'ten ÖNCE** fotoğraflayıp sonrasında yalnızca o fotoğrafı `clearInterval`'lıyordu. Ağ çağrısı sürerken store'a başka biri ticker koyduysa — `start()`, ikinci bir sync, ya da **socket'in `timer:started` yankısı** (`socketStore` bunu her başlatmada tetikliyor) — o ticker **temizlenmeden üzerine yazılıyor**, öksüz kalıp saniyede bir `tick()` çağırmaya devam ediyordu. `useTimer()` tüm store'a abone olduğu için her tick, **sekme navigatöründe mount kalan tüm ekranları** yeniden render ediyor. Seans başına ≥1 sızıntı → N seans sonra saniyede N tam render → JS thread doluyor.
+- **Kanıt (simülasyon, `scratchpad/ticker-race.js`)**: 10 seans başlatma → **eski kod 10 canlı ticker, yeni kod 1**. Sağlıklı sonuç: aktif seans başına 1.
+- **FIX**: ticker sahipliği `startTicker()`/`stopTicker()` helper'larında toplandı ve **her zaman güncel** `_interval`'i okuyor (await öncesi fotoğrafı değil). `tickerSeq` güvenlik ağı: öksüz kalan bir ticker bir sonraki ateşinde kendini `clearInterval`'lıyor → bu sınıftan bir hata ileride tekrar sızsa bile birikmiyor. Eşzamanlı `syncWithServer` çağrıları tek isteğe birleştiriliyor (mount + foreground + socket yankısı aynı saniyede geliyordu).
+- **Yan tespitler**: taşıma sonrası tüm ekran uçları sunucuda **200 + gerçek veri** (`/timer/subjects`, `/timer/stats`, `/timer/monthly`, `/rooms`, `/leaderboard/*`, `/cosmetics/*`, `/achievements`, `/friends`) — spinner'lar tamamen istemci kaynaklı. Diğer tüm `setInterval`'lerin cleanup'ı var (PetDetailModal, TimerScreen mola sayacı).
+- **Bilinen kalan koku (düzeltilmedi)**: `useTimer()` → `useTimerStore()` + `useSocketStore()` selector'süz, yani tüm store'a abone; TimerScreen socket olaylarında da render oluyor. Sızıntı kapandığı için 1/sn'ye indi, kritik değil — ileride selector'lara bölünebilir.
+- **Doğrulama tahmini (cihazda test edilecek)**: uygulamayı zorla kapatıp açınca akıcı olmalı, art arda 3-4 seans başlat/durdur sonrası ESKİ build'de bozulmalı, YENİ build'de bozulmamalı.
+
+### Faz 37 — 🇩🇪 Supabase Sydney → Frankfurt taşındı (6 Ağustos)
 DB taşıma · kod değişikliği yok · Fly secrets güncellendi · **doğrulandı**
 
 - **Neden**: Faz 36'nın ölçümü DB sorgu aşaması başına ~0.5 sn gösteriyordu (ams makine → Sydney DB). Kod tarafı tükenmişti; kalan tek kaldıraç DB'yi makinenin yanına almaktı.
