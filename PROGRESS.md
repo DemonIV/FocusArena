@@ -247,7 +247,30 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 36 — 🐌→⚡ Gecikme avı: "uygulama donuyor" şikayeti (6 Ağustos) ⭐ EN GÜNCEL
+### Faz 37 — 🇩🇪 Supabase Sydney → Frankfurt taşındı (6 Ağustos) ⭐ EN GÜNCEL
+DB taşıma · kod değişikliği yok · Fly secrets güncellendi · **doğrulandı**
+
+- **Neden**: Faz 36'nın ölçümü DB sorgu aşaması başına ~0.5 sn gösteriyordu (ams makine → Sydney DB). Kod tarafı tükenmişti; kalan tek kaldıraç DB'yi makinenin yanına almaktı.
+- **Yeni proje**: ref `diswgpruuysfkrzlilrk`, bölge **eu-central-1**, pooler `aws-0-eu-central-1.pooler.supabase.com`. Eski Sydney projesi (`nmzfbmhtxcjqwjjjaedx`) **silinmedi**, geri dönüş yolu olarak duruyor.
+- **Taşıma sırası (bu sıra ZORUNLU)**: public **şema** → **auth verisi** (`auth.users` + `auth.identities`, `--column-inserts --on-conflict-do-nothing`) → public **verisi** → **en son** `on_auth_user_created` tetikleyicisi.
+  - `public.users.id → auth.users(id)` FK'sı yüzünden auth verisi public verisinden ÖNCE gelmeli (tek dosyalık dump bu yüzden patlıyor).
+  - Tetikleyici en sona bırakılmalı: auth verisi girerken aktif olsaydı `handle_new_user()` her satır için ikinci bir `public.users` kaydı üretirdi.
+  - Dump'tan **çıkarılması gereken 2 şey**: `CREATE SCHEMA "public"` (hedefte zaten var) ve 24 adet `ALTER DEFAULT PRIVILEGES` (Supabase `supabase_admin` adına yazıyor, `postgres` rolü değiştiremiyor — yeni projede aynıları zaten kurulu).
+- **Doğrulama**: 13 tablonun satır sayıları birebir (sessions 47, users 8, achievements 12…), `auth.users`/`auth.identities` 8/8, RLS politikaları 23=23, index 34=34, fonksiyonlar 6=6, sequence yok (hepsi UUID). Cutover öncesi eski DB'de sapma kontrolü yapıldı (son seans 25 Tem, değişiklik yok). Cutover sonrası: **giriş çalışıyor** (bcrypt hash'ler taşındı), **yeni kayıt akışı çalışıyor** (e-posta onayı engel değil; test hesabı sonra silindi), veri doğru geliyor.
+- **🔑 Anahtar tuzağı**: kullanıcının ilk iki denemede `.env`'e koyduğu anahtar `service_role` değil **`anon`**'du (JWT payload'ında `"role":"anon"`). Belirti sessiz ve sinsi: REST **HTTP 200 ama boş liste** döner (RLS filtreler) — backend "veri yok" gibi davranırdı. Fly'a göndermeden önce **her zaman doğrula**: payload'da `"role":"service_role"` + gerçek satır dönüyor mu. (Yeni format `sb_secret_…` de kabul; `supabase-js` anahtarı yorumlamıyor.)
+- **📊 SONUÇ (curl, TLS dahil; ağ tabanı `/health` ≈ 1.06 sn)**:
+
+  | Endpoint | Sydney (başlangıç) | Kod opt. sonrası | **Frankfurt** |
+  |---|---|---|---|
+  | `/timer/stats` | 2.93 | 1.37–2.00 | **0.98–1.26** |
+  | `/achievements` | 2.53–2.93 | 1.48–2.23 | **1.00–1.43** |
+  | `/friends` | 2.03–2.57 | 1.53–2.08 | **1.02–1.25** |
+  | `/timer/challenge` | 2.58–3.34 | 2.05–2.56 | **1.04–1.27** |
+
+  Hepsi ağ tabanına yapıştı → DB süresi artık ölçülemeyecek kadar küçük. Kalan gecikme saf mesafe: İstanbul → **gru (São Paulo, Fly anycast sapması)** → ams. Onu da almak istenirse tek yol `studysquad.app` + Cloudflare proxy (istek başına ~0.35 sn daha).
+- **Migration'lar**: 002–017 taşınan şemada zaten var (dump'tan geldi). Bundan sonraki migration'lar **Frankfurt pooler'ına** çalıştırılacak.
+
+### Faz 36 — 🐌→⚡ Gecikme avı: "uygulama donuyor" şikayeti (6 Ağustos)
 `b19b7ac` + `a7420b6` · sadece backend · tsc temiz · **Fly deploy ✓ (2 tur)**
 
 - **Şikayet**: build 14 sonrası "çok donuyor, çoğu yer loading'de takılı". Ölçümle bakıldı, uygulama kodunda değil **topolojide** çıktı.
@@ -539,7 +562,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 |---------|-------|
 | Marka | **StudySquad** · Android paketi `com.studysquad.app` · **iOS bundle `com.studysquadhq.app`** (com.studysquad.app başka hesapta kayıtlı) · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
-| DB | Supabase Sydney (ap-southeast-2); yerel bağlantı psql **pooler** ile (direkt host IPv6-only) |
+| DB | ✅ **Supabase Frankfurt (eu-central-1)**, ref `diswgpruuysfkrzlilrk` — pooler `aws-0-eu-central-1.pooler.supabase.com`, user `postgres.diswgpruuysfkrzlilrk` (direkt host IPv6-only, hep pooler kullan). Eski Sydney projesi geri dönüş için duruyor |
 | Migration'lar | 002–017 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title, 016 = users.utc_offset_minutes, 017 = users.selected_avatar) |
 | EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
