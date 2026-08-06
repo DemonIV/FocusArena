@@ -77,7 +77,51 @@ const INITIAL: Omit<
   _interval: null,
 };
 
-export const useTimerStore = create<TimerStore>((set, get) => ({
+export const useTimerStore = create<TimerStore>((set, get) => {
+  /**
+   * Ticker ownership lives in these two helpers, and they always read the
+   * CURRENT interval — never one snapshotted before an `await`.
+   *
+   * That distinction was the bug: `syncWithServer` grabbed `_interval` before
+   * its network call and cleared only that one afterwards. Anything that
+   * installed a ticker during the call (`start`, another sync, the socket's
+   * `timer:started` echo) got its interval overwritten but never cleared, so
+   * the orphan kept calling `tick()` — and re-rendering every subscriber —
+   * once a second, forever. One leak per session start was enough to saturate
+   * the JS thread: the clock froze and touches lagged while the Reanimated
+   * animations, which live on the UI thread, kept playing.
+   *
+   * `tickerSeq` is the safety net: an orphan that somehow survives notices it
+   * is no longer the live ticker on its next fire and clears itself.
+   */
+  let tickerSeq = 0;
+
+  const stopTicker = () => {
+    const iv = get()._interval;
+    if (iv) clearInterval(iv);
+    tickerSeq += 1;
+    set({ _interval: null });
+  };
+
+  const startTicker = () => {
+    const iv = get()._interval;
+    if (iv) clearInterval(iv);
+    const mine = ++tickerSeq;
+    const next = setInterval(() => {
+      if (mine !== tickerSeq) { clearInterval(next); return; } // orphan: self-heal
+      get().tick();
+    }, 1000);
+    set({ _interval: next });
+  };
+
+  /**
+   * Overlapping syncs collapse onto one request. Mount, app-foreground and the
+   * socket's `timer:started` all fire within a second of each other, and each
+   * used to race the others for ticker ownership.
+   */
+  let syncInFlight: Promise<void> | null = null;
+
+  return {
   ...INITIAL,
   _onComplete: null,
   setOnComplete: (cb) => set({ _onComplete: cb }),
@@ -116,7 +160,6 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const { state } = await timerService.start(duration, subjectId);
-      const interval = setInterval(() => get().tick(), 1000);
       set({
         sessionId: state.sessionId,
         duration: state.duration,
@@ -131,8 +174,8 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
         awayMs: 0,
         pauses: 0,
         _bgAt: null,
-        _interval: interval,
       });
+      startTicker();
     } finally {
       set({ isLoading: false });
     }
@@ -140,8 +183,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
 
   pause: async () => {
     // 1️⃣ Stop ticker immediately — no more ticks
-    const { _interval } = get();
-    if (_interval) { clearInterval(_interval); set({ _interval: null }); }
+    stopTicker();
 
     // 2️⃣ Optimistic update: mark paused NOW so tick() guard works.
     //    Also close any in-flight away spell and count the pause (Focus Score).
@@ -178,8 +220,8 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
         await get().syncWithServer();
       } catch {
         // Sync also failed (offline) — full rollback: restore ticker
-        const interval = setInterval(() => get().tick(), 1000);
-        set({ isPaused: false, _interval: interval });
+        set({ isPaused: false });
+        startTicker();
       }
     }
   },
@@ -189,13 +231,12 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     let apiFailed = false;
     try {
       const { state } = await timerService.resume();
-      const interval = setInterval(() => get().tick(), 1000);
       set({
         startTime: state.startTime,
         accumulatedMs: state.accumulatedMs,
         isPaused: false,
-        _interval: interval,
       });
+      startTicker();
     } catch {
       apiFailed = true;
     } finally {
@@ -212,8 +253,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   },
 
   stop: async () => {
-    const { _interval } = get();
-    if (_interval) { clearInterval(_interval); set({ _interval: null }); }
+    stopTicker();
     // Snapshot Focus Score telemetry, folding in any still-open away spell.
     const s = get();
     const telemetry = {
@@ -233,8 +273,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
         return null;
       }
       // Network / server error — restore ticker so user can retry
-      const interval = setInterval(() => get().tick(), 1000);
-      set({ _interval: interval });
+      startTicker();
       throw err;
     } finally {
       set({ isLoading: false });
@@ -245,41 +284,47 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     // 🛑 Guard 1: skip if an operation is already in flight
     if (get().isLoading) return;
 
-    const currentInterval = get()._interval;
+    // 🛑 Guard 2: one request for however many callers ask at once.
+    if (syncInFlight) return syncInFlight;
+
+    syncInFlight = (async () => {
+      try {
+        const status = await timerService.status();
+
+        // 🛑 Guard 3: if pause/resume/stop started WHILE we were awaiting the
+        //    status response, bail out — don't overwrite their optimistic state.
+        if (get().isLoading) return;
+
+        if (!status.active) {
+          stopTicker();
+          set({ ...INITIAL });
+          return;
+        }
+
+        set({
+          sessionId: status.sessionId,
+          duration: status.duration,
+          elapsedMs: status.elapsedMs,
+          remainingMs: status.remainingMs,
+          isPaused: status.isPaused,
+          subjectId: status.subjectId,
+          isActive: true,
+          accumulatedMs: status.elapsedMs,
+          startTime: Date.now(),
+        });
+
+        // Ticker state follows the server's verdict, and always replaces
+        // whatever is running right now — not what was running before the call.
+        if (status.isPaused) stopTicker();
+        else startTicker();
+      } catch { /* network error — keep local state */ }
+    })();
+
     try {
-      const status = await timerService.status();
-
-      // 🛑 Guard 2: if pause/resume/stop started WHILE we were awaiting the
-      //    status response, bail out — don't overwrite their optimistic state.
-      if (get().isLoading) return;
-
-      if (!status.active) {
-        if (currentInterval) clearInterval(currentInterval);
-        set({ ...INITIAL });
-        return;
-      }
-
-      // Kill stale ticker before setting up a fresh one
-      if (currentInterval) clearInterval(currentInterval);
-
-      let newInterval: ReturnType<typeof setInterval> | null = null;
-      if (!status.isPaused) {
-        newInterval = setInterval(() => get().tick(), 1000);
-      }
-
-      set({
-        sessionId: status.sessionId,
-        duration: status.duration,
-        elapsedMs: status.elapsedMs,
-        remainingMs: status.remainingMs,
-        isPaused: status.isPaused,
-        subjectId: status.subjectId,
-        isActive: true,
-        accumulatedMs: status.elapsedMs,
-        startTime: Date.now(),
-        _interval: newInterval,
-      });
-    } catch { /* network error — keep local state */ }
+      await syncInFlight;
+    } finally {
+      syncInFlight = null;
+    }
   },
 
   loadSubjects: async () => {
@@ -297,8 +342,8 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   },
 
   reset: () => {
-    const { _interval } = get();
-    if (_interval) clearInterval(_interval);
+    stopTicker();
     set({ ...INITIAL });
   },
-}));
+  };
+});
