@@ -138,7 +138,39 @@ export async function getAchievementsWithProgress(userId: string): Promise<{
   avatars: AvatarEntry[];
   selectedAvatar: AvatarId | null;
 }> {
-  const earned = await getUserAchievements(userId);
+  // The database lives on the other side of the planet from the app server, so
+  // round trips — not rows — are what this endpoint costs. Everything it needs
+  // goes out in ONE parallel batch: badges (which also carry the Pro flag) and
+  // the user row (title + avatar inputs) and the session history.
+  const [badgeRes, userRes, sessRes] = await Promise.all([
+    supabase
+      .from('achievements')
+      .select('id, badge_type, earned_at')
+      .eq('user_id', userId)
+      .order('earned_at', { ascending: true }),
+    supabase
+      .from('users')
+      .select('level, longest_streak, utc_offset_minutes, selected_title, selected_avatar')
+      .eq('id', userId)
+      .maybeSingle(),
+    supabase
+      .from('sessions')
+      .select('duration_minutes, started_at, focus_score')
+      .eq('user_id', userId)
+      .limit(20_000), // explicit cap (same shape as getStudyDNA); aggregate in JS
+  ]);
+
+  if (badgeRes.error) throw new Error(badgeRes.error.message);
+  // A failed sessions read must NOT silently compute "zero of everything" —
+  // that would show every avatar as locked and reject a legitimate selection.
+  if (sessRes.error) throw new Error(sessRes.error.message);
+
+  const earned: AchievementEntry[] = (badgeRes.data ?? []).map((row) => ({
+    id: row.id as string,
+    badge_type: row.badge_type as BadgeType,
+    earned_at: row.earned_at as string,
+    meta: BADGE_META[row.badge_type as BadgeType],
+  }));
   const earnedSet = new Set(earned.map((e) => e.badge_type));
 
   const locked = BADGE_TYPES.filter((b) => !earnedSet.has(b)).map((b) => ({
@@ -157,15 +189,14 @@ export async function getAchievementsWithProgress(userId: string): Promise<{
   });
 
   // Selected title from the user row; ignore a stale/locked selection.
-  const { data: userRow } = await supabase
-    .from('users')
-    .select('selected_title')
-    .eq('id', userId)
-    .maybeSingle();
-  const raw = (userRow?.selected_title as TitleId | null) ?? null;
+  const raw = (userRes.data?.selected_title as TitleId | null) ?? null;
   const selectedTitle = raw && titles.find((t) => t.id === raw)?.unlocked ? raw : null;
 
-  const { avatars, selectedAvatar } = await computeAvatarsForUser(userId);
+  const { avatars, selectedAvatar } = deriveAvatars(
+    userRes.data,
+    sessRes.data ?? [],
+    earnedSet.has('pro_member'),
+  );
 
   return { earned, locked, titles, selectedTitle, avatars, selectedAvatar };
 }
@@ -197,44 +228,38 @@ function avatarUnlocked(u: AvatarUnlock, s: AvatarStats): boolean {
   }
 }
 
+interface AvatarUserRow {
+  level?: number | null;
+  longest_streak?: number | null;
+  utc_offset_minutes?: number | null;
+  selected_avatar?: string | null;
+}
+
+interface AvatarSessionRow {
+  duration_minutes?: number | null;
+  started_at?: string | null;
+  focus_score?: number | null;
+}
+
 /**
- * Compute every avatar's unlock status from the user's live aggregates, plus
- * their currently selected avatar (cleared if it points to a locked one).
- * Self-contained (own queries) so it can be called from the profile read and
- * from the selection setter alike.
+ * Compute every avatar's unlock status from already-fetched rows, plus the
+ * user's currently selected avatar (cleared if it points to a locked one).
+ * Pure — the caller owns the queries, so a read that already has this data
+ * (the profile endpoint) does not pay for a second round trip.
  */
-async function computeAvatarsForUser(userId: string): Promise<{
+function deriveAvatars(
+  userRow: AvatarUserRow | null | undefined,
+  sessionRows: AvatarSessionRow[],
+  isPro: boolean,
+): {
   avatars: AvatarEntry[];
   selectedAvatar: AvatarId | null;
-}> {
-  const [userRes, badgeRes, sessRes] = await Promise.all([
-    supabase
-      .from('users')
-      .select('level, longest_streak, utc_offset_minutes, selected_avatar')
-      .eq('id', userId)
-      .maybeSingle(),
-    supabase
-      .from('achievements')
-      .select('badge_type')
-      .eq('user_id', userId)
-      .eq('badge_type', 'pro_member')
-      .maybeSingle(),
-    supabase
-      .from('sessions')
-      .select('duration_minutes, started_at, focus_score')
-      .eq('user_id', userId)
-      .limit(20_000), // explicit cap (same shape as getStudyDNA); aggregate in JS
-  ]);
-
-  // A failed sessions read must NOT silently compute "zero of everything" —
-  // that would show every avatar as locked and reject a legitimate selection.
-  if (sessRes.error) throw new Error(sessRes.error.message);
-
-  const u = userRes.data;
+} {
+  const u = userRow;
   const offsetMin = Math.round((u?.utc_offset_minutes as number | null) ?? 0);
 
   let sessions = 0, nightSessions = 0, totalMin = 0, focusHigh = 0;
-  for (const r of sessRes.data ?? []) {
+  for (const r of sessionRows) {
     const min = (r.duration_minutes as number | null) ?? 0;
     if (min <= 0) continue;
     sessions += 1;
@@ -251,7 +276,7 @@ async function computeAvatarsForUser(userId: string): Promise<{
     hours: totalMin / 60,
     level: (u?.level as number | null) ?? 0,
     focusHigh,
-    isPro: !!badgeRes.data,
+    isPro,
   };
 
   const avatars: AvatarEntry[] = AVATAR_IDS.map((id) => {
@@ -262,6 +287,35 @@ async function computeAvatarsForUser(userId: string): Promise<{
   const raw = (u?.selected_avatar as AvatarId | null) ?? null;
   const selectedAvatar = raw && avatars.find((a) => a.id === raw)?.unlocked ? raw : null;
   return { avatars, selectedAvatar };
+}
+
+/** Same numbers, but fetching their own inputs — for the selection setter. */
+async function computeAvatarsForUser(userId: string): Promise<{
+  avatars: AvatarEntry[];
+  selectedAvatar: AvatarId | null;
+}> {
+  const [userRes, proRes, sessRes] = await Promise.all([
+    supabase
+      .from('users')
+      .select('level, longest_streak, utc_offset_minutes, selected_avatar')
+      .eq('id', userId)
+      .maybeSingle(),
+    supabase
+      .from('achievements')
+      .select('badge_type')
+      .eq('user_id', userId)
+      .eq('badge_type', 'pro_member')
+      .maybeSingle(),
+    supabase
+      .from('sessions')
+      .select('duration_minutes, started_at, focus_score')
+      .eq('user_id', userId)
+      .limit(20_000),
+  ]);
+
+  if (sessRes.error) throw new Error(sessRes.error.message);
+
+  return deriveAvatars(userRes.data, sessRes.data ?? [], !!proRes.data);
 }
 
 /**

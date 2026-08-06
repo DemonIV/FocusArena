@@ -121,23 +121,40 @@ function localDateKey(ts: string | Date, offsetMin: number): string {
   return new Date(t.getTime() + offsetMin * 60_000).toISOString().slice(0, 10);
 }
 
-/** The caller's stored UTC offset in minutes (0 = UTC, the safe default). */
+const tzKey = (userId: string) => `tz:${userId}`;
+const TZ_TTL = 86_400; // 1 day — the client re-reports its offset on every launch
+
+/**
+ * The caller's stored UTC offset in minutes (0 = UTC, the safe default).
+ *
+ * Six read endpoints start by asking for this one number, and the database sits
+ * a long way from the app server — so a full round trip per request bought us
+ * nothing. It changes only when the client reports a new timezone, which writes
+ * through below.
+ */
 async function getUserOffset(userId: string): Promise<number> {
+  const cached = await redis.get(tzKey(userId));
+  if (cached !== null) return clampOffset(Number(cached));
+
   const { data } = await supabase
     .from('users')
     .select('utc_offset_minutes')
     .eq('id', userId)
     .single();
-  return clampOffset((data?.utc_offset_minutes as number | null) ?? 0);
+  const offset = clampOffset((data?.utc_offset_minutes as number | null) ?? 0);
+  await redis.set(tzKey(userId), String(offset), 'EX', TZ_TTL);
+  return offset;
 }
 
 /** Persist the device's current UTC offset (minutes to add to UTC → local). */
 export async function setUserTimezone(userId: string, offsetMinutes: number): Promise<void> {
+  const offset = clampOffset(offsetMinutes);
   const { error } = await supabase
     .from('users')
-    .update({ utc_offset_minutes: clampOffset(offsetMinutes) })
+    .update({ utc_offset_minutes: offset })
     .eq('id', userId);
   if (error) throw new Error(error.message);
+  await redis.set(tzKey(userId), String(offset), 'EX', TZ_TTL);
 }
 
 /**
