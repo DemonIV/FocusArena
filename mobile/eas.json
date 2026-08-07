@@ -9,7 +9,8 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://focusarena.fly.dev",
-        "EXPO_PUBLIC_WS_URL": "wss://focusarena.fly.dev"
+        "EXPO_PUBLIC_WS_URL": "wss://focusarena.fly.dev",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "preview": {
