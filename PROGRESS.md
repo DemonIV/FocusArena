@@ -247,7 +247,67 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 39 — 🔍 iOS donma avı v2: SVG + ölçüm altyapısı (7 Ağustos) ⭐ EN GÜNCEL
+### Faz 40 — 💳 iOS IAP altyapısı sıfırdan + donma avı yeni eksen (7 Ağustos, akşam) ⭐ EN GÜNCEL
+`5f647dc` (expo-dev-client + eas.json development fix) · **iki build kurulmayı bekliyor**
+
+#### A) Donma avı — ekran görüntüsü teşhisi ve elenen teoriler
+
+- **Kullanıcı 3 kare gönderdi** (Timer / Profil / Ana Sayfa). Okunanlar:
+  - **SVG iOS'ta ÇALIŞIYOR** — timer'ın ilerleme arkı, 60 tikli saat çerçevesi, halka hepsi çiziliyor. `react-native-svg` teorisi (Faz 39) **kesin öldü**.
+  - **Ekrandaki her "veri" yerel fallback**: coin "0", "Varsayılan ✓Seçili", pet fiyatları — hepsi `constants/frames.ts` + `pets.ts` kataloğundan. İstatistikler "—", XP 0, Toplam 0m = `statsQ.data` undefined. Yani **hiçbir sorgu tamamlanmıyor**.
+  - Ana Sayfa hero'su ekranda yoktu → kullanıcı kaydırmıştı, normalde var. İpucu kapandı.
+  - ⚠️ `ActivityIndicator` **native** animasyondur — dönüyor olması JS thread'in yaşadığını KANITLAMAZ.
+- **Elenen teoriler (bu oturum)**:
+  1. *Backend* — takılan iki uç dahil hepsi **200, ~1.1–1.5 sn** (testalpha1 ile ölçüldü: `/timer/stats` 1.46, `/timer/subjects/stats` 1.27, `/timer/monthly` 1.09, `/achievements` 1.24, `/timer/heatmap` 1.24).
+  2. *socket.io long-polling bağlantı havuzunu tıkıyor* — `websocket.ts`'te `transports: ['websocket']`, polling yok.
+  3. *Ölü refresh token* — `refreshAccessToken()` hata alınca `clearAuth()` çağırıyor → navigator Login'e atar. Sekmelerde kalınabiliyorsa auth sağlam.
+  4. *Supabase anahtarları eksik* — mobilde `SUPABASE_URL/ANON_KEY` sadece export edilmiş, **hiç kullanılmıyor**.
+- **🔄 YENİ EKSEN (asıl bulgu)**: `sentryEnabled = Boolean(SENTRY_DSN) && !__DEV__`. Faz 39'daki **Android reprodüksiyonu dev client'taydı → `__DEV__` true → Sentry KAPALI**. iOS TestFlight → `__DEV__` false → **Sentry AÇIK**. Yani gözlediğimiz şey "Android çalışıyor / iOS çalışmıyor" değil, **"Sentry kapalıyken çalışıyor / açıkken çalışmıyor"** olabilir. Sentry RN `XMLHttpRequest`'i yamalıyor (breadcrumb + `tracesSampleRate: 0.1`) — tam da hiçbir fetch'in bitmemesi semptomunun geçtiği yol.
+- **🩺 Watchdog yorumu DÜZELTİLDİ** (Faz 39'un 4. adımı yanlıştı): `useJsThreadWatchdog` nabzını `setInterval` ile atıyor. JS thread **kalıcı** ölürse o interval de ateşlenmez → **hiç olay gitmez**. Yani "Sentry'de `js-thread-stall` yok" ⇒ "JS thread sağlam" ÇIKARIMI GEÇERSİZ. Doğrusu: olay varsa tıkanıp kendine geliyor; olay yoksa ya kalıcı ölü ya gerçekten sağlam — ayrım dev client'ta yapılır.
+- **Kullanıcı Sentry'yi kontrol etti**: RN projesinde **hiç olay yok** (DSN üretim ortamında gömülü olmasına rağmen).
+- **Hazırlanan iki build (kurulmayı bekliyor)**:
+  - **iOS dev client** `683f3c97-5aaf-45cd-a377-a1d9ba68d18a` — Metro'ya bağlanıp canlı konsol verir. **Uyarı: dev modda çalışır → Sentry KAPALI → hatayı üretmeyebilir** (ama bu bile bilgi).
+  - **Android preview APK** `32b312f2-422d-4e03-9b5d-22fd6a43c175` — **kontrollü deney**: aynı kod, üretim bundle'ı, **Sentry AÇIK** (preview ortamında DSN var). Donarsa sorun iOS'a özel DEĞİL → "release+Sentry" ekseni doğrulanır.
+- **Altyapı**: `eas device:create` ile iPhone kaydedildi (UDID `00008120-00140C393EE0201E`, Apple team `2SRX65DU82`). `expo-dev-client ~6.0.21` eklendi. **eas.json `development` profiline `SENTRY_DISABLE_AUTO_UPLOAD=true` eklendi** — bu profil ilk kez kullanılıyordu ve Faz 10'daki fix yalnız preview+production'a uygulanmıştı, eksikliği build'i kırıyordu.
+
+#### B) 💳 iOS IAP: hiç yokmuş — sıfırdan kuruldu
+
+- **Tetikleyen bulgu**: `billing.ts` iOS'ta `EXPO_PUBLIC_REVENUECAT_IOS_KEY` arıyor, EAS ortamlarında **sadece ANDROID anahtarı vardı** → `billingEnabled=false` → iPhone'da Pro/paywall/coin/trial **sessizce tamamen kapalıydı**.
+- **Daha büyük bulgu**: RevenueCat'te **App Store uygulaması hiç yoktu**; Play Store uygulamasının **ürünü sıfırdı**; tek ürünler **Test Store**'daki Monthly/Yearly'ydi ve `default` offering onların üzerine kuruluydu; `coins` offering'i **hiç oluşturulmamıştı**. Yani IAP **iki platformda da** gerçek mağazada çalışmıyordu.
+- **ASC'de kurulanlar** (app `6788842347`):
+  - **In-App Purchase Key** `RevenueCat` — Key ID `87KZA9F27G`, Issuer ID `f96ef19d-3898-4c35-8720-42d5b84d92b2`. (`.p8` tek seferlik indirme, kullanıcıda.)
+  - **Abonelik grubu "StudySquad Pro"**: `pro_monthly` (1 ay), `pro_yearly` (**1 Year Upfront** — "Monthly with 12-month commitment" DEĞİL). 175 ülke, İngilizce lokalizasyon.
+  - **Consumable'lar**: `coins_1000`, `coins_5500`, `coins_12000`. 175 ülke, İngilizce lokalizasyon.
+  - **Fiyat stratejisi (kullanıcı seçti)**: taban USD; **TR + UK elle**, Avro bölgesi Apple'ın otomatiğinde. ASC'de **toplu fiyat düzenleme YOK** (~25 avro ülkesi tek tek olurdu).
+
+    | Ürün | ABD | 🇹🇷 | 🇬🇧 | 🇪🇺 (oto) |
+    |---|---|---|---|---|
+    | `pro_monthly` | $5.99 | ₺199,99 | £4.99 | €6,99 |
+    | `pro_yearly` | $44.99 | ₺1.499,99 | £39.99 | €49,99 |
+    | `coins_1000` | $1.99 | ₺49,99 | (oto) | (oto) |
+    | `coins_5500` | $7.99 | ₺199,99 | (oto) | (oto) |
+    | `coins_12000` | $12.99 | ₺349,99 | (oto) | (oto) |
+
+- **RevenueCat'te kurulanlar** (proje `bf0ba880`):
+  - App Store uygulaması `appe20c9f397e` / `com.studysquadhq.app`, P8 bağlı. Public anahtar **`appl_CpgcZwwowOTtnxuIHThiZWWOUBS`**.
+  - **Import ÇALIŞMADI** ("No new products available to import") — RC'nin import'u ayrı bir **App Store Connect API key**'i ister ve draft ürünleri görmez → 5 ürün **elle** oluşturuldu.
+  - `pro` entitlement iki aboneliğe de bağlandı. `default` offering'in Monthly/Yearly paketlerine App Store ürünleri eklendi (Test Store ürünleri de duruyor, zararsız).
+  - **`coins` offering'i oluşturuldu** — 3 **Custom** paket (`coins_1000/5500/12000`). Kod `offerings.all.coins.availablePackages` arıyordu, o offering hiç yoktu.
+  - EAS `preview` + `production` ortamlarına `EXPO_PUBLIC_REVENUECAT_IOS_KEY` yazıldı.
+- **🧰 Tarayıcı otomasyonu tuzakları (bu oturumda ısırdı)**:
+  - **ASC sayfası tıklama anında kayıyor** → `coins_5500`'ün tabanı yanlışlıkla **$79,99** seçildi (yakalandı, Back ile düzeltildi). Ders: fiyat/kritik seçimlerden sonra **ref ile geri oku, doğrula**.
+  - ASC'de `form_input` kısa alanlarda bile **sessizce başarısız** olabiliyor → tıkla + `type`.
+  - ASC native `<select>`: `form_input` React'e işlemiyor → **tıkla → Down×N → Enter**.
+  - RC'de Key ID / Issuer ID alanları **p8 yüklenene kadar disabled**.
+- **⏸️ IAP'ta kalan işler**: review ekran görüntüsü + notları yok; **Apple kuralı: ilk abonelik ve ilk consumable yeni bir uygulama sürümüyle birlikte submit edilmeli**; IAP lokalizasyonları sadece İngilizce; coin paketlerinde GBP Apple otomatiğinde; **Play Store tarafı hâlâ tamamen boş** (Android'de Pro/coin satılamaz).
+
+**⏭️ SONRAKİ OTURUMUN İLK İŞLERİ:**
+1. **Android preview APK'sını (`32b312f2`) emülatöre kur ve test et** — kullanıcıdan bir şey gerekmez. Donarsa → sorun iOS'a özel değil, "release + Sentry" ekseni doğrulanır ve av tamamen yeni yöne kayar. Donmazsa → gerçekten iOS'a özel.
+2. **iOS dev client'ı (`683f3c97`) telefona kur**, Metro'yu başlat (aynı WiFi) → canlı konsol.
+3. Sentry hipotezi doğrulanırsa: `Sentry.init`'i `enableAutoPerformanceTracing:false` / XHR enstrümantasyonu kapalı deneyerek daralt.
+4. Play Store IAP ürünleri (Android monetizasyonu şu an ölü).
+
+### Faz 39 — 🔍 iOS donma avı v2: SVG + ölçüm altyapısı (7 Ağustos)
 `447778a` (kill-switch + watchdog) · `cc18911` (svg 15.15.5) · `1309b42` (Sentry dev susturma) · **build 18 bekliyor**
 
 - **Faz 38'in ticker düzeltmesi yetmedi** — kullanıcı build 15/16'da aynı donmayı bildirdi. Tahmin yürütmeyi bırakıp ölçüme geçildi.
