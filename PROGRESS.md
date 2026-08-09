@@ -247,7 +247,40 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 40 — 💳 iOS IAP altyapısı sıfırdan + donma avı yeni eksen (7 Ağustos, akşam) ⭐ EN GÜNCEL
+### Faz 41 — 🔌 iOS dev client bağlantı altyapısı + Sentry deneyinin build'siz hale getirilmesi (9 Ağustos) ⭐ EN GÜNCEL
+Kod değişikliği YOK (yalnız ortam/altyapı) · **dev client telefona HÂLÂ KURULAMADI — oturum burada kesildi**
+
+- **Karar**: Android APK adımı (Faz 40'ın 1. maddesi) **ertelendi**, iOS dev client yolundan devam edildi.
+- **🔑 OTURUMUN ASIL KAZANIMI — Sentry deneyi artık EAS build gerektirmiyor**: `sentryEnabled = Boolean(SENTRY_DSN) && !__DEV__` (analytics.ts:14) ve yerel `mobile/.env` içinde `EXPO_PUBLIC_SENTRY_DSN` **dolu** (Metro başlarken `env: load .env` ile yüklendiği log'da doğrulandı). Dev client'ta JS bundle **uygulamanın içinde değil, Metro'dan** geldiği için `__DEV__`'i Metro'nun bayrağı belirliyor:
+
+  | Aşama | Metro komutu | `__DEV__` | Sentry | Ne öğretir |
+  |---|---|---|---|---|
+  | **A** | `expo start --dev-client` | `true` | ❌ kapalı | Donma burada da varsa → Sentry masum, canlı konsolda gerçek hata okunur |
+  | **B** | `expo start --dev-client --no-dev --minify` | `false` | ✅ açık | A temiz + B donuk ⇒ **hipotez kanıtlanır** (suçlu Sentry'nin XHR yaması) |
+  | | | | | A ve B'nin ikisi de temizse ⇒ sorun yalnız gerçek release binary'sinde |
+
+  Aşama değişimi = **Metro'yu yeniden başlatmak** (saniyeler), 20 dk'lık build döngüsü değil. Android APK'sına da gerek kalmayabilir.
+- **Build 18 doğrulandı**: `683f3c97-5aaf-45cd-a377-a1d9ba68d18a` — status `finished`, profil `development`, buildNumber 18, commit `115912f`, SDK 54, internal distribution. Cihaz kaydı da doğrulandı: UDID `00008120-00140C393EE0201E`, team `2SRX65DU82` → profil bu telefonu içeriyor, kurulum teknik olarak mümkün.
+- **⛔ TIKANMA (çözülmedi)**: dev client telefonda **görünmüyor**; kullanıcı bunun yerine **Expo Go**'yu açtı → sonsuz loading + "istek zaman aşımına uğradı". Metro log'una **hiçbir bundle isteği düşmedi**, yani telefon hiç ulaşamadı.
+  - **Expo Go bu projeyi ÇALIŞTIRAMAZ** (kalıcı not): `react-native-mmkv`, `react-native-purchases`, `expo-live-activity`, yerel `screen-lock` modülü, Sentry native katmanı → hiçbiri Expo Go'da yok. Açılması gereken şey **StudySquad ikonunun kendisi** (dev client build'i aynı bundle ID'yi taşıdığı için **TestFlight uygulamasının üzerine yazar**; iş bitince TestFlight'tan geri kurulur).
+  - **En olası sebep (sınanmadı)**: expo.dev build sayfası Safari'de **Expo hesabına giriş** ister; kullanıcı build sayfası yerine login sayfasını görmüş olabilir.
+- **🧰 Ortam tuzakları (bu oturumda ısırdı, hepsi çözüldü)**:
+  - `npx eas-cli …` **askıda kalıyor** (paketi indirmeye çalışıyor). eas **global kurulu**: `C:\Users\alper\AppData\Roaming\npm\eas.ps1` → doğrudan `eas …` çağır.
+  - `eas device:list` non-interactive'de **`--apple-team-id 2SRX65DU82` şart** (yoksa "Unable to select an Apple team").
+  - **LAN yolu çalışmadı**: Metro `192.168.1.172:8081`'de dinliyordu ama **8081 için gelen bağlantı güvenlik duvarı kuralı yok**; `New-NetFirewallRule` **yönetici** istiyor (erişim engellendi). Gerekirse yükseltilmiş kabukta: `New-NetFirewallRule -DisplayName "Metro bundler 8081 (Expo dev)" -Direction Inbound -Protocol TCP -LocalPort 8081 -Action Allow -Profile Private`.
+  - **Tünel yolu çalıştı**: `npm i -g @expo/ngrok@^4.1.0` (expo'nun interaktif kurulum sorusunu atlamak için önceden global kur). **İlk deneme "ngrok tunnel took too long to connect" ile düştü, ikinci deneme başarılı** — bir kez yeniden dene.
+  - **Tünel URL'si non-TTY çıktıda BASILMIYOR** → `http://127.0.0.1:4040/api/tunnels` (ngrok yerel API) ile oku. Bu oturumda: **`https://e1tfdbo-software66-8081.exp.direct`** (Metro yeniden başlatılınca **aynı kaldı** — sabit görünüyor). İnternetten doğrulandı: `/status` → **HTTP 200 `packager-status:running`**.
+  - **⚠️ Metro'yu harness'ın arka plan görevi olarak başlatma — ÖLDÜRÜLÜYOR** (bir kez `killed` oldu, 8081 düştü). Kalıcı çalıştırma: `Start-Process cmd.exe -ArgumentList '/c','npx expo start --dev-client --tunnel' -WorkingDirectory mobile -RedirectStandardOutput <log> -WindowStyle Hidden` → log dosyasından okunur, oturum boyunca yaşar.
+
+**⏭️ SONRAKİ OTURUMUN İLK İŞLERİ:**
+1. **Dev client'ı telefona kur** (kaldığımız yer): Safari → build sayfası → gerekirse `software66` ile **giriş yap** → Install. Takılırsa hangi adımda ne görüldüğü sorulacak. Kurulum yine olmazsa alternatif: yeni `development` build (buildNumber artar) ya da doğrudan Android APK'sına dönmek.
+2. Kurulunca Metro'yu tünelle başlat (yukarıdaki `Start-Process` biçimiyle), URL'yi ngrok API'sinden al, **A aşaması** akışını koştur: giriş → Ana Sayfa 10-15 sn → Profil → Timer 10 sn.
+3. **B aşaması**: Metro'yu `--no-dev --minify` ile yeniden başlat, aynı akış. Matrise göre karar ver.
+4. B'de donma üretilirse: `Sentry.init`'e `enableAutoPerformanceTracing:false` / XHR enstrümantasyonu kapalı deneyerek daralt.
+5. Hâlâ tıkalıysa: ertelenen **Android preview APK `32b312f2`** emülatörde (kullanıcıdan bağımsız, aynı hipotezi sınar).
+6. Play Store IAP ürünleri (Android monetizasyonu hâlâ ölü).
+
+### Faz 40 — 💳 iOS IAP altyapısı sıfırdan + donma avı yeni eksen (7 Ağustos, akşam)
 `5f647dc` (expo-dev-client + eas.json development fix) · **iki build kurulmayı bekliyor**
 
 #### A) Donma avı — ekran görüntüsü teşhisi ve elenen teoriler
