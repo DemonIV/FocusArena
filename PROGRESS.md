@@ -247,8 +247,51 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 41 — 🔌 iOS dev client bağlantı altyapısı + Sentry deneyinin build'siz hale getirilmesi (9 Ağustos) ⭐ EN GÜNCEL
-Kod değişikliği YOK (yalnız ortam/altyapı) · **dev client telefona HÂLÂ KURULAMADI — oturum burada kesildi**
+### Faz 42 — 🎯 A/B deneyi koşuldu: Sentry hipotezi ÖLDÜ + aylardır yanlış Sentry projesine bakılıyormuş (10 Ağustos) ⭐ EN GÜNCEL
+Kalıcı kod değişikliği YOK (geçici prob eklendi, aynı oturumda geri alındı — `analytics.ts` HEAD ile birebir) · tsc temiz
+
+**Faz 41'in tıkanması çözüldü**: dev client (buildNumber **19**) telefona kuruldu, tünelden Metro'ya bağlandı, A ve B aşamalarının **ikisi de koşuldu**.
+
+#### 🔴 Sonuç: donma avının Sentry ekseni kapandı
+
+| Aşama | Metro | `__DEV__` | Sentry | Sonuç |
+|---|---|---|---|---|
+| **A** | `expo start --dev-client --tunnel` | true | kapalı | **temiz** — donma yok |
+| **B** | `… --no-dev --minify` | false | **açık** | **temiz** — her sayfa gezildi, donma yok |
+
+B'nin gerçekten "Sentry açık" koştuğu **kanıtlandı** (varsayılmadı): geçici prob telefon ekranına `__DEV__=false · DSN=var · enabled=true · flush=OK` yazdı ve olay Sentry'ye düştü. Ayrıca tünel kayıtlarından bundle URL'si (`dev=false&minify=true`) ve servis edilen bundle'ın içi (DSN inline edilmiş) doğrulandı. **⇒ Sentry'nin XHR yaması suçlu DEĞİL. Faz 40'ın "yeni ekseni" geçersiz.**
+
+#### 🔑 Oturumun asıl bulgusu: yanlış Sentry projesi
+
+- Mobil DSN → **`node`** projesi (`4511507857670224`). Kullanıcının aylardır baktığı **`react-native`** projesi (`4511507873267792`) **hiç kullanılmamış** — o yüzden hep "waiting for first error" gösteriyordu. Backend ayrı üçüncü projede (`4511507964362832`).
+- EAS **preview + production** ortamlarındaki `EXPO_PUBLIC_SENTRY_DSN` yerel `.env` ile **birebir aynı** → TestFlight build'leri de `node`'a rapor ediyor.
+- **⇒ Faz 40'ın "Sentry'de hiç olay yok" gözlemi geçersizdi**; üzerine kurulan watchdog yorumu (`js-thread-stall` yok ⇒ …) da geçersiz.
+- iOS→Sentry hattı sağlam: prob olayı `iPhone 14 Pro · iOS 26.5.2 · release 1.0.0 (19) · environment production`.
+
+#### 📋 `node` projesinde 30 günlük saklama içindeki TÜM içerik (9 olay)
+
+- **7× `Invariant Violation: Tried to register two views with the same name RNSVG*`** (Rect/Use/Text/Mask/Group/Ellipse/ClipPath) — **Fatal**, unhandled, 7 Ağustos. **Ama hepsi Android emülatöründen** (`sdk_gphone64_x86`, Android 15, env `development`, release `1.0.0 (1)`), iPhone'dan değil. `npm ls react-native-svg` → **tek kopya** (15.12.1), yani ikili paket değil ⇒ büyük ihtimalle dev reload artığı (`analytics.ts`'teki yorumun tarif ettiği şey). Not olarak duruyor, iOS donmasını açıklamıyor.
+- 2× bu oturumun probu (iPhone).
+- **iOS TestFlight build'lerinden (14–18) SIFIR olay** — o build'ler aktif kullanılıp donma bildirilmiş olmasına rağmen. (Not: Sentry saklama süresi bu planda **30 gün**; `statsPeriod=90d` istense de 30'a düşüyor, daha eskisi yok.)
+
+#### 🧭 Avın yeni durumu
+
+Donma, **çalışan bir JS thread'in yakalayıp raporlayabileceği bir hata değil**. Dev client'ta (native **Debug** derlenmiş, JS Metro'dan, Sentry açık) her şey kusursuz; TestFlight'ta (native **Release** derlenmiş, JS gömülü) donuyor ve tek olay bile çıkmıyor. Bu, Faz 39'daki toolchain korelasyonunun (build 12 eski Xcode ✓ / 14+ iOS 26 SDK ✗) ve Faz 35'teki MMKV `memset_s` olayının imzası.
+
+**⚠️ eas.json'da fark edilen kritik ayrım**: `development` profilinde `buildConfiguration` yok → EAS dev client'ı **Debug** derliyor; TestFlight ise **Release**. Yani bu gece test edilen ikili, donan ikiliyle native tarafta aynı derleme DEĞİL.
+
+**⏭️ SONRAKİ OTURUMUN İLK İŞİ — karar verildi, kullanıcı onayı bekleniyor:**
+1. **`development` + `buildConfiguration: "Release"` build'i al** (~20 dk). JS yine Metro'dan gelir (anında A/B), native taraf Release derlenir. **Donarsa** suçlu Release derlemesi/toolchain → pod/optimizasyon bazında daraltılır. **Donmazsa** suçlu gömülü Hermes bytecode bundle'ı veya EAS env farkı.
+2. Alternatif/paralel: TestFlight'ı telefona geri kur → donmayı bu gece üret; Sentry'nin çalıştığını **artık bildiğimiz için** olaylar canlı düşerse sebep doğrudan okunur.
+3. **Temizlik**: Sentry'de `node` projesini `studysquad-mobile` diye yeniden adlandır + kullanılmayan `react-native` projesini kapat. (DSN'i değiştirme — geçmiş kaybolur; projeyi adlandırmak yeterli.)
+
+**🧰 Bu oturumun ortam dersleri:**
+- Dev client'ta `--no-dev` ile **console log'ları Metro'ya akmıyor** → "log'da uyarı yok" hiçbir şey kanıtlamaz. Ölçüm için: ngrok yerel API'si (`127.0.0.1:4040/api/requests/http`) bundle URL'sinin `dev`/`minify` parametrelerini verir; `curl` ile bundle indirilip `grep -a` ile içeriği (inline env, kod) doğrulanabilir.
+- Telefonda cevap almanın en güvenilir yolu **`Alert.alert` probu** (log değil, ekran). `Sentry.flush()` RN'de **argüman almaz** (browser SDK'sından farklı) — `flush(8000)` tsc hatası verir.
+- `eas env:list` **`--non-interactive` bayrağını tanımıyor**; `--format long` ile çalışır.
+
+### Faz 41 — 🔌 iOS dev client bağlantı altyapısı + Sentry deneyinin build'siz hale getirilmesi (9 Ağustos)
+Kod değişikliği YOK (yalnız ortam/altyapı) · **dev client telefona HÂLÂ KURULAMADI — oturum burada kesildi** · ⚠️ **Faz 42 bu fazın Sentry hipotezini ÇÜRÜTTÜ, tablosunu oradan oku**
 
 - **Karar**: Android APK adımı (Faz 40'ın 1. maddesi) **ertelendi**, iOS dev client yolundan devam edildi.
 - **🔑 OTURUMUN ASIL KAZANIMI — Sentry deneyi artık EAS build gerektirmiyor**: `sentryEnabled = Boolean(SENTRY_DSN) && !__DEV__` (analytics.ts:14) ve yerel `mobile/.env` içinde `EXPO_PUBLIC_SENTRY_DSN` **dolu** (Metro başlarken `env: load .env` ile yüklendiği log'da doğrulandı). Dev client'ta JS bundle **uygulamanın içinde değil, Metro'dan** geldiği için `__DEV__`'i Metro'nun bayrağı belirliyor:
@@ -710,6 +753,8 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 ---
 
 ## 🔜 Sıradaki Adımlar
+
+> 🚨 **ÖNCE BUNU OKU: Faz 42 (10 Ağustos)** — donma avının güncel durumu ve sonraki adım orada. Sentry ekseni kapandı; sıradaki iş `development` + `buildConfiguration: "Release"` build'i. Aşağıdaki liste o avın dışındaki işler.
 
 **Sonraki oturumun ilk işleri (Claude):** — bkz ⭐ "Oturum Özeti 2026-07-11" (BUILD DURUMU)
 1. ✅ ~~TAZE iOS + Android build al~~ — atıldı (Android `592d10f0`, iOS `50f40c6d`). **Build sonuçlarını kontrol et**; iOS bittiyse **elle submit**: `cd mobile && npx eas-cli submit -p ios --latest` (interaktif, 2FA isteyebilir). Kalıcı fix: ascAppId'yi eas.json submit profiline yaz.
