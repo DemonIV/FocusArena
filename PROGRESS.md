@@ -247,7 +247,25 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 43 — 🏁 Donma avı: release ekseni tamamen elendi + 35 saatlik seans bug'ı düzeltildi (11 Ağustos) ⭐ EN GÜNCEL
+### Faz 44 — 🎉 DONMA AVI BİTTİ: production/TestFlight build 22 TEMİZ (12 Ağustos) ⭐ EN GÜNCEL
+Kod değişikliği YOK · iOS build **22** (`production`, store dağıtımı, commit `ba0ca6c`, finished 12 Ağu 01:51)
+
+- **Kullanıcı build 22'yi aldı, cihazda test etti → DONMA YOK.** Aylardır süren av (Faz 35→43) kapandı.
+- **Hangi hipotez kazandı**: Faz 43'ün **2. hipotezi** — donma **build 14–18'e özgüydü ve zaten kapanmıştı**. Faz 39'da SDK 54 matrisine geri dönülmüştü (`c72c6e4`: expo 54.0.36, react-native-svg 15.12.1) ve o günden 12 Ağustos'a kadar hiç production build alınmamıştı; yani fix aylar önce girmiş ama doğrulanmamıştı.
+- **1. hipotez de elendi** (App Store dağıtımına özgü bir şey): build 22 `production` profili + **store distribution** ile alındı ve **`production` EAS ortamı BOŞ DEĞİL** — doğrulandı (`eas env:list --environment production`): `EXPO_PUBLIC_SENTRY_DSN`, `EXPO_PUBLIC_POSTHOG_KEY/HOST`, `EXPO_PUBLIC_REVENUECAT_IOS_KEY` (`appl_…`, 7 Ağu'da Faz 40'ta eklenmiş), `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` hepsi orada. ⇒ Build 22, donan 14–18 ile **birebir aynı koşullarda** (Release derleme + gömülü Hermes + App Store imzası + tüm analytics/IAP anahtarları açık) ve temiz. Karşılaştırılabilirlik açığı yok.
+- **📌 Düzeltilen yanlış kayıt**: altyapı tablosunda "production env **boş**" yazıyordu — **yanlıştı** (Faz 40'tan beri dolu). Faz 43'te build 20'nin anahtarsız çıkmasının sebebi `production` değil **`development` ortamının** boş olmasıydı; iki ortam karıştırılmış.
+- **Av boyunca elenen eksenler (özet, tekrar kazılmasın)**: Sentry XHR yaması (Faz 42) · yanlış Sentry projesi (Faz 42, `node` = gerçek mobil proje) · native Release derlemesi (Faz 43 build 20) · gömülü Hermes bundle + analytics açık (Faz 43 build 21) · App Store dağıtımı/production env (Faz 44 build 22). **Gerçek suçlu: SDK/paket matrisi (expo + react-native-svg sürümleri), Faz 39'da düzeltildi.**
+- `eas.json`'daki **`development-release`** profili (native Release + dev client) **bırakıldı** — gelecekteki "Debug'da çalışıyor Release'te çalışmıyor" avları için hazır alet.
+
+**⏭️ SONRAKİ OTURUMUN İLK İŞLERİ** (donma avı artık yol kapatmıyor, yayın yoluna dönüldü):
+1. **Bekleyen cihaz testleri** — build 22 ile ilk kez görülebilecekler: Live Activity (Faz 21), screen-lock hatırlatması (Faz 23), Nebula TimerCircle (Faz 26), avatarlar (Faz 34), oda ekranı yenilemesi (Faz 31), iOS IAP/paywall (Faz 40 — artık `appl_` anahtarı build'de).
+2. Kalan küçük bug: onboarding **Skip butonu çalışmıyor**.
+3. Play Store IAP ürünleri + Play Console closed testing (Android monetizasyonu hâlâ ölü).
+4. Temizlik: Sentry'de `node` projesini `studysquad-mobile` diye yeniden adlandır + kullanılmayan `react-native` projesini kapat.
+5. Çalışma ağacındaki kazara değişiklikler (kök `tsconfig.json` + `package.json`'a geri gelmiş `@types/react-native`) — hâlâ duruyor.
+6. App Store yayını için kalanlar: sözleşme/banka/vergi, App Privacy, gizlilik politikası metni, `studysquad.app` domain'i.
+
+### Faz 43 — 🏁 Donma avı: release ekseni tamamen elendi + 35 saatlik seans bug'ı düzeltildi (11 Ağustos)
 `e0396ae` (development-release profili) + `6a2473c` (buildNumber 21) + `ba0aff8` (cleanup fix) · Migration 018 ✓ · backend tsc temiz · **Fly deploy ✓ (canlıda uçtan uca doğrulandı)**
 
 #### 🎯 A) Donma avı — iki kontrollü build, ikisi de TEMİZ
@@ -784,12 +802,12 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Marka | **StudySquad** · Android paketi `com.studysquad.app` · **iOS bundle `com.studysquadhq.app`** (com.studysquad.app başka hesapta kayıtlı) · Play başlığı: "StudySquad: Study w/ Friends" |
 | Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
 | DB | ✅ **Supabase Frankfurt (eu-central-1)**, ref `diswgpruuysfkrzlilrk` — pooler `aws-0-eu-central-1.pooler.supabase.com`, user `postgres.diswgpruuysfkrzlilrk` (direkt host IPv6-only, hep pooler kullan). Eski Sydney projesi geri dönüş için duruyor |
-| Migration'lar | 002–017 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title, 016 = users.utc_offset_minutes, 017 = users.selected_avatar) |
-| EAS | preview APK'lar başarılı ✓; preview env'de Sentry/PostHog/RC anahtarları; production env **boş** |
+| Migration'lar | 002–018 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title, 016 = users.utc_offset_minutes, 017 = users.selected_avatar, 018 = sessions.target_minutes) |
+| EAS | preview APK/IPA'lar ✓; **`preview` + `production` ortamlarının ikisi de dolu** (Sentry DSN, PostHog key+host, RC iOS `appl_` + Android `goog_`) — doğrulandı 12 Ağu. **Boş olan `development` ortamı** (Faz 43 build 20 bu yüzden anahtarsız çıktı) |
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). ✅ **En güncel: buildNumber 14 (6 Ağu, commit `513d415`) FINISHED** — Faz 34 avatarları + MMKV pin dahil. `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). ✅ **En güncel: buildNumber 22 (12 Ağu, commit `ba0ca6c`, `production`/store) FINISHED → cihazda test edildi, DONMA YOK** (Faz 44 — av bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
 | Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
 | Pod pin'leri | `plugins/withPinnedMmkv.js` → MMKV + MMKVCore **2.4.0** (2.4.1 iOS 26 SDK'da derlenmiyor, Tencent/MMKV#1675). Upstream düzelince plugin silinecek |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
@@ -798,7 +816,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 ## 🔜 Sıradaki Adımlar
 
-> 🚨 **ÖNCE BUNU OKU: Faz 42 (10 Ağustos)** — donma avının güncel durumu ve sonraki adım orada. Sentry ekseni kapandı; sıradaki iş `development` + `buildConfiguration: "Release"` build'i. Aşağıdaki liste o avın dışındaki işler.
+> ✅ **DONMA AVI BİTTİ — bkz Faz 44 (12 Ağustos).** Build 22 (production/TestFlight) cihazda temiz; suçlu Faz 39'da düzeltilen SDK/paket matrisiymiş. Bu eksende yeni kazı YOK. Sıradaki işler Faz 44'ün listesinde + aşağıda.
 
 **Sonraki oturumun ilk işleri (Claude):** — bkz ⭐ "Oturum Özeti 2026-07-11" (BUILD DURUMU)
 1. ✅ ~~TAZE iOS + Android build al~~ — atıldı (Android `592d10f0`, iOS `50f40c6d`). **Build sonuçlarını kontrol et**; iOS bittiyse **elle submit**: `cd mobile && npx eas-cli submit -p ios --latest` (interaktif, 2FA isteyebilir). Kalıcı fix: ascAppId'yi eas.json submit profiline yaz.
