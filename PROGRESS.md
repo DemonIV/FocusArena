@@ -247,7 +247,51 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 42 — 🎯 A/B deneyi koşuldu: Sentry hipotezi ÖLDÜ + aylardır yanlış Sentry projesine bakılıyormuş (10 Ağustos) ⭐ EN GÜNCEL
+### Faz 43 — 🏁 Donma avı: release ekseni tamamen elendi + 35 saatlik seans bug'ı düzeltildi (11 Ağustos) ⭐ EN GÜNCEL
+`e0396ae` (development-release profili) + `6a2473c` (buildNumber 21) + `ba0aff8` (cleanup fix) · Migration 018 ✓ · backend tsc temiz · **Fly deploy BEKLİYOR**
+
+#### 🎯 A) Donma avı — iki kontrollü build, ikisi de TEMİZ
+
+Faz 42'nin "native Debug ≠ Release" şüphesi sınandı. `eas.json`'a **`development-release`** profili eklendi (`extends: development` + `ios.buildConfiguration: "Release"`), normal `development` profili Debug olarak korundu.
+
+| Build | Native | JS kaynağı | `__DEV__` | Sentry/PostHog/RC | Sonuç |
+|---|---|---|---|---|---|
+| **20** (`development-release`) | **Release** | **gömülü Hermes** | false | **kapalı** (env boş) | ✅ **temiz** |
+| **21** (`preview`) | **Release** | **gömülü Hermes** | false | **açık** (log doğruladı) | ✅ **temiz** |
+| TestFlight 14–18 | Release | gömülü Hermes | false | açık | ❌ donuyor |
+
+- **🔑 Sürpriz bulgu**: `developmentClient: true` + `buildConfiguration: Release` = pratikte **production build**. `expo-dev-client`'ın launcher/dev menüsü `#if DEBUG` ile derlendiği için Release'te tamamen ölü; Xcode'un bundling fazı Release'te çalıştığı için JS **uygulamaya gömülüyor**. Sonuç: Metro'ya hiç bağlanmadan, gömülü bundle ile çalıştı (Metro log'unda **sıfır bundle isteği**, tünel zaten hiç ayağa kalkmamıştı). ⇒ Sallamada dev menüsünün çıkmaması **normaldir**, yanlış build'de olunduğunun kanıtı değildir.
+- **🔑 EAS `development` ortamı BOŞ** (`eas env:list --environment development` → "No variables found"). Build 20 bu yüzden Sentry/PostHog/RevenueCat **anahtarları olmadan** derlendi — bu kazara mükemmel bir kontrol grubu oldu. Build 21 (`preview` ortamı) anahtarların hepsini aldı; build log'u satır satır doğruladı (varsayılmadı).
+- **⇒ Elenen eksenler**: Sentry XHR yaması (Faz 42), native Release derlemesi, gömülü Hermes bytecode bundle, "release + analytics SDK'ları açık" kombinasyonu. **Hepsi temiz.**
+- **⏳ Kalan hipotezler (sadece iki tane)**:
+  1. Donma **App Store dağıtımına özel** bir şeyden: `production` EAS ortamı farkı, App Store imzası/receipt doğrulaması, StoreKit'in üretim modu (ad-hoc `preview` imzasında yok).
+  2. Donma **build 14–18'e özgüydü ve zaten kapandı** — Faz 39'da SDK 54 matrisine geri dönülmüştü (`c72c6e4`: expo 54.0.36, svg 15.12.1) ve o günden beri hiç production build alınmadı.
+- **⏭️ Ayırt etme yolu**: yeni bir **production/TestFlight** build'i al, donmayı üretmeye çalış. Donmuyorsa av bitti (hipotez 2). Donuyorsa suçlu "ad-hoc preview vs App Store production" farkında — çok dar bir alan, üstelik Sentry artık **çalışır ve doğru projede** olduğu için olay canlı düşer.
+
+#### 🐛 B) 35 saatlik seans bug'ı — kök neden + kalıcı fix (`ba0aff8`)
+
+- **Belirti**: klasik modda timer açık unutulunca "35 saat çalıştın" görünüyordu.
+- **Kök neden**: `jobs/session-cleanup.ts` terk edilmiş seansı kapatırken **ham duvar saatini** yazıyordu, hiçbir üst sınır yoktu. Hedef süre yalnız Redis'te (`timer:{userId}`, 4 sa TTL) tutulduğu için iş çalıştığında zaten kaybolmuştu. `stopTimer` ise **zaten kapıyordu** (timer.service.ts:305-311) — tutarsızlık buradaydı.
+- **Neden 4 saatte değil de 35 saatte yakalandı**: **Fly makinesi boşta auto-stop** olduğu için Bull cron'u 4 saatlik eşik penceresinde hiç koşmadı. Bozuk satır: seans **9 Ağu 23:20**'de başlamış (Faz 41 oturumu), makine bugün uygulamayla uyanınca **11 Ağu 10:52**'de kapanmış → 2132 dk. `was_completed=false` olduğu için XP/coin verilmemiş, sadece toplam süreyi şişirmiş.
+- **Fix**: migration **018** `sessions.target_minutes smallint` (nullable) — hedef süre artık satırda kalıcı. `startTimer` insert'te yazıyor; cleanup `min(geçen, target_minutes ?? 180)` ile kapıyor. **180 = `StartTimerSchema`'nın zaten uyguladığı tavan** (`.max(180)`, timer.schema.ts:6), eski satırlar için fallback — yani meşru bir seans hiçbir zaman 3 saati geçemiyordu, bu da 35 saatin kesin olarak cleanup'tan geldiğini kanıtladı.
+- **Kullanıcı kararı**: mevcut bozuk satır (`fb428033…`, testalpha1) **olduğu gibi bırakıldı** — sadece ileriye dönük düzeltme yeterli görüldü.
+
+#### 🧰 Ortam notları
+
+- **`!` öneki bash çalıştırır**, PowerShell değil — kullanıcıya komut verirken bash sözdizimi kullan.
+- **flyctl tam yolu (winget)**: `C:\Users\alper\AppData\Local\Microsoft\WinGet\Packages\Fly-io.flyctl_Microsoft.Winget.Source_8wekyb3d8bbwe\flyctl.exe`
+- `eas env:list` **çalışma dizini `mobile/` olmalı** (kökte "EAS project not configured" der).
+- Bu oturumda **Fly deploy** ve **psql migration** çağrıları otomatik izin sınıflandırıcısı tarafından reddedildi (psql `-f` ikinci denemede geçti); üretim deploy'unu kullanıcı çalıştırmalı.
+
+**⏭️ SONRAKİ OTURUMUN İLK İŞLERİ:**
+1. **Backend'i Fly'a deploy et** (migration 018 uygulandı ama kod deploy edilmedi — `target_minutes` insert'i canlıda henüz yok; şema nullable olduğu için eski kod kırılmıyor, acil değil ama fix aktif değil):
+   `cd /c/Users/alper/Desktop/FocusArena && "<flyctl-tam-yolu>" deploy --remote-only --depot=false --app focusarena`
+2. **Production/TestFlight build al** → donma hâlâ var mı? Avın son sorusu bu.
+3. Play Store IAP ürünleri (Android monetizasyonu hâlâ ölü).
+4. Bekleyen temizlik: Sentry'de `node` projesini `studysquad-mobile` diye yeniden adlandır + kullanılmayan `react-native` projesini kapat.
+5. Çalışma ağacında duran kazara değişiklikler (kök `tsconfig.json` + `package.json`'a geri gelmiş `@types/react-native`) — kullanıcı "sonra bakarız" dedi.
+
+### Faz 42 — 🎯 A/B deneyi koşuldu: Sentry hipotezi ÖLDÜ + aylardır yanlış Sentry projesine bakılıyormuş (10 Ağustos)
 Kalıcı kod değişikliği YOK (geçici prob eklendi, aynı oturumda geri alındı — `analytics.ts` HEAD ile birebir) · tsc temiz
 
 **Faz 41'in tıkanması çözüldü**: dev client (buildNumber **19**) telefona kuruldu, tünelden Metro'ya bağlandı, A ve B aşamalarının **ikisi de koşuldu**.
