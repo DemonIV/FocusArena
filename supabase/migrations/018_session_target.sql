@@ -1,0 +1,11 @@
+-- Faz 43 — abandoned sessions must never bank more than the user actually set.
+--
+-- The intended length lived only in Redis (`timer:{userId}`, 4 h TTL). When the
+-- cleanup job closed a stale session the key was usually already gone, so it
+-- wrote the raw wall-clock elapsed — a forgotten timer recorded 35 hours.
+-- Persisting the target on the row lets jobs/session-cleanup.ts clamp exactly
+-- the way stopTimer() already does.
+--
+-- Nullable on purpose: rows created before this migration have no target, and
+-- the job falls back to the hard 180-minute ceiling from StartTimerSchema.
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS target_minutes smallint;

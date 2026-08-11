@@ -237,6 +237,7 @@ export async function startTimer(
       subject_id: subjectId ?? null,
       started_at: new Date().toISOString(),
       duration_minutes: 0,   // will be updated on stop
+      target_minutes: duration, // so session-cleanup can clamp an abandoned session
       was_completed: false,
       synced: true,
     })
