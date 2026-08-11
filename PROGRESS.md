@@ -248,7 +248,7 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
 ### Faz 43 — 🏁 Donma avı: release ekseni tamamen elendi + 35 saatlik seans bug'ı düzeltildi (11 Ağustos) ⭐ EN GÜNCEL
-`e0396ae` (development-release profili) + `6a2473c` (buildNumber 21) + `ba0aff8` (cleanup fix) · Migration 018 ✓ · backend tsc temiz · **Fly deploy BEKLİYOR**
+`e0396ae` (development-release profili) + `6a2473c` (buildNumber 21) + `ba0aff8` (cleanup fix) · Migration 018 ✓ · backend tsc temiz · **Fly deploy ✓ (canlıda uçtan uca doğrulandı)**
 
 #### 🎯 A) Donma avı — iki kontrollü build, ikisi de TEMİZ
 
@@ -275,6 +275,7 @@ Faz 42'nin "native Debug ≠ Release" şüphesi sınandı. `eas.json`'a **`devel
 - **Neden 4 saatte değil de 35 saatte yakalandı**: **Fly makinesi boşta auto-stop** olduğu için Bull cron'u 4 saatlik eşik penceresinde hiç koşmadı. Bozuk satır: seans **9 Ağu 23:20**'de başlamış (Faz 41 oturumu), makine bugün uygulamayla uyanınca **11 Ağu 10:52**'de kapanmış → 2132 dk. `was_completed=false` olduğu için XP/coin verilmemiş, sadece toplam süreyi şişirmiş.
 - **Fix**: migration **018** `sessions.target_minutes smallint` (nullable) — hedef süre artık satırda kalıcı. `startTimer` insert'te yazıyor; cleanup `min(geçen, target_minutes ?? 180)` ile kapıyor. **180 = `StartTimerSchema`'nın zaten uyguladığı tavan** (`.max(180)`, timer.schema.ts:6), eski satırlar için fallback — yani meşru bir seans hiçbir zaman 3 saati geçemiyordu, bu da 35 saatin kesin olarak cleanup'tan geldiğini kanıtladı.
 - **Kullanıcı kararı**: mevcut bozuk satır (`fb428033…`, testalpha1) **olduğu gibi bırakıldı** — sadece ileriye dönük düzeltme yeterli görüldü.
+- **Canlı doğrulama** (deploy sonrası, uçtan uca): `/health` 200 → testalpha1 login → `POST /timer/start {duration:25}` → DB satırında **`target_minutes = 25`** ✓ → `POST /timer/stop` ile 0 dk/0 XP/0 coin kapatıldı (veri kirletilmedi).
 
 #### 🧰 Ortam notları
 
@@ -284,9 +285,8 @@ Faz 42'nin "native Debug ≠ Release" şüphesi sınandı. `eas.json`'a **`devel
 - Bu oturumda **Fly deploy** ve **psql migration** çağrıları otomatik izin sınıflandırıcısı tarafından reddedildi (psql `-f` ikinci denemede geçti); üretim deploy'unu kullanıcı çalıştırmalı.
 
 **⏭️ SONRAKİ OTURUMUN İLK İŞLERİ:**
-1. **Backend'i Fly'a deploy et** (migration 018 uygulandı ama kod deploy edilmedi — `target_minutes` insert'i canlıda henüz yok; şema nullable olduğu için eski kod kırılmıyor, acil değil ama fix aktif değil):
-   `cd /c/Users/alper/Desktop/FocusArena && "<flyctl-tam-yolu>" deploy --remote-only --depot=false --app focusarena`
-2. **Production/TestFlight build al** → donma hâlâ var mı? Avın son sorusu bu.
+1. **Production/TestFlight build al** → donma hâlâ var mı? Avın son sorusu bu.
+   `cd mobile && eas build --platform ios --profile production --non-interactive --auto-submit`
 3. Play Store IAP ürünleri (Android monetizasyonu hâlâ ölü).
 4. Bekleyen temizlik: Sentry'de `node` projesini `studysquad-mobile` diye yeniden adlandır + kullanılmayan `react-native` projesini kapat.
 5. Çalışma ağacında duran kazara değişiklikler (kök `tsconfig.json` + `package.json`'a geri gelmiş `@types/react-native`) — kullanıcı "sonra bakarız" dedi.
