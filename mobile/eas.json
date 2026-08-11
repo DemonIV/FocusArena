@@ -13,6 +13,12 @@
         "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
+    "development-release": {
+      "extends": "development",
+      "ios": {
+        "buildConfiguration": "Release"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "android": {
