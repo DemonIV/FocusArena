@@ -18,6 +18,7 @@ import {
 } from '../services/billing';
 import { useBillingStore } from '../stores';
 import { track } from '../services/analytics';
+import { LegalLinks } from './LegalLinks';
 
 // Palette — matches ProfileScreen
 const BG = '#0d0d1a';
@@ -199,6 +200,9 @@ export function PaywallModal({ visible, onClose, source = 'unknown', dismissLabe
             </TouchableOpacity>
 
             <Text style={styles.legal}>{t('pro.legal')}</Text>
+
+            {/* Tappable EULA + Privacy links — App Store Guideline 3.1.2 */}
+            <LegalLinks color="#64748b" />
           </ScrollView>
         </View>
       </View>

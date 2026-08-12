@@ -17,7 +17,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
-import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal, AvatarArt } from '../../components';
+import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal, AvatarArt, LegalLinks } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { CoinShopModal } from '../../components/CoinShopModal';
 import { PetDetailModal } from '../../components/PetDetailModal';
@@ -689,6 +689,9 @@ export function ProfileScreen() {
             <Text style={styles.deleteAccountText}>{t('profile.deleteAccount')}</Text>
           )}
         </TouchableOpacity>
+
+        {/* ── Legal (store requirement: reachable from inside the app) ── */}
+        <LegalLinks style={{ marginTop: 18, marginBottom: 8 }} />
 
       </ScrollView>
 

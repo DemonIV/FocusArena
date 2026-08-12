@@ -612,5 +612,9 @@
     "epic": "Épique",
     "legend": "Légendaire",
     "mythic": "Mythique"
+  },
+  "legal": {
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité"
   }
 }

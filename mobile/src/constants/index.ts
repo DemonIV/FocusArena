@@ -7,6 +7,18 @@ export const WS_URL = env(process.env.EXPO_PUBLIC_WS_URL, 'ws://localhost:3000')
 export const SUPABASE_URL = env(process.env.EXPO_PUBLIC_SUPABASE_URL, '');
 export const SUPABASE_ANON_KEY = env(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY, '');
 
+/**
+ * Public legal pages (served by the backend, see modules/legal).
+ * App Review requires the Terms of Use + Privacy Policy to be reachable from
+ * inside the purchase flow itself (App Store Guideline 3.1.2), not only from
+ * the store listing.
+ */
+export const LEGAL_URLS = {
+  privacy: `${API_URL}/legal/privacy`,
+  terms: `${API_URL}/legal/terms`,
+  support: `${API_URL}/legal/support`,
+} as const;
+
 export const TIMER = {
   MIN_DURATION: 5 * 60,
   MAX_DURATION: 180 * 60,

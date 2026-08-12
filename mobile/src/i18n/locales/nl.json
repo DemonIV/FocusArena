@@ -612,5 +612,9 @@
     "epic": "Episch",
     "legend": "Legendarisch",
     "mythic": "Mythisch"
+  },
+  "legal": {
+    "terms": "Gebruiksvoorwaarden",
+    "privacy": "Privacybeleid"
   }
 }

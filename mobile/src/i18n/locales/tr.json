@@ -612,5 +612,9 @@
     "epic": "Epik",
     "legend": "Efsanevi",
     "mythic": "Mitik"
+  },
+  "legal": {
+    "terms": "Kullanım Şartları",
+    "privacy": "Gizlilik Politikası"
   }
 }

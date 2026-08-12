@@ -12,3 +12,4 @@ export { ZenModeModal } from './ZenModeModal';
 export { PetCompanion, PetAdoptTeaser } from './PetCompanion';
 export { PetDetailModal } from './PetDetailModal';
 export { MonthlyStatsModal } from './MonthlyStatsModal';
+export { LegalLinks } from './LegalLinks';
