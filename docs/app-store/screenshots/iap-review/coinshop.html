@@ -1,0 +1,92 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Coin Shop — IAP review screenshot</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* CoinShopModal.tsx: sheet radius 28, drag handle, gold accents */
+  .sheet { border-radius: 28px 28px 0 0; }
+  .handle {
+    width: 40px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,.15); margin: 0 auto 20px;
+  }
+  .title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.3; }
+
+  .pack {
+    position: relative; display: flex; align-items: center; gap: 14px;
+    background: var(--card); border: 1.5px solid rgba(255,255,255,.08);
+    border-radius: 16px; padding: 16px; margin-bottom: 12px;
+  }
+  .pack.best { border-color: rgba(255,215,0,.5); background: rgba(255,215,0,.06); }
+  .pack .ico { font-size: 30px; flex: none; }
+  .pack .coins { flex: 1; font-size: 17px; font-weight: 800; color: var(--coin-gold); }
+  .buy {
+    min-width: 88px; text-align: center; border-radius: 12px; padding: 10px 16px;
+    background: rgba(0,210,255,.09); border: 1px solid rgba(0,210,255,.33);
+    color: var(--accent); font-size: 14px; font-weight: 800;
+  }
+  .pack.best .buy {
+    background: rgba(255,215,0,.13); border-color: rgba(255,215,0,.4); color: var(--coin-gold);
+  }
+  .badge {
+    position: absolute; top: -9px; right: 14px; background: var(--coin-gold);
+    border-radius: 10px; padding: 3px 10px; color: #131325;
+    font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  }
+  .footer { color: var(--fine); font-size: 11px; text-align: center; margin-top: 6px; line-height: 1.4; }
+  .close { color: var(--muted); text-align: center; margin-top: 16px; font-size: 14px; }
+</style>
+
+<div class="phone">
+<div class="behind">
+  <div class="nav">Profile</div>
+  <div class="section">FRAME SHOP <span class="chip">🪙 1,050</span></div>
+  <div class="row">
+    <div class="tile"><div class="ring" style="border-color:#00d2ff"></div><b>Default</b></div>
+    <div class="tile"><div class="ring" style="border-color:#b45309"></div><b>Bronze</b></div>
+    <div class="tile"><div class="ring"></div><b>Silver</b></div>
+  </div>
+  <div class="section">PET SHOP</div>
+  <div class="row">
+    <div class="tile"><span style="font-size:34px">🐣</span><b>Chick</b></div>
+    <div class="tile"><span style="font-size:34px">🦄</span><b>Unicorn</b></div>
+    <div class="tile"><span style="font-size:34px">🐢</span><b>Turtle</b></div>
+  </div>
+</div>
+<div class="backdrop"></div>
+
+<div class="status">
+  <span>9:41</span>
+  <span class="icons">
+    <span class="bars"><i></i><i></i><i></i><i></i></span>
+    <span>WiFi</span>
+    <span class="batt"><span style="width:15px"></span></span>
+  </span>
+</div>
+
+<div class="sheet">
+  <div class="handle"></div>
+  <div class="title">🪙 Coin Pack</div>
+  <div class="subtitle">Buy frames and cosmetics with coins — your XP stays untouched</div>
+
+  <div class="pack">
+    <span class="ico">🪙</span>
+    <span class="coins">1,000 Coins</span>
+    <span class="buy">$1.99</span>
+  </div>
+  <div class="pack">
+    <span class="ico">💰</span>
+    <span class="coins">5,500 Coins</span>
+    <span class="buy">$7.99</span>
+  </div>
+  <div class="pack best">
+    <div class="badge">BEST VALUE</div>
+    <span class="ico">🏆</span>
+    <span class="coins">12,000 Coins</span>
+    <span class="buy">$12.99</span>
+  </div>
+
+  <div class="footer">You can also earn coins by focusing — every session<br>gives coins equal to XP</div>
+  <div class="close">Close</div>
+</div>
+</div>

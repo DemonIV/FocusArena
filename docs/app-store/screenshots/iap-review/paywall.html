@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>StudySquad Pro paywall — IAP review screenshot</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* PaywallModal.tsx: sheet radius 24, maxHeight 88% */
+  /* On device the sheet is maxHeight 88% with a ScrollView; here it is pinned so
+     the whole flow — prices, auto-renewal notice and the Terms/Privacy links
+     that Guideline 3.1.2 asks for — is visible in one shot. */
+  .sheet { border-radius: 24px 24px 0 0; top: 68px; }
+  .benefit { padding: 7px 0; }
+  .crown { font-size: 44px; text-align: center; margin-bottom: 4px; line-height: 1.1; }
+  .title { font-size: 26px; font-weight: 800; color: var(--text); text-align: center; }
+  .tagline { font-size: 14px; color: var(--muted); text-align: center; margin: 6px 0 20px; }
+
+  .benefits { margin-bottom: 20px; }
+  .benefit { display: flex; align-items: center; padding: 8px 0; }
+  .benefit .ico { font-size: 22px; width: 36px; flex: none; }
+  /* flex:1 + min-width:0 mirrors benefitText's flex:1 in RN — without it the
+     longest benefit line widens the whole layout and the shot gets clipped. */
+  .benefit .txt { flex: 1; min-width: 0; font-size: 15px; color: var(--text); line-height: 1.25; }
+
+  .pkg {
+    position: relative; background: var(--card); border-radius: 14px; padding: 16px;
+    margin-bottom: 12px; border: 2px solid transparent;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .pkg.sel { border-color: var(--accent); }
+  .pkg .ptitle { font-size: 16px; font-weight: 700; color: var(--muted); }
+  .pkg.sel .ptitle { color: var(--text); }
+  .pkg .pprice { font-size: 16px; font-weight: 800; color: var(--muted); }
+  .pkg.sel .pprice { color: var(--accent); }
+  .save {
+    position: absolute; top: -9px; right: 14px; background: var(--gold);
+    border-radius: 8px; padding: 2px 8px; color: #1a1000;
+    font-size: 10px; font-weight: 900; letter-spacing: .5px;
+  }
+
+  .cta {
+    background: var(--accent); border-radius: 14px; padding: 16px 0; margin-top: 8px;
+    text-align: center; color: #001018; font-size: 17px; font-weight: 800;
+  }
+  .restore { color: var(--accent); text-align: center; margin-top: 16px; font-size: 14px; font-weight: 600; }
+  .cancel { color: var(--muted); text-align: center; margin-top: 14px; font-size: 14px; }
+  .legal { color: var(--fine); font-size: 11px; text-align: center; margin-top: 16px; line-height: 16px; }
+  .links { display: flex; justify-content: center; align-items: center; margin-top: 10px; color: #64748b; }
+  .links a { font-size: 12px; font-weight: 600; text-decoration: underline; color: #64748b; }
+  .links .sep { font-size: 12px; margin: 0 8px; }
+</style>
+
+<div class="phone">
+<div class="behind">
+  <div class="nav">Profile</div>
+  <div class="card">
+    <div class="avatar">🧑‍🚀</div>
+    <div>
+      <div class="name">testalpha1</div>
+      <div class="sub">Level 6 · 12 day streak</div>
+    </div>
+  </div>
+  <div class="section">MY SUBJECTS</div>
+  <div class="row"><div class="tile"><div class="ring"></div><b>Mathematics</b></div><div class="tile"><div class="ring"></div><b>Physics</b></div></div>
+</div>
+<div class="backdrop"></div>
+
+<div class="status">
+  <span>9:41</span>
+  <span class="icons">
+    <span class="bars"><i></i><i></i><i></i><i></i></span>
+    <span>WiFi</span>
+    <span class="batt"><span style="width:15px"></span></span>
+  </span>
+</div>
+
+<div class="sheet">
+  <div class="crown">👑</div>
+  <div class="title">StudySquad Pro</div>
+  <div class="tagline">More focus, fewer limits.</div>
+
+  <div class="benefits">
+    <div class="benefit"><span class="ico">📚</span><span class="txt">Add unlimited subjects</span></div>
+    <div class="benefit"><span class="ico">🛡️</span><span class="txt">Streak freeze — a missed day won't break your streak</span></div>
+    <div class="benefit"><span class="ico">🧘</span><span class="txt">Zen Mode — immersive, distraction-free focus screen</span></div>
+    <div class="benefit"><span class="ico">✨</span><span class="txt">Animated Pro timer frames (Prism &amp; Royal)</span></div>
+    <div class="benefit"><span class="ico">🎖️</span><span class="txt">Exclusive Pro badges</span></div>
+  </div>
+
+  <div class="pkg sel">
+    <div class="save">SAVE 37%</div>
+    <div class="ptitle">Yearly</div>
+    <div class="pprice">$44.99</div>
+  </div>
+  <div class="pkg">
+    <div class="ptitle">Monthly</div>
+    <div class="pprice">$5.99</div>
+  </div>
+
+  <div class="cta">Go Pro</div>
+  <div class="restore">Restore purchases</div>
+  <div class="cancel">Cancel</div>
+  <div class="legal">Subscription auto-renews at the end of each period.<br>Cancel anytime in your store settings.</div>
+  <div class="links"><a href="#">Terms of Use</a><span class="sep">·</span><a href="#">Privacy Policy</a></div>
+</div>
+</div>

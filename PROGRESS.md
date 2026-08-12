@@ -247,22 +247,27 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 45 — 🍎 App Store yayın hamlesi: build 23 + IAP'ler v1.0 submission'ına hazırlanıyor (12 Ağustos) ⭐ EN GÜNCEL
-Kod değişikliği YOK (mevcut `2c77d35`) · iOS build **23** FINISHED + ASC'ye yüklendi · **submit EDİLMEDİ**
+### Faz 45 — 🚀 APP STORE'A GÖNDERİLDİ: v1.0 + 5 IAP, build 23 (12 Ağustos) ⭐ EN GÜNCEL
+Kod değişikliği YOK (mevcut `2c77d35`) · iOS build **23** · **7 item submit edildi → "1.0 Waiting for Review"** · yayın: **Automatically release**
 
 - **Karar**: iOS v1.0 **5 IAP ürünüyle birlikte** gönderilecek. Gerekçe: build 22'de `appl_` RC anahtarı gömülü → paywall iOS'ta zaten AKTİF; Apple ilk abonelik/consumable'ın bir sürümle birlikte submit edilmesini şart koşuyor; 3.1.2 için yasal linkler (commit `2c77d35`) build'de olmalıydı. (Faz 27'nin "iOS v1'de IAP yok" kararı böylece geçersiz.)
 - **iOS build 23** (`4f0e20ae`, commit `2c77d35`, production/store, 12 Ağu 17:18→17:24) → auto-submit ✓ ASC'ye yüklendi (submission `8bb03b55`), Apple işlemesi bekleniyor. **İlk build ki paywall/profil yasal linkleri içeriyor.**
 - **Paywall 3.1.2 denetimi ✓**: ürün adı, süre (Aylık/Yıllık), `priceString`, otomatik yenilenme uyarısı, tıklanabilir Kullanım Şartları + Gizlilik Politikası (`LegalLinks`), "Satın alımları geri yükle" — hepsi yerinde.
 - **ASC'de yapılanlar** (tarayıcı otomasyonu): 5 IAP ürününün (pro_monthly, pro_yearly, coins_1000/5500/12000) hepsine **App Review notları** yazılıp kaydedildi (demo hesap + satın alma ekranına ulaşma yolu + coin'in ücretsiz de kazanıldığı bilgisi) → hepsinde "Add for Review" aktif. **Abonelik grubu lokalizasyonu eksikti** (grup sayfası → Localization boştu) → English (U.S.) / display name "StudySquad Pro" eklendi. Notların repo kopyası + submission checklist: `docs/app-store/iap-review.md`.
-- **🔴 Bulunan hata (DÜZELTİLMEDİ)**: v1.0 App Review notlarında **"This version contains NO in-app purchases and NO ads."** yazıyor — IAP'ler artık gönderildiği için YANLIŞ beyan. Yeni metin yazıldı ama **ASC oturumu düştüğü için KAYDEDİLEMEDİ** → tekrar yazılacak (kaynak: `docs/app-store/metadata.md` satır 113 de güncellenmeli).
-- ASC oturumu otomasyon ortasında `/login`'e düştü; Claude şifre giremez → kullanıcı yeniden giriş yapacak. Yeni tuzaklar memory'ye işlendi (Save butonu sticky header'da ıskalıyor, uzun `type` renderer'ı dakikalarca kilitliyor, oturum düşünce kayıtsız değişiklik kaybolur).
+- **🔴 Yanlış beyan düzeltildi**: v1.0 App Review notlarında **"This version contains NO in-app purchases and NO ads."** yazıyordu (Faz 27'den kalma) — IAP'ler bu sürümle gönderildiği için yanlış olmuştu. Yeni metin: IAP listesi + paywall/Coin Shop'a ulaşma yolu + "There are NO ads". `metadata.md`'deki kaynak da güncellendi.
+- **ASC oturumu otomasyon ortasında `/login`'e düştü** (kayıtsız notlar kayboldu, kullanıcı 2FA ile yeniden girdi). Yeni tuzaklar memory'de: Save butonu sticky header'da ıskalıyor (önce en tepeye kaydır, sonra tıkla, `zoom` ile "Saved ✓" doğrula), ~1200 karakterlik `type` renderer'ı 2-4 dk kilitliyor, oturum düşünce kayıtsız değişiklik gider → her alanı yazdıktan sonra HEMEN kaydet.
+- **🔒 IAP review screenshot ZORUNLU** (ASC: "Unable to Add for Review: You must add a Review Information screenshot"). Kilit zinciri: görsel yok → ürün *Prepare for Submission*'da kalır → StoreKit ürünü döndürmez → **uygulamada paywall/Coin Shop boş** ("Abonelik şu an kullanılamıyor" — kullanıcının cihaz görüntülerinde bu görüldü). Yani cihazdan "gerçek fiyatlı" kare çekmek submit'ten ÖNCE mümkün değildi.
+- **Çözüm — inceleme görselleri HTML'den üretildi** (`docs/app-store/screenshots/iap-review/`): `paywall.html` + `coinshop.html`, stiller `PaywallModal.tsx`/`CoinShopModal.tsx`'ten birebir (palet, radius, padding, font boyut/ağırlık), fiyatlar ASC'deki gerçek USD taban fiyatlar ($5.99/$44.99 · $1.99/$7.99/$12.99), EN metinler `en.json`'dan. `render.ps1` headless Chrome → `crop.js` (sharp) ile **1170×2532**'ye kırpıyor. Paywall karesi 3.1.2 kanıtı: fiyat + süre + otomatik yenilenme + Terms/Privacy linkleri + Restore hepsi görünür.
+  - Tuzak 1: `.benefit .txt`'e `flex:1` vermeyi atlayınca (RN'de var) en uzun satır gövdeyi genişletti → sağ taraf sessizce kırpıldı. Tuzak 2: `--window-size` bu makinede viewport'u ekran ölçeklemesine göre veriyor → sabit `.phone` kutusu + büyük pencere + sharp ile crop yapıldı.
+  - 📌 **Memory düzeltmesi**: `file_upload` disk yolu kabul ETMEZ sanılıyordu — **oturumun scratchpad klasöründeki dosyaları kabul ediyor**. PNG'ler scratchpad'e kopyalanıp 5 ürüne Claude tarafından yüklendi (kullanıcı sürüklemedi).
+- **Submission (7 item)**: iOS App 1.0 → **1.0.0 (23)** · StudySquad Pro (abonelik grubu) · pro_monthly + pro_yearly · coins_1000/5500/12000. Grup için ASC iki şart dayattı: gruptan en az bir abonelik + bir app version aynı submission'da. Sonuç: **"7 Items Submitted"**, versiyon **Waiting for Review**, inceleme 24-48 saat, onaylanınca **otomatik yayına** girer (kullanıcı kararı).
 
-**⏭️ SIRADAKİ ADIMLAR (yayın için kalan):**
-1. **Kullanıcı**: ASC'ye yeniden giriş yap (2FA).
-2. **Kullanıcı**: cihazdan 2 ekran görüntüsü → **Paywall** (Profil → 👑 Pro kartı) ve **Coin Shop** (Profil → Çerçeveler → 🪙 çipi); ASC'de her IAP'nin "Review Information → Screenshot" alanına sürükle (paywall → 2 abonelik, coin shop → 3 coin paketi).
-3. **Claude**: v1.0 review notlarını düzelt (IAP beyanı), build 10 → **23**'ü versiyona bağla, 5 IAP + versiyonu tek submission'a ekle.
-4. **Kullanıcı onayıyla**: **Submit to App Review** (yayın şekli: Automatically release).
-5. Sonra: Play Store IAP + closed testing (Android monetizasyonu hâlâ ölü); bekleyen cihaz testleri (Live Activity, screen-lock, Nebula, avatarlar, oda ekranı).
+**⏭️ SIRADAKİ ADIMLAR:**
+1. **Apple incelemesini bekle** (24-48 sa). Red gelirse en olası eksen: paywall/IAP akışı (3.1.2 linkleri build 23'te var) veya sosyal içerik/moderasyon soruları.
+2. **Cihazda doğrula (şimdi mümkün)**: ürünler artık *Waiting for Review* → StoreKit sandbox'ta dönmeli. TestFlight build 23'te paywall + Coin Shop **gerçek fiyatlarla** açılıyor mu? Açılmıyorsa RC↔StoreKit eşlemesi (offering paketleri) tekrar bakılmalı — bu, onay sonrası satın alma çalışsın diye kritik.
+3. Bekleyen cihaz testleri (build 23 ilk kez): Live Activity (Faz 21), screen-lock hatırlatması (Faz 23), Nebula TimerCircle (Faz 26), avatarlar (Faz 34), oda ekranı yenilemesi (Faz 31).
+4. Play Store IAP ürünleri + closed testing (Android monetizasyonu hâlâ ölü).
+5. Temizlik: çalışma ağacındaki kazara değişiklikler (kök `tsconfig.json`, `package.json`'daki `@types/react-native`) + Sentry'de `node` projesini yeniden adlandır.
 
 ### Faz 44 — 🎉 DONMA AVI BİTTİ: production/TestFlight build 22 TEMİZ (12 Ağustos)
 Kod değişikliği YOK · iOS build **22** (`production`, store dağıtımı, commit `ba0ca6c`, finished 12 Ağu 01:51)
@@ -824,7 +829,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). ✅ **En güncel: buildNumber 22 (12 Ağu, commit `ba0ca6c`, `production`/store) FINISHED → cihazda test edildi, DONMA YOK** (Faz 44 — av bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). 🚀 **v1.0 + 5 IAP App Review'a gönderildi (12 Ağu, build 23 = commit `2c77d35`) → "Waiting for Review", onayda otomatik yayın.** Build 22 (commit `ba0ca6c`) cihazda temizdi (Faz 44 — donma avı bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
 | Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
 | Pod pin'leri | `plugins/withPinnedMmkv.js` → MMKV + MMKVCore **2.4.0** (2.4.1 iOS 26 SDK'da derlenmiyor, Tencent/MMKV#1675). Upstream düzelince plugin silinecek |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |

@@ -1,0 +1,95 @@
+/* IAP review screenshots — faithful rebuild of the in-app purchase sheets.
+   Values copied from mobile/src/components/PaywallModal.tsx + CoinShopModal.tsx
+   (palette, radii, paddings, font sizes/weights) so the reviewer sees the same
+   screen the app renders once StoreKit returns the products. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0d0d1a;
+  --card: #131325;
+  --accent: #00d2ff;
+  --gold: #f59e0b;
+  --coin-gold: #ffd700;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --fine: #475569;
+}
+
+/* The phone frame is a fixed-size box pinned to the top-left corner: headless
+   Chrome is rendered at a larger window and the PNG is cropped to 1170x2532,
+   so the shot no longer depends on the host's display scaling. */
+body { background: #000; }
+
+.phone {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── iOS status bar ─────────────────────────────────────────────── */
+.status {
+  position: absolute; top: 0; left: 0; right: 0; height: 54px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px 0; color: #fff; font-size: 15px; font-weight: 600;
+  z-index: 5;
+}
+.status .icons { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+.bars { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
+.bars i { width: 3px; background: #fff; border-radius: 1px; display: block; }
+.bars i:nth-child(1) { height: 4px; }
+.bars i:nth-child(2) { height: 6px; }
+.bars i:nth-child(3) { height: 8px; }
+.bars i:nth-child(4) { height: 11px; }
+.batt {
+  width: 25px; height: 12px; border: 1.5px solid rgba(255,255,255,.5);
+  border-radius: 3px; position: relative; display: flex; align-items: center;
+}
+.batt::after {
+  content: ""; position: absolute; right: -3px; width: 2px; height: 4px;
+  background: rgba(255,255,255,.5); border-radius: 0 1px 1px 0;
+}
+.batt span { display: block; height: 8px; margin: 0 1.5px; background: #fff; border-radius: 1.5px; }
+
+/* ── the app screen behind the sheet (dimmed by the modal backdrop) ── */
+.behind { position: absolute; inset: 0; padding: 62px 20px 0; }
+.behind .nav { text-align: center; color: #64748b; font-size: 17px; font-weight: 700; }
+.behind .card {
+  margin-top: 22px; background: var(--card); border: 1px solid #1e1e35;
+  border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 14px;
+}
+.behind .avatar {
+  width: 58px; height: 58px; border-radius: 50%;
+  border: 2px solid var(--accent); background: #0a1622;
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.behind .name { color: var(--text); font-size: 17px; font-weight: 700; }
+.behind .sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
+.behind .section {
+  margin-top: 26px; color: var(--muted); font-size: 11px;
+  letter-spacing: 2px; font-weight: 700;
+}
+.behind .row { display: flex; gap: 12px; margin-top: 12px; }
+.behind .tile {
+  flex: 1; height: 116px; background: var(--card); border: 1px solid #1e1e35;
+  border-radius: 16px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+}
+.behind .ring { width: 52px; height: 52px; border-radius: 50%; border: 3px solid #334155; }
+.behind .tile b { color: var(--muted); font-size: 12px; font-weight: 600; }
+.behind .chip {
+  float: right; border: 1px solid rgba(255,215,0,.45); border-radius: 999px;
+  padding: 5px 12px; color: var(--coin-gold); font-size: 13px; font-weight: 700;
+}
+
+.backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+
+/* ── bottom sheet ───────────────────────────────────────────────── */
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--bg); padding: 24px;
+  border-top: 1px solid #1e1e35;
+}
