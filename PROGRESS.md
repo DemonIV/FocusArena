@@ -247,7 +247,24 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 44 — 🎉 DONMA AVI BİTTİ: production/TestFlight build 22 TEMİZ (12 Ağustos) ⭐ EN GÜNCEL
+### Faz 45 — 🍎 App Store yayın hamlesi: build 23 + IAP'ler v1.0 submission'ına hazırlanıyor (12 Ağustos) ⭐ EN GÜNCEL
+Kod değişikliği YOK (mevcut `2c77d35`) · iOS build **23** FINISHED + ASC'ye yüklendi · **submit EDİLMEDİ**
+
+- **Karar**: iOS v1.0 **5 IAP ürünüyle birlikte** gönderilecek. Gerekçe: build 22'de `appl_` RC anahtarı gömülü → paywall iOS'ta zaten AKTİF; Apple ilk abonelik/consumable'ın bir sürümle birlikte submit edilmesini şart koşuyor; 3.1.2 için yasal linkler (commit `2c77d35`) build'de olmalıydı. (Faz 27'nin "iOS v1'de IAP yok" kararı böylece geçersiz.)
+- **iOS build 23** (`4f0e20ae`, commit `2c77d35`, production/store, 12 Ağu 17:18→17:24) → auto-submit ✓ ASC'ye yüklendi (submission `8bb03b55`), Apple işlemesi bekleniyor. **İlk build ki paywall/profil yasal linkleri içeriyor.**
+- **Paywall 3.1.2 denetimi ✓**: ürün adı, süre (Aylık/Yıllık), `priceString`, otomatik yenilenme uyarısı, tıklanabilir Kullanım Şartları + Gizlilik Politikası (`LegalLinks`), "Satın alımları geri yükle" — hepsi yerinde.
+- **ASC'de yapılanlar** (tarayıcı otomasyonu): 5 IAP ürününün (pro_monthly, pro_yearly, coins_1000/5500/12000) hepsine **App Review notları** yazılıp kaydedildi (demo hesap + satın alma ekranına ulaşma yolu + coin'in ücretsiz de kazanıldığı bilgisi) → hepsinde "Add for Review" aktif. **Abonelik grubu lokalizasyonu eksikti** (grup sayfası → Localization boştu) → English (U.S.) / display name "StudySquad Pro" eklendi. Notların repo kopyası + submission checklist: `docs/app-store/iap-review.md`.
+- **🔴 Bulunan hata (DÜZELTİLMEDİ)**: v1.0 App Review notlarında **"This version contains NO in-app purchases and NO ads."** yazıyor — IAP'ler artık gönderildiği için YANLIŞ beyan. Yeni metin yazıldı ama **ASC oturumu düştüğü için KAYDEDİLEMEDİ** → tekrar yazılacak (kaynak: `docs/app-store/metadata.md` satır 113 de güncellenmeli).
+- ASC oturumu otomasyon ortasında `/login`'e düştü; Claude şifre giremez → kullanıcı yeniden giriş yapacak. Yeni tuzaklar memory'ye işlendi (Save butonu sticky header'da ıskalıyor, uzun `type` renderer'ı dakikalarca kilitliyor, oturum düşünce kayıtsız değişiklik kaybolur).
+
+**⏭️ SIRADAKİ ADIMLAR (yayın için kalan):**
+1. **Kullanıcı**: ASC'ye yeniden giriş yap (2FA).
+2. **Kullanıcı**: cihazdan 2 ekran görüntüsü → **Paywall** (Profil → 👑 Pro kartı) ve **Coin Shop** (Profil → Çerçeveler → 🪙 çipi); ASC'de her IAP'nin "Review Information → Screenshot" alanına sürükle (paywall → 2 abonelik, coin shop → 3 coin paketi).
+3. **Claude**: v1.0 review notlarını düzelt (IAP beyanı), build 10 → **23**'ü versiyona bağla, 5 IAP + versiyonu tek submission'a ekle.
+4. **Kullanıcı onayıyla**: **Submit to App Review** (yayın şekli: Automatically release).
+5. Sonra: Play Store IAP + closed testing (Android monetizasyonu hâlâ ölü); bekleyen cihaz testleri (Live Activity, screen-lock, Nebula, avatarlar, oda ekranı).
+
+### Faz 44 — 🎉 DONMA AVI BİTTİ: production/TestFlight build 22 TEMİZ (12 Ağustos)
 Kod değişikliği YOK · iOS build **22** (`production`, store dağıtımı, commit `ba0ca6c`, finished 12 Ağu 01:51)
 
 - **Kullanıcı build 22'yi aldı, cihazda test etti → DONMA YOK.** Aylardır süren av (Faz 35→43) kapandı.

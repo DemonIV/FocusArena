@@ -110,7 +110,14 @@ Thank you for reviewing StudySquad!
   requests require explicit acceptance. Day-by-day stats are visible to accepted
   friends only.
 • Account deletion is available in-app: Profile → Delete account (bottom of screen).
-• This version contains NO in-app purchases and NO ads.
+• In-app purchases submitted with this version: the "StudySquad Pro" auto-renewing
+  subscription (monthly / yearly) and three consumable coin packs. Paywall: Profile
+  tab > tap the "StudySquad Pro" card at the top. Coin Shop: Profile tab > "Frames"
+  shop section > tap the coin balance chip in its header. The paywall shows the price,
+  the subscription length, an auto-renewal notice, tappable Terms of Use and Privacy
+  Policy links and a Restore Purchases action. Everything else in the app is free, and
+  coins can also be earned by completing focus sessions.
+• There are NO ads.
 • Live Activity (lock-screen countdown) requires iOS 16.2+ and starts automatically
   with a focus session.
 • Push notifications are optional; the app is fully usable without them.
