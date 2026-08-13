@@ -33,6 +33,12 @@ export interface JwtPayload {
   sub: string;              // userId (UUID)
   email: string;
   type: 'access' | 'refresh';
+  /**
+   * Session id — one per sign-in, so the same account can stay signed in on
+   * several devices. Optional: tokens issued before multi-session support
+   * don't carry it and fall back to the legacy single-token store.
+   */
+  sid?: string;
   iat?: number;
   exp?: number;
 }

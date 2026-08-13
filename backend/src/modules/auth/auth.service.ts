@@ -69,25 +69,58 @@ export async function getUserById(userId: string): Promise<PublicUser> {
 // ─── Redis Refresh Token Store ────────────────────────────────
 
 /**
- * Persist a refresh token in Redis.
- * Key: `refresh:{userId}` — one active refresh token per user.
+ * Key for ONE sign-in session: `refresh:{userId}:{sessionId}`.
+ *
+ * Storing per session (instead of one token per user) is what lets the same
+ * account stay signed in on several devices. With a single shared key, any
+ * second sign-in silently overwrote the first device's token, and the moment
+ * that device tried to refresh, the reuse guard wiped the survivor too — both
+ * sessions dead, the app stuck on spinners forever.
+ *
+ * Tokens issued before this change carry no session id; they keep working
+ * against the legacy `refresh:{userId}` key until they expire (max 7 days).
  */
-export async function storeRefreshToken(userId: string, token: string): Promise<void> {
-  await redis.set(`refresh:${userId}`, token, 'EX', REFRESH_TTL_SECONDS);
+function refreshKey(userId: string, sessionId?: string): string {
+  return sessionId ? `refresh:${userId}:${sessionId}` : `refresh:${userId}`;
+}
+
+/** Persist a refresh token for one session. */
+export async function storeRefreshToken(
+  userId: string,
+  token: string,
+  sessionId?: string,
+): Promise<void> {
+  await redis.set(refreshKey(userId, sessionId), token, 'EX', REFRESH_TTL_SECONDS);
 }
 
 /**
- * Verify that the supplied token matches what is stored in Redis.
+ * Verify that the supplied token matches what is stored for this session.
  * Does NOT delete the token — call deleteRefreshToken when consuming.
  */
-export async function validateRefreshToken(userId: string, token: string): Promise<boolean> {
-  const stored = await redis.get(`refresh:${userId}`);
+export async function validateRefreshToken(
+  userId: string,
+  token: string,
+  sessionId?: string,
+): Promise<boolean> {
+  const stored = await redis.get(refreshKey(userId, sessionId));
   return stored !== null && stored === token;
 }
 
+/** Remove one session's refresh token (logout / rotation / reuse guard). */
+export async function deleteRefreshToken(userId: string, sessionId?: string): Promise<void> {
+  await redis.del(refreshKey(userId, sessionId));
+}
+
 /**
- * Remove the refresh token from Redis (logout / token rotation).
+ * Remove every session of a user (account deletion). Uses SCAN rather than
+ * KEYS so a growing key space never blocks Redis.
  */
-export async function deleteRefreshToken(userId: string): Promise<void> {
-  await redis.del(`refresh:${userId}`);
+export async function deleteAllRefreshTokens(userId: string): Promise<void> {
+  const pattern = `refresh:${userId}*`;
+  let cursor = '0';
+  do {
+    const [next, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+    cursor = next;
+    if (keys.length > 0) await redis.del(...keys);
+  } while (cursor !== '0');
 }

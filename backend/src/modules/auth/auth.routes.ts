@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type {
   FastifyPluginAsync,
   FastifyRequest,
@@ -18,6 +19,7 @@ import {
   storeRefreshToken,
   validateRefreshToken,
   deleteRefreshToken,
+  deleteAllRefreshTokens,
   deleteAuthUser,
 } from './auth.service';
 import { track } from '../../shared/observability';
@@ -60,8 +62,12 @@ export const authGuard: preHandlerHookHandler = async (
 export const authRoutes: FastifyPluginAsync = async (fastify) => {
   // ── Helpers ──────────────────────────────────────────────────
 
-  function signTokenPair(userId: string, email: string) {
-    const base = { sub: userId, email };
+  /**
+   * Sign an access/refresh pair for ONE session. Every sign-in gets its own
+   * session id so devices don't evict each other (see storeRefreshToken).
+   */
+  function signTokenPair(userId: string, email: string, sessionId: string) {
+    const base = { sub: userId, email, sid: sessionId };
     const accessToken = fastify.jwt.sign(
       { ...base, type: 'access' } satisfies Omit<JwtPayload, 'iat' | 'exp'>,
       { expiresIn: ACCESS_TTL },
@@ -89,8 +95,9 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
       const authUser = await createAuthUser(email, password, username);
       // The DB trigger `handle_new_user` has already created the users-table row.
       const user = await getUserById(authUser.id);
-      const { accessToken, refreshToken } = signTokenPair(user.id, user.email);
-      await storeRefreshToken(user.id, refreshToken);
+      const sid = randomUUID();
+      const { accessToken, refreshToken } = signTokenPair(user.id, user.email, sid);
+      await storeRefreshToken(user.id, refreshToken, sid);
 
       track(user.id, 'user_registered', { username: user.username });
 
@@ -121,8 +128,11 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       const authUser = await signInUser(email, password);
       const user = await getUserById(authUser.id);
-      const { accessToken, refreshToken } = signTokenPair(user.id, user.email);
-      await storeRefreshToken(user.id, refreshToken);
+      // A fresh session per sign-in — never touches the sessions this account
+      // already has on other devices.
+      const sid = randomUUID();
+      const { accessToken, refreshToken } = signTokenPair(user.id, user.email, sid);
+      await storeRefreshToken(user.id, refreshToken, sid);
 
       return reply.send({ accessToken, refreshToken, user });
     } catch (err: unknown) {
@@ -156,20 +166,28 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.code(401).send({ error: 'Unauthorized', message: 'Invalid token type' });
       }
 
-      // 2. Compare against Redis (token rotation guard)
-      const isValid = await validateRefreshToken(payload.sub, refreshToken);
+      // 2. Compare against Redis (token rotation guard), scoped to this session
+      const isValid = await validateRefreshToken(payload.sub, refreshToken, payload.sid);
       if (!isValid) {
-        // Possible token reuse attack — wipe the stored token
-        await deleteRefreshToken(payload.sub);
+        // Possible reuse — revoke ONLY this session. Wiping every session here
+        // is what used to let one stale device kill the account's live logins.
+        await deleteRefreshToken(payload.sub, payload.sid);
         return reply.code(401).send({
           error: 'Unauthorized',
           message: 'Refresh token is invalid or has already been used',
         });
       }
 
-      // 3. Issue new pair and rotate Redis entry
-      const { accessToken: newAccess, refreshToken: newRefresh } = signTokenPair(payload.sub, payload.email);
-      await storeRefreshToken(payload.sub, newRefresh);
+      // 3. Issue a new pair and rotate the entry, keeping the same session.
+      //    Legacy tokens (no sid) are migrated onto a session key here.
+      const sid = payload.sid ?? randomUUID();
+      const { accessToken: newAccess, refreshToken: newRefresh } = signTokenPair(
+        payload.sub,
+        payload.email,
+        sid,
+      );
+      await storeRefreshToken(payload.sub, newRefresh, sid);
+      if (!payload.sid) await deleteRefreshToken(payload.sub);
 
       return reply.send({ accessToken: newAccess, refreshToken: newRefresh });
     } catch {
@@ -180,7 +198,8 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
   // ── POST /logout ──────────────────────────────────────────────
 
   fastify.post('/logout', { preHandler: authGuard }, async (request, reply) => {
-    await deleteRefreshToken(request.user.sub);
+    // Sign out this device only — other devices keep their sessions.
+    await deleteRefreshToken(request.user.sub, request.user.sid);
     return reply.send({ message: 'Logged out successfully' });
   });
 
@@ -192,14 +211,15 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       track(userId, 'account_deleted');
       await deleteAuthUser(userId);
-      await deleteRefreshToken(userId);
+      // Every device, not just the one that asked.
+      await deleteAllRefreshTokens(userId);
       return reply.send({ message: 'Account deleted' });
     } catch (err: unknown) {
       // Already gone (double-tap / retry with a still-valid JWT) — the
       // desired end state holds, so report success instead of a 500.
       const msg = err instanceof Error ? err.message : '';
       if (/user not found/i.test(msg)) {
-        await deleteRefreshToken(userId);
+        await deleteAllRefreshTokens(userId);
         return reply.send({ message: 'Account deleted' });
       }
       request.log.error(err, 'account deletion failed');
