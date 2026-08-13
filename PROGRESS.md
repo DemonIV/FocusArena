@@ -247,7 +247,19 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 45 — 🚀 APP STORE'A GÖNDERİLDİ: v1.0 + 5 IAP, build 23 (12 Ağustos) ⭐ EN GÜNCEL
+### Faz 46 — 🩺 "DONMA"NIN GERÇEK SEBEBİ BULUNDU: tek-token oturum tasarımı (13 Ağustos) ⭐ EN GÜNCEL
+`3e26b35` · sadece backend · Fly deploy ✓ · canlıda doğrulandı ✓ · **yeni mobil build GEREKMEDİ**
+
+- **Şikayet**: build 23'te "yine donma, aynı kısımlar". Ama build 22 ile aradaki tek kod farkı yasal linkler commit'iydi (bir import + bir `<LegalLinks/>`) — donmayı açıklayamaz.
+- **Semptomun doğru okunuşu** (kullanıcı ifadesi): sekmeler açılıyor, kaydırma çalışıyor → **JS thread YAŞIYOR**; ama tüm veri bölümleri sonsuz "loading", timer'da animasyon dönüyor **sayı ilerlemiyor** (animasyon native, sayaç JS+ağ), force-quit düzeltmiyor. ⇒ "donma" değil, **isteklerin tamamlanmaması**.
+- **Kanıt zinciri**: `/health` 1.2 sn sabit · testalpha1 ile 18 uç 200 (monthly dahil) · veri hacmi küçük (max 27 seans) ⇒ sunucu sağlıklı. **Fly logları**: cihazdan giden HER istek **401**, `POST /auth/refresh` dahil. Redis'te `refresh:*` sadece 1 anahtar.
+- **🔴 KÖK NEDEN**: `auth.service.ts` refresh token'ı **`refresh:{userId}` — kullanıcı başına TEK anahtar**da tutuyordu. (1) İkinci bir giriş (başka cihaz/simülatör/API testi) birincinin token'ını **eziyor**; eski cihaz 15 dk sonra (access TTL) her istekte 401 alıyor. (2) Daha kötüsü — eski cihaz refresh deneyince `auth.routes.ts` reuse guard'ı **saklı token'ı komple siliyordu**, yani *hayattaki* oturumu da öldürüyordu → "düzeltiyorum, biraz sonra yine bozuluyor" döngüsü. Aylardır kovalanan aralıklı "donma" tablosunun mekanizması bu; build 22'nin temiz çıkması da şanstı.
+- **Düzeltme** (`3e26b35`): `refresh:{userId}:{sessionId}` + JWT'ye opsiyonel **`sid`** claim'i. Reuse guard artık **yalnız o oturumu** iptal ediyor; logout yalnız o cihazı çıkarıyor; hesap silme SCAN ile tüm oturumları temizliyor. **Geriye uyumlu**: `sid` taşımayan eski token'lar legacy anahtarla çalışmaya devam ediyor ve ilk refresh'te yeni şemaya taşınıyor → kimse zorla çıkış yapmıyor. **Mobil değişiklik gerekmedi** (sid token'ın içinde) ⇒ App Store'a yeniden gönderim yok.
+- **Canlı doğrulama**: iki giriş → iki ayrı Redis anahtarı; ikisi de refresh edebiliyor (200/200); rotasyona uğramış eski token → 401; ardından diğer oturum hâlâ 200 (domino kırıldı).
+- **⚠️ Açık kalan 2 madde**: (1) **Fly cold start** — `fly.toml`'da `min_machines_running = 0`; loglarda `autostopping machine` → uyanırken `instance refused connection` → `failed to connect to machine: gave up after 15 attempts (8 sn)`. Uygulama açılışta ~12 isteği aynı anda atıyor, `retry: 1` ile ikisi de bu pencereye düşüyor ⇒ **aynı boş-ekran tablosunu tek başına üretebilir**. Çözüm: `min_machines_running = 1` (küçük aylık ücret) + istemcide ağ hatasına özel backoff. Kullanıcı onayı bekliyor. (2) Oturum ölünce istemci **Login'e atmalıydı** (`refreshAccessToken` → `clearAuth`), kullanıcı atılmadığını bildirdi → doğrulanıp düzeltilecek; bu mobil taraf olduğu için yeni build ister.
+- 📌 **İnceleme kuralı**: Apple hakemi `testalpha1` ile girecek. Düzeltmeden sonra oturumlar birbirini öldürmüyor, ama gereksiz risk almamak için inceleme bitene kadar o hesapla giriş yapılmayacak.
+
+### Faz 45 — 🚀 APP STORE'A GÖNDERİLDİ: v1.0 + 5 IAP, build 23 (12 Ağustos)
 Kod değişikliği YOK (mevcut `2c77d35`) · iOS build **23** · **7 item submit edildi → "1.0 Waiting for Review"** · yayın: **Automatically release**
 
 - **Karar**: iOS v1.0 **5 IAP ürünüyle birlikte** gönderilecek. Gerekçe: build 22'de `appl_` RC anahtarı gömülü → paywall iOS'ta zaten AKTİF; Apple ilk abonelik/consumable'ın bir sürümle birlikte submit edilmesini şart koşuyor; 3.1.2 için yasal linkler (commit `2c77d35`) build'de olmalıydı. (Faz 27'nin "iOS v1'de IAP yok" kararı böylece geçersiz.)
