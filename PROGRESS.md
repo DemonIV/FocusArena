@@ -247,7 +247,19 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 46 — 🩺 "DONMA"NIN GERÇEK SEBEBİ BULUNDU: tek-token oturum tasarımı (13 Ağustos) ⭐ EN GÜNCEL
+### Faz 47 — 💳 ASC ödeme kurulumu: sözleşme, banka, vergi, DSA (12–13 Ağustos) ⭐ EN GÜNCEL
+Kod değişikliği YOK · tamamı App Store Connect panelinde · **bitmeden Apple ödeme YAPAMAZ**
+
+- **Tetikleyen soru**: "abonelik parası nereye düşecek?" → ASC → Business bakıldı: **Ücretsiz Uygulamalar Sözleşmesi Aktif, Ücretli Uygulamalar Sözleşmesi "New"** (imzasız) idi. Yani IAP'ler onaylansa bile satılamaz, tahsilat olmaz.
+- **Para akışı (referans)**: Apple tahsil eder (TR satışlarında KDV'yi de o hesaplar) → komisyon **%30**, Small Business Program'a kabul edilirse **%15** → aylık dönem kapanışından ~30-35 gün sonra **havale**. Bölgesel alt eşik (~150 $ karşılığı) altında kalan tutar devreder. RevenueCat paraya dokunmaz (yalnız makbuz doğrulama/analitik). Rapor: ASC → Payments and Financial Reports.
+- **Kullanıcının tamamladıkları**: Legal Entity (Individual, adres) · **Ücretli Uygulamalar Sözleşmesi** (12 Ağu 2026 – 7 Tem 2027, durum **"Bekleyen Kullanıcı Bilgileri"**) · **banka hesabı** eklendi: Türkiye Halk Bankası (1208), **banka para birimi TRY, telif para birimi USD**, durum "Processing" (24 sa) — yani Apple USD gönderir, banka TL'ye çevirir (kur/masraf bankayla konuşulmalı).
+- **Kalan adımlar (kullanıcıda)**:
+  - **Kimlik doğrulama**: "Name Identification Document" — şirket/mahkeme belgesi isteniyor ama Individual için karşılığı kimlik. Belge dili listesinde **Türkçe YOK** → İngilizce (UK/ABD arasında pratik fark yok) → **pasaport** ideal (iki dilli); ehliyet/TC kimlik alternatif. PDF/JPEG/PNG, max 10 MB, **başlık/kapak/filigran EKLEME** (düzenlenmiş görünür), dört köşe görünsün, ad ASC'deki "Alperen Torun" ile birebir aynı olsun.
+  - **W-8BEN**: 5 (ABD TIN) boş · **6.a = TCKN** (boşsa anlaşma talebi geçersiz sayılabilir) · 8 doğum tarihi **AA-GG-YYYY** · Bölüm II **satır 9 işaretlenmeli** (Türkiye mukimi; işaretlenmezse ABD kaynaklı gelirde %30 stopaj) · **satır 10 bir bütün** (madde/paragraf + oran + "Uygulama satışından elde edilen gelir" radyosu) — ya hepsi ya hiçbiri; madde/oran **mali müşavire** sorulacak. Gönderdikten sonra form düzenlenemiyor ama **yeni form gönderilebiliyor** (formun kendi metni 30 gün içinde yeni form taahhüdü içeriyor). Geçerlilik: imza yılı + 3 takvim yılı.
+  - **DSA trader beyanı**: ASC Türkçesinde "trader" **"yatırımcı"** diye yanlış çevrilmiş. IAP sattığı için **trader** seçilmeli; seçilmezse **AB'nin 27 ülkesinde listelenmez**. Trader seçilince **ad/adres/telefon/e-posta AB ürün sayfasında herkese açık** görünür (e-posta/telefon doğrulama kodu ister) → yayınlanacak e-posta için `studysquad.app` alan adı alınıp `support@…` kullanılması önerildi.
+  - **Small Business Program** başvurusu (%15).
+
+### Faz 46 — 🩺 "DONMA"NIN GERÇEK SEBEBİ BULUNDU: tek-token oturum tasarımı (13 Ağustos)
 `3e26b35` · sadece backend · Fly deploy ✓ · canlıda doğrulandı ✓ · **yeni mobil build GEREKMEDİ**
 
 - **Şikayet**: build 23'te "yine donma, aynı kısımlar". Ama build 22 ile aradaki tek kod farkı yasal linkler commit'iydi (bir import + bir `<LegalLinks/>`) — donmayı açıklayamaz.
@@ -834,7 +846,9 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Bileşen | Durum |
 |---------|-------|
 | Marka | **StudySquad** · Android paketi `com.studysquad.app` · **iOS bundle `com.studysquadhq.app`** (com.studysquad.app başka hesapta kayıtlı) · Play başlığı: "StudySquad: Study w/ Friends" |
-| Backend | Fly.io — https://focusarena.fly.dev (/health 200, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez) |
+| Backend | Fly.io — https://focusarena.fly.dev (/health 200 ~1.2 sn, tüm cron'lar zamanlı; URL dahili, kullanıcı görmez). ⚠️ `min_machines_running = 0` → trafik yokken makine durur, uyanırken ilk ~8 sn'deki istekleri proxy düşürür (Faz 46) |
+| Oturum modeli | ✅ **Oturum başına refresh token**: `refresh:{userId}:{sessionId}` + JWT `sid` claim'i (Faz 46). Çoklu cihaz güvenli; reuse guard yalnız o oturumu iptal eder. Access 15 dk / refresh 7 gün |
+| Ödeme (Apple) | ⏳ Ücretli Uygulamalar Sözleşmesi **"Bekleyen Kullanıcı Bilgileri"** · banka: Halkbank TRY hesap / USD telif (Processing) · **kalan: kimlik doğrulama + W-8BEN + DSA trader beyanı** (Faz 47) |
 | DB | ✅ **Supabase Frankfurt (eu-central-1)**, ref `diswgpruuysfkrzlilrk` — pooler `aws-0-eu-central-1.pooler.supabase.com`, user `postgres.diswgpruuysfkrzlilrk` (direkt host IPv6-only, hep pooler kullan). Eski Sydney projesi geri dönüş için duruyor |
 | Migration'lar | 002–018 hepsi uygulandı ✓ (013 = focus_score, 014 = weekly_goal_claims, 015 = users.selected_title, 016 = users.utc_offset_minutes, 017 = users.selected_avatar, 018 = sessions.target_minutes) |
 | EAS | preview APK/IPA'lar ✓; **`preview` + `production` ortamlarının ikisi de dolu** (Sentry DSN, PostHog key+host, RC iOS `appl_` + Android `goog_`) — doğrulandı 12 Ağu. **Boş olan `development` ortamı** (Faz 43 build 20 bu yüzden anahtarsız çıktı) |
@@ -850,22 +864,23 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 ## 🔜 Sıradaki Adımlar
 
-> ✅ **DONMA AVI BİTTİ — bkz Faz 44 (12 Ağustos).** Build 22 (production/TestFlight) cihazda temiz; suçlu Faz 39'da düzeltilen SDK/paket matrisiymiş. Bu eksende yeni kazı YOK. Sıradaki işler Faz 44'ün listesinde + aşağıda.
+> 🚀 **v1.0 + 5 IAP App Review'da (Faz 45).** 🩺 **"Donma"nın kök nedeni bulundu ve canlıda düzeltildi (Faz 46)** — tek-token oturum tasarımıydı, kod/SDK değil.
 
-**Sonraki oturumun ilk işleri (Claude):** — bkz ⭐ "Oturum Özeti 2026-07-11" (BUILD DURUMU)
-1. ✅ ~~TAZE iOS + Android build al~~ — atıldı (Android `592d10f0`, iOS `50f40c6d`). **Build sonuçlarını kontrol et**; iOS bittiyse **elle submit**: `cd mobile && npx eas-cli submit -p ios --latest` (interaktif, 2FA isteyebilir). Kalıcı fix: ascAppId'yi eas.json submit profiline yaz.
-2. **Cihaz test geri bildirimlerini topla** → iterasyon: özellikle **Live Activity** (iOS, kaprisli olabilir) + **screen-lock hatırlatması** (iOS best-effort; kilitte yanlış tetik olursa v2 Darwin sinyali; Android güvenilir mi) + **pomodoro auto-start/titreşim** (Faz 24). Ayrıca Faz 14/15/16/18 UI'ları ilk kez cihazda.
-3. Kalan küçük bug: onboarding **Skip butonu çalışmıyor**.
-4. Aynı env'leri **production** ortamına da ekle → production AAB build (Play için).
-5. Gizlilik politikası metnini hazırla (Sentry/PostHog/RC veri işleme dahil). Push teslimatı gerçek cihaz + muhtemel FCM kurulumu gerektiriyor.
+**Sonraki oturumun ilk işleri (Claude):**
+1. **Apple inceleme sonucunu kontrol et** (ASC → 1.0 durumu). Onaylanırsa otomatik yayına girer. Red gelirse gerekçeyi Faz 45/46 bağlamında oku.
+2. **Fly cold start** (kullanıcı onayı bekliyor): `fly.toml` → `min_machines_running = 1` + istemcide ağ hatasına özel backoff (`retry: 2-3`, artan gecikme). Makine uykudayken açılıştaki ~12 istek düşüyor ve aynı boş-ekran tablosunu üretiyor; **hakem uykudaki makineye denk gelirse red riski**.
+3. **İstemci toparlanması**: oturum ölünce `clearAuth()` → Login'e atmalı; kullanıcı atmadığını bildirdi. Doğrula (`refreshAccessToken` → `api.setOnRefresh` kaydı gerçekten yapılıyor mu) ve düzelt; ekranlarda sonsuz spinner yerine "Tekrar dene" hatası göster. **Yeni build ister** → incelemeden sonra.
+4. Bekleyen cihaz testleri (build 23 ile ilk kez): Live Activity (Faz 21), screen-lock hatırlatması (Faz 23), Nebula TimerCircle (Faz 26), avatarlar (Faz 34), oda ekranı (Faz 31), iOS IAP/paywall.
+5. Kalan küçük bug: onboarding **Skip butonu** (kullanıcı düzelttiğini söyledi ama git'te değişiklik yok — bir sonraki build'de doğrula).
+6. Çalışma ağacı temizliği: kök `tsconfig.json` + `package.json`'daki `@types/react-native` (kazara, expo-doctor'ı kırar).
+7. Sentry temizliği: `node` projesini `studysquad-mobile` diye yeniden adlandır, kullanılmayan `react-native` projesini kapat.
 
 **Kullanıcı tarafında bekleyenler:**
-4. Play Console kimlik doğrulama sonucu → uygulama oluştur (`com.studysquad.app`) → **closed testing** track'ine AAB + **12 testçi e-postası** (14 gün kullanım şartı — testçileri şimdiden topla!).
-5. Play Console'da IAP ürünleri: Pro abonelik (monthly/yearly + **free trial offer**) + coin paketleri (`coins_1000/5500/12000`).
-6. RC'ye service account JSON bağla + ürünleri eşle + **"coins" offering** oluştur.
-7. `studysquad.app` domain'ini al (~15$/yıl).
-8. **Apple**: ✅ hesap onaylı + ASC uygulaması + ilk build. Kalan: yeni ikonlu build TestFlight'ta işlensin → iPhone'da test (özellikle **push**) → sonra ASC sözleşme/banka/vergi + iOS IAP ürünleri + **RevenueCat iOS `appl_` anahtarı** (IAP kurulunca) + App Privacy → public review. Not: iOS bundle `com.studysquadhq.app`.
-9. Yayın sonrası fikirler: günlük görevler, ligler, pet besleme, Arena Pass.
+1. **ASC ödeme kurulumu** (Faz 47 akışı): ✅ Legal Entity + Ücretli Uygulamalar Sözleşmesi (12 Ağu–7 Tem 2027, durum "Bekleyen Kullanıcı Bilgileri") + banka hesabı eklendi (Halkbank, TRY hesap / USD telif, "Processing"). **Kalan**: kimlik belgesi doğrulaması (ehliyet/pasaport, dil İngilizce), **W-8BEN vergi formu** (6.a TCKN + Bölüm II satır 9; satır 10 mali müşavire), **DSA trader beyanı** (AB'de dağıtım için zorunlu; ad/adres/telefon/e-posta ürün sayfasında herkese açık görünür). Bunlar bitmeden Apple ödeme yapamaz.
+2. **Small Business Program** başvurusu → komisyon %30 yerine %15.
+3. Play Console: kimlik doğrulama → uygulama (`com.studysquad.app`) → closed testing (12 testçi × 14 gün) + IAP ürünleri + RC service account JSON + "coins" offering.
+4. `studysquad.app` domain'i (~15$/yıl) — paylaşım kartlarında ve DSA e-postasında işe yarar.
+5. Yayın sonrası fikirler: günlük görevler, ligler, pet besleme, Arena Pass.
 
 > **Not (Claude için):** Yeni oturuma başlarken güncel durumu görmek için önce bu dosyayı oku; oturum sonunda yapılanları ve sıradaki adımları buraya işle.
 
