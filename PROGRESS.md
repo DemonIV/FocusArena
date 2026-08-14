@@ -247,7 +247,18 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 47 — 💳 ASC ödeme kurulumu: sözleşme, banka, vergi, DSA (12–13 Ağustos) ⭐ EN GÜNCEL
+### Faz 48 — 🔴 Guideline 2.1 reddi: cevap + ekran kaydı (14–15 Ağustos) ⭐ EN GÜNCEL — YARIM
+Kod değişikliği YOK · **yeni build GEREKMEZ** · Apple sadece ekran kaydı + yazılı bilgi istedi
+
+- **Red (14 Ağu)**: "Guideline 2.1 - Information Needed". Hata/çökme bulunmadı; 8 maddelik bilgi listesi istendi (ekran kaydı, test cihazları, uygulama tanımı, erişim yönergeleri, dış servisler, bölgesel farklar, düzenlenmiş sektör, IAP'ler). Cevap `docs/app-store/review-reply-2.1.md` bölüm A'da hazırlanmıştı.
+- **Karakter sınırı sürprizi**: ASC'de tarayıcıdan ölçüldü — Resolution Center reply kutusu ve App Review Information → Notes alanı **ikisi de 4000 karakter**. Hazır metin **7810** karakterdi. İçerik kaybetmeden **3942 karaktere** sıkıştırıldı → dosyada **bölüm A2**, yapıştırılacak olan bu.
+- **Yükleme yerleri doğrulandı** (bölüm B2): Resolution Center'daki **Attach File** çoklu dosya ve tür kısıtsız; App Review Information → Attachment tek dosya; vitrin ekran görüntüleri zaten yüklü (8 adet, 6.5"). **Cevap gönderildikten sonra ek eklenemiyor** → önce dosya hazır olmalı.
+- **Kullanıcı kaydı çekti**: 3 dk 11 sn ekran kaydı + 16 ekran görüntüsü (iPhone 14 Pro / iOS 26.6).
+- 🔴 **Tıkanan nokta — video kalitesi**: kayıt bilgisayara WhatsApp'la aktarıldığı için `ffprobe` ile **384×848** çıktı (orijinal 1179×2556). Bu çözünürlükte hakem paywall'daki fiyatı/abonelik süresini/Terms linklerini okuyamaz → ikinci red riski. **Gönderilmedi.**
+- **USB/MTP çıkmazı** (bölüm B3): iPhone'da `DCIM` yok, `Internal Storage` altında `202511_a` tarzı klasörler var ve **klasör adı dosya tarihini vermiyor**. iCloud "Depolamayı Optimize Et" yüzünden 39 klasörün 5'i dolu (251 dosya, en yenisi 2 Ağu) — bugünkü kayıt kabloyla görünmüyor. Kullanıcı iCloud alanı satın aldı ama **bu tek başına orijinalleri cihaza indirmiyor**. Önerilen: iCloud.com'dan indir ya da Drive/OneDrive ile aktar.
+- **Devam**: kullanıcı orijinalin yolunu verecek → doğrula, gerekirse ffmpeg ile küçült, ASC'ye yerleştir, onayla gönder.
+
+### Faz 47 — 💳 ASC ödeme kurulumu: sözleşme, banka, vergi, DSA (12–13 Ağustos)
 Kod değişikliği YOK · tamamı App Store Connect panelinde · **bitmeden Apple ödeme YAPAMAZ**
 
 - **Tetikleyen soru**: "abonelik parası nereye düşecek?" → ASC → Business bakıldı: **Ücretsiz Uygulamalar Sözleşmesi Aktif, Ücretli Uygulamalar Sözleşmesi "New"** (imzasız) idi. Yani IAP'ler onaylansa bile satılamaz, tahsilat olmaz.
@@ -855,7 +866,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). 🚀 **v1.0 + 5 IAP App Review'a gönderildi (12 Ağu, build 23 = commit `2c77d35`) → "Waiting for Review", onayda otomatik yayın.** Build 22 (commit `ba0ca6c`) cihazda temizdi (Faz 44 — donma avı bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). 🔴 **v1.0 + 5 IAP gönderildi (12 Ağu, build 23 = commit `2c77d35`) → 14 Ağu **Guideline 2.1 ile reddedildi** (kod hatası yok, bilgi/ekran kaydı isteniyor — Faz 48). Cevap hazır, video orijinali bekleniyor.** Build 22 (commit `ba0ca6c`) cihazda temizdi (Faz 44 — donma avı bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
 | Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
 | Pod pin'leri | `plugins/withPinnedMmkv.js` → MMKV + MMKVCore **2.4.0** (2.4.1 iOS 26 SDK'da derlenmiyor, Tencent/MMKV#1675). Upstream düzelince plugin silinecek |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
@@ -864,10 +875,14 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 ## 🔜 Sıradaki Adımlar
 
-> 🚀 **v1.0 + 5 IAP App Review'da (Faz 45).** 🩺 **"Donma"nın kök nedeni bulundu ve canlıda düzeltildi (Faz 46)** — tek-token oturum tasarımıydı, kod/SDK değil.
+> 🔴 **v1.0 Guideline 2.1 ile reddedildi (Faz 48) — kod hatası yok, Apple ekran kaydı + 8 maddelik bilgi istiyor. Cevap metni hazır (3942 karakter), ekran kaydının ORİJİNALİ bekleniyor.** 🩺 **"Donma"nın kök nedeni bulundu ve canlıda düzeltildi (Faz 46)** — tek-token oturum tasarımıydı, kod/SDK değil.
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. **Apple inceleme sonucunu kontrol et** (ASC → 1.0 durumu). Onaylanırsa otomatik yayına girer. Red gelirse gerekçeyi Faz 45/46 bağlamında oku.
+1. 🔴 **Guideline 2.1 cevabını gönder** (Faz 48, yarım kaldı). Kullanıcı ekran kaydının **orijinalini** bilgisayara çıkarıp yolunu verecek. Yapılacaklar sırayla:
+   - Videoyu `ffprobe` ile doğrula — **genişlik ≥ 1080 olmalı**. (Elde duran `Downloads\iphonee\WhatsApp Video ....mp4` **384×848**, kullanılamaz; WhatsApp ezmiş.) Gerekirse ffmpeg ile 720×1560 / ~50 MB'a indir.
+   - ASC → App Review → 12 Ağu gönderimi → en alt → **Reply to App Review** → `docs/app-store/review-reply-2.1.md` **A2 metnini** (3942 karakter) yaz + **Attach File** ile video + `Downloads\iphonee\` içindeki 16 ekran görüntüsünü ekle. **Gönderdikten sonra ek eklenemiyor.**
+   - Aynı metni App Store → 1.0 → **App Review Information → Notes** alanına da yaz (mevcut 1214 karakter temizlenecek).
+   - Gönderimi **kullanıcı onayıyla** yap. Detaylar/tuzaklar: `docs/app-store/review-reply-2.1.md` bölüm B2–B3–D.
 2. **Fly cold start** (kullanıcı onayı bekliyor): `fly.toml` → `min_machines_running = 1` + istemcide ağ hatasına özel backoff (`retry: 2-3`, artan gecikme). Makine uykudayken açılıştaki ~12 istek düşüyor ve aynı boş-ekran tablosunu üretiyor; **hakem uykudaki makineye denk gelirse red riski**.
 3. **İstemci toparlanması**: oturum ölünce `clearAuth()` → Login'e atmalı; kullanıcı atmadığını bildirdi. Doğrula (`refreshAccessToken` → `api.setOnRefresh` kaydı gerçekten yapılıyor mu) ve düzelt; ekranlarda sonsuz spinner yerine "Tekrar dene" hatası göster. **Yeni build ister** → incelemeden sonra.
 4. Bekleyen cihaz testleri (build 23 ile ilk kez): Live Activity (Faz 21), screen-lock hatırlatması (Faz 23), Nebula TimerCircle (Faz 26), avatarlar (Faz 34), oda ekranı (Faz 31), iOS IAP/paywall.
