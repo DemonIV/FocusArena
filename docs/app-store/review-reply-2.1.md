@@ -22,10 +22,11 @@ shop with in-app purchase details, the push-notification permission prompt, and
 account deletion.
 
 2) DEVICES AND OS VERSIONS TESTED
-- iPhone <MODEL>, iOS <VERSION> — physical device, build 23 via TestFlight (primary
-  test device; the attached screen recording was captured on it)
-- iPhone <MODEL 2>, iOS <VERSION 2> — <sil veya doldur>
-- iOS Simulator (iPhone 16 Pro, iOS 18) — used during development only
+- iPhone 14 Pro, iOS 26.6 — physical device, build 23 installed via TestFlight.
+  This is our primary test device and the attached screen recording was captured
+  on it.
+- iOS Simulator (iPhone 16 Pro) — used during development only, not for release
+  verification.
 The app is iPhone-only (supportsTablet is false) and requires iOS 15.1 or later.
 The Live Activity / lock-screen countdown requires iOS 16.2 or later; on older
 versions the rest of the app works normally and no Live Activity is started.
