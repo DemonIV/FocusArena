@@ -278,30 +278,62 @@ Telefon takılı değilse/kilitliyse `Apple iPhone` "This PC" altında hiç gör
 
 ---
 
+## B4) ⚠️ Eksik ekran görüntüleri — çekilmesi gereken 5 kare (18 Ağustos'ta tespit edildi)
+
+`C:\Users\alper\Downloads\iphonee\` altındaki 16 görüntü (945×2048) incelendi. Kapsadıkları:
+login, ana sayfa (donut + haftalık grafik), timer (klasik / pomodoro ayarları / çalışırken /
+mola), sıralama (küresel + Ülke Savaşları), odalar (liste + oda kur + oda detayı), arkadaş
+listesi, profil (Pro kartı + streak heatmap, istatistikler + coin bakiyesi, avatarlar +
+ünvanlar, ayarlar + "Hesabı Sil" butonu).
+
+**Ama Apple'ın red mektubunda özellikle sorduğu şu ekranlar YOK:**
+
+| # | Çekilecek kare | Neden gerekli | Nasıl ulaşılır |
+|---|---|---|---|
+| A | **Paywall (tam)** — fiyat, "Aylık/Yıllık", otomatik yenilenme yazısı, Kullanım Şartları + Gizlilik linkleri, "Satın alımları geri yükle" **hepsi tek karede** | Madde 8 + Guideline 3.1.2'nin tam konusu | Profil → üstteki 👑 **StudySquad Pro** kartı. Sığmazsa 2 kare çek (üst/alt) |
+| B | **Coin Shop** — 3 paket + fiyatları | Madde 8 (consumable'lar) | Profil → "Çerçeve Mağazası" → 🪙 bakiye çipi (1.300 yazan) |
+| C | **Engelleme (Block) akışı** | Apple UGC için ayrıca istedi; Notes'ta "users can block other users" yazıyor, kanıt lazım | Arkadaşlar → `testbeta2` satırını aç → Engelle seçeneği görünsün |
+| D | **Push izin istemi** (iOS'un sistem dialogu) | Madde 4 — "hangi izinler isteniyor" | Uygulamayı yeni hesapla aç / izni sıfırla → istem çıkınca kare al |
+| E | **Hesap silme onay ekranı** (iki aşamalı onayın 2. adımı) | Elimizde sadece "Hesabı Sil" butonu var, onay ekranı yok | Profil → en alt → Hesabı Sil → onay ekranını göster, **son adımı ONAYLAMA** |
+
+Bu 5 kare olmadan gönderim yapılırsa ikinci red riski yüksek — çünkü cevap metni bunları
+anlatıyor ama görsel kanıt yok, videonun kendisi de okunmaz çözünürlükte (B3).
+
+---
+
 ## C) Gönderim öncesi kontrol listesi
 
 - [ ] `fly.toml` → `min_machines_running = 1` deploy edildi (hakem uykudaki makineye denk gelmesin)
 - [x] Metindeki `<MODEL>` / `<VERSION>` yer tutucuları dolduruldu (iPhone 14 Pro / iOS 26.6)
 - [x] Ekran kaydı çekildi (3 dk 11 sn) + 16 ekran görüntüsü
 - [ ] **Kaydın ORİJİNALİ** (1179×2556) telefondan çıkarıldı — WhatsApp sürümü 384×848, kullanılamaz (bkz. B3)
+- [ ] **Eksik 5 ekran görüntüsü çekildi** (paywall, coin shop, block, push izni, hesap silme onayı — bkz. B4)
 - [ ] A2 metni (3942 karakter) Resolution Center reply kutusuna yazıldı
-- [ ] A2 metni **App Review Information → Notes** alanına da yapıştırıldı (Apple "future submissions" için istedi)
+- [x] A2 metni **App Review Information → Notes** alanına yapıştırıldı ve kaydedildi (18 Ağustos 2026, 3942/4000, "✓ Saved" doğrulandı — eski 1214 karakterlik metnin yerine geçti)
 - [x] Demo hesap bilgileri güncel: `testalpha1@studysquad.test` / `Passw0rd123`
+- [x] 16 görüntü inceleme sırasına göre adlandırıldı (`01-login-screen.jpg` … `16-profile-settings-delete-account.jpg`), yükleme için scratchpad'de hazır
 - [ ] Video + ekran görüntüleri **Attach File** ile eklendi (gönderdikten sonra ek eklenemiyor!)
 - [ ] Resolution Center'a cevap gönderildi → durum tekrar "Waiting for Review"
 
 ---
 
-## D) Oturum durumu — 14/15 Ağustos 2026
+## D) Oturum durumu — 18 Ağustos 2026
 
-**Tamamlanan:** Cevap metni 4000 karaktere sığdırıldı (A2). ASC'deki 4 yükleme yeri
-tarayıcıdan doğrulandı (B2). Ekran kaydı + 16 görüntü çekildi.
+**Tamamlanan:**
+- A2 metni **App Review Information → Notes** alanına yazıldı ve kaydedildi (3942/4000, "✓ Saved").
+  Eski 1214 karakterlik not metninin yerini aldı.
+- 16 ekran görüntüsü tek tek incelendi, inceleme sırasına göre adlandırılıp yükleme için
+  scratchpad'e (`asc-evidence/`) kopyalandı — toplam 1,7 MB, `file_upload` limitine uygun.
 
-**Tıkanan nokta:** Videonun orijinali hâlâ telefonda. `C:\Users\alper\Downloads\iphonee\`
-altındaki sürüm WhatsApp'tan geçtiği için 384×848 — gönderilemez (B3).
-USB/MTP denendi, iCloud optimizasyonu yüzünden bugünkü kayıt görünmüyor.
-Kullanıcı iCloud alanı satın aldı; orijinali bilgisayara çıkarıp **yolunu verecek**.
+**Tıkanan noktalar (ikisi de kullanıcıda):**
+1. **Video hâlâ WhatsApp sürümü.** `Downloads\iphonee\WhatsApp Video 2026-08-14 at 22.39.32.mp4`
+   `ffprobe` ile ölçüldü: **384×848**, 33,2 MB, 3:11 — yani 14 Ağustos'taki dosyanın aynısı,
+   yeni bir şey gelmemiş. Kullanılamaz (B3). Ayrıca 33 MB, `file_upload`'ın 10 MB limitinin
+   üstünde → **Claude yükleyemez, kullanıcı elle eklemeli.** Kullanıcı orijinali çıkaracağını belirtti.
+2. **5 ekran görüntüsü eksik** (paywall, coin shop, block, push izni, hesap silme onayı) — bkz. B4.
+   Cevap metni bunları anlatıyor ama görsel kanıt yok.
 
 **Sonraki oturumun ilk işi:** kullanıcının verdiği yoldaki videoyu `ffprobe` ile doğrula
-(genişlik ≥ 1080 olmalı; gerekirse ffmpeg ile 720×1560 / ~50 MB'a indir),
-sonra ASC'de A2 metni + video + görüntüleri yerleştir ve **kullanıcı onayıyla** gönder.
+(genişlik ≥ 1080 olmalı; gerekirse ffmpeg ile 720×1560 / ~50 MB'a indir), eksik 5 kareyi
+mevcut 16'nın arasına doğru sıraya yerleştir, sonra Resolution Center → Reply modalında
+A2 metni + görüntüleri koy, videoyu kullanıcıya ekletip **kullanıcı onayıyla** gönder.
