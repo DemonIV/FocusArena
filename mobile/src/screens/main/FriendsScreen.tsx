@@ -585,7 +585,6 @@ const styles = StyleSheet.create({
   rowName: { color: TEXT, fontSize: 15, fontWeight: '600' },
   rowStatus: { fontSize: 12, marginTop: 2 },
   rowSub: { color: MUTED, fontSize: 12, marginTop: 2 },
-  removeIcon: { color: MUTED, fontSize: 16 },
   moreBtn: { marginLeft: 10 },
   moreIcon: { color: MUTED, fontSize: 22, fontWeight: '700', lineHeight: 22 },
   blockedTag: { color: MUTED, fontSize: 12, fontWeight: '700', textTransform: 'uppercase' },
