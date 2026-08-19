@@ -306,8 +306,9 @@ anlatıyor ama görsel kanıt yok, videonun kendisi de okunmaz çözünürlükte
 - [ ] `fly.toml` → `min_machines_running = 1` deploy edildi (hakem uykudaki makineye denk gelmesin)
 - [x] Metindeki `<MODEL>` / `<VERSION>` yer tutucuları dolduruldu (iPhone 14 Pro / iOS 26.6)
 - [x] Ekran kaydı çekildi (3 dk 11 sn) + 16 ekran görüntüsü
-- [ ] **Kaydın ORİJİNALİ** (1179×2556) telefondan çıkarıldı — WhatsApp sürümü 384×848, kullanılamaz (bkz. B3)
-- [ ] **Eksik 5 ekran görüntüsü çekildi** (paywall, coin shop, block, push izni, hesap silme onayı — bkz. B4)
+- [x] **Kaydın ORİJİNALİ** telefondan çıkarıldı — 20 Ağu: TR kaydı 1180×2556 / 4:55 / 145 MB `Downloads\ScreenRecording_08-19-2026 23-17-56_1.MP4` (bkz. E1)
+- [ ] **İngilizce kayıt** PC'ye aktarıldı — Apple'a gidecek asıl video bu (bkz. E4/1)
+- [ ] **Eksik ekran görüntüleri**: coin shop ✅ (`IMG_7586.PNG`) · paywall ⚠️ yarım (Terms/Privacy kadrajda yok, `IMG_7587.PNG`) · block ❌ · push izni ❌ · hesap silme onayı ❌ (bkz. E1/E3)
 - [ ] A2 metni (3942 karakter) Resolution Center reply kutusuna yazıldı
 - [x] A2 metni **App Review Information → Notes** alanına yapıştırıldı ve kaydedildi (18 Ağustos 2026, 3942/4000, "✓ Saved" doğrulandı — eski 1214 karakterlik metnin yerine geçti)
 - [x] Demo hesap bilgileri güncel: `testalpha1@studysquad.test` / `Passw0rd123`
@@ -337,3 +338,71 @@ anlatıyor ama görsel kanıt yok, videonun kendisi de okunmaz çözünürlükte
 (genişlik ≥ 1080 olmalı; gerekirse ffmpeg ile 720×1560 / ~50 MB'a indir), eksik 5 kareyi
 mevcut 16'nın arasına doğru sıraya yerleştir, sonra Resolution Center → Reply modalında
 A2 metni + görüntüleri koy, videoyu kullanıcıya ekletip **kullanıcı onayıyla** gönder.
+
+---
+
+## E) Oturum durumu — 20 Ağustos 2026 · Videolar çekildi (TR + EN)
+
+Kullanıcı kaydı **iki dilde** çekti. Bilgisayara şu an **yalnızca Türkçe olan** aktarılmış.
+
+### E1) Elimizdeki dosyalar
+
+| Dosya | Ölçüm | Durum |
+|---|---|---|
+| `Downloads\ScreenRecording_08-19-2026 23-17-56_1.MP4` | **1180×2556**, 4 dk 55 sn, 3,9 Mb/sn, **145 MB** | ✅ **Türkçe kayıt, tam çözünürlük.** B3'teki WhatsApp sorunu çözüldü |
+| İngilizce kayıt | — | ❌ **Henüz PC'de yok.** Aynı yolla (iCloud/Drive, WhatsApp DEĞİL) aktarılmalı |
+| `Downloads\IMG_7586.PNG` | 1179×2556 | ✅ **Coin Shop (EN)** — 1.000/$1.99, 5.500/$7.99, 12.000/$12.99 → B4 maddesi **B tamam** |
+| `Downloads\IMG_7587.PNG` | 1179×2556 | ⚠️ **Paywall (EN)** — Monthly $5.99 / Yearly $44.99 / Go Pro / Restore purchases / otomatik yenilenme yazısı var, **ama Terms + Privacy linkleri kadrajda YOK** → B4 maddesi **A yarım** |
+
+Ekran görüntülerindeki kırmızı kayıt noktası ve 00:35 saati, İngilizce kaydın bu gece
+çekildiğini gösteriyor — dosya telefonda duruyor.
+
+### E2) ⚠️ Paywall'da Terms/Privacy linkleri neden görünmüyor (kod hatası DEĞİL)
+
+`PaywallModal.tsx:205` `<LegalLinks />` bileşenini basıyor ve `LegalLinks.tsx` gerçekten
+dokunulabilir **Kullanım Şartları · Gizlilik Politikası** linkleri üretiyor
+(`LEGAL_URLS.terms` / `.privacy`, i18n anahtarları `legal.terms` / `legal.privacy` — hepsi mevcut).
+
+Sorun: sheet `maxHeight: '88%'` ve içerik bir `ScrollView` içinde
+(`PaywallModal.tsx:122`, `showsVerticalScrollIndicator={false}`). Linkler en son eleman
+olduğu için **ekranın altında kalıyor**; kaydırma çubuğu da gizli olduğundan alt içerik
+olduğu belli olmuyor. Hem videoda hem `IMG_7587.PNG`'de otomatik yenilenme yazısında kesiliyor.
+
+**Yapılacak:** paywall açıkken sheet'in içinde **yukarı kaydır** → alta
+"Kullanım Şartları · Gizlilik Politikası" gelsin → o kareyi çek/kaydet.
+Bu, Guideline 3.1.2'nin ve A2 metnindeki 8-a maddesinin doğrudan konusu; kanıtsız gönderilirse
+"metinde var diyor ama göstermiyor" durumu oluşur.
+
+### E3) Türkçe kayıtta EKSİK olan sahneler (0–295 sn kare kare tarandı)
+
+| B planı # | Sahne | Kayıtta var mı |
+|---|---|---|
+| 1 | Uygulama açılışı | ⚠️ Kayıt doğrudan **giriş ekranında** başlıyor (ana ekrandan ikona dokunma yok) |
+| 2 | **Kayıt olma + onboarding** | ❌ Yok — mevcut demo hesapla giriş yapılmış |
+| 3 | **Push izin istemi** | ❌ Yok |
+| 4 | Giriş | ✅ 0–20 sn |
+| 5 | Timer (klasik, çalışırken) | ✅ 45–60, 195–205, 265–275 sn |
+| 6 | Pomodoro ayarları | ✅ ~60 sn |
+| 7 | İstatistik + heatmap + aylık takvim | ✅ 150–175 sn |
+| 8 | Leaderboard (Oyuncular/Ülkeler, Tüm Zamanlar) | ✅ 80–95 sn |
+| 9 | Rooms (liste, oda kur, oda detayı, davet kodu) | ✅ 100–125, 220 sn |
+| 10 | **Arkadaşlar → ENGELLE (Block)** | ❌ Yok — sadece liste, arama ve davet paylaşımı görünüyor |
+| 11 | Paywall | ⚠️ Var (145–152 sn) ama **Terms/Privacy'ye kadar kaydırılmamış** (bkz. E2) |
+| 12 | **Coin Shop (3 paket + fiyat)** | ❌ Videoda yok — sadece "Çerçeve Mağazası" ve 1.300 coin çipi. *(EN ekran görüntüsü kapatıyor)* |
+| 13 | Sandbox satın alma sayfası | ❌ Yok |
+| 14 | **Hesap silme iki aşamalı onay** | ❌ Yok — kayıt "Çıkış Yap" onayıyla bitiyor (280 sn) |
+
+### E4) Sıradaki adımlar (öncelik sırasıyla)
+
+1. **İngilizce kaydı PC'ye aktar** (iCloud.com → Fotoğraflar → İndir, veya Drive/OneDrive).
+   Hakem İngilizce okuyor → **Apple'a gidecek asıl video İngilizce olan.** Türkçe kayıt
+   yedek/lokalizasyon kanıtı; ikisini birden yollamak şart değil.
+2. **Eksik kanıt kareleri** (ekran görüntüsü yeterli, yeniden çekim şart değil):
+   - Paywall **alta kaydırılmış** hâli → Terms of Use · Privacy Policy görünsün *(en kritik)*
+   - Arkadaşlar → `testbeta2` → **Block** akışı
+   - **Push bildirim izni** sistem istemi
+   - **Hesabı Sil** iki aşamalı onayın 2. adımı *(son onaya BASMA)*
+3. Videoyu ASC'ye yüklemeden önce boyutu kontrol et — 145 MB büyük. Gerekirse
+   `ffmpeg -i in.MP4 -vf scale=1080:-2 -c:v libx264 -crf 24 -preset veryfast -c:a aac -b:a 96k out.mp4`
+   ile ~1080 genişlikte, okunabilirliği koruyarak küçült.
+4. Sonra: Resolution Center → Reply → A2 metni + görüntüler + video → **kullanıcı onayıyla** gönder.
