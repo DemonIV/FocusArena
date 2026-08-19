@@ -13,11 +13,12 @@ import {
   ActivityIndicator,
   Platform,
   Switch,
+  Linking,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks';
-import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal, AvatarArt, LegalLinks } from '../../components';
+import { StatCard, StreakHeatmap, SubjectDonutCard, MonthlyStatsModal, AvatarArt, LegalLinks, BlockedUsersModal } from '../../components';
 import { PaywallModal } from '../../components/PaywallModal';
 import { CoinShopModal } from '../../components/CoinShopModal';
 import { PetDetailModal } from '../../components/PetDetailModal';
@@ -27,7 +28,7 @@ import { useBillingStore, useSettingsStore } from '../../stores';
 import { setPushEnabled as syncPushEnabled } from '../../services';
 import LottieView from 'lottie-react-native';
 import { timerService, achievementsService, roomsService, cosmeticsService } from '../../services';
-import { FRAMES, getFrameVisual, PETS, getPetVisual, PET_EGG_LOTTIE, PET_RARITY_COLORS } from '../../constants';
+import { FRAMES, getFrameVisual, PETS, getPetVisual, PET_EGG_LOTTIE, PET_RARITY_COLORS, LEGAL_URLS } from '../../constants';
 import { RARITY_COLOR as AVATAR_RARITY_COLOR, isAvatarId } from '../../constants/avatars';
 import i18n from '../../i18n';
 import { formatDuration } from '../../utils/formatTime';
@@ -77,6 +78,7 @@ function fmtMinutes(m: number): string {
 export function ProfileScreen() {
   const { t } = useTranslation();
   const { user, logout, deleteAccount } = useAuth();
+  const [blockedVisible, setBlockedVisible] = useState(false);
   const queryClient = useQueryClient();
 
   // ── Queries ──────────────────────────────────────────────────────────────────
@@ -671,6 +673,26 @@ export function ProfileScreen() {
           />
         </View>
 
+        {/* Blocked users + support are store requirements for a social app
+            (Guideline 1.2: blocking must be reversible and we must be reachable). */}
+        <TouchableOpacity
+          style={styles.settingRow}
+          onPress={() => setBlockedVisible(true)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.settingLabel}>🚫 {t('profile.blockedUsers')}</Text>
+          <Text style={styles.settingChevron}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.settingRow}
+          onPress={() => { void Linking.openURL(LEGAL_URLS.support).catch(() => undefined); }}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.settingLabel}>💬 {t('profile.support')}</Text>
+          <Text style={styles.settingChevron}>›</Text>
+        </TouchableOpacity>
+
         {/* ── Sign Out ── */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
           <Text style={styles.logoutText}>{t('profile.signOut')}</Text>
@@ -694,6 +716,8 @@ export function ProfileScreen() {
         <LegalLinks style={{ marginTop: 18, marginBottom: 8 }} />
 
       </ScrollView>
+
+      <BlockedUsersModal visible={blockedVisible} onClose={() => setBlockedVisible(false)} />
 
       {/* ── Add / Edit Subject Modal ── */}
       <Modal
@@ -1676,6 +1700,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   settingLabel: { color: TEXT, fontSize: 15, fontWeight: '600' },
+  settingChevron: { color: MUTED, fontSize: 22, fontWeight: '600' },
   logoutBtn: {
     marginTop: 8,
     backgroundColor: `${DANGER}12`,

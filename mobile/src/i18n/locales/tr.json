@@ -12,7 +12,8 @@
     "edit": "Düzenle",
     "add": "Ekle",
     "minShort": "dk",
-    "hourShort": "sa"
+    "hourShort": "sa",
+    "back": "Geri"
   },
   "auth": {
     "tagline": "Yarış. Odaklan. Başar.",
@@ -37,7 +38,8 @@
     "registrationFailed": "Kayıt Başarısız",
     "somethingWrong": "Bir şeyler ters gitti",
     "passwordsNoMatch": "Parolalar eşleşmiyor.",
-    "passwordTooShort": "Parola en az 8 karakter olmalı."
+    "passwordTooShort": "Parola en az 8 karakter olmalı.",
+    "termsNotice": "Hesap oluşturarak Kullanım Şartları'nı ve Gizlilik Politikası'nı kabul etmiş olursun. Rahatsız edici içeriğe ve kötüye kullanan davranışa sıfır tolerans gösterilir."
   },
   "language": {
     "title": "Dil"
@@ -314,7 +316,9 @@
     "titles": "Ünvanlar",
     "titlesHint": "Rozetlerinden kazandığın bir ünvanı seçip profilinde göster.",
     "avatars": "Avatarlar",
-    "avatarsHint": "Çalışarak kazandığın avatarlar. Birine dokunup tak — arkadaşların, odalar ve sıralamalar görür."
+    "avatarsHint": "Çalışarak kazandığın avatarlar. Birine dokunup tak — arkadaşların, odalar ve sıralamalar görür.",
+    "blockedUsers": "Engellenen kullanıcılar",
+    "support": "Yardım ve iletişim"
   },
   "rooms": {
     "createRoom": "+ Oda Kur",
@@ -404,7 +408,9 @@
     "requestSentTitle": "Gönderildi!",
     "requestSent": "Arkadaşlık isteği gönderildi.",
     "sendFailed": "İstek gönderilemedi",
-    "searchFailed": "Arama başarısız"
+    "searchFailed": "Arama başarısız",
+    "mute": "Bildirimleri sustur",
+    "unmute": "Bildirimleri aç"
   },
   "status": {
     "studying": "çalışıyor",
@@ -616,5 +622,37 @@
   "legal": {
     "terms": "Kullanım Şartları",
     "privacy": "Gizlilik Politikası"
+  },
+  "moderation": {
+    "sheetSubtitle": "Bu kullanıcı için bir işlem seç.",
+    "report": "Şikayet et",
+    "block": "Engelle",
+    "unblock": "Engeli kaldır",
+    "blockTitle": "Kullanıcı engellensin mi?",
+    "blockMsg": "{{name}} artık seni bulamaz, istek gönderemez ve etkinliğini göremez. Bunu Profil'den geri alabilirsin.",
+    "blockedTitle": "Kullanıcı engellendi",
+    "blockedMsg": "{{name}} artık seninle etkileşime giremez.",
+    "blockFailed": "Kullanıcı engellenemedi.",
+    "unblockTitle": "Engel kaldırılsın mı?",
+    "unblockMsg": "{{name}} seni tekrar bulabilecek ve arkadaşlık isteği gönderebilecek.",
+    "unblockFailed": "Engel kaldırılamadı.",
+    "blockedUsers": "Engellenen kullanıcılar",
+    "blockedUsersHint": "Bu kişiler seninle etkileşime giremez.",
+    "noBlockedUsers": "Kimseyi engellemedin.",
+    "reportTitle": "{{name}} şikayet ediliyor",
+    "reportSubtitle": "Sorunun ne olduğunu seç. Her şikayeti 24 saat içinde inceliyoruz.",
+    "sendReport": "Şikayeti gönder",
+    "detailsPlaceholder": "Eklemek istediğin bir şey var mı? (isteğe bağlı)",
+    "reportedTitle": "Şikayet alındı",
+    "reportedMsg": "Teşekkürler. Her şikayeti 24 saat içinde inceliyor ve gereğini yapıyoruz.",
+    "reportFailed": "Şikayet gönderilemedi.",
+    "reason": {
+      "harassment": "Taciz veya zorbalık",
+      "inappropriate_name": "Uygunsuz isim",
+      "spam": "Spam veya dolandırıcılık",
+      "impersonation": "Sahte kimlik",
+      "other": "Başka bir şey"
+    },
+    "blockedTag": "Engellendi"
   }
 }

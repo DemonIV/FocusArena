@@ -1,4 +1,5 @@
 import { supabase, supabaseAuth, redis } from '../../shared';
+import { assertClean } from '../../shared/contentFilter';
 import type { PublicUser } from './auth.schema';
 
 const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -14,6 +15,10 @@ export async function createAuthUser(
   password: string,
   username: string,
 ): Promise<{ id: string; email: string }> {
+  // Usernames are shown to everyone (leaderboards, rooms, friend search),
+  // so they are filtered before the account exists — Guideline 1.2.
+  assertClean(username, 'username');
+
   const { data, error } = await supabaseAuth.auth.admin.createUser({
     email,
     password,

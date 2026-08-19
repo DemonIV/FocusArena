@@ -104,6 +104,9 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.code(201).send({ accessToken, refreshToken, user });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '';
+      if ((err as { code?: string }).code === 'OBJECTIONABLE') {
+        return reply.code(400).send({ error: 'Bad Request', code: 'OBJECTIONABLE', message: msg });
+      }
       if (/already registered|already exists|duplicate/i.test(msg)) {
         return reply.code(409).send({ error: 'Conflict', message: 'Email or username already in use' });
       }

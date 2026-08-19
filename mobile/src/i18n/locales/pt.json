@@ -12,7 +12,8 @@
     "edit": "Editar",
     "add": "Adicionar",
     "minShort": "min",
-    "hourShort": "h"
+    "hourShort": "h",
+    "back": "Voltar"
   },
   "auth": {
     "tagline": "Compita. Concentre-se. Conquiste.",
@@ -37,7 +38,8 @@
     "registrationFailed": "Falha no registro",
     "somethingWrong": "Algo deu errado",
     "passwordsNoMatch": "As senhas não coincidem.",
-    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres."
+    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres.",
+    "termsNotice": "Ao criar uma conta aceitas os nossos Termos de Utilização e a Política de Privacidade. Há tolerância zero para conteúdo ofensivo e comportamento abusivo."
   },
   "language": {
     "title": "Idioma"
@@ -314,7 +316,9 @@
     "titles": "Títulos",
     "titlesHint": "Escolha um título conquistado para exibir no seu perfil.",
     "avatars": "Avatares",
-    "avatarsHint": "Avatares que você conquistou estudando. Toque para usar um — amigos, salas e rankings vão ver."
+    "avatarsHint": "Avatares que você conquistou estudando. Toque para usar um — amigos, salas e rankings vão ver.",
+    "blockedUsers": "Utilizadores bloqueados",
+    "support": "Ajuda e contacto"
   },
   "rooms": {
     "createRoom": "+ Criar sala",
@@ -404,7 +408,9 @@
     "requestSentTitle": "Enviado!",
     "requestSent": "Pedido de amizade enviado.",
     "sendFailed": "Não foi possível enviar o pedido",
-    "searchFailed": "Falha na busca"
+    "searchFailed": "Falha na busca",
+    "mute": "Silenciar notificações",
+    "unmute": "Ativar notificações"
   },
   "status": {
     "studying": "estudando",
@@ -616,5 +622,37 @@
   "legal": {
     "terms": "Termos de Uso",
     "privacy": "Política de Privacidade"
+  },
+  "moderation": {
+    "sheetSubtitle": "Escolhe uma ação para este utilizador.",
+    "report": "Denunciar",
+    "block": "Bloquear",
+    "unblock": "Desbloquear",
+    "blockTitle": "Bloquear utilizador?",
+    "blockMsg": "{{name}} deixará de te encontrar, enviar pedidos ou ver a tua atividade. Podes anular no Perfil.",
+    "blockedTitle": "Utilizador bloqueado",
+    "blockedMsg": "{{name}} já não pode interagir contigo.",
+    "blockFailed": "Não foi possível bloquear o utilizador.",
+    "unblockTitle": "Desbloquear utilizador?",
+    "unblockMsg": "{{name}} poderá encontrar-te e enviar-te um pedido de amizade novamente.",
+    "unblockFailed": "Não foi possível desbloquear o utilizador.",
+    "blockedUsers": "Utilizadores bloqueados",
+    "blockedUsersHint": "Estas pessoas não podem interagir contigo.",
+    "noBlockedUsers": "Não bloqueaste ninguém.",
+    "reportTitle": "Denunciar {{name}}",
+    "reportSubtitle": "Diz-nos o que se passa. Analisamos cada denúncia em 24 horas.",
+    "sendReport": "Enviar denúncia",
+    "detailsPlaceholder": "Mais alguma coisa que devamos saber? (opcional)",
+    "reportedTitle": "Denúncia recebida",
+    "reportedMsg": "Obrigado. Analisamos cada denúncia em 24 horas e agimos em conformidade.",
+    "reportFailed": "Não foi possível enviar a denúncia.",
+    "reason": {
+      "harassment": "Assédio ou bullying",
+      "inappropriate_name": "Nome inapropriado",
+      "spam": "Spam ou burla",
+      "impersonation": "Falsificação de identidade",
+      "other": "Outra coisa"
+    },
+    "blockedTag": "Bloqueado"
   }
 }

@@ -12,7 +12,8 @@
     "edit": "Modifica",
     "add": "Aggiungi",
     "minShort": "min",
-    "hourShort": "h"
+    "hourShort": "h",
+    "back": "Indietro"
   },
   "auth": {
     "tagline": "Competi. Concentrati. Raggiungi.",
@@ -37,7 +38,8 @@
     "registrationFailed": "Registrazione non riuscita",
     "somethingWrong": "Qualcosa è andato storto",
     "passwordsNoMatch": "Le password non corrispondono.",
-    "passwordTooShort": "La password deve avere almeno 8 caratteri."
+    "passwordTooShort": "La password deve avere almeno 8 caratteri.",
+    "termsNotice": "Creando un account accetti i nostri Termini di utilizzo e l'Informativa sulla privacy. Tolleranza zero per contenuti offensivi e comportamenti abusivi."
   },
   "language": {
     "title": "Lingua"
@@ -314,7 +316,9 @@
     "titles": "Titoli",
     "titlesHint": "Scegli un titolo che hai sbloccato da mostrare sul profilo.",
     "avatars": "Avatar",
-    "avatarsHint": "Gli avatar che hai conquistato studiando. Tocca per indossarne uno: lo vedranno amici, stanze e classifiche."
+    "avatarsHint": "Gli avatar che hai conquistato studiando. Tocca per indossarne uno: lo vedranno amici, stanze e classifiche.",
+    "blockedUsers": "Utenti bloccati",
+    "support": "Aiuto e contatti"
   },
   "rooms": {
     "createRoom": "+ Crea stanza",
@@ -404,7 +408,9 @@
     "requestSentTitle": "Inviata!",
     "requestSent": "Richiesta di amicizia inviata.",
     "sendFailed": "Impossibile inviare la richiesta",
-    "searchFailed": "Ricerca non riuscita"
+    "searchFailed": "Ricerca non riuscita",
+    "mute": "Silenzia le notifiche",
+    "unmute": "Riattiva le notifiche"
   },
   "status": {
     "studying": "studia",
@@ -616,5 +622,37 @@
   "legal": {
     "terms": "Termini di servizio",
     "privacy": "Informativa sulla privacy"
+  },
+  "moderation": {
+    "sheetSubtitle": "Scegli un'azione per questo utente.",
+    "report": "Segnala",
+    "block": "Blocca",
+    "unblock": "Sblocca",
+    "blockTitle": "Bloccare l'utente?",
+    "blockMsg": "{{name}} non potrà più trovarti, inviarti richieste o vedere la tua attività. Puoi annullare dal Profilo.",
+    "blockedTitle": "Utente bloccato",
+    "blockedMsg": "{{name}} non può più interagire con te.",
+    "blockFailed": "Impossibile bloccare l'utente.",
+    "unblockTitle": "Sbloccare l'utente?",
+    "unblockMsg": "{{name}} potrà di nuovo trovarti e inviarti una richiesta di amicizia.",
+    "unblockFailed": "Impossibile sbloccare l'utente.",
+    "blockedUsers": "Utenti bloccati",
+    "blockedUsersHint": "Queste persone non possono interagire con te.",
+    "noBlockedUsers": "Non hai bloccato nessuno.",
+    "reportTitle": "Segnala {{name}}",
+    "reportSubtitle": "Dicci cosa non va. Esaminiamo ogni segnalazione entro 24 ore.",
+    "sendReport": "Invia segnalazione",
+    "detailsPlaceholder": "Altro che dovremmo sapere? (facoltativo)",
+    "reportedTitle": "Segnalazione ricevuta",
+    "reportedMsg": "Grazie. Esaminiamo ogni segnalazione entro 24 ore e interveniamo.",
+    "reportFailed": "Impossibile inviare la segnalazione.",
+    "reason": {
+      "harassment": "Molestie o bullismo",
+      "inappropriate_name": "Nome inappropriato",
+      "spam": "Spam o truffa",
+      "impersonation": "Furto d'identità",
+      "other": "Altro"
+    },
+    "blockedTag": "Bloccato"
   }
 }

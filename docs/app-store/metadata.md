@@ -106,9 +106,11 @@ Thank you for reviewing StudySquad!
 
 • Demo account above is pre-populated (has friends and study history). You can also
   register a fresh account with any email — no email verification is required.
-• Social features: users can block other users (Friends screen) and all friend
-  requests require explicit acceptance. Day-by-day stats are visible to accepted
-  friends only.
+• Social features: all friend requests require explicit acceptance, and day-by-day
+  stats are visible to accepted friends only. Any user can be blocked and reported
+  from the Friends tab (tap a row's "..." button); blocked users are managed under
+  Profile > "Blocked users". Usernames, room names and subject names are screened
+  against a blocklist when created. Reports are acted on within 24 hours.
 • Account deletion is available in-app: Profile → Delete account (bottom of screen).
 • In-app purchases submitted with this version: the "StudySquad Pro" auto-renewing
   subscription (monthly / yearly) and three consumable coin packs. Paywall: Profile

@@ -15,7 +15,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import type { AuthStackParamList } from '../../types';
 import { useAuth } from '../../hooks';
-import { LanguagePicker } from '../../components';
+import { LanguagePicker, LegalLinks } from '../../components';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
@@ -119,6 +119,12 @@ export function RegisterScreen({ navigation }: Props) {
               : <Text style={styles.btnText}>{t('auth.createAccount')}</Text>
             }
           </TouchableOpacity>
+
+          {/* Guideline 1.2 wants the terms — including the zero-tolerance rule
+              for objectionable content — accepted at sign-up, with the full
+              documents one tap away. */}
+          <Text style={styles.termsNotice}>{t('auth.termsNotice')}</Text>
+          <LegalLinks color="#8a8a9a" />
         </View>
 
         <TouchableOpacity
@@ -166,6 +172,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   form: { gap: 10 },
+  termsNotice: {
+    fontSize: 11,
+    lineHeight: 16,
+    color: '#6a6a80',
+    textAlign: 'center',
+    marginTop: 18,
+  },
   fieldLabel: {
     fontSize: 13,
     color: '#8a8a9a',

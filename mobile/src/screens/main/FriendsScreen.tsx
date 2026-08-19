@@ -13,7 +13,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { friendsService } from '../../services';
-import { FramedAvatar, MonthlyStatsModal, AvatarArt } from '../../components';
+import { FramedAvatar, MonthlyStatsModal, AvatarArt, UserActionsSheet } from '../../components';
 import { isAvatarId } from '../../constants/avatars';
 import { getPetEmoji } from '../../constants';
 import { useSocketStore, useAuthStore } from '../../stores';
@@ -48,6 +48,10 @@ export function FriendsScreen() {
   const [referralCode, setReferralCode] = useState('');
   // Friend whose monthly stats are open (tap a friend row)
   const [statsFriend, setStatsFriend] = useState<{ id: string; username: string } | null>(null);
+  // User the moderation sheet (mute / report / block / remove) acts on
+  const [actionUser, setActionUser] = useState<
+    { id: string; username: string; isFriend: boolean; muted: boolean } | null
+  >(null);
 
   const shareInvite = useInviteShare('friends');
 
@@ -196,18 +200,16 @@ export function FriendsScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() =>
-            Alert.alert(
-              t('friends.removeFriend'),
-              t('friends.removeFriendMsg', { name: item.username }),
-              [
-                { text: t('common.cancel'), style: 'cancel' },
-                { text: t('friends.remove'), style: 'destructive', onPress: () => removeMut.mutate(item.friendId) },
-              ],
-            )
+            setActionUser({
+              id: item.friendId,
+              username: item.username,
+              isFriend: true,
+              muted: item.muted,
+            })
           }
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.removeIcon}>✕</Text>
+          <Text style={styles.moreIcon}>⋯</Text>
         </TouchableOpacity>
       </View>
     );
@@ -272,6 +274,24 @@ export function FriendsScreen() {
       )}
       {(item.relationship === 'pending_sent' || item.relationship === 'pending_received') && (
         <Text style={styles.pendingTag}>{t('friends.pending')}</Text>
+      )}
+      {item.relationship === 'blocked' ? (
+        <Text style={styles.blockedTag}>{t('moderation.blockedTag')}</Text>
+      ) : (
+        <TouchableOpacity
+          onPress={() =>
+            setActionUser({
+              id: item.id,
+              username: item.username,
+              isFriend: item.relationship === 'friends',
+              muted: false,
+            })
+          }
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.moreBtn}
+        >
+          <Text style={styles.moreIcon}>⋯</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -412,6 +432,39 @@ export function FriendsScreen() {
         userId={statsFriend?.id}
         username={statsFriend?.username}
       />
+
+      <UserActionsSheet
+        user={actionUser}
+        onClose={() => setActionUser(null)}
+        context={tab === 'search' ? 'search' : 'friends'}
+        isFriend={actionUser?.isFriend ?? false}
+        muted={actionUser?.muted ?? false}
+        onToggleMute={() => {
+          if (!actionUser) return;
+          muteMut.mutate({ userId: actionUser.id, muted: !actionUser.muted });
+          setActionUser(null);
+        }}
+        onRemoveFriend={() => {
+          if (!actionUser) return;
+          const { id, username } = actionUser;
+          setActionUser(null);
+          Alert.alert(
+            t('friends.removeFriend'),
+            t('friends.removeFriendMsg', { name: username }),
+            [
+              { text: t('common.cancel'), style: 'cancel' },
+              { text: t('friends.remove'), style: 'destructive', onPress: () => removeMut.mutate(id) },
+            ],
+          );
+        }}
+        onBlocked={() => {
+          void qc.invalidateQueries({ queryKey: ['friends'] });
+          void qc.invalidateQueries({ queryKey: ['friend-requests'] });
+          void qc.invalidateQueries({ queryKey: ['blockedUsers'] });
+          // A blocked user must not linger in the result list behind the sheet.
+          setSearchResults((prev) => prev.filter((u) => u.id !== actionUser?.id));
+        }}
+      />
     </View>
   );
 }
@@ -533,6 +586,9 @@ const styles = StyleSheet.create({
   rowStatus: { fontSize: 12, marginTop: 2 },
   rowSub: { color: MUTED, fontSize: 12, marginTop: 2 },
   removeIcon: { color: MUTED, fontSize: 16 },
+  moreBtn: { marginLeft: 10 },
+  moreIcon: { color: MUTED, fontSize: 22, fontWeight: '700', lineHeight: 22 },
+  blockedTag: { color: MUTED, fontSize: 12, fontWeight: '700', textTransform: 'uppercase' },
   bellBtn: { marginRight: 14 },
   bellIcon: { fontSize: 15 },
   bellIconMuted: { opacity: 0.45 },

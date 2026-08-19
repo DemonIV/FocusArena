@@ -355,6 +355,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
       if (e.code === 'LIMIT_REACHED') {
         return reply.code(402).send({ error: 'Payment Required', code: 'LIMIT_REACHED', message: e.message });
       }
+      if (e.code === 'OBJECTIONABLE') return reply.code(400).send({ error: 'Bad Request', code: 'OBJECTIONABLE', message: e.message });
       request.log.error(err, 'timer/subjects POST failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });
@@ -377,6 +378,7 @@ export const timerRoutes: FastifyPluginAsync = async (fastify) => {
     } catch (err: unknown) {
       const e = err as { code?: string; message: string };
       if (e.code === 'NOT_FOUND') return reply.code(404).send({ error: 'Not Found', message: e.message });
+      if (e.code === 'OBJECTIONABLE') return reply.code(400).send({ error: 'Bad Request', code: 'OBJECTIONABLE', message: e.message });
       request.log.error(err, 'timer/subjects PATCH failed');
       captureException(err, { method: request.method, url: request.url });
       return reply.code(500).send({ error: 'Internal server error' });

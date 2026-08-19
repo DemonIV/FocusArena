@@ -12,7 +12,8 @@
     "edit": "Bewerken",
     "add": "Toevoegen",
     "minShort": "min",
-    "hourShort": "u"
+    "hourShort": "u",
+    "back": "Terug"
   },
   "auth": {
     "tagline": "Strijd. Focus. Bereik.",
@@ -37,7 +38,8 @@
     "registrationFailed": "Registratie mislukt",
     "somethingWrong": "Er ging iets mis",
     "passwordsNoMatch": "Wachtwoorden komen niet overeen.",
-    "passwordTooShort": "Wachtwoord moet minstens 8 tekens bevatten."
+    "passwordTooShort": "Wachtwoord moet minstens 8 tekens bevatten.",
+    "termsNotice": "Door een account aan te maken ga je akkoord met onze Gebruiksvoorwaarden en het Privacybeleid. Er geldt nultolerantie voor aanstootgevende inhoud en misbruik."
   },
   "language": {
     "title": "Taal"
@@ -314,7 +316,9 @@
     "titles": "Titels",
     "titlesHint": "Kies een verdiende titel om op je profiel te tonen.",
     "avatars": "Avatars",
-    "avatarsHint": "Avatars die je hebt verdiend. Tik om er een te dragen — vrienden, kamers en ranglijsten zien hem."
+    "avatarsHint": "Avatars die je hebt verdiend. Tik om er een te dragen — vrienden, kamers en ranglijsten zien hem.",
+    "blockedUsers": "Geblokkeerde gebruikers",
+    "support": "Hulp en contact"
   },
   "rooms": {
     "createRoom": "+ Kamer maken",
@@ -404,7 +408,9 @@
     "requestSentTitle": "Verzonden!",
     "requestSent": "Vriendschapsverzoek verzonden.",
     "sendFailed": "Kan het verzoek niet verzenden",
-    "searchFailed": "Zoeken mislukt"
+    "searchFailed": "Zoeken mislukt",
+    "mute": "Meldingen dempen",
+    "unmute": "Meldingen aanzetten"
   },
   "status": {
     "studying": "studeert",
@@ -616,5 +622,37 @@
   "legal": {
     "terms": "Gebruiksvoorwaarden",
     "privacy": "Privacybeleid"
+  },
+  "moderation": {
+    "sheetSubtitle": "Kies een actie voor deze gebruiker.",
+    "report": "Rapporteren",
+    "block": "Blokkeren",
+    "unblock": "Deblokkeren",
+    "blockTitle": "Gebruiker blokkeren?",
+    "blockMsg": "{{name}} kan je niet meer vinden, geen verzoeken sturen en je activiteit niet zien. Je kunt dit ongedaan maken via Profiel.",
+    "blockedTitle": "Gebruiker geblokkeerd",
+    "blockedMsg": "{{name}} kan niet meer met je communiceren.",
+    "blockFailed": "Gebruiker kon niet worden geblokkeerd.",
+    "unblockTitle": "Gebruiker deblokkeren?",
+    "unblockMsg": "{{name}} kan je weer vinden en een vriendschapsverzoek sturen.",
+    "unblockFailed": "Gebruiker kon niet worden gedeblokkeerd.",
+    "blockedUsers": "Geblokkeerde gebruikers",
+    "blockedUsersHint": "Deze mensen kunnen niet met je communiceren.",
+    "noBlockedUsers": "Je hebt niemand geblokkeerd.",
+    "reportTitle": "{{name}} rapporteren",
+    "reportSubtitle": "Vertel ons wat er mis is. We bekijken elke melding binnen 24 uur.",
+    "sendReport": "Melding versturen",
+    "detailsPlaceholder": "Nog iets wat we moeten weten? (optioneel)",
+    "reportedTitle": "Melding ontvangen",
+    "reportedMsg": "Bedankt. We bekijken elke melding binnen 24 uur en ondernemen actie.",
+    "reportFailed": "Melding kon niet worden verstuurd.",
+    "reason": {
+      "harassment": "Intimidatie of pesten",
+      "inappropriate_name": "Ongepaste naam",
+      "spam": "Spam of oplichting",
+      "impersonation": "Identiteitsfraude",
+      "other": "Iets anders"
+    },
+    "blockedTag": "Geblokkeerd"
   }
 }

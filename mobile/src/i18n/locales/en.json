@@ -12,7 +12,8 @@
     "edit": "Edit",
     "add": "Add",
     "minShort": "min",
-    "hourShort": "h"
+    "hourShort": "h",
+    "back": "Back"
   },
   "auth": {
     "tagline": "Compete. Focus. Achieve.",
@@ -37,7 +38,8 @@
     "registrationFailed": "Registration Failed",
     "somethingWrong": "Something went wrong",
     "passwordsNoMatch": "Passwords do not match.",
-    "passwordTooShort": "Password must be at least 8 characters."
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "termsNotice": "By creating an account you accept our Terms of Use and Privacy Policy. There is zero tolerance for objectionable content or abusive behaviour."
   },
   "language": {
     "title": "Language"
@@ -314,7 +316,9 @@
     "titles": "Titles",
     "titlesHint": "Pick a title you've earned to show on your profile.",
     "avatars": "Avatars",
-    "avatarsHint": "Avatars you've earned by studying. Tap one to wear it — friends, rooms and leaderboards will see it."
+    "avatarsHint": "Avatars you've earned by studying. Tap one to wear it — friends, rooms and leaderboards will see it.",
+    "blockedUsers": "Blocked users",
+    "support": "Help & contact"
   },
   "rooms": {
     "createRoom": "+ Create Room",
@@ -404,7 +408,9 @@
     "requestSentTitle": "Sent!",
     "requestSent": "Friend request sent.",
     "sendFailed": "Could not send request",
-    "searchFailed": "Search failed"
+    "searchFailed": "Search failed",
+    "mute": "Mute notifications",
+    "unmute": "Unmute notifications"
   },
   "status": {
     "studying": "studying",
@@ -616,5 +622,37 @@
   "legal": {
     "terms": "Terms of Use",
     "privacy": "Privacy Policy"
+  },
+  "moderation": {
+    "sheetSubtitle": "Choose an action for this user.",
+    "report": "Report",
+    "block": "Block",
+    "unblock": "Unblock",
+    "blockTitle": "Block user?",
+    "blockMsg": "{{name}} will no longer be able to find you, send you requests or see your activity. You can undo this from Profile.",
+    "blockedTitle": "User blocked",
+    "blockedMsg": "{{name}} can no longer interact with you.",
+    "blockFailed": "Could not block this user.",
+    "unblockTitle": "Unblock user?",
+    "unblockMsg": "{{name}} will be able to find you and send you a friend request again.",
+    "unblockFailed": "Could not unblock this user.",
+    "blockedUsers": "Blocked users",
+    "blockedUsersHint": "These people cannot interact with you.",
+    "noBlockedUsers": "You haven't blocked anyone.",
+    "reportTitle": "Report {{name}}",
+    "reportSubtitle": "Tell us what is wrong. We review every report within 24 hours.",
+    "sendReport": "Send report",
+    "detailsPlaceholder": "Anything else we should know? (optional)",
+    "reportedTitle": "Report received",
+    "reportedMsg": "Thank you. We review every report within 24 hours and act on it.",
+    "reportFailed": "Could not send the report.",
+    "reason": {
+      "harassment": "Harassment or bullying",
+      "inappropriate_name": "Inappropriate name",
+      "spam": "Spam or scam",
+      "impersonation": "Impersonation",
+      "other": "Something else"
+    },
+    "blockedTag": "Blocked"
   }
 }

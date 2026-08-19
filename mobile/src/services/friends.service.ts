@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { FriendEntry, FriendRequest, UserSearchResult } from '../types';
+import type { FriendEntry, FriendRequest, UserSearchResult, BlockedUser, ReportReason } from '../types';
 
 // ── Raw API shapes (backend returns snake_case) ───────────────────
 
@@ -22,6 +22,13 @@ interface RawRequest {
   avatar_url: string | null;
   level: number;
   requested_at: string;
+}
+
+interface RawBlocked {
+  user_id: string;
+  username: string;
+  avatar_url: string | null;
+  blocked_at: string;
 }
 
 interface RawSearchUser {
@@ -113,9 +120,41 @@ export const friendsService = {
   remove: (userId: string) =>
     api.delete<void>(`/friends/${userId}`),
 
-  /** Block a user */
+  /** Block a user — they disappear from search and can no longer interact */
   block: (userId: string) =>
     api.post<{ message: string }>(`/friends/${userId}/block`),
+
+  /** Users the caller has blocked */
+  listBlocked: async (): Promise<BlockedUser[]> => {
+    const data = await api.get<{ blocked: RawBlocked[] }>('/friends/blocked');
+    return data.blocked.map((b) => ({
+      userId: b.user_id,
+      username: b.username,
+      avatarUrl: b.avatar_url,
+      blockedAt: b.blocked_at,
+    }));
+  },
+
+  /**
+   * Lift a block. Same endpoint as removing a friend: the backend deletes the
+   * friendship row whatever its status, and only the user who placed a block
+   * is allowed to delete it.
+   */
+  unblock: (userId: string) => api.delete<void>(`/friends/${userId}`),
+
+  /** File an abuse report against a user (App Store Guideline 1.2) */
+  report: (
+    userId: string,
+    reason: ReportReason,
+    details?: string,
+    context: 'friends' | 'search' | 'room' | 'leaderboard' = 'friends',
+  ) =>
+    api.post<{ message: string }>('/moderation/reports', {
+      userId,
+      reason,
+      details: details?.trim() || undefined,
+      context,
+    }),
 
   /** Mute/unmute one friend's "started studying" pushes */
   setMuted: (userId: string, muted: boolean) =>

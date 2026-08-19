@@ -149,8 +149,11 @@ Please let us know if anything else would help the review. Thank you for your ti
 
 ---
 
-## A2) ⚠️ ASC'ye GERÇEKTEN yapıştırılacak metin (4000 karakter sınırı)
+## A2) ~~ASC'ye yapıştırılacak metin~~ — ESKİ (build 23 içindi, bkz. A3)
 
+> ⛔ **20 Ağustos'ta geçersiz kaldı: bu metin build 23'ü anlatıyor ve engelleme özelliğini
+> var gibi gösteriyor — o sırada UI'da yoktu. Gönderilecek olan artık [A3](#a3).**
+>
 > **Yukarıdaki (A) metni 7810 karakter — ASC'ye SIĞMIYOR.** 14 Ağustos'ta tarayıcıdan
 > doğrulandı: **Resolution Center reply kutusu 4000**, **App Review Information → Notes
 > alanı da 4000** karakterle sınırlı (Notes'ta hâlihazırda 1214 karakter dolu, temizlenip
@@ -308,9 +311,14 @@ anlatıyor ama görsel kanıt yok, videonun kendisi de okunmaz çözünürlükte
 - [x] Ekran kaydı çekildi (3 dk 11 sn) + 16 ekran görüntüsü
 - [x] **Kaydın ORİJİNALİ** telefondan çıkarıldı — 20 Ağu: TR kaydı 1180×2556 / 4:55 / 145 MB `Downloads\ScreenRecording_08-19-2026 23-17-56_1.MP4` (bkz. E1)
 - [ ] **İngilizce kayıt** PC'ye aktarıldı — Apple'a gidecek asıl video bu (bkz. E4/1)
-- [ ] **Eksik ekran görüntüleri**: coin shop ✅ (`IMG_7586.PNG`) · paywall ⚠️ yarım (Terms/Privacy kadrajda yok, `IMG_7587.PNG`) · block ❌ · push izni ❌ · hesap silme onayı ❌ (bkz. E1/E3)
-- [ ] A2 metni (3942 karakter) Resolution Center reply kutusuna yazıldı
-- [x] A2 metni **App Review Information → Notes** alanına yapıştırıldı ve kaydedildi (18 Ağustos 2026, 3942/4000, "✓ Saved" doğrulandı — eski 1214 karakterlik metnin yerine geçti)
+- [ ] **Eksik ekran görüntüleri** (build 24'ten çekilecek 7 kare — bkz. F3): coin shop ✅ (`IMG_7586.PNG`) · paywall ⚠️ yarım (`IMG_7587.PNG`, Terms/Privacy kadrajda yok) · engelle sheet'i ❌ · şikayet ekranı ❌ · engellenenler listesi ❌ · kayıt şart kabulü ❌ · push izni ❌ · hesap silme onayı ❌
+- [x] **Build 24** — engelle + şikayet + içerik filtresi + EULA kabulü eklendi (bkz. F)
+- [ ] Build 24 EAS ile derlenip TestFlight'a yüklendi
+- [ ] Migration `019_user_reports.sql` canlı DB'ye uygulandı
+- [ ] Backend deploy edildi (yeni `/moderation` uçları + güncel Kullanım Şartları sayfası)
+- [ ] **A3** metni Resolution Center reply kutusuna yazıldı
+- [ ] **A3** metni Notes alanına yazıldı (18 Ağu'daki A2 metninin yerine — A2 artık yanlış)
+- [x] ~~A2 metni Notes alanına yapıştırıldı (18 Ağustos 2026, 3942/4000)~~ → A3 ile değişecek
 - [x] Demo hesap bilgileri güncel: `testalpha1@studysquad.test` / `Passw0rd123`
 - [x] 16 görüntü inceleme sırasına göre adlandırıldı (`01-login-screen.jpg` … `16-profile-settings-delete-account.jpg`), yükleme için scratchpad'de hazır
 - [ ] Video + ekran görüntüleri **Attach File** ile eklendi (gönderdikten sonra ek eklenemiyor!)
@@ -406,3 +414,126 @@ Bu, Guideline 3.1.2'nin ve A2 metnindeki 8-a maddesinin doğrudan konusu; kanıt
    `ffmpeg -i in.MP4 -vf scale=1080:-2 -c:v libx264 -crf 24 -preset veryfast -c:a aac -b:a 96k out.mp4`
    ile ~1080 genişlikte, okunabilirliği koruyarak küçült.
 4. Sonra: Resolution Center → Reply → A2 metni + görüntüler + video → **kullanıcı onayıyla** gönder.
+
+---
+
+<a id="a3"></a>
+
+## A3) ⭐ GÖNDERİLECEK METİN (build 24, 3933 karakter)
+
+> A2'nin yerine geçer. Fark: **build 24**'e atıf, engelleme/şikayet artık gerçekten var
+> (**bölüm 9**), paywall'daki yasal linkler için "sayfayı sonuna kadar kaydır" notu.
+> 3933 karakter (CRLF sayılsa bile 3968) — 4000 sınırına 32 karakter pay var.
+> Hem **Resolution Center reply** kutusuna hem **App Review Information → Notes** alanına
+> aynısı yapıştırılacak (Notes'taki A2 metni silinip bununla değiştirilecek).
+
+```
+Thank you for reviewing StudySquad. Answers below in your order. This reply ships with build 24, which adds the moderation tools in section 9.
+
+1) SCREEN RECORDING
+Attached, starting at app launch on a physical iPhone 14 Pro: login, focus timer and Pomodoro, statistics, leaderboards, rooms, friends, the Pro paywall, the coin shop, account deletion. Screenshots cover block, report, the push prompt and the paywall's legal links.
+
+2) DEVICES / OS TESTED
+iPhone 14 Pro, iOS 26.6 - physical device, via TestFlight (Simulator: development only). The app is iPhone-only and needs iOS 15.1+; its Live Activity countdown needs iOS 16.2+ and is not started below that.
+
+3) FUNCTION AND TARGET AUDIENCE
+A social study-focus timer for students (high school/university, 13+). The user creates subjects, sets a daily goal and runs focus sessions on a classic timer or Pomodoro. Sessions earn XP and coins, build a streak and feed statistics: heatmap, per-subject breakdown, weekly charts, a 0-100 focus score. The social layer is the point: friends, who is studying now, weekly leaderboards, small private rooms. Cosmetics cost coins earned by studying. No gambling, no messaging, no ads.
+
+4) SETUP AND ACCESS
+No setup files; internet required.
+Demo account, pre-populated: testalpha1@studysquad.test / Passw0rd123
+Second account for the friend flow: testbeta2@studysquad.test / Passw0rd123
+A fresh account also works: no email verification, onboarding ~30s.
+Navigation: Timer tab (subject + duration, Start; Classic/Pomodoro). Profile tab (stats, heatmap, paywall, Frames shop, blocked users, deletion). Leaderboard tab. Rooms tab (create, or join by 8-character code). Friends tab (search, request, moderate).
+The only system prompt is the optional push one. The app never asks for location, contacts, camera, microphone, photos or ATT, and does not use IDFA.
+
+5) EXTERNAL SERVICES
+Fly.io (our Node.js API), Supabase/PostgreSQL, Upstash Redis, RevenueCat (receipt validation only; Apple's IAP handles payments), Expo Push/APNs, Sentry, PostHog, Apple ActivityKit. No AI services, no ad or attribution SDKs, no third-party login.
+
+6) REGIONAL DIFFERENCES
+None - same features, content and pricing everywhere. The interface is localized into 10 languages, following the device. "Country Wars" groups users by the locale country code: cosmetic only, no location data collected.
+
+7) REGULATED INDUSTRY / THIRD-PARTY MATERIAL
+Not applicable: no health, finance, gambling, dating or medical features. The one third-party asset is the pet artwork, from Google's Noto Emoji set, under CC BY 4.0 (commercial use allowed with attribution).
+
+8) IN-APP PURCHASES
+a) StudySquad Pro - auto-renewing subscription, monthly (pro_monthly) and yearly (pro_yearly) sharing one "pro" entitlement: unlimited subjects (free tier: 8), streak freeze, Zen mode, animated frames, Pro badges. Profile tab > "StudySquad Pro" card, and once during onboarding. The paywall carries the title, length, localized price, auto-renewal notice, Terms of Use and Privacy Policy links and "Restore purchases" - scroll the sheet to its end for the links.
+b) Coin packs - consumables coins_1000, coins_5500, coins_12000. Coins buy frames, avatars and pets: no cash value, not transferable, also earned by studying. Profile tab > Frames > coin balance chip.
+
+9) USER-GENERATED CONTENT SAFEGUARDS (new in build 24)
+The only user-authored text is usernames, room names and subject names, all screened against a blocklist at creation. Any user can be blocked and reported: Friends tab, tap the row's "..." button, then Block or Report (5 reasons + free text). A blocked user cannot find or contact the blocker, and is listed under Profile > "Blocked users" where the block can be lifted. Reports reach a moderation queue we act on within 24 hours. The Terms of Use, accepted at sign-up, state a zero-tolerance policy for objectionable content and abusive users.
+
+Thank you for your time.
+```
+
+---
+
+## F) Build 24 — Guideline 1.2 (UGC) eksikleri kapatıldı · 20 Ağustos 2026
+
+Kullanıcı "arkadaşlarda engelle yok" dedi; kod denetimi bunu **doğruladı** ve yanında
+başka açıklar da çıktı. Apple'ın 8 maddelik 2.1 mektubu bunları sormamıştı, **ama**
+gönderdiğimiz metin, ASC Notes'u ve canlıdaki Kullanım Şartları sayfası
+"kullanıcılar birbirini engelleyebilir" diyordu — hakem arayıp bulamasa ikinci red kesindi.
+
+### F1) Denetim sonucu (build 23 hâli)
+
+| Guideline 1.2 şartı | Build 23 | Build 24 |
+|---|---|---|
+| Kötüye kullananı **engelleme** | Backend ✅, mobil servis ✅, **UI ❌ (hiç çağrılmıyordu)** | ✅ |
+| **Şikayet** mekanizması | ❌ Hiç yok | ✅ |
+| Engellenenler listesi + engeli kaldırma | ❌ | ✅ |
+| Uygunsuz içerik **filtreleme** | ❌ | ✅ |
+| Kayıtta **şart kabulü** (EULA) | ❌ | ✅ |
+| Uygulama içi **iletişim** bağlantısı | ❌ (`LEGAL_URLS.support` tanımlı ama kullanılmıyordu) | ✅ |
+| Hesap silme (5.1.1 v) | ✅ | ✅ |
+| Üçüncü parti giriş → Sign in with Apple (4.8) | Gerekmiyor (yalnızca e-posta/parola) | — |
+
+**İzinler tarafında eksik çıkmadı:** tek sistem istemi push; kamera/fotoğraf/konum/kişiler/
+mikrofon hiç kullanılmıyor → Info.plist usage description gerekmiyor. ATT/IDFA yok.
+
+### F2) Yapılan değişiklikler
+
+**Backend**
+- `supabase/migrations/019_user_reports.sql` — `user_reports` tablosu (5 sebep, durum
+  makinesi, açık şikayet için kısmi UNIQUE index → aynı çifte ikinci açık şikayet yok, RLS deny-all).
+- `backend/src/modules/moderation/` — `POST /moderation/reports`, `GET /moderation/reports/:userId`.
+  Şikayet hem DB'ye yazılıyor **hem Sentry'ye warning** düşüyor (sadece Postgres'e yazsak kimse görmezdi).
+- `backend/src/shared/contentFilter.ts` — leet/aksan normalizasyonu + tekrar harf sıkıştırma
+  (`fuuuuck`→`fuck`). İki liste: her yerde yasak olan **substring** terimleri, ve yalnız tam
+  kelime eşleşen liste. `am/got/pic/aq` gibi kısa Türkçe küfürler **bilerek dışarıda** —
+  "8 am study", "Got Focus?" gibi masum oda adlarını yakalıyorlardı (Scunthorpe problemi).
+  Bağlanma noktaları: kayıt (kullanıcı adı), oda kur/düzenle, konu ekle/düzenle → 400 `OBJECTIONABLE`.
+- `legal.routes.ts` Kullanım Şartları: sıfır tolerans maddesi, engelle+şikayet yolu,
+  **24 saat içinde işleme alma taahhüdü**.
+
+**Mobil**
+- `UserActionsSheet.tsx` — arkadaş satırındaki `⋯` düğmesi: Sustur / Şikayet et / Engelle /
+  Arkadaşlıktan çıkar. Alert yerine bottom sheet, çünkü Android'in AlertDialog'u **3 düğme**
+  gösterir, burada 4 tane var. Şikayet ekranı 5 sebep + 500 karakter serbest metin.
+- `BlockedUsersModal.tsx` + Profil → Ayarlar → **Engellenen kullanıcılar** (engeli kaldır).
+- Profil → Ayarlar → **Yardım ve iletişim** (`LEGAL_URLS.support`).
+- Arama sonuçlarında da `⋯` var → arkadaş olmayan biri de engellenip şikayet edilebiliyor.
+  Zaten engellenmiş kullanıcıda `⋯` yerine "Engellendi" etiketi.
+- `RegisterScreen` — hesap oluştur düğmesinin altında şart kabulü metni + tıklanabilir
+  Kullanım Şartları · Gizlilik Politikası.
+- `friends.service.ts` — `listBlocked`, `unblock`, `report` eklendi.
+- 10 dilin hepsine `moderation.*` bloğu + `common.back`, `friends.mute/unmute`,
+  `profile.blockedUsers/support`, `auth.termsNotice` (583 anahtar, hepsinde eşit).
+- `mobile/app.json` → `buildNumber: "24"`.
+
+Backend ve mobil `tsc --noEmit` temiz.
+
+### F3) ⚠️ Bunun ekran kaydına etkisi
+
+19 Ağustos'ta çekilen TR ve EN kayıtlar **build 23'te** çekildi — o build'de engelle/şikayet
+**yok**. Kayıtlar uygulama turu olarak hâlâ geçerli, ama **engelleme ve şikayet kareleri
+build 24'ten yeniden alınmalı**. En pratiği: kaydı yeniden çekmek yerine build 24 kurulup
+şu kareleri ekran görüntüsü olarak almak:
+
+1. Arkadaşlar → `testbeta2` satırı → `⋯` → açılan sheet (Şikayet et + Engelle görünür)
+2. Şikayet ekranı (5 sebep listesi)
+3. Profil → Ayarlar → Engellenen kullanıcılar
+4. Kayıt ekranının altındaki şart kabulü + linkler
+5. Paywall **sonuna kadar kaydırılmış** → Kullanım Şartları · Gizlilik Politikası görünür
+6. Push izin sistem istemi
+7. Hesabı Sil iki aşamalı onayın 2. adımı (**son onaya BASMA**)

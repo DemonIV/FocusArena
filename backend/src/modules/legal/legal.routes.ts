@@ -179,9 +179,15 @@ everything done with your account. One account per person; accounts may not be s
   <li>No falsifying study data (automation, tampering with requests, exploiting bugs) —
       leaderboards only work if the numbers are honest. We may reset stats or suspend accounts
       involved in manipulation.</li>
-  <li>No offensive, impersonating or misleading usernames or room names.</li>
-  <li>No harassment of other users. You can block other users in the app; blocked users cannot
-      interact with you.</li>
+  <li><b>Zero tolerance for objectionable content or abusive behaviour.</b> No offensive,
+      hateful, sexual, impersonating or misleading usernames, room names or subject names.
+      Names are screened automatically when they are created, and accounts that get around
+      the screening are removed.</li>
+  <li>No harassment of other users. In the app you can <b>block</b> any user (Friends tab →
+      open the user's row → Block) and <b>report</b> them for harassment, an inappropriate
+      name, spam or impersonation. Blocked users cannot interact with you.</li>
+  <li>We review every report and act on it — removing content, suspending or terminating the
+      account — <b>within 24 hours</b> of it being filed.</li>
   <li>No attempts to disrupt or reverse-engineer the service.</li>
 </ul>
 

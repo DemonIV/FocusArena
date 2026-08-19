@@ -12,7 +12,8 @@
     "edit": "Edytuj",
     "add": "Dodaj",
     "minShort": "min",
-    "hourShort": "godz."
+    "hourShort": "godz.",
+    "back": "Wstecz"
   },
   "auth": {
     "tagline": "Rywalizuj. Skup się. Osiągaj.",
@@ -37,7 +38,8 @@
     "registrationFailed": "Rejestracja nie powiodła się",
     "somethingWrong": "Coś poszło nie tak",
     "passwordsNoMatch": "Hasła nie są zgodne.",
-    "passwordTooShort": "Hasło musi mieć co najmniej 8 znaków."
+    "passwordTooShort": "Hasło musi mieć co najmniej 8 znaków.",
+    "termsNotice": "Zakładając konto, akceptujesz nasz Regulamin i Politykę prywatności. Obowiązuje zerowa tolerancja dla obraźliwych treści i nadużyć."
   },
   "language": {
     "title": "Język"
@@ -314,7 +316,9 @@
     "titles": "Tytuły",
     "titlesHint": "Wybierz zdobyty tytuł, który pokażesz w profilu.",
     "avatars": "Awatary",
-    "avatarsHint": "Awatary zdobyte podczas nauki. Dotknij, aby założyć — zobaczą go znajomi, pokoje i rankingi."
+    "avatarsHint": "Awatary zdobyte podczas nauki. Dotknij, aby założyć — zobaczą go znajomi, pokoje i rankingi.",
+    "blockedUsers": "Zablokowani użytkownicy",
+    "support": "Pomoc i kontakt"
   },
   "rooms": {
     "createRoom": "+ Utwórz pokój",
@@ -404,7 +408,9 @@
     "requestSentTitle": "Wysłano!",
     "requestSent": "Zaproszenie do znajomych wysłane.",
     "sendFailed": "Nie udało się wysłać zaproszenia",
-    "searchFailed": "Wyszukiwanie nie powiodło się"
+    "searchFailed": "Wyszukiwanie nie powiodło się",
+    "mute": "Wycisz powiadomienia",
+    "unmute": "Włącz powiadomienia"
   },
   "status": {
     "studying": "uczy się",
@@ -616,5 +622,37 @@
   "legal": {
     "terms": "Warunki korzystania",
     "privacy": "Polityka prywatności"
+  },
+  "moderation": {
+    "sheetSubtitle": "Wybierz działanie dla tego użytkownika.",
+    "report": "Zgłoś",
+    "block": "Zablokuj",
+    "unblock": "Odblokuj",
+    "blockTitle": "Zablokować użytkownika?",
+    "blockMsg": "{{name}} nie będzie mógł Cię znaleźć, wysyłać zaproszeń ani widzieć Twojej aktywności. Możesz to cofnąć w Profilu.",
+    "blockedTitle": "Użytkownik zablokowany",
+    "blockedMsg": "{{name}} nie może już wchodzić z Tobą w interakcje.",
+    "blockFailed": "Nie udało się zablokować użytkownika.",
+    "unblockTitle": "Odblokować użytkownika?",
+    "unblockMsg": "{{name}} znów będzie mógł Cię znaleźć i wysłać zaproszenie do znajomych.",
+    "unblockFailed": "Nie udało się odblokować użytkownika.",
+    "blockedUsers": "Zablokowani użytkownicy",
+    "blockedUsersHint": "Te osoby nie mogą wchodzić z Tobą w interakcje.",
+    "noBlockedUsers": "Nikogo nie zablokowałeś.",
+    "reportTitle": "Zgłoś użytkownika {{name}}",
+    "reportSubtitle": "Napisz, co jest nie tak. Każde zgłoszenie sprawdzamy w ciągu 24 godzin.",
+    "sendReport": "Wyślij zgłoszenie",
+    "detailsPlaceholder": "Coś jeszcze, co powinniśmy wiedzieć? (opcjonalne)",
+    "reportedTitle": "Zgłoszenie przyjęte",
+    "reportedMsg": "Dziękujemy. Każde zgłoszenie sprawdzamy w ciągu 24 godzin i podejmujemy działania.",
+    "reportFailed": "Nie udało się wysłać zgłoszenia.",
+    "reason": {
+      "harassment": "Nękanie lub zastraszanie",
+      "inappropriate_name": "Nieodpowiednia nazwa",
+      "spam": "Spam lub oszustwo",
+      "impersonation": "Podszywanie się",
+      "other": "Coś innego"
+    },
+    "blockedTag": "Zablokowany"
   }
 }

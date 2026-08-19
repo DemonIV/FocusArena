@@ -13,3 +13,5 @@ export { PetCompanion, PetAdoptTeaser } from './PetCompanion';
 export { PetDetailModal } from './PetDetailModal';
 export { MonthlyStatsModal } from './MonthlyStatsModal';
 export { LegalLinks } from './LegalLinks';
+export { UserActionsSheet } from './UserActionsSheet';
+export { BlockedUsersModal } from './BlockedUsersModal';

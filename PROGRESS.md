@@ -247,8 +247,36 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - **Onay önizlemesi (interaktif mockup)**: https://claude.ai/code/artifact/80c86b86-2e1b-4d06-a155-091ba15fd758 — durumlar (idle/odak/pause/son dakika) + çerçeve seçimi oynanabilir.
 - JS-only değişiklik (svg zaten native'de vardı) → **bir sonraki build'e girer**; cihazda test edilecek.
 
-### Faz 48 — 🔴 Guideline 2.1 reddi: cevap + ekran kaydı (14–15 Ağustos) ⭐ EN GÜNCEL — YARIM
-Kod değişikliği YOK · **yeni build GEREKMEZ** · Apple sadece ekran kaydı + yazılı bilgi istedi
+### Faz 49 — 🛡️ Guideline 1.2 (UGC) eksikleri: engelle + şikayet + içerik filtresi (20 Ağustos) ⭐ EN GÜNCEL
+**Yeni build GEREKİYOR → `buildNumber: 24`.** Faz 48'in "build gerekmez" varsayımı geçersiz.
+
+- **Tetikleyen**: kullanıcı "arkadaşlarda engelle yok galiba" dedi. Kod denetimi doğruladı:
+  `friendsService.block()` **tanımlıydı ama hiçbir ekrandan çağrılmıyordu**. Backend (block/
+  listBlocked/unblock) ta baştan tamdı — eksik olan sadece UI'dı.
+- **Asıl tehlike**: ASC Notes'u, gönderilecek A2 metni ve **canlıdaki Kullanım Şartları sayfası**
+  "users can block other users" diyordu. Hakem arayıp bulamasa 2.1'den çıkıp "yanıltıcı bilgi"ye dönerdi.
+- **Denetimde çıkan diğer açıklar**: şikayet mekanizması hiç yok · engellenenler listesi yok ·
+  küfür/uygunsuz içerik filtresi yok (kullanıcı adı, oda adı, konu adı başkalarına görünüyor) ·
+  kayıt ekranında şart kabulü yok · `LEGAL_URLS.support` tanımlı ama uygulamada linklenmemiş.
+- **İzin tarafı temiz çıktı**: tek sistem istemi push; kamera/fotoğraf/konum/kişiler/mikrofon
+  hiç kullanılmıyor → Info.plist usage description gerekmiyor. ATT/IDFA yok. Üçüncü parti giriş
+  olmadığı için **Sign in with Apple (4.8) zorunlu değil**. Hesap silme (5.1.1 v) zaten vardı.
+- **Yapılanlar**: migration `019_user_reports.sql` · `backend/src/modules/moderation/`
+  (`POST /moderation/reports`, DB + Sentry warning) · `backend/src/shared/contentFilter.ts`
+  (kayıt/oda/konu adlarına bağlı, 400 `OBJECTIONABLE`) · `UserActionsSheet.tsx` (⋯ → sustur/
+  şikayet/engelle/çıkar) · `BlockedUsersModal.tsx` + Profil ayarları · Profil'de "Yardım ve
+  iletişim" · RegisterScreen'de şart kabulü + linkler · 10 dile `moderation.*` (583 anahtar, eşit).
+- **Filtre tuzağı**: ilk listede `am`, `got`, `pic`, `aq` vardı → "8 am study", "Got Focus?",
+  "pic of the day" gibi masum oda adlarını yakalıyordu (Scunthorpe problemi). Kısa Türkçe
+  küfürler listeden **bilerek** çıkarıldı; tekrar-harf sıkıştırma (`fuuuuck`→`fuck`) eklendi.
+  Node ile 30+ temiz / 13 kirli örnekle test edildi: sıfır yanlış pozitif.
+- **Sheet neden Alert değil**: Android AlertDialog **3 düğme** gösterir, menüde 4 aksiyon var.
+- ⚠️ **19 Ağustos'taki TR+EN kayıtlar build 23'te çekildi** → engelle/şikayet kareleri
+  build 24'ten yeniden alınmalı (7 kare listesi: `review-reply-2.1.md` bölüm F3).
+- Backend + mobil `tsc --noEmit` temiz. **Gönderilecek yeni metin: bölüm A3 (3933 karakter).**
+
+### Faz 48 — 🔴 Guideline 2.1 reddi: cevap + ekran kaydı (14–15 Ağustos) — YARIM
+Kod değişikliği YOK · ~~yeni build GEREKMEZ~~ (**Faz 49 ile geçersiz: build 24 gerekiyor**) · Apple sadece ekran kaydı + yazılı bilgi istedi
 
 - **Red (14 Ağu)**: "Guideline 2.1 - Information Needed". Hata/çökme bulunmadı; 8 maddelik bilgi listesi istendi (ekran kaydı, test cihazları, uygulama tanımı, erişim yönergeleri, dış servisler, bölgesel farklar, düzenlenmiş sektör, IAP'ler). Cevap `docs/app-store/review-reply-2.1.md` bölüm A'da hazırlanmıştı.
 - **Karakter sınırı sürprizi**: ASC'de tarayıcıdan ölçüldü — Resolution Center reply kutusu ve App Review Information → Notes alanı **ikisi de 4000 karakter**. Hazır metin **7810** karakterdi. İçerik kaybetmeden **3942 karaktere** sıkıştırıldı → dosyada **bölüm A2**, yapıştırılacak olan bu.
@@ -866,7 +894,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). 🔴 **v1.0 + 5 IAP gönderildi (12 Ağu, build 23 = commit `2c77d35`) → 14 Ağu **Guideline 2.1 ile reddedildi** (kod hatası yok, bilgi/ekran kaydı isteniyor — Faz 48). Cevap hazır, video orijinali bekleniyor.** Build 22 (commit `ba0ca6c`) cihazda temizdi (Faz 44 — donma avı bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). 🔴 **v1.0 + 5 IAP gönderildi (12 Ağu, build 23 = commit `2c77d35`) → 14 Ağu **Guideline 2.1 ile reddedildi** (kod hatası yok, bilgi/ekran kaydı isteniyor — Faz 48). **Faz 49: UGC açıkları kapatıldı, `buildNumber: 24` — derlenip gönderilecek.** Build 22 (commit `ba0ca6c`) cihazda temizdi (Faz 44 — donma avı bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
 | Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
 | Pod pin'leri | `plugins/withPinnedMmkv.js` → MMKV + MMKVCore **2.4.0** (2.4.1 iOS 26 SDK'da derlenmiyor, Tencent/MMKV#1675). Upstream düzelince plugin silinecek |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
@@ -875,16 +903,24 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 ## 🔜 Sıradaki Adımlar
 
-> 🔴 **v1.0 Guideline 2.1 ile reddedildi (Faz 48) — kod hatası yok, Apple ekran kaydı + 8 maddelik bilgi istiyor. Cevap metni hazır (3942 karakter), ekran kaydının ORİJİNALİ bekleniyor.** 🩺 **"Donma"nın kök nedeni bulundu ve canlıda düzeltildi (Faz 46)** — tek-token oturum tasarımıydı, kod/SDK değil.
+> 🔴 **v1.0 Guideline 2.1 ile reddedildi (Faz 48). Faz 49'da UGC (1.2) açıkları kapatıldı → artık YENİ BUILD (24) gerekiyor: engelle + şikayet + içerik filtresi + EULA kabulü kodda hazır, derlenip gönderilecek. Apple'a gidecek metin: `review-reply-2.1.md` bölüm A3 (3933 karakter).** 🩺 **"Donma"nın kök nedeni bulundu ve canlıda düzeltildi (Faz 46)** — tek-token oturum tasarımıydı, kod/SDK değil.
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. 🔴 **Guideline 2.1 cevabını gönder** (Faz 48, yarım kaldı). Kullanıcı ekran kaydının **orijinalini** bilgisayara çıkarıp yolunu verecek. Yapılacaklar sırayla:
-   - Videoyu `ffprobe` ile doğrula — **genişlik ≥ 1080 olmalı**. (Elde duran `Downloads\iphonee\WhatsApp Video ....mp4` **384×848**, kullanılamaz; WhatsApp ezmiş.) Gerekirse ffmpeg ile 720×1560 / ~50 MB'a indir.
-   - ASC → App Review → 12 Ağu gönderimi → en alt → **Reply to App Review** → `docs/app-store/review-reply-2.1.md` **A2 metnini** (3942 karakter) yaz + **Attach File** ile video + `Downloads\iphonee\` içindeki 16 ekran görüntüsünü ekle. **Gönderdikten sonra ek eklenemiyor.**
-   - Aynı metni App Store → 1.0 → **App Review Information → Notes** alanına da yaz (mevcut 1214 karakter temizlenecek).
-   - Gönderimi **kullanıcı onayıyla** yap. Detaylar/tuzaklar: `docs/app-store/review-reply-2.1.md` bölüm B2–B3–D.
+1. 🔴 **Build 24'ü çıkar ve 2.1 cevabını gönder** (Faz 48 + 49). Sırayla:
+   - Migration `019_user_reports.sql`'i canlı DB'ye uygula (pooler ile; bkz. memory `db-access`).
+   - Backend'i deploy et — yeni `/moderation` uçları + güncellenen Kullanım Şartları sayfası
+     (**kullanıcı `!` ile koşmalı**, bkz. memory `backend-debug-toolkit`).
+   - EAS ile **build 24**'ü derle → TestFlight.
+   - Kullanıcı build 24'ü kurup **F3'teki 7 kareyi** çeksin (engelle sheet'i, şikayet ekranı,
+     engellenenler listesi, kayıt şart kabulü, **paywall sonuna kadar kaydırılmış** hâli,
+     push izni, hesap silme onayı).
+   - **İngilizce ekran kaydını** PC'ye aktar (iCloud/Drive — WhatsApp DEĞİL). TR kaydı hazır:
+     `Downloads\ScreenRecording_08-19-2026 23-17-56_1.MP4`, 1180×2556, 4:55, 145 MB —
+     yüklemeden önce gerekirse ffmpeg ile 1080 genişliğe indir.
+   - ASC → Reply to App Review → **A3 metni** + video + kareler → **kullanıcı onayıyla** gönder.
+     Notes alanındaki eski A2 metnini de A3 ile değiştir. Detaylar: `review-reply-2.1.md` B2/F.
 2. **Fly cold start** (kullanıcı onayı bekliyor): `fly.toml` → `min_machines_running = 1` + istemcide ağ hatasına özel backoff (`retry: 2-3`, artan gecikme). Makine uykudayken açılıştaki ~12 istek düşüyor ve aynı boş-ekran tablosunu üretiyor; **hakem uykudaki makineye denk gelirse red riski**.
-3. **İstemci toparlanması**: oturum ölünce `clearAuth()` → Login'e atmalı; kullanıcı atmadığını bildirdi. Doğrula (`refreshAccessToken` → `api.setOnRefresh` kaydı gerçekten yapılıyor mu) ve düzelt; ekranlarda sonsuz spinner yerine "Tekrar dene" hatası göster. **Yeni build ister** → incelemeden sonra.
+3. **İstemci toparlanması**: oturum ölünce `clearAuth()` → Login'e atmalı; kullanıcı atmadığını bildirdi. Doğrula (`refreshAccessToken` → `api.setOnRefresh` kaydı gerçekten yapılıyor mu) ve düzelt; ekranlarda sonsuz spinner yerine "Tekrar dene" hatası göster. **Yeni build ister → build 24'e yetişirse birlikte gitsin** (Faz 49 zaten build çıkarıyor).
 4. Bekleyen cihaz testleri (build 23 ile ilk kez): Live Activity (Faz 21), screen-lock hatırlatması (Faz 23), Nebula TimerCircle (Faz 26), avatarlar (Faz 34), oda ekranı (Faz 31), iOS IAP/paywall.
 5. Kalan küçük bug: onboarding **Skip butonu** (kullanıcı düzelttiğini söyledi ama git'te değişiklik yok — bir sonraki build'de doğrula).
 6. Çalışma ağacı temizliği: kök `tsconfig.json` + `package.json`'daki `@types/react-native` (kazara, expo-doctor'ı kırar).

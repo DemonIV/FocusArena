@@ -12,7 +12,8 @@
     "edit": "Bearbeiten",
     "add": "Hinzufügen",
     "minShort": "Min.",
-    "hourShort": "Std."
+    "hourShort": "Std.",
+    "back": "Zurück"
   },
   "auth": {
     "tagline": "Wettkämpfen. Fokussieren. Erreichen.",
@@ -37,7 +38,8 @@
     "registrationFailed": "Registrierung fehlgeschlagen",
     "somethingWrong": "Etwas ist schiefgelaufen",
     "passwordsNoMatch": "Passwörter stimmen nicht überein.",
-    "passwordTooShort": "Passwort muss mindestens 8 Zeichen haben."
+    "passwordTooShort": "Passwort muss mindestens 8 Zeichen haben.",
+    "termsNotice": "Mit der Erstellung eines Kontos akzeptierst du unsere Nutzungsbedingungen und Datenschutzerklärung. Für anstößige Inhalte und missbräuchliches Verhalten gilt null Toleranz."
   },
   "language": {
     "title": "Sprache"
@@ -314,7 +316,9 @@
     "titles": "Titel",
     "titlesHint": "Wähle einen verdienten Titel für dein Profil.",
     "avatars": "Avatare",
-    "avatarsHint": "Avatare, die du dir erarbeitet hast. Tippe, um einen zu tragen — Freunde, Räume und Ranglisten sehen ihn."
+    "avatarsHint": "Avatare, die du dir erarbeitet hast. Tippe, um einen zu tragen — Freunde, Räume und Ranglisten sehen ihn.",
+    "blockedUsers": "Blockierte Nutzer",
+    "support": "Hilfe & Kontakt"
   },
   "rooms": {
     "createRoom": "+ Raum erstellen",
@@ -404,7 +408,9 @@
     "requestSentTitle": "Gesendet!",
     "requestSent": "Freundschaftsanfrage gesendet.",
     "sendFailed": "Anfrage konnte nicht gesendet werden",
-    "searchFailed": "Suche fehlgeschlagen"
+    "searchFailed": "Suche fehlgeschlagen",
+    "mute": "Benachrichtigungen stummschalten",
+    "unmute": "Benachrichtigungen aktivieren"
   },
   "status": {
     "studying": "lernt",
@@ -616,5 +622,37 @@
   "legal": {
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutzerklärung"
+  },
+  "moderation": {
+    "sheetSubtitle": "Wähle eine Aktion für diesen Nutzer.",
+    "report": "Melden",
+    "block": "Blockieren",
+    "unblock": "Blockierung aufheben",
+    "blockTitle": "Nutzer blockieren?",
+    "blockMsg": "{{name}} kann dich nicht mehr finden, dir keine Anfragen senden und deine Aktivität nicht sehen. Du kannst das im Profil rückgängig machen.",
+    "blockedTitle": "Nutzer blockiert",
+    "blockedMsg": "{{name}} kann nicht mehr mit dir interagieren.",
+    "blockFailed": "Nutzer konnte nicht blockiert werden.",
+    "unblockTitle": "Blockierung aufheben?",
+    "unblockMsg": "{{name}} kann dich wieder finden und dir eine Freundschaftsanfrage senden.",
+    "unblockFailed": "Blockierung konnte nicht aufgehoben werden.",
+    "blockedUsers": "Blockierte Nutzer",
+    "blockedUsersHint": "Diese Personen können nicht mit dir interagieren.",
+    "noBlockedUsers": "Du hast niemanden blockiert.",
+    "reportTitle": "{{name}} melden",
+    "reportSubtitle": "Sag uns, was nicht stimmt. Wir prüfen jede Meldung innerhalb von 24 Stunden.",
+    "sendReport": "Meldung senden",
+    "detailsPlaceholder": "Sollten wir noch etwas wissen? (optional)",
+    "reportedTitle": "Meldung erhalten",
+    "reportedMsg": "Danke. Wir prüfen jede Meldung innerhalb von 24 Stunden und handeln entsprechend.",
+    "reportFailed": "Meldung konnte nicht gesendet werden.",
+    "reason": {
+      "harassment": "Belästigung oder Mobbing",
+      "inappropriate_name": "Unangemessener Name",
+      "spam": "Spam oder Betrug",
+      "impersonation": "Identitätsmissbrauch",
+      "other": "Etwas anderes"
+    },
+    "blockedTag": "Blockiert"
   }
 }

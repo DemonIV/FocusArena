@@ -387,6 +387,22 @@ export interface UserSearchResult {
   relationship: 'none' | 'friends' | 'pending_sent' | 'pending_received' | 'blocked';
 }
 
+/** A user the caller has blocked (Profile → Blocked users) */
+export interface BlockedUser {
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  blockedAt: string;
+}
+
+/** Abuse-report reasons — mirrors REPORT_REASONS on the backend */
+export type ReportReason =
+  | 'harassment'
+  | 'inappropriate_name'
+  | 'spam'
+  | 'impersonation'
+  | 'other';
+
 /** Earned achievement (flat) */
 export interface AchievementEntry {
   id: string;

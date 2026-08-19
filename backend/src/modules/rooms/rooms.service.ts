@@ -1,4 +1,5 @@
 import { randomBytes } from 'crypto';
+import { assertClean } from '../../shared/contentFilter';
 import { supabase, redis } from '../../shared';
 import { checkAndAward } from '../achievements';
 import type {
@@ -400,6 +401,9 @@ export async function createRoom(userId: string, body: CreateRoomBody): Promise<
     );
   }
 
+  // Room names are visible to every member and in invite previews.
+  assertClean(body.name, 'roomName');
+
   // All rooms are private (invite-code only). Public room creation is disabled.
   const { data: room, error } = await supabase
     .from('rooms')
@@ -448,6 +452,8 @@ export async function updateRoom(
   roomId: string,
   body: UpdateRoomBody,
 ): Promise<RoomDetail> {
+  if (body.name !== undefined) assertClean(body.name, 'roomName');
+
   const { data: room, error } = await supabase
     .from('rooms')
     .select('owner_id, is_private, max_members')

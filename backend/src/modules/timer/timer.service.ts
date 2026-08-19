@@ -1,4 +1,5 @@
 import { supabase, redis } from '../../shared';
+import { assertClean } from '../../shared/contentFilter';
 import { invalidateCache, invalidateCountries } from '../leaderboard';
 import { checkAndAward } from '../achievements';
 import { addStudyMinutesToRooms } from '../rooms/rooms.service';
@@ -1167,6 +1168,9 @@ export async function getSubjects(userId: string) {
 }
 
 export async function createSubject(userId: string, body: CreateSubjectBody) {
+  // Subject names reach other people: room members see what you focused on.
+  assertClean(body.name, 'subjectName');
+
   // Free tier is capped to FREE_SUBJECT_LIMIT active subjects; Pro is unlimited.
   // Skipped entirely when billing is off so dev/Expo Go is unaffected.
   if (billingEnabled && !(await isUserPro(userId))) {
@@ -1195,6 +1199,8 @@ export async function createSubject(userId: string, body: CreateSubjectBody) {
 }
 
 export async function updateSubject(userId: string, subjectId: string, body: UpdateSubjectBody) {
+  if (body.name !== undefined) assertClean(body.name, 'subjectName');
+
   const { data, error } = await supabase
     .from('subjects')
     .update(body)
