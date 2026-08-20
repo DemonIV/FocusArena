@@ -909,7 +909,7 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 | Gözlemlenebilirlik | Sentry + PostHog **aktif** (preview build'lerde anahtarlar gömülü) |
 | RevenueCat | Proje + `pro` entitlement + Monthly/Yearly offering ✓; Android anahtarı: `goog_ZabvZUZeqQlkyIWjFOGtRHKstqg` (public SDK anahtarı, gizli değil); ⏳ EAS'ta hâlâ test anahtarı yazılı (değiştirilecek); service account JSON + "coins" offering bekliyor |
 | Play Console | Kayıt yapıldı, **kimlik doğrulama bekleniyor**; sonra: 12 testçi × 14 gün closed testing zorunlu |
-| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). 🔴 **v1.0 + 5 IAP gönderildi (12 Ağu, build 23 = commit `2c77d35`) → 14 Ağu **Guideline 2.1 ile reddedildi** (kod hatası yok, bilgi/ekran kaydı isteniyor — Faz 48). **Faz 49: UGC açıkları kapatıldı, `buildNumber: 24` — derlenip gönderilecek.** Build 22 (commit `ba0ca6c`) cihazda temizdi (Faz 44 — donma avı bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
+| iOS | ✅ Apple hesabı onaylı; ASC uygulaması (`com.studysquadhq.app`, TestFlight + `alperentorun334@icloud.com`). 🔴 **v1.0 + 5 IAP gönderildi (12 Ağu, build 23 = commit `2c77d35`) → 14 Ağu **Guideline 2.1 ile reddedildi** (kod hatası yok, bilgi/ekran kaydı isteniyor — Faz 48). **Faz 49: UGC açıkları kapatıldı; build 24 (`9250e4c2`, commit `0c84130`) derlendi ve 20 Ağu'da ASC'ye yüklendi — cevap gönderimi kanıt karelerini bekliyor.** Build 22 (commit `ba0ca6c`) cihazda temizdi (Faz 44 — donma avı bitti). `eas.json`'da artık `ascAppId` var → **`--auto-submit` çalışıyor**. ASC API key (APP_MANAGER) EAS'te saklı. `scheme: studysquad` |
 | Native modüller | expo-live-activity (Live Activity), local `modules/screen-lock` (kilit algılama, autolinking ✓ + gitignore negation), react-native-svg, expo-keep-awake → build cache'siz/uzun |
 | Pod pin'leri | `plugins/withPinnedMmkv.js` → MMKV + MMKVCore **2.4.0** (2.4.1 iOS 26 SDK'da derlenmiyor, Tencent/MMKV#1675). Upstream düzelince plugin silinecek |
 | Domain | `studysquad.app` **henüz alınmadı** (paylaşım kartlarında yazıyor + gizlilik politikası için gerekli) |
@@ -918,25 +918,32 @@ Bu oturumda 3 büyük özellik bitirildi, hepsi main'de + Fly'da canlı, migrati
 
 ## 🔜 Sıradaki Adımlar
 
-> 🔴 **v1.0 Guideline 2.1 ile reddedildi (Faz 48). Faz 49'da UGC (1.2) açıkları kapatıldı → artık YENİ BUILD (24) gerekiyor: engelle + şikayet + içerik filtresi + EULA kabulü kodda hazır, derlenip gönderilecek. Apple'a gidecek metin: `review-reply-2.1.md` bölüm A3 (3933 karakter).** 🩺 **"Donma"nın kök nedeni bulundu ve canlıda düzeltildi (Faz 46)** — tek-token oturum tasarımıydı, kod/SDK değil.
+> 🟡 **v1.0 Guideline 2.1 ile reddedildi (Faz 48) → Faz 49'da UGC (1.2) açıkları kapatıldı, sevkiyat BİTTİ: migration canlıda · backend deploy edildi · build 24 ASC'ye yüklendi · Fly makinesi sıcak. ⏳ Kalan tek şey KANIT TOPLAMA: kullanıcı TestFlight'tan 7 kare çekecek + İngilizce kaydı PC'ye aktaracak, sonra `review-reply-2.1.md` bölüm A3 (3933 karakter) ASC'ye gönderilecek.** 🩺 **"Donma"nın kök nedeni bulundu ve canlıda düzeltildi (Faz 46)** — tek-token oturum tasarımıydı, kod/SDK değil.
 
 **Sonraki oturumun ilk işleri (Claude):**
-1. 🔴 **Build 24'ü çıkar ve 2.1 cevabını gönder** (Faz 48 + 49). Sırayla:
-   - Migration `019_user_reports.sql`'i canlı DB'ye uygula (pooler ile; bkz. memory `db-access`).
-   - Backend'i deploy et — yeni `/moderation` uçları + güncellenen Kullanım Şartları sayfası
-     (**kullanıcı `!` ile koşmalı**, bkz. memory `backend-debug-toolkit`).
-   - EAS ile **build 24**'ü derle → TestFlight.
-   - Kullanıcı build 24'ü kurup **F3'teki 7 kareyi** çeksin (engelle sheet'i, şikayet ekranı,
-     engellenenler listesi, kayıt şart kabulü, **paywall sonuna kadar kaydırılmış** hâli,
-     push izni, hesap silme onayı).
-   - **İngilizce ekran kaydını** PC'ye aktar (iCloud/Drive — WhatsApp DEĞİL). TR kaydı hazır:
-     `Downloads\ScreenRecording_08-19-2026 23-17-56_1.MP4`, 1180×2556, 4:55, 145 MB —
-     yüklemeden önce gerekirse ffmpeg ile 1080 genişliğe indir.
-   - ASC → Reply to App Review → **A3 metni** + video + kareler → **kullanıcı onayıyla** gönder.
-     Notes alanındaki eski A2 metnini de A3 ile değiştir. Detaylar: `review-reply-2.1.md` B2/F.
-2. **Fly cold start** (kullanıcı onayı bekliyor): `fly.toml` → `min_machines_running = 1` + istemcide ağ hatasına özel backoff (`retry: 2-3`, artan gecikme). Makine uykudayken açılıştaki ~12 istek düşüyor ve aynı boş-ekran tablosunu üretiyor; **hakem uykudaki makineye denk gelirse red riski**.
-3. **İstemci toparlanması**: oturum ölünce `clearAuth()` → Login'e atmalı; kullanıcı atmadığını bildirdi. Doğrula (`refreshAccessToken` → `api.setOnRefresh` kaydı gerçekten yapılıyor mu) ve düzelt; ekranlarda sonsuz spinner yerine "Tekrar dene" hatası göster. **Yeni build ister → build 24'e yetişirse birlikte gitsin** (Faz 49 zaten build çıkarıyor).
-4. Bekleyen cihaz testleri (build 23 ile ilk kez): Live Activity (Faz 21), screen-lock hatırlatması (Faz 23), Nebula TimerCircle (Faz 26), avatarlar (Faz 34), oda ekranı (Faz 31), iOS IAP/paywall.
+1. 🟡 **2.1 cevabını ASC'ye gönder** — sevkiyat bitti, kanıt bekleniyor. 20 Ağu itibarıyla HAZIR:
+   migration canlıda · backend deploy edildi (`POST /moderation/reports` → 401, `/legal/terms`
+   yeni metinle canlı) · **build 24** (`9250e4c2`, commit `0c84130`) ASC'ye yüklendi ·
+   Fly makinesi sıcak (`/health` 1,25 sn). **Kullanıcıdan bekleneni al, sonra gönder:**
+   - Build 24 TestFlight'tan kurulup **F3'teki 7 kare** çekilecek: engelle sheet'i (Arkadaşlar →
+     satır → `⋯`), şikayet ekranı (5 sebep), Profil → Engellenen kullanıcılar, kayıt şart kabulü,
+     **paywall sonuna kadar kaydırılmış** hâli (Terms/Privacy görünsün), push izni,
+     hesap silme onayının 2. adımı (son onaya BASILMAYACAK).
+   - **İngilizce ekran kaydı** PC'ye aktarılacak (iCloud/Drive — WhatsApp DEĞİL, ezip 384×848 yapıyor).
+     TR kaydı hazır: `Downloads\ScreenRecording_08-19-2026 23-17-56_1.MP4` (1180×2556, 4:55, 145 MB).
+     Hakem İngilizce okuyor → **asıl gönderilecek olan İngilizce kayıt**. 145 MB büyükse:
+     `ffmpeg -i in.MP4 -vf scale=1080:-2 -c:v libx264 -crf 24 -preset veryfast -c:a aac -b:a 96k out.mp4`
+   - ASC → App Review → 12 Ağu gönderimi → en alt → **Reply to App Review** → **A3 metni**
+     (`review-reply-2.1.md`, 3933 karakter) + video + kareler → **kullanıcı onayıyla** gönder.
+     ⚠️ Gönderdikten sonra ek eklenemiyor → önce hepsi hazır olsun.
+   - Ayrıca App Store → 1.0 → **App Review Information → Notes** alanındaki **eski A2 metnini
+     A3 ile değiştir** — A2 var olmayan bir engelleme özelliğini anlatıyor, yanıltıcı.
+   - Tarayıcı tuzakları: memory `asc-browser-automation` (Save sticky header'da ıskalanıyor,
+     uzun `type` renderer'ı kilitliyor, oturum ortada düşebilir → her alanı hemen kaydet).
+2. 💰 **İnceleme ONAYLANDIKTAN sonra** `fly.toml` → `min_machines_running = 0` + `auto_stop_machines`
+   geri aç (şu an makine 7/24 çalışıyor, ücretsiz kademeyi aşabilir). İnceleme bitmeden DOKUNMA.
+3. **İstemci toparlanması**: oturum ölünce `clearAuth()` → Login'e atmalı; kullanıcı atmadığını bildirdi. Doğrula (`refreshAccessToken` → `api.setOnRefresh` kaydı gerçekten yapılıyor mu) ve düzelt; ekranlarda sonsuz spinner yerine "Tekrar dene" hatası göster. **Yeni build ister → build 24 çıktı, bu artık build 25'e kalır** (inceleme sonrasına).
+4. Bekleyen cihaz testleri (**build 24 ile** yapılabilir, TestFlight'ta): Live Activity (Faz 21), screen-lock hatırlatması (Faz 23), Nebula TimerCircle (Faz 26), avatarlar (Faz 34), oda ekranı (Faz 31), iOS IAP/paywall.
 5. Kalan küçük bug: onboarding **Skip butonu** (kullanıcı düzelttiğini söyledi ama git'te değişiklik yok — bir sonraki build'de doğrula).
 6. Çalışma ağacı temizliği: kök `tsconfig.json` + `package.json`'daki `@types/react-native` (kazara, expo-doctor'ı kırar).
 7. Sentry temizliği: `node` projesini `studysquad-mobile` diye yeniden adlandır, kullanılmayan `react-native` projesini kapat.
