@@ -280,9 +280,15 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
   ⚠️ `eas.json` production profilinde `autoIncrement: true` var — app.json'daki değeri **artırır**.
   Elle 24 yazınca build 25 olacaktı; app.json 23'e alınıp artış EAS'e bırakıldı. Bu yüzden
   HEAD'deki buildNumber ile EAS'teki numara arasında geçmişte kayma oldu (HEAD 21 iken build 23).
-- 🔴 **Kalan tek risk: Fly soğuk başlangıç.** Deploy sonrası `/health` **11,3 sn**'de döndü.
-  Hakem uykudaki makineye denk gelirse aynı boş-ekran tablosu → `min_machines_running = 1`
-  gönderimden ÖNCE açılmalı (aşağıdaki 2. madde).
+- ✅ **Fly soğuk başlangıç kapatıldı (20 Ağu).** Önce `/health` **11,3 sn** (makine uykuda) →
+  şimdi **1,0–1,5 sn**, 15 dk boşta bekletildikten sonra bile makine `started` ve health 1,25 sn.
+  ⚠️ **Tuzak**: `auto_stop_machines = false` yapmak YETMİYOR, tam tersine zarar veriyor —
+  `min_machines_running` **yalnızca `auto_stop_machines` açıkken** işler; false yapılınca Fly'ın
+  "en az bu kadarını ayakta tut" mekanizması da kapanır ve deploy sonrası duran makineyi kimse
+  kaldırmaz. Doğru kombinasyon: **`auto_stop_machines = true` + `min_machines_running = 1`**.
+  Deploy sonrası proxy duran makineyi kendiliğinden kaldırmadı → bir kez
+  `flyctl machine start <id>` gerekti; sonrasında kalıcı.
+  💰 Makine artık sürekli çalışıyor; **inceleme onaylanınca 0'a çekilebilir**.
 
 ### Faz 48 — 🔴 Guideline 2.1 reddi: cevap + ekran kaydı (14–15 Ağustos) — YARIM
 Kod değişikliği YOK · ~~yeni build GEREKMEZ~~ (**Faz 49 ile geçersiz: build 24 gerekiyor**) · Apple sadece ekran kaydı + yazılı bilgi istedi

@@ -306,7 +306,7 @@ anlatıyor ama görsel kanıt yok, videonun kendisi de okunmaz çözünürlükte
 
 ## C) Gönderim öncesi kontrol listesi
 
-- [ ] `fly.toml` → `min_machines_running = 1` deploy edildi (hakem uykudaki makineye denk gelmesin)
+- [x] `fly.toml` → `auto_stop_machines = true` + `min_machines_running = 1` deploy edildi ve doğrulandı (20 Ağu: `/health` 11,3 sn → 1,25 sn; 15 dk boştan sonra makine hâlâ `started`)
 - [x] Metindeki `<MODEL>` / `<VERSION>` yer tutucuları dolduruldu (iPhone 14 Pro / iOS 26.6)
 - [x] Ekran kaydı çekildi (3 dk 11 sn) + 16 ekran görüntüsü
 - [x] **Kaydın ORİJİNALİ** telefondan çıkarıldı — 20 Ağu: TR kaydı 1180×2556 / 4:55 / 145 MB `Downloads\ScreenRecording_08-19-2026 23-17-56_1.MP4` (bkz. E1)
