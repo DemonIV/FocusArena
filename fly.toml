@@ -19,9 +19,14 @@ primary_region = "ams"  # Amsterdam — Türkiye'ye en yakın ücretsiz bölge
   # App Review boyunca makine UYANIK kalmalı. Uykudaki makinede ilk istek
   # ~11 sn sürüyordu ve açılıştaki istek dalgası düşüyordu — Guideline 2.1
   # reddinin arkasındaki "boş ekran" şüphesi buydu.
-  auto_stop_machines  = false  # Trafik yoksa DURDURMA
+  #
+  # DİKKAT: `min_machines_running` YALNIZCA `auto_stop_machines` açıkken işler.
+  # auto_stop'u false yapmak Fly'ın "en az bu kadarını ayakta tut" mekanizmasını
+  # kapatır ve duran makine istek gelene dek durur — tam istemediğimiz şey.
+  # Doğru "hep sıcak" kombinasyonu bu:
+  auto_stop_machines  = true   # Fly yönetsin...
   auto_start_machines = true   # İstek gelince otomatik başlat
-  min_machines_running = 1     # En az bir makine hep ayakta
+  min_machines_running = 1     # ...ama primary region'da 1 makineyi hiç durdurma
 
   [http_service.concurrency]
     type       = "requests"
