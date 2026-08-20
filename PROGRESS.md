@@ -274,6 +274,15 @@ Sadece mobil (`TimerCircle.tsx` tam yeniden yazım) · tsc temiz · **CİHAZDA T
 - ⚠️ **19 Ağustos'taki TR+EN kayıtlar build 23'te çekildi** → engelle/şikayet kareleri
   build 24'ten yeniden alınmalı (7 kare listesi: `review-reply-2.1.md` bölüm F3).
 - Backend + mobil `tsc --noEmit` temiz. **Gönderilecek yeni metin: bölüm A3 (3933 karakter).**
+- **Sevkiyat (20 Ağu, aynı oturum)**: migration canlıya uygulandı (pooler eu-central-1) ·
+  backend deploy edildi ve doğrulandı (`/moderation/reports` → 401, `/legal/terms` yeni metinle canlı) ·
+  **build 24 derlendi** (`9250e4c2`, commit `0c84130`) ve `eas submit` ile **ASC'ye yüklendi**.
+  ⚠️ `eas.json` production profilinde `autoIncrement: true` var — app.json'daki değeri **artırır**.
+  Elle 24 yazınca build 25 olacaktı; app.json 23'e alınıp artış EAS'e bırakıldı. Bu yüzden
+  HEAD'deki buildNumber ile EAS'teki numara arasında geçmişte kayma oldu (HEAD 21 iken build 23).
+- 🔴 **Kalan tek risk: Fly soğuk başlangıç.** Deploy sonrası `/health` **11,3 sn**'de döndü.
+  Hakem uykudaki makineye denk gelirse aynı boş-ekran tablosu → `min_machines_running = 1`
+  gönderimden ÖNCE açılmalı (aşağıdaki 2. madde).
 
 ### Faz 48 — 🔴 Guideline 2.1 reddi: cevap + ekran kaydı (14–15 Ağustos) — YARIM
 Kod değişikliği YOK · ~~yeni build GEREKMEZ~~ (**Faz 49 ile geçersiz: build 24 gerekiyor**) · Apple sadece ekran kaydı + yazılı bilgi istedi

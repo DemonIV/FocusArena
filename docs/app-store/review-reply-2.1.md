@@ -313,9 +313,10 @@ anlatıyor ama görsel kanıt yok, videonun kendisi de okunmaz çözünürlükte
 - [ ] **İngilizce kayıt** PC'ye aktarıldı — Apple'a gidecek asıl video bu (bkz. E4/1)
 - [ ] **Eksik ekran görüntüleri** (build 24'ten çekilecek 7 kare — bkz. F3): coin shop ✅ (`IMG_7586.PNG`) · paywall ⚠️ yarım (`IMG_7587.PNG`, Terms/Privacy kadrajda yok) · engelle sheet'i ❌ · şikayet ekranı ❌ · engellenenler listesi ❌ · kayıt şart kabulü ❌ · push izni ❌ · hesap silme onayı ❌
 - [x] **Build 24** — engelle + şikayet + içerik filtresi + EULA kabulü eklendi (bkz. F)
-- [ ] Build 24 EAS ile derlenip TestFlight'a yüklendi
-- [ ] Migration `019_user_reports.sql` canlı DB'ye uygulandı
-- [ ] Backend deploy edildi (yeni `/moderation` uçları + güncel Kullanım Şartları sayfası)
+- [x] Migration `019_user_reports.sql` canlı DB'ye uygulandı (20 Ağu, pooler eu-central-1; tablo + 4 index + 2 CHECK + 2 FK + RLS doğrulandı)
+- [x] Backend deploy edildi — `POST /moderation/reports` → 401 (uç ayakta), `/legal/terms` yeni sıfır tolerans + 24 saat metniyle canlıda
+- [x] **Build 24** EAS'te derlendi (`9250e4c2`, commit `0c84130`, 20 Ağu 03:23) ve **ASC'ye yüklendi** (`eas submit`, Apple işliyor → TestFlight)
+- [ ] Build 24 telefona kurulup **F3'teki 7 kare** çekildi
 - [ ] **A3** metni Resolution Center reply kutusuna yazıldı
 - [ ] **A3** metni Notes alanına yazıldı (18 Ağu'daki A2 metninin yerine — A2 artık yanlış)
 - [x] ~~A2 metni Notes alanına yapıştırıldı (18 Ağustos 2026, 3942/4000)~~ → A3 ile değişecek
