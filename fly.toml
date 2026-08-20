@@ -16,9 +16,12 @@ primary_region = "ams"  # Amsterdam — Türkiye'ye en yakın ücretsiz bölge
 [http_service]
   internal_port       = 8080
   force_https         = true
-  auto_stop_machines  = true   # Trafik yoksa durdur (ücretsiz plan)
+  # App Review boyunca makine UYANIK kalmalı. Uykudaki makinede ilk istek
+  # ~11 sn sürüyordu ve açılıştaki istek dalgası düşüyordu — Guideline 2.1
+  # reddinin arkasındaki "boş ekran" şüphesi buydu.
+  auto_stop_machines  = false  # Trafik yoksa DURDURMA
   auto_start_machines = true   # İstek gelince otomatik başlat
-  min_machines_running = 0     # Sıfıra inebilir (hobbyist kullanım)
+  min_machines_running = 1     # En az bir makine hep ayakta
 
   [http_service.concurrency]
     type       = "requests"
